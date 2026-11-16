@@ -127,6 +127,16 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 .ctl:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
 .ctl svg { width: 14px; height: 14px; fill: currentColor; }
 
+/* 分類標籤：膠囊按鈕，選中淡主色（同篩選標籤） */
+.wf { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: -4px; }
+.wf button { height: 32px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--tile); color: var(--muted); font: inherit; font-size: calc(13px * var(--fs-k)); font-weight: 500; cursor: pointer; transition: background calc(.2s * var(--dur)), border-color calc(.2s * var(--dur)), color calc(.2s * var(--dur)), transform calc(.2s * var(--dur)) var(--spring); }
+.wf button small { font-size: 12px; color: var(--weak); font-variant-numeric: tabular-nums; }
+.wf button:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); color: var(--ink); }
+.wf button:active { transform: scale(.96); }
+.wf button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.wf button[aria-pressed="true"] { background: var(--tint); border-color: color-mix(in srgb, var(--primary) 40%, transparent); color: var(--selected-fg); font-weight: 600; }
+.wf button[aria-pressed="true"] small { color: inherit; opacity: .75; }
+.shell.on-detail > .wf { display: none; }
 .wall { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-auto-rows: var(--row); grid-auto-flow: dense; gap: var(--gap); }
 .cell {
   background: var(--card); border: 1px solid var(--card-edge); border-radius: var(--r-2xl);
@@ -781,6 +791,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .dt-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: -6px; }
 .dt-stage-l { font-size: 13px; font-weight: 600; color: var(--label); }
 .dt-stage > .cell { flex: none; max-width: 100%; animation: none; cursor: default; }
+#wall > .cell[hidden] { display: none; }   /* .cell 的 display:flex 會蓋掉 hidden；分類篩選與自訂面板的隱藏都靠這條 */
 .dt-stage > .cell[hidden] { display: flex !important; }
 .dt-stage > .cell:hover { transform: none; }
 .dt-stage > .cell .cell-doc { display: none; }
@@ -915,13 +926,15 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sp-copy:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
 .sp-copy.done { color: var(--ok-fg); border-color: color-mix(in srgb, var(--ok-fg) 40%, transparent); }
 .dt-pn { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 4px; }
-.dt-pn button { min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--tile); box-shadow: var(--raise); color: var(--ink); font: inherit; text-align: left; cursor: pointer; transition: border-color calc(.2s * var(--dur)), transform calc(.2s * var(--dur)) var(--spring); }
+.dt-pn button { min-width: 0; display: flex; flex-direction: row; align-items: center; gap: 4px; padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--tile); box-shadow: var(--raise); color: var(--ink); font: inherit; text-align: left; cursor: pointer; transition: border-color calc(.2s * var(--dur)), transform calc(.2s * var(--dur)) var(--spring); }
 /* 滑過外框同元件牆卡片：淡主色（可以點進去的同一種回饋）*/
 .dt-pn button:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
 .dt-pn button:active { transform: scale(.98); }
-.dt-pn button.nx { text-align: right; align-items: flex-end; }
-.dt-pn small { font-size: 12px; color: var(--weak); }
-.dt-pn b { font-size: 15px; font-weight: 600; }
+.dt-pn button.nx { justify-content: flex-end; text-align: right; }
+.dt-pn button > svg { flex: none; width: 18px; height: 18px; fill: none; stroke: var(--weak); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.dt-pn .pv > svg { margin-left: -4px; }
+.dt-pn .nx > svg { margin-right: -4px; }
+.dt-pn b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; font-weight: 600; }
 .dt-pn button[hidden] { visibility: hidden; display: flex; }
 
 /* ==== ⌘K 搜尋 ==== */
@@ -1270,6 +1283,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       <button class="ctl" id="toggle-play" type="button"><svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg><span>暫停</span></button>
     </div>
   </div>
+
+  <nav class="wf" id="wf" aria-label="元件分類"></nav>
 
   <div class="wall" id="wall">
     <section class="cell h2" id="c-dd">
@@ -3177,9 +3192,12 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const cells = $$('#wall > .cell').map((el) => ({ id: el.id, el, name: (el.querySelector('header')?.firstChild?.textContent || el.id).trim(), cat: catOf(el.id) }));
     const naturalOrder = cells.map((c) => c.id);
     const orderOf = () => { const o = theme.layout.order.filter((id) => naturalOrder.includes(id)); return [...o, ...naturalOrder.filter((id) => !o.includes(id))]; };
+    let wallCat = '';   // 分類篩選（空＝全部）
+    const inView = (c) => !theme.layout.hidden.includes(c.id) && (!wallCat || c.cat === wallCat);
     function applyLayout() {
-      const order = orderOf(), hidden = new Set(theme.layout.hidden);
-      for (const c of cells) { c.el.style.order = String(order.indexOf(c.id)); c.el.hidden = hidden.has(c.id); }
+      const order = orderOf();
+      for (const c of cells) { c.el.style.order = String(order.indexOf(c.id)); c.el.hidden = !inView(c); }
+      paintCats?.();
       // 滑動標記、圖表都靠量位置：版面變了就讓它們重量一次
       requestAnimationFrame(() => dispatchEvent(new Event('resize')));
     }
@@ -3430,6 +3448,29 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const RADIUS = [['方正', { card: 8, control: 6, pill: 'soft' }, '3px'], ['適中', DEFAULT.shape, '8px'], ['圓潤', { card: 28, control: 14, pill: 'full' }, '14px']];
     const MOTION = [['關', null, 'M5 12h14'], ['少', { speed: 1.25, bounce: 'none' }, 'M4 16c4 0 6-8 16-8'], ['標準', { speed: 1, bounce: 'standard' }, 'M3 17c3 0 4-10 8-10s3 7 6 7 2-3 4-3']];
     const CAT_LABEL = { 輸入: '表單', 導覽: '導覽', 狀態: '狀態', 資料: '資料', 圖表: '圖表' };
+    /* ---- 元件牆分類篩選：全部／表單／導覽／狀態／資料／圖表 ---- */
+    const wf = $('#wf');
+    var paintCats = () => {
+      const vis = cells.filter((c) => !theme.layout.hidden.includes(c.id));
+      wf.innerHTML = [['', '全部', vis.length], ...Object.keys(CAT).map((k) => [k, CAT_LABEL[k] || k, vis.filter((c) => c.cat === k).length])]
+        .filter(([k, , n]) => !k || n).map(([k, t, n]) => `<button type="button" data-cat="${k}" aria-pressed="${wallCat === k}">${t}<small>${n}</small></button>`).join('');
+    };
+    function setCat(k) {
+      if (k === wallCat) return;
+      const before = new Map(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()]));
+      wallCat = k;
+      const u = new URL(location.href); k ? u.searchParams.set('cat', k) : u.searchParams.delete('cat'); history.replaceState(history.state, '', u);
+      applyLayout();
+      cells.forEach((c, i) => {
+        if (c.el.hidden) return;
+        const b = before.get(c), a = c.el.getBoundingClientRect();
+        if (b) { const dx = b.left - a.left, dy = b.top - a.top; if (dx || dy) c.el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: D(520), easing: SOFT }); }
+        else c.el.animate([{ opacity: 0, transform: 'scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: D(360), easing: 'ease-out', delay: Math.min(i, 12) * 12, fill: 'backwards' });
+      });
+    }
+    wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });
+    { const q = new URLSearchParams(location.search).get('cat'); if (q && CAT[q]) wallCat = q; }
+    applyLayout();
     const isDarkNow = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
     const setMode = (m) => { if (m === 'auto') delete root.dataset.theme; else root.dataset.theme = m; try { m === 'auto' ? localStorage.removeItem('wall-theme') : localStorage.setItem('wall-theme', m); } catch (e) {} };
 
@@ -4009,7 +4050,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       btn.innerHTML = (ok ? ICON_YES : ICON_LINK) + label.outerHTML;
       clearTimeout(btn._t); btn._t = setTimeout(() => { if (!btn.isConnected) return; btn.classList.remove('done'); btn.innerHTML = ICON_LINK + '<span>複製連結</span>'; }, 2200);
     }
-    const seq = () => orderOf().filter((id) => DOC[id] && !theme.layout.hidden.includes(id));
+    const seq = () => orderOf().filter((id) => DOC[id] && !theme.layout.hidden.includes(id) && (!wallCat || catOf(id) === wallCat));
     // 捲動容器：自訂面板開著時是 body，否則是視窗
     const scroller = () => (document.body.classList.contains('cz-open') && matchMedia('(min-width: 761px)').matches ? document.body : document.scrollingElement);
     const ping = (cell) => { cell.classList.remove('ping'); void cell.offsetWidth; cell.classList.add('ping'); };
@@ -4066,8 +4107,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         <div class="dt-panel" data-panel="basic" id="dt-pn-basic" role="tabpanel" aria-labelledby="dt-tab-basic">${basicHtml(id, d)}</div>
         ${SPEC[id] ? `<div class="dt-panel" data-panel="variants" id="dt-pn-variants" role="tabpanel" aria-labelledby="dt-tab-variants" hidden>${specHtml(id)}</div>` : ''}
         <nav class="dt-pn" aria-label="其他元件">
-          <button class="pv" type="button"${prev ? ` data-go="${prev}"` : ' hidden'}><small>上一個</small><b>${prev ? esc(TITLE[prev]) : ''}</b></button>
-          <button class="nx" type="button"${next ? ` data-go="${next}"` : ' hidden'}><small>下一個</small><b>${next ? esc(TITLE[next]) : ''}</b></button>
+          <button class="pv" type="button"${prev ? ` data-go="${prev}" aria-label="上一個：${esc(TITLE[prev])}"` : ' hidden'}><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><b>${prev ? esc(TITLE[prev]) : ''}</b></button>
+          <button class="nx" type="button"${next ? ` data-go="${next}" aria-label="下一個：${esc(TITLE[next])}"` : ' hidden'}><b>${next ? esc(TITLE[next]) : ''}</b><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
         </nav>`;
       // 牆上的卡片直接搬進來當互動示範（動畫腳本照常跑），離開時放回原位
       if (cell) {

@@ -734,7 +734,9 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 /* ==== 元件詳細頁（2026-11-16 第一階段，參考 component.gallery 的元件頁）====
    牆＝總覽，點卡片進詳細頁：網址 #form-field 可分享、⌘K 直接到頁；返回回到原本捲動位置。
    原本的說明側欄會擋住右側卡片、讓位又會讓牆重排造成誤點，所以改成整頁。 */
-#wall > .cell { cursor: pointer; }
+#wall > .cell { cursor: pointer; transition: transform calc(.55s * var(--dur)) var(--spring-soft), box-shadow calc(.4s * var(--dur)) var(--ease), border-color calc(.25s * var(--dur)) var(--ease); }
+/* 滑過：外框轉淡主色，提示「點了會進詳細頁」；鍵盤聚焦 ⓘ 時同樣亮起 */
+#wall > .cell:hover, #wall > .cell:has(.cell-doc:focus-visible) { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
 /* ⓘ 緊跟在標題後面（右上角留給程式名稱與圖例）；平常隱藏，滑過卡片或鍵盤聚焦才出現 */
 .cell-doc { width: 20px; height: 20px; margin: -2px auto -2px -4px; flex: none; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--label); cursor: pointer; opacity: 0; scale: .7; transition: opacity calc(.2s * var(--dur)) var(--ease), scale calc(.35s * var(--dur)) var(--spring), color calc(.2s * var(--dur)), background calc(.2s * var(--dur)); }
 .cell-doc svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -746,6 +748,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 @keyframes cell-ping { 0%, 40% { box-shadow: 0 0 0 4px var(--focus), var(--shadow-lift); } }
 
 .shell.on-detail > .wall { display: none; }
+/* 進場動畫只播第一次：牆從詳細頁回來時 display 由 none 變回 grid，瀏覽器會把 rise 重播，排後面的卡片空白最久 2 秒多（2026-11-16 修正）。ping 是返回時的提示，要留著 */
+.wall.ready > .cell:not(.ping) { animation: none; }
 .cdp[hidden] { display: none; }
 .cdp { display: flex; flex-direction: column; gap: 16px; margin-top: 8px; }
 /* 頁首＋互動示範包成一塊，和上方全站功能列（語言、主題、搜尋、自訂）分開 */
@@ -791,7 +795,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .doc-chips span { height: 24px; padding: 0 8px; display: inline-flex; align-items: center; border-radius: var(--r-xs); background: var(--soft); color: var(--muted); font-size: 12.5px; font-weight: 400; white-space: nowrap; }
 .dt-pn { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 4px; }
 .dt-pn button { min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--tile); box-shadow: var(--raise); color: var(--ink); font: inherit; text-align: left; cursor: pointer; transition: border-color calc(.2s * var(--dur)), transform calc(.2s * var(--dur)) var(--spring); }
-.dt-pn button:hover { border-color: var(--primary); }
+/* 滑過外框同元件牆卡片：淡主色（可以點進去的同一種回饋）*/
+.dt-pn button:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
 .dt-pn button:active { transform: scale(.98); }
 .dt-pn button.nx { text-align: right; align-items: flex-end; }
 .dt-pn small { font-size: 12px; color: var(--weak); }
@@ -3387,6 +3392,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       h.insertBefore(b, $('em', h));
     });
     const shell = $('.shell'), wall = $('#wall'), dt = $('#detail');
+    // 第一次的進場動畫播完（或被詳細頁中斷）就標記 ready，之後不再重播
+    Promise.allSettled($$('#wall > .cell').flatMap((c) => c.getAnimations().filter((a) => a.animationName === 'rise').map((a) => a.finished))).then(() => wall.classList.add('ready'));
     const ICON_YES = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>', ICON_NO = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
     const li = (a) => a.map((x) => `<li>${esc(x)}</li>`).join('');
     const ICON_LINK = '<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>';
@@ -3454,7 +3461,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         cell.style.width = w + 'px'; cell.style.height = h + 'px';
         $('.dt-stage', dt).append(cell);
       }
-      dtId = id;
+      dtId = id; wall.classList.add('ready');
       shell.classList.add('on-detail'); dt.hidden = false;
       document.title = `${TITLE[id]}・${BASE_TITLE}`;
       scroller().scrollTop = 0;

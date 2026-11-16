@@ -128,14 +128,15 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 .ctl svg { width: 14px; height: 14px; fill: currentColor; }
 
 /* 分類標籤：膠囊按鈕，選中淡主色（同篩選標籤） */
-.wf { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: -4px; }
-.wf button { height: 32px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--tile); color: var(--muted); font: inherit; font-size: calc(13px * var(--fs-k)); font-weight: 500; cursor: pointer; transition: background calc(.2s * var(--dur)), border-color calc(.2s * var(--dur)), color calc(.2s * var(--dur)), transform calc(.2s * var(--dur)) var(--spring); }
-.wf button small { font-size: 12px; color: var(--weak); font-variant-numeric: tabular-nums; }
+.wf { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: -2px; }
+.wf button { height: 40px; padding: 0 16px 0 18px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--tile); color: var(--muted); font: inherit; font-size: calc(15px * var(--fs-k)); font-weight: 500; cursor: pointer; transition: background calc(.2s * var(--dur)), border-color calc(.2s * var(--dur)), color calc(.2s * var(--dur)), transform calc(.2s * var(--dur)) var(--spring); }
+/* 數量做成小膠囊，和上方設定按鈕（32px、純文字）明顯區分 */
+.wf button small { min-width: 22px; height: 20px; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-pill); background: var(--soft); font-size: 12px; font-weight: 600; color: var(--weak); font-variant-numeric: tabular-nums; }
 .wf button:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); color: var(--ink); }
 .wf button:active { transform: scale(.96); }
 .wf button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
 .wf button[aria-pressed="true"] { background: var(--tint); border-color: color-mix(in srgb, var(--primary) 40%, transparent); color: var(--selected-fg); font-weight: 600; }
-.wf button[aria-pressed="true"] small { color: inherit; opacity: .75; }
+.wf button[aria-pressed="true"] small { background: var(--primary); color: var(--on-primary); }
 .shell.on-detail > .wf { display: none; }
 .wall { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-auto-rows: var(--row); grid-auto-flow: dense; gap: var(--gap); }
 .cell {
@@ -3469,7 +3470,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       });
     }
     wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });
-    { const q = new URLSearchParams(location.search).get('cat'); if (q && CAT[q]) wallCat = q; }
+    { const q = new URLSearchParams(location.search).get('cat'), k = q && (CAT[q] ? q : Object.keys(CAT).find((x) => CAT_LABEL[x] === q)); if (k) wallCat = k; }   // 網址可用內部名稱或畫面上的名稱（例如 表單）
     applyLayout();
     const isDarkNow = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
     const setMode = (m) => { if (m === 'auto') delete root.dataset.theme; else root.dataset.theme = m; try { m === 'auto' ? localStorage.removeItem('wall-theme') : localStorage.setItem('wall-theme', m); } catch (e) {} };

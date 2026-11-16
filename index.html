@@ -2968,6 +2968,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         qrow('主色', el('div', { class: 'cz-sw-row', role: 'group', 'aria-label': '主色' },
           PRIMARY_SWATCHES.map(([v, n]) => el('button', { type: 'button', class: 'cz-swatch', style: `--c:${v}`, title: n, 'aria-label': `主色：${n}`, 'aria-pressed': String(c.primary === v), onclick: () => { c.primary = v; changed(); renderAll(); flash(); } })),
           el('label', { class: 'cz-pick' + (custom ? ' on' : ''), title: '自訂顏色', style: custom ? `--c:${c.primary}` : '' }, colorInput('color.primary', '自訂主色'))), primaryWarn),
+        // 底色色調（2026-11-16 從進階移來）：縮圖並排底色、線條、文字三色 —— 淺底三種很像，靠中、深兩段把色相拉開
+        qrow('底色', opts('底色色調', [['cool', '偏藍'], ['neutral', '中性'], ['warm', '偏暖']].map(([k, name]) => {
+          const p = (k === 'cool' ? COOL : NEUTRAL[k]).light;
+          return { name, thumb: thumb('tone', `background:linear-gradient(90deg, ${p.page} 0 34%, ${p['line-strong']} 34% 67%, ${p.muted} 67%);border-color:${p['line-strong']}`), on: () => c.neutral === k, pick: () => { c.neutral = k; } };
+        }))),
         qrow('圓角', opts('圓角', RADIUS.map(([name, s, r]) => ({ name, thumb: thumb('r', `border-top-left-radius:${r}`), on: () => same(theme.shape, s), pick: () => { theme.shape = clone(s); } })))),
         qrow('動畫', opts('動畫', MOTION.map(([name, m, d]) => {
           const t = thumb('mo'); t.innerHTML = `<svg viewBox="0 0 24 24"><path d="${d}"/></svg>`;
@@ -3008,8 +3013,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           c.darkPrimary ? el('label', { class: 'cz-pick', style: 'align-self:flex-start' }, colorInput('color.darkPrimary', '深色模式主色'), '深色主色') : null,
           row('狀態顏色', 'color.success', el('div', { class: 'cz-tiles' }, [['success', '成功'], ['warn', '提醒'], ['danger', '錯誤'], ['info', '資訊']].map(([k, n]) =>
             el('label', { class: 'cz-tile', 'data-path': 'color.' + k, title: '點色塊換色' }, colorInput('color.' + k, n + '顏色'), n)))),
-          row('圖表顏色', 'color.series', el('div', { class: 'cz-series' }, c.series.map((v, i) => el('input', { type: 'color', value: v, 'aria-label': `圖表第 ${i + 1} 色`, oninput: (e) => { c.series[i] = e.target.value; changed(false); }, onchange: () => record() })))),
-          row('底色色調', 'color.neutral', seg('color.neutral', [['cool', '偏藍'], ['neutral', '中性'], ['warm', '偏暖']], '底色色調'))),
+          row('圖表顏色', 'color.series', el('div', { class: 'cz-series' }, c.series.map((v, i) => el('input', { type: 'color', value: v, 'aria-label': `圖表第 ${i + 1} 色`, oninput: (e) => { c.series[i] = e.target.value; changed(false); }, onchange: () => record() }))))),
         blk('字型細節',
           el('p', { class: 'cz-hint' }, '七個層級對齊 Material 3；字級以 100% 字級時為準。'),
           ...LEVELS.map(([k, n, en]) => {

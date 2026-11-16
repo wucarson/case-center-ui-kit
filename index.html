@@ -2508,7 +2508,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     });
     live('c-dp', (signal) => {
       const PRE = [TODAY, TODAY + 1, TODAY + 7, 30];
-      const choose = (d, p = -1) => { const prev = cur; pres.forEach((x, k) => x.classList.toggle('on', k === p)); pick(d); setTimeout(() => { dp.classList.remove('open'); roll(f, fmt(d), d > prev ? 1 : -1); }, 350); };
+      // 示範用：選完不自動關閉，方便查看選取效果；再點欄位或卡片其他地方才關
+      const choose = (d, p = -1) => { const prev = cur; pres.forEach((x, k) => x.classList.toggle('on', k === p)); pick(d); if (d !== prev) roll(f, fmt(d), d > prev ? 1 : -1); };
       $('.dp-f', dp).addEventListener('click', () => dp.classList.toggle('open'), { signal });
       pres.forEach((x, k) => x.addEventListener('click', () => { press(x); choose(PRE[k], k); }, { signal }));
       days.forEach((x, k) => { if (!x.classList.contains('off')) x.addEventListener('click', () => choose(k + 1), { signal }); });

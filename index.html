@@ -641,6 +641,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .dl-r .b2 { height: 24px; padding: 0 8px; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); }
 .dl-bd { position: absolute; inset: 0; background: rgb(8 14 28 / .38); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); opacity: 0; transition: opacity calc(.25s * var(--dur)) var(--ease); }
 .dl.open .dl-bd { opacity: 1; }
+.dl:not(.open) :is(.dl-bd, .dl-d) { pointer-events: none; }
 .dl-d { position: absolute; left: 50%; top: 50%; width: min(92%, 340px); padding: 12px 14px; border: 1px solid var(--card-edge); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-lift); translate: -50% -50%; opacity: 0; transform: scale(.94); transition: opacity calc(.15s * var(--dur)) ease-in, transform calc(.15s * var(--dur)) ease-in; }
 .dl.open .dl-d { opacity: 1; transform: none; transition: opacity calc(.2s * var(--dur)) var(--ease), transform calc(.5s * var(--dur)) var(--spring-soft); }
 .dl-d b { display: block; font-size: calc(14px * var(--fs-k) * var(--rk, 1)); line-height: calc(20px * var(--fs-k) * var(--rk, 1)); font-weight: 600; }
@@ -796,6 +797,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .doc-tag svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 .doc-tag.ok { background: var(--ok-bg); color: var(--ok-fg); }
 .doc-tag.no { background: var(--danger-bg); color: var(--danger-fg); }
+.doc-tag.info { background: var(--info-bg); color: var(--info-fg); }
+.doc-tag.neu { background: var(--q-bg); color: var(--q-fg); }
 .doc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .doc-chips span { height: 24px; padding: 0 8px; display: inline-flex; align-items: center; border-radius: var(--r-xs); background: var(--soft); color: var(--muted); font-size: 12.5px; font-weight: 400; white-space: nowrap; }
 /* ==== 詳細頁第二階段：變體／狀態對照／程式範例（2026-11-16）====
@@ -847,7 +850,6 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .dt-panel[hidden] { display: none; }
 /* 互動示範：右上角播放／暫停（只控制這張）；暫停後可以直接操作 */
 .dt-play { display: flex; align-items: center; gap: 8px; }
-.dt-play small { font-size: 12px; color: var(--weak); }
 .dt-play button { width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--tile); box-shadow: var(--raise); color: var(--ink); cursor: pointer; transition: transform calc(.2s * var(--dur)) var(--spring), border-color calc(.2s * var(--dur)); }
 .dt-play button:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
 .dt-play button:active { transform: scale(.92); }
@@ -859,6 +861,12 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .cell.held.live .btn:active, .cell.held.live .b2:active { transform: scale(.96); }
 .cell.held.live .b2:hover { background: var(--tint); border-color: var(--primary); }
 .cell.held.live .b2.dng:hover { background: var(--danger-bg); border-color: var(--danger-fg); }
+.cell.held.live :is(.seg span, .tgr, .ck, .rad, .starb, .tab, .dtab, nav span, .chip u, .dd-t, .dd-m div, .ms-t, .ms-f u, .mn-h .b2, .mn-i:not(.dis), .dl-r .b2, .dl-a span, .ip-b, .btn.hold, .sd-it, .sd-tg, .sd-brand, .th[data-k], .up, .stack, .bar, .hc, .pie .sg, .pie-r, .toasts, .co, .tp-col u, .dp-f, .dp-pre span, .dp-g span:not(.off), .ps span) { cursor: pointer; }
+.cell.held.live :is(.tab, .dtab, .rad, .ck):hover { color: var(--ink); }
+.cell.held.live .dtab:active, .cell.held.live .seg span:active { transform: scale(.96); }
+.ht.hov .hc:not(.rc) { opacity: .35; }
+.ht .hc { transition: opacity calc(.2s * var(--dur)); }
+.cell.held.live .btn.hold { touch-action: none; user-select: none; }
 .ff-real { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; outline: none; background: none; color: var(--ink); font: inherit; }
 .ff-real::placeholder { color: var(--label); }
 .dt-stage { grid-auto-flow: row; gap: 14px; min-height: 0; padding: 32px 24px; }
@@ -1710,6 +1718,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   const held = new Set(), HOLD = {};
   const own = (id) => (ms) => new Promise(res => { const tick = () => (paused || held.has(id)) ? setTimeout(tick, 200) : res(); setTimeout(tick, ms * PACE); });
   const wait = (ms) => new Promise(res => setTimeout(res, ms));
+  // live(id, setup)：暫停這張卡片時呼叫 setup(signal) 掛事件；恢復播放時 abort，事件全部移除
+  const live = (id, setup) => { let ac; HOLD[id] = { on() { ac = new AbortController(); setup(ac.signal); }, off() { ac?.abort(); } }; };
   const loopOn = (sl, delay, fn) => { (async () => { await sl(delay); for (;;) await fn(); })().catch(console.error); };
   const tween = (a, b, ms, cb, ease = t => 1 - Math.pow(1 - t, 3)) => new Promise(res => {
     const s = performance.now();
@@ -1780,6 +1790,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       await sleep(250); items.forEach(x => x.classList.remove('hl'));
       await sleep(2000);
     });
+    live('c-dd', (signal) => {
+      $('.dd-t', dd).addEventListener('click', () => dd.classList.toggle('open'), { signal });
+      items.forEach((x, k) => {
+        x.addEventListener('mouseenter', () => items.forEach((y, j) => y.classList.toggle('hl', j === k)), { signal });
+        x.addEventListener('click', () => { const step = k > cur ? 1 : -1; items.forEach((y, j) => y.classList.toggle('sel', j === k)); pop(x, .96); dd.classList.remove('open'); if (k !== cur) roll(val, opts[k], step); cur = k; }, { signal });
+      });
+      $('#c-dd').addEventListener('click', (e) => { if (!dd.contains(e.target)) dd.classList.remove('open'); }, { signal });
+    });
   }
 
   /* 搜尋與標籤建議 */
@@ -1802,6 +1820,22 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       for (let k = text.length - 1; k >= 0; k--) { paint(text.slice(0, k)); await sleep(55); }
       box.classList.remove('focus'); caret.hidden = true; ph.style.marginLeft = '';
       await sleep(900);
+    });
+    // 暫停後換成真的輸入框：打字即時比對建議標籤，沒有相符就收起
+    let real = null;
+    live('c-search', (signal) => {
+      list.classList.remove('show'); paint(''); caret.hidden = true; box.classList.remove('focus'); q.hidden = ph.hidden = true;
+      real = document.createElement('input');
+      Object.assign(real, { className: 'ff-real', placeholder: ph.textContent, autocomplete: 'off' }); real.setAttribute('aria-label', '搜尋（示範）');
+      ph.after(real);
+      real.addEventListener('focus', () => box.classList.add('focus'), { signal });
+      real.addEventListener('blur', () => { box.classList.remove('focus'); setTimeout(() => list.classList.remove('show'), 150); }, { signal });
+      real.addEventListener('input', () => {
+        const v = real.value.trim(), hit = v && data.find(([k, rs]) => k.includes(v) || v.includes(k) || rs.some(([a]) => a.includes(v)));
+        if (hit) hit[1].forEach(([a, b], k) => { res[k].firstElementChild.textContent = a; res[k].lastElementChild.textContent = b; });
+        list.classList.toggle('show', !!hit);
+      }, { signal });
+      signal.addEventListener('abort', () => { real.remove(); real = null; q.hidden = false; ph.hidden = false; paint(''); list.classList.remove('show'); });
     });
   }
 
@@ -1845,6 +1879,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       roll(n, data[i][0], d); roll(t, data[i][1], d);
       await sleep(1900);
     });
+    live('c-seg', (signal) => tabs.forEach((x, k) => x.addEventListener('click', () => {
+      if (k === i) return; const d = k > i ? 1 : -1; i = k;
+      tabs.forEach((y, j) => y.classList.toggle('on', j === i)); pill.style.transform = `translateX(${i * 100}%)`;
+      roll(n, data[i][0], d); roll(t, data[i][1], d);
+    }, { signal })));
   }
 
   /* 開關 */
@@ -1852,6 +1891,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const sleep = own('c-tg'), loop = (d, fn) => loopOn(sleep, d, fn);
     const rows = $$('#c-tg .tgr'), seq = [1, 0, 2, 1, 0, 2]; let i = 0;
     loop(1000, async () => { rows[seq[i++ % seq.length]].classList.toggle('on'); await sleep(1250); });
+    live('c-tg', (signal) => rows.forEach((r) => r.addEventListener('click', () => r.classList.toggle('on'), { signal })));
   }
 
   /* 按住確認 */
@@ -1868,6 +1908,22 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       await sleep(1900);
       b.classList.remove('done'); roll(r, '按住結案', -1);
       await sleep(1600);
+    });
+    // 暫停後：真的按住 1.5 秒才結案，中途放開就取消
+    live('c-hold', (signal) => {
+      let a1 = null, a2 = null, t = 0;
+      const reset = () => { b.getAnimations().forEach((a) => a.cancel()); a1?.cancel(); a2?.cancel(); };
+      b.classList.remove('done'); reset(); roll(r, '按住結案', -1);
+      b.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0 || b.classList.contains('done')) return;
+        b.setPointerCapture(e.pointerId); roll(r, '持續按住…');
+        b.animate([{ transform: 'scale(1)' }, { transform: 'scale(.97)' }], { duration: D(200), fill: 'forwards', easing: 'ease-out' });
+        const kf = [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], o = { duration: 1500, fill: 'forwards', easing: 'linear' };
+        a1 = fill.animate(kf, o); a2 = bar.animate(kf, o);
+        t = setTimeout(() => { reset(); b.classList.add('done'); roll(r, CHECK + '已結案'); pop(b, .93); setTimeout(() => { b.classList.remove('done'); roll(r, '按住結案', -1); }, 1900); }, 1500);
+      }, { signal });
+      const cancel = () => { if (!t || b.classList.contains('done')) return; clearTimeout(t); t = 0; reset(); roll(r, '按住結案', -1); };
+      b.addEventListener('pointerup', cancel, { signal }); b.addEventListener('pointercancel', cancel, { signal });
     });
   }
 
@@ -1886,6 +1942,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       roll(p, txt[i], i > prev ? 1 : -1);
       await sleep(2300);
     });
+    live('c-tabs', (signal) => tabs.forEach((x, k) => x.addEventListener('click', () => {
+      if (k === i) return; const d = k > i ? 1 : -1; i = k;
+      tabs.forEach((y, j) => y.classList.toggle('on', j === i)); place(); roll(p, txt[i], d);
+    }, { signal })));
   }
 
   /* 提示訊息 */
@@ -1901,6 +1961,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       roll(h, a); roll(p, b);
       await sleep(2800);
     });
+    // 暫停後：點提示框換下一種語氣（資訊、成功、警告、錯誤）
+    live('c-co', (signal) => co.addEventListener('click', () => {
+      const [tone, d, a, b] = data[++i % data.length];
+      co.className = 'co ' + tone; ico.setAttribute('d', d); pop(svg, .4); roll(h, a); roll(p, b);
+    }, { signal }));
   }
 
   /* 歷程 */
@@ -1953,6 +2018,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const top = body.firstElementChild; top.classList.add('hv'); await sleep(1200); top.classList.remove('hv');
       await sleep(700);
     });
+    // 暫停後：點欄位標題排序，再點一次反向
+    live('c-tb', (signal) => ths.forEach((t) => t.addEventListener('click', () => { const k = t.dataset.k; if (!k) return; const dir = t.dataset.s === 'asc' ? -1 : 1; press(t); apply(k, dir); }, { signal })));
   }
 
   /* 狀態徽章 */
@@ -1986,6 +2053,13 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       } else press(b);
       await sleep(on ? 2300 : 1400);
     });
+    live('c-star', (signal) => b.addEventListener('click', () => {
+      on = !on; b.classList.toggle('on', on); roll(lab, on ? '已追蹤' : '未追蹤', on ? 1 : -1);
+      if (on) {
+        pop($('svg', b), .3);
+        dots.forEach((d, k) => { const ang = (360 / dots.length * k) * Math.PI / 180; d.animate([{ transform: 'none', opacity: 1 }, { transform: `translate(${Math.cos(ang) * 26}px, ${Math.sin(ang) * 26}px) scale(.4)`, opacity: 0 }], { duration: D(700), easing: 'cubic-bezier(.22,1,.36,1)' }); });
+      } else press(b);
+    }, { signal }));
   }
 
   /* 統計卡 */
@@ -2053,6 +2127,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       press(all); items.forEach(t => t.classList.remove('on')); sync();
       await sleep(1100);
     });
+    live('c-ck', (signal) => {
+      items.forEach((t) => t.addEventListener('click', () => { t.classList.toggle('on'); sync(); }, { signal }));
+      all.addEventListener('click', () => { const full = items.every((t) => t.classList.contains('on')); press(all); items.forEach((t) => t.classList.toggle('on', !full)); sync(); }, { signal });
+    });
   }
 
   /* 單選清單 */
@@ -2060,6 +2138,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const sleep = own('c-rad'), loop = (d, fn) => loopOn(sleep, d, fn);
     const rs = $$('#c-rad .rad'); let i = 0;
     loop(1900, async () => { i = (i + 1) % rs.length; rs.forEach((r, k) => r.classList.toggle('on', k === i)); await sleep(1800); });
+    live('c-rad', (signal) => rs.forEach((r, k) => r.addEventListener('click', () => { i = k; rs.forEach((x, j) => x.classList.toggle('on', j === k)); }, { signal })));
   }
 
   /* 長條圖 */
@@ -2076,6 +2155,12 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     };
     paint(sets[0], false); let i = 0;
     loop(1100, async () => { i++; paint(sets[i % sets.length], true); await sleep(2900); });
+    // 暫停後：滑過長條顯示那天的數量，移開回到最高值
+    live('c-bars', (signal) => {
+      const say = (k) => { const s0 = sets[i % sets.length]; roll(cap, k < 0 ? `最高 週${wd[s0.indexOf(Math.max(...s0))]}・${Math.max(...s0)} 件` : `週${wd[k]}・${s0[k]} 件`); };
+      bars.forEach((b, k) => b.addEventListener('mouseenter', () => say(k), { signal }));
+      wrap.addEventListener('mouseleave', () => say(-1), { signal });
+    });
   }
 
   /* 熱度表 */
@@ -2096,6 +2181,12 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       }
       await sleep(2600);
     });
+    // 暫停後：滑過格子，同一列與同一欄保持清楚、其他淡掉
+    live('c-ht', (signal) => {
+      cells.forEach((row, r) => row.forEach((e, c) => e.addEventListener('mouseenter', () => { ht.classList.add('hov'); cells.forEach((rw, rr) => rw.forEach((x, cc) => x.classList.toggle('rc', rr === r || cc === c))); }, { signal })));
+      ht.addEventListener('mouseleave', () => ht.classList.remove('hov'), { signal });
+      signal.addEventListener('abort', () => ht.classList.remove('hov'));
+    });
   }
 
   /* 分頁 */
@@ -2114,6 +2205,12 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       roll(info, `顯示第 ${cur * 20 + 1}–${Math.min(total, cur * 20 + 20)} 筆`, dir);
       await sleep(1500);
     });
+    live('c-pg', (signal) => {
+      const go = (to) => { to = Math.max(0, Math.min(N - 1, to)); if (to === cur) return; const d = to > cur ? 1 : -1; cur = to; place(); roll(info, `顯示第 ${cur * 20 + 1}–${Math.min(total, cur * 20 + 20)} 筆`, d); };
+      pages.forEach((p, k) => p.addEventListener('click', () => go(k), { signal }));
+      prev.addEventListener('click', () => { press(prev); go(cur - 1); }, { signal });
+      next.addEventListener('click', () => { press(next); go(cur + 1); }, { signal });
+    });
   }
 
   /* 檔案上傳 */
@@ -2128,6 +2225,17 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       await tween(0, 100, 2600, x => { bar.style.width = x + '%'; st.textContent = `${(mb * x / 100).toFixed(1)} / ${mb.toFixed(1)} MB・${Math.round(x)}%`; }, t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
       up.classList.add('done'); st.textContent = '上傳完成'; pop(ico, .7);
       await sleep(1900);
+    });
+    // 暫停後：點上傳區跑一次上傳
+    live('c-up', (signal) => {
+      let busy = false;
+      up.addEventListener('click', async () => {
+        if (busy) return; busy = true;
+        const [name, mb, tone] = files[i++ % files.length];
+        up.classList.remove('done'); bar.style.width = '0%'; st.textContent = '0%'; roll(nm, name); ico.style.setProperty('--tone', tone); pop(ico, .8);
+        await tween(0, 100, 2000, (x) => { bar.style.width = x + '%'; st.textContent = `${(mb * x / 100).toFixed(1)} / ${mb.toFixed(1)} MB・${Math.round(x)}%`; });
+        up.classList.add('done'); st.textContent = '上傳完成'; pop(ico, .7); busy = false;
+      }, { signal });
     });
   }
 
@@ -2155,6 +2263,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       v2.remove();
       await sleep(900);
     });
+    // 暫停後：點 × 移除，其餘標籤滑動補位；全部移除後自動補回三個
+    live('c-chips', (signal) => wrap.addEventListener('click', async (e) => {
+      const x = e.target.closest('u'), chip = x?.closest('.chip'); if (!chip || chip.dataset.bye) return;
+      chip.dataset.bye = 1;
+      await chip.animate([{ transform: 'none', opacity: 1 }, { transform: 'scale(.5)', opacity: 0 }], { duration: D(220), easing: 'ease-in', fill: 'forwards' }).finished;
+      flip(kids, () => chip.remove());
+      if (!wrap.children.length) { await wait(500); add(); add(); add(); }
+    }, { signal }));
   }
 
   /* 時間選擇器 */
@@ -2162,15 +2278,16 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const sleep = own('c-tp'), loop = (d, fn) => loopOn(sleep, d, fn);
     const f = $('#c-tp .tp-f .roll'), cols = $$('#c-tp .tp-col'), hv = $('.roll', cols[0]), mv = $('.roll', cols[1]);
     let h = 9, m = 30; const p2 = n => String(n).padStart(2, '0');
-    const bump = async (col, d) => {
+    const bump = async (col, d, w = sleep) => {
       const u = $$('u', col)[d > 0 ? 0 : 1]; u.classList.add('hv'); press(u);
       if (col === cols[1]) { m += 15 * d; if (m >= 60) { m = 0; h = (h + 1) % 24; roll(hv, p2(h), 1); } if (m < 0) { m = 45; h = (h + 23) % 24; roll(hv, p2(h), -1); } roll(mv, p2(m), d); }
       else { h = (h + d + 24) % 24; roll(hv, p2(h), d); }
       roll(f, `${p2(h)}:${p2(m)}`, d);
-      await sleep(450); u.classList.remove('hv');
+      await w(450); u.classList.remove('hv');
     };
     const seq = [[1, 1], [1, 1], [0, 1], [1, -1], [0, 1], [1, 1], [0, -1], [0, -1], [1, -1], [1, -1]]; let i = 0;
     loop(800, async () => { const [c, d] = seq[i++ % seq.length]; await bump(cols[c], d); await sleep(i % 5 === 0 ? 1600 : 700); });
+    live('c-tp', (signal) => cols.forEach((col) => $$('u', col).forEach((u, k) => u.addEventListener('click', () => bump(col, k ? -1 : 1, wait), { signal }))));
   }
 
   /* Toast */
@@ -2189,6 +2306,15 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       e.animate([{ transform: 'translateY(110%) scale(.9)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: D(620), easing: SPRING });
       await sleep(2600);
     });
+    // 暫停後：點 Toast 關掉；點空白處跳出下一則
+    live('c-toast', (signal) => box.addEventListener('click', async (e) => {
+      const t = e.target.closest('.toast');
+      const old = $('.toast', box);
+      if (old) { await old.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateY(60%) scale(.94)', opacity: 0 }], { duration: D(260), easing: 'ease-in', fill: 'forwards' }).finished; old.remove(); }
+      if (t) return;
+      const n = make(data[i++ % data.length]); box.appendChild(n);
+      n.animate([{ transform: 'translateY(110%) scale(.9)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: D(620), easing: SPRING });
+    }, { signal }));
   }
 
   /* 骨架載入 */
@@ -2243,6 +2369,15 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       }
       clear(); roll(mb, tot, -1); roll(ms, '總工時（小時）', -1);
       await sleep(1400);
+    });
+    // 暫停後：滑過扇形或圖例，聚焦那個部門並顯示佔比
+    live('c-pie', (signal) => {
+      const tot = sum(cur);
+      const focus = (k) => { pie.classList.add('focus'); segs.forEach((s0, j) => s0.classList.toggle('on', j === k)); rows.forEach((r0, j) => r0.classList.toggle('on', j === k)); roll(mb, Math.round(cur[k] / tot * 100) + '%'); roll(ms, cats[k][0]); };
+      const off = () => { clear(); roll(mb, Math.round(tot), -1); roll(ms, '總工時（小時）', -1); };
+      clear(); roll(mb, Math.round(tot), -1); roll(ms, '總工時（小時）', -1);
+      segs.forEach((s0, k) => { s0.addEventListener('mouseenter', () => focus(k), { signal }); s0.addEventListener('mouseleave', off, { signal }); });
+      rows.forEach((r0, k) => { r0.addEventListener('mouseenter', () => focus(k), { signal }); r0.addEventListener('mouseleave', off, { signal }); });
     });
   }
 
@@ -2306,6 +2441,12 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       lc.classList.remove('show');
       await sleep(900);
     });
+    // 暫停後：游標在圖上移動，跟著最近的月份顯示數值
+    live('c-line', (signal) => {
+      la.getAnimations().forEach((a) => a.finish()); la.style.strokeDasharray = ''; la.style.strokeDashoffset = ''; ar.style.opacity = 1;
+      lc.addEventListener('mousemove', (e) => { const x = e.clientX - lc.getBoundingClientRect().left; const k = Math.max(0, Math.min(11, Math.round((x - P.l) / ((w - P.l - P.r) / 11)))); show(k); lc.classList.add('show'); }, { signal });
+      lc.addEventListener('mouseleave', () => lc.classList.remove('show'), { signal });
+    });
   }
 
   /* 堆疊圖：各部門高度與分段同時變動，再輪流聚焦單一系列 */
@@ -2365,6 +2506,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       dp.classList.remove('open'); roll(f, fmt(d), d > prev ? 1 : -1);
       await sleep(2200);
     });
+    live('c-dp', (signal) => {
+      const PRE = [TODAY, TODAY + 1, TODAY + 7, 30];
+      const choose = (d, p = -1) => { const prev = cur; pres.forEach((x, k) => x.classList.toggle('on', k === p)); pick(d); setTimeout(() => { dp.classList.remove('open'); roll(f, fmt(d), d > prev ? 1 : -1); }, 350); };
+      $('.dp-f', dp).addEventListener('click', () => dp.classList.toggle('open'), { signal });
+      pres.forEach((x, k) => x.addEventListener('click', () => { press(x); choose(PRE[k], k); }, { signal }));
+      days.forEach((x, k) => { if (!x.classList.contains('off')) x.addEventListener('click', () => choose(k + 1), { signal }); });
+      $('#c-dp').addEventListener('click', (e) => { if (!dp.contains(e.target)) dp.classList.remove('open'); }, { signal });
+    });
   }
 
   /* 期間選擇：膠囊滑到新期間，下方時間軸的範圍同步伸縮 */
@@ -2386,6 +2535,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     pill.style.transition = bar.style.transition = 'none'; paint(); void pill.offsetWidth; pill.style.transition = bar.style.transition = '';
     addEventListener('resize', paint);
     loop(1500, async () => { const prev = i; i = (i + 1) % its.length; roll(r, paint(), i > prev ? 1 : -1); await sleep(2600); });
+    live('c-ps', (signal) => its.forEach((x, k) => x.addEventListener('click', () => { if (k === i) return; const prev = i; i = k; roll(r, paint(), i > prev ? 1 : -1); }, { signal })));
   }
 
   /* 成員頭像群組（提案）：最多顯示 3 位，其餘收成「+N」；展開時頭像分開並顯示姓名 */
@@ -2414,6 +2564,16 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       tip.classList.remove('show'); await sleep(300);
       st.classList.remove('spread'); await sleep(700);
       n = 2; paint(2, -1); await sleep(1300);
+    });
+    // 暫停後：點頭像群組展開／收合，展開時滑過頭像顯示姓名
+    live('c-av', (signal) => {
+      tip.classList.remove('show');
+      st.addEventListener('click', () => { st.classList.toggle('spread'); tip.classList.remove('show'); }, { signal });
+      slots.forEach((sl, k) => sl.addEventListener('mouseenter', () => {
+        if (!st.classList.contains('spread') || sl.classList.contains('gone')) return;
+        tip.textContent = M[k][1]; tip.style.left = (sl.offsetLeft + sl.offsetWidth / 2 - tip.offsetWidth / 2) + 'px'; tip.classList.add('show');
+      }, { signal }));
+      st.addEventListener('mouseleave', () => tip.classList.remove('show'), { signal });
     });
   }
 
@@ -2490,6 +2650,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       h.classList.remove('hv'); drop(r); await sleep(1500);
       if (i % 2 === 0 && g === gen) { await idle(); const t = order[2 + (i / 2) % 2]; press($('.drg-s', t)); toggle(t); await sleep(1200); }
     });
+    live('c-drag', () => {});   // 拖移與開關本來就能直接操作
   }
 
   /* 表單欄位：直接送出 → 錯誤（欄框紅、訊息出現，位置早就留好不跳）→ 打字錯誤消失、字數跟著跑 → 離開 → 清空回到「尚未填寫」 */
@@ -2555,22 +2716,41 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       items.forEach((x) => x.classList.remove('on')); picked = []; sync(-1); await sleep(500);
       clr.classList.remove('hv'); await sleep(300); ms.classList.remove('open'); await sleep(1800);
     });
+    live('c-ms', (signal) => {
+      $('.ms-t', ms).addEventListener('click', () => ms.classList.toggle('open'), { signal });
+      items.forEach((x, k) => {
+        x.addEventListener('mouseenter', () => hl(k), { signal });
+        x.addEventListener('click', () => { const on = x.classList.toggle('on'); picked = on ? [...picked, NAMES[k]] : picked.filter((n) => n !== NAMES[k]); sync(on ? 1 : -1); }, { signal });
+      });
+      clr.addEventListener('click', () => { press(clr); items.forEach((x) => x.classList.remove('on')); picked = []; sync(-1); }, { signal });
+      $('#c-ms').addEventListener('click', (e) => { if (!ms.contains(e.target)) { ms.classList.remove('open'); hl(-1); } }, { signal });
+    });
   }
 
   /* 操作選單：⋯ 滑過 → 按下 → 選單從右上角長出 → 方向鍵逐項（跳過停用）→ 選取 → 收起 */
   {
     const sleep = own('c-mn'), loop = (d, fn) => loopOn(sleep, d, fn);
     const mn = $('#c-mn .mn'), btn = $('.mn-h .b2', mn), items = $$('.mn-i', mn);
-    const live = items.map((x, k) => (x.classList.contains('dis') ? -1 : k)).filter((k) => k >= 0);
+    const usable = items.map((x, k) => (x.classList.contains('dis') ? -1 : k)).filter((k) => k >= 0);
     const hl = (k) => items.forEach((x, j) => x.classList.toggle('hl', j === k));
     const PICK = [items.length - 1, 1, 3]; let p = 0;
     loop(2000, async () => {
       btn.classList.add('hv'); await sleep(400); press(btn);
       btn.classList.remove('hv'); btn.classList.add('on'); mn.classList.add('open'); await sleep(600);
       const to = PICK[p++ % PICK.length];
-      for (const k of live) { hl(k); await sleep(300); if (k === to) break; }
+      for (const k of usable) { hl(k); await sleep(300); if (k === to) break; }
       await sleep(500); press(items[to]); await sleep(250);
       mn.classList.remove('open'); btn.classList.remove('on'); await sleep(200); hl(-1); await sleep(2200);
+    });
+    live('c-mn', (signal) => {
+      const close = () => { mn.classList.remove('open'); btn.classList.remove('on'); hl(-1); };
+      btn.addEventListener('click', () => { press(btn); const open = !mn.classList.contains('open'); mn.classList.toggle('open', open); btn.classList.toggle('on', open); }, { signal });
+      items.forEach((x, k) => {
+        if (x.classList.contains('dis')) return;
+        x.addEventListener('mouseenter', () => hl(k), { signal });
+        x.addEventListener('click', async () => { press(x); await wait(200); close(); }, { signal });
+      });
+      $('#c-mn').addEventListener('click', (e) => { if (!btn.contains(e.target) && !$('.mn-p', mn).contains(e.target)) close(); }, { signal });
     });
   }
 
@@ -2593,6 +2773,18 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       ok.classList.remove('hv'); dl.classList.remove('open'); await sleep(300);
       if (c.dng) { rows[c.row].classList.add('gone'); await sleep(1600); rows[c.row].classList.remove('gone'); }
       await sleep(1600);
+    });
+    live('c-dl', (signal) => {
+      let c = null;
+      const close = () => { cancel.classList.remove('fc'); dl.classList.remove('open'); };
+      V.forEach((cfg) => $(cfg.trig, rows[cfg.row]).addEventListener('click', (e) => {
+        press(e.currentTarget); c = cfg;
+        roll(ttl, c.title); t1.textContent = c.t1; t2.textContent = c.t2; t2.hidden = !c.t2; ok.textContent = c.ok; ok.classList.toggle('dng', c.dng);
+        dl.classList.add('open'); cancel.classList.toggle('fc', c.dng);
+      }, { signal }));
+      cancel.addEventListener('click', () => { press(cancel); close(); }, { signal });
+      $('.dl-bd', dl).addEventListener('click', close, { signal });
+      ok.addEventListener('click', async () => { press(ok); close(); if (c?.dng) { await wait(300); rows[c.row].classList.add('gone'); await wait(1600); rows[c.row].classList.remove('gone'); } }, { signal });
     });
   }
 
@@ -2626,6 +2818,13 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const cls = k++ % 2 ? 'fc' : 'hv';
       aim(); b.classList.add(cls); await sleep(350); pop2.classList.add('show'); await sleep(2600);
       pop2.classList.remove('show'); await sleep(200); b.classList.remove(cls); await sleep(2000);
+    });
+    live('c-ip', (signal) => {
+      const show = (on) => { aim(); pop2.classList.toggle('show', on); b.classList.toggle('hv', on); };
+      b.classList.remove('hv', 'fc'); pop2.classList.remove('show');
+      b.addEventListener('mouseenter', () => show(true), { signal });
+      b.addEventListener('mouseleave', () => show(false), { signal });
+      b.addEventListener('click', () => show(!pop2.classList.contains('show')), { signal });
     });
   }
 
@@ -2679,6 +2878,12 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       roll(line, tabs[to][3], dir);
       await sleep(2300);
     });
+    live('c-dtab', (signal) => els.forEach((e, to) => e.addEventListener('click', () => {
+      if (to === cur) return; const dir = to > cur ? 1 : -1;
+      els.forEach((x, k) => x.classList.toggle('on', k === to)); cur = to; place();
+      const b = $('b', e); if (b) pop(b, .7);
+      roll(line, tabs[to][3], dir);
+    }, { signal })));
   }
 
   /* 側邊選單：滑過 → 按下 → 選中片滑過去；群組收合；整個側欄收成圖示列，滑過顯示提示 */
@@ -2713,6 +2918,12 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       showTip(5, false); await sleep(500);
       app.classList.remove('mini'); await sleep(1100);
       await pick(0); await sleep(1800);
+    });
+    // 暫停後：點項目選取、點「管理」收合群組、點品牌列把側欄收成圖示
+    live('c-side', (signal) => {
+      its.forEach((e, k) => e.addEventListener('click', () => { its.forEach((x, j) => x.classList.toggle('on', j === k)); cur = k; place(); const b = $('b', e); if (b) pop(b, .7); }, { signal }));
+      grp.addEventListener('click', () => shut(!grp.classList.contains('shut')), { signal });
+      $('.sd-brand', app).addEventListener('click', () => { app.classList.toggle('mini'); setTimeout(place, 320); }, { signal });
     });
   }
 
@@ -3580,6 +3791,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const shell = $('.shell'), wall = $('#wall'), dt = $('#detail');
     // 第一次的進場動畫播完（或被詳細頁中斷）就標記 ready，之後不再重播
     Promise.allSettled($$('#wall > .cell').flatMap((c) => c.getAnimations().filter((a) => a.animationName === 'rise').map((a) => a.finished))).then(() => wall.classList.add('ready'));
+    // 狀態與互動圖示：開關
+    const ICON_STATE = '<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="5"/><circle cx="16" cy="12" r="2.2"/></svg>';
+    // 無障礙圖示：人形（同 Material 的 Accessibility 頁籤圖示）
+    const ICON_A11Y = '<svg viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="1.6"/><path d="M5 8.5l7 1.5 7-1.5M12 10v4.5M9 21l3-6.5 3 6.5"/></svg>';
     const ICON_YES = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>', ICON_NO = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
     const li = (a) => a.map((x) => `<li>${esc(x)}</li>`).join('');
     /* ---- 第二階段：變體／狀態對照／程式範例（先做按鈕、表單欄位）---- */
@@ -3720,8 +3935,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const basicHtml = (id, d) => `<div class="dt-grid${SPEC[id]?.s ? ' c3' : ''}">
           <section class="dt-box"><h3><span class="doc-tag ok">${ICON_YES}使用時機</span></h3><ul>${li(d.u)}</ul></section>
           <section class="dt-box"><h3><span class="doc-tag no">${ICON_NO}禁止使用</span></h3><ul>${li(d.x)}</ul></section>
-          ${SPEC[id]?.s ? '' : `<section class="dt-box"><h3>狀態與互動</h3><div class="doc-chips">${d.st.split('、').map((x) => `<span>${esc(x)}</span>`).join('')}</div></section>`}
-          <section class="dt-box"><h3>無障礙</h3>${A11Y[id] ? Object.entries(A11Y[id]).map(([k, v]) => `<h4 class="a11y-h">${k}</h4><ul>${li(v)}</ul>`).join('') : `<ul>${li(d.a)}</ul>`}</section>
+          ${SPEC[id]?.s ? '' : `<section class="dt-box"><h3><span class="doc-tag neu">${ICON_STATE}狀態與互動</span></h3><div class="doc-chips">${d.st.split('、').map((x) => `<span>${esc(x)}</span>`).join('')}</div></section>`}
+          <section class="dt-box"><h3><span class="doc-tag info">${ICON_A11Y}無障礙</span></h3>${A11Y[id] ? Object.entries(A11Y[id]).map(([k, v]) => `<h4 class="a11y-h">${k}</h4><ul>${li(v)}</ul>`).join('') : `<ul>${li(d.a)}</ul>`}</section>
         </div>`;
     // 程式碼上色：註解、字串、標籤名（先跳脫再上色）
     const hl = (src) => esc(src).replace(/(&lt;!--[\s\S]*?--&gt;)|(&quot;[^&]*?&quot;)|(&lt;\/?)([\w-]+)/g, (m, c, s, lt, tag) => c ? `<span class="c">${c}</span>` : s ? `<span class="s">${s}</span>` : `${lt}<span class="t">${tag}</span>`);
@@ -3808,6 +4023,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     };
     const I_PAUSE = '<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>', I_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
     // 暫停這張示範：循環停住；有 HOLD 行為的元件（按鈕、表單欄位）改成可以直接操作
+    // 只是顯示、沒有操作的元件：詳細頁不放播放／暫停
+    const STATIC = new Set(['c-bdg', 'c-stat', 'c-sb', 'c-fl', 'c-nt', 'c-sk', 'c-es', 'c-stk']);
     function setHold(on) {
       const id = dtId, cell = id && $('#' + id); if (!cell || on === held.has(id)) return;
       on ? held.add(id) : held.delete(id);
@@ -3820,7 +4037,6 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const on = held.has(dtId), b = $('.dt-pp', box);
       b.innerHTML = on ? I_PLAY : I_PAUSE; b.setAttribute('aria-pressed', on);
       b.setAttribute('aria-label', on ? '播放示範' : '暫停示範'); b.title = on ? '播放' : '暫停';
-      $('small', box).textContent = on ? (HOLD[dtId] ? '已暫停，可以直接操作' : '已暫停') : '';
     }
     function putBack() {
       if (dtId && held.has(dtId)) setHold(false);
@@ -3842,7 +4058,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           <p class="dt-def">${esc(d.d)}</p>
           <div class="doc-code">${d.r.split('・').map((x) => `<code>${esc(x)}</code>`).join('')}</div>
         </header>
-        <div class="dt-bar"><span class="dt-stage-l">互動示範</span><div class="dt-play"><small aria-live="polite"></small><button type="button" class="dt-pp"></button></div></div>
+        <div class="dt-bar"><span class="dt-stage-l">互動示範</span>${STATIC.has(id) ? '' : '<div class="dt-play"><button type="button" class="dt-pp"></button></div>'}</div>
         <section class="dt-stage" aria-label="互動示範"></section>
         </div>
         ${SPEC[id] ? `<div class="tabs dt-tabs" role="tablist" aria-label="內容"><i></i><button class="tab" type="button" role="tab" id="dt-tab-basic" aria-controls="dt-pn-basic" data-tab="basic">指南</button><button class="tab" type="button" role="tab" id="dt-tab-variants" aria-controls="dt-pn-variants" data-tab="variants">規格</button></div>` : ''}

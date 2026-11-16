@@ -776,7 +776,9 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .doc-code { display: flex; flex-wrap: wrap; gap: 6px; }
 .doc-code code { padding: 2px 8px; border-radius: var(--r-xs); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-subtle); color: var(--muted); font: 12.5px/20px ui-monospace, 'SF Mono', 'JetBrains Mono', Consolas, monospace; }
 .dt-stage { position: relative; display: grid; place-items: center; min-height: 320px; padding: 44px 24px 32px; border: 1px solid var(--line-subtle); border-radius: var(--r-2xl); background: radial-gradient(color-mix(in srgb, var(--line-strong) 45%, transparent) 1px, transparent 1.2px) 0 0 / 18px 18px, color-mix(in srgb, var(--soft) 55%, var(--line-subtle)); overflow: auto; }
-.dt-stage-l { position: absolute; left: 18px; top: 14px; font-size: 12px; font-weight: 600; color: var(--label); }
+/* 示範框上方的控制列：左「互動示範」，右 狀態文字＋電腦／手機＋播放／暫停（同 uiarc 的工具列位置） */
+.dt-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: -6px; }
+.dt-stage-l { font-size: 13px; font-weight: 600; color: var(--label); }
 .dt-stage > .cell { flex: none; max-width: 100%; animation: none; cursor: default; }
 .dt-stage > .cell[hidden] { display: flex !important; }
 .dt-stage > .cell:hover { transform: none; }
@@ -787,6 +789,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .dt-box { padding: 16px 18px 18px; border-radius: var(--r-lg); background: var(--card); font-size: 14px; line-height: 22px; }
 .dt-box h3 { margin: 0 0 10px; display: flex; align-items: center; gap: 6px; font-size: 13px; line-height: 20px; font-weight: 600; color: var(--label); }
 .dt-box ul { margin: 0; padding-left: 18px; color: var(--muted); }
+.a11y-h { margin: 0 0 2px; font-size: 12px; line-height: 18px; font-weight: 600; color: var(--weak); }
+.a11y-h ~ .a11y-h { margin-top: 10px; }
 .dt-box li + li { margin-top: 4px; }
 .doc-tag { height: 24px; padding: 0 10px 0 8px; display: inline-flex; align-items: center; gap: 4px; border-radius: var(--r-pill); font-size: 12px; font-weight: 600; }
 .doc-tag svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
@@ -794,6 +798,114 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .doc-tag.no { background: var(--danger-bg); color: var(--danger-fg); }
 .doc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .doc-chips span { height: 24px; padding: 0 8px; display: inline-flex; align-items: center; border-radius: var(--r-xs); background: var(--soft); color: var(--muted); font-size: 12.5px; font-weight: 400; white-space: nowrap; }
+/* ==== 詳細頁第二階段：變體／狀態對照／程式範例（2026-11-16）====
+   靜態樣本，不跑示範動畫；樣式沿用牆上的 .btn／.b2／.ff，只補牆上沒有的狀態。 */
+.sp-sec { padding: 16px 18px 18px; border-radius: var(--r-lg); background: var(--card); }
+.sp-sec > h3 { margin: 0 0 12px; font-size: 13px; line-height: 20px; font-weight: 600; color: var(--label); }
+.sp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.sp-grid.st { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.sp-grid.wide { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.sp-grid.wide.st { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+.sp-grid { row-gap: 14px; }
+/* 同一列的預覽框等高、說明對齊：預覽與說明各佔一個 subgrid 列 */
+.sp-t { min-width: 0; display: grid; grid-row: span 2; grid-template-rows: subgrid; grid-template-columns: minmax(0, 1fr); row-gap: 8px; }
+.sp-pv { min-height: 104px; display: grid; place-items: center; padding: 18px 16px; border-radius: var(--r-md); background: color-mix(in srgb, var(--soft) 55%, var(--line-subtle)); }
+.sp-pv > .ff { width: 100%; align-self: start; }
+.sp-cap { display: flex; flex-direction: column; gap: 1px; padding: 0 2px; }
+.sp-cap b { font-size: 13px; line-height: 20px; font-weight: 600; color: var(--ink); }
+.sp-cap small { font-size: 12px; line-height: 18px; color: var(--weak); }
+/* 按鈕樣本：32／48 兩級，對齊 repo 的 ctl-sm／ctl-md */
+.sp .btn { min-width: 0; height: 48px; padding: 0 20px; }
+.sp .btn.sm { height: 32px; padding: 0 12px; font-size: calc(13px * var(--fs-k)); box-shadow: 0 4px 10px -5px var(--glow), inset 0 1px 0 rgb(255 255 255 / .3); }
+.sp .b2.lg { height: 48px; padding: 0 20px; font-size: calc(14px * var(--fs-k)); }
+.sp .b2.ico.lg { width: 48px; padding: 0; }
+.sp .b2.gh { border-color: transparent; background: none; box-shadow: none; color: var(--muted); }
+.sp .b2 .ic, .sp .btn .ic { width: 16px; height: 16px; }
+.sp .btn.hv { background: linear-gradient(color-mix(in srgb, #000 10%, transparent), color-mix(in srgb, #000 10%, transparent)), var(--grad); }
+.sp .is-press { transform: scale(.96); }
+.sp .is-focus { outline: 3px solid var(--focus); outline-offset: 2px; }
+.sp .is-load { gap: 8px; }
+.sp .is-load .spin { width: 14px; height: 14px; }
+.sp .btn.is-off { background: var(--soft); color: var(--label); box-shadow: none; }
+.sp .b2.is-off { background: var(--soft); color: var(--label); border-color: var(--line-subtle); box-shadow: none; }
+/* 表單欄位樣本 */
+.sp .ff-i { gap: 8px; }
+.sp .ff-i .ic { width: 16px; height: 16px; flex: none; color: var(--weak); }
+.sp .ff-i .unit { margin-left: auto; color: var(--weak); }
+.sp .ff-i .q { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sp .ff-i.ta { height: 76px; align-items: flex-start; padding-top: 9px; }
+.sp .ff.dis .ff-i { background: var(--soft); border-color: var(--line-subtle); box-shadow: none; color: var(--label); }
+.sp .ff.dis .ff-l { color: var(--label); }
+.sp .ff-x:empty { display: none; }
+/* 詳細頁頁籤：基本（四個說明區塊）／變體（變體、狀態、程式碼）。沿用牆上的 .tabs 底線樣式 */
+.dt-tabs { margin: 4px 4px -4px; }
+.dt-tabs .tab { padding: 0 14px; border: 0; background: none; font: inherit; font-size: 14px; cursor: pointer; }
+.dt-tabs .tab:hover:not(.on) { color: var(--ink); }
+.dt-tabs .tab:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; border-radius: var(--r-sm); }
+.dt-tabs > i { width: 0; }
+.dt-panel { display: flex; flex-direction: column; gap: 16px; }
+.dt-panel[hidden] { display: none; }
+/* 互動示範：右上角播放／暫停（只控制這張）；暫停後可以直接操作 */
+.dt-play { display: flex; align-items: center; gap: 8px; }
+.dt-play small { font-size: 12px; color: var(--weak); }
+.dt-play button { width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--tile); box-shadow: var(--raise); color: var(--ink); cursor: pointer; transition: transform calc(.2s * var(--dur)) var(--spring), border-color calc(.2s * var(--dur)); }
+.dt-play button:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
+.dt-play button:active { transform: scale(.92); }
+.dt-play button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.dt-play svg { width: 14px; height: 14px; fill: currentColor; }
+.cell.held :is(.spin, .shim, .caret) { animation-play-state: paused; }
+.cell.held.live .btn, .cell.held.live .b2 { cursor: pointer; transition: transform calc(.25s * var(--dur)) var(--spring), filter calc(.2s * var(--dur)), background calc(.2s * var(--dur)), border-color calc(.2s * var(--dur)); }
+.cell.held.live .btn:hover { filter: brightness(.92); }
+.cell.held.live .btn:active, .cell.held.live .b2:active { transform: scale(.96); }
+.cell.held.live .b2:hover { background: var(--tint); border-color: var(--primary); }
+.cell.held.live .b2.dng:hover { background: var(--danger-bg); border-color: var(--danger-fg); }
+.ff-real { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; outline: none; background: none; color: var(--ink); font: inherit; }
+.ff-real::placeholder { color: var(--label); }
+.dt-stage { grid-auto-flow: row; gap: 14px; min-height: 0; padding: 32px 24px; }
+/* 卡片在牆上有跨欄設定（w2／h2），在示範區固定單格置中 */
+.dt-stage > .cell { grid-column: 1; grid-row: 1; }
+.sp .btn { gap: 6px; }
+.api .nw { white-space: nowrap; }
+/* 參數表 */
+.api-wrap { overflow-x: auto; }
+.api { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 20px; }
+.api th { padding: 0 12px 8px; border-bottom: 1px solid var(--line-subtle); text-align: left; font-size: 12px; font-weight: 600; color: var(--label); white-space: nowrap; }
+.api td { padding: 10px 12px; border-bottom: 1px solid var(--line-subtle); vertical-align: top; color: var(--muted); }
+.api tr:last-child td { border-bottom: 0; }
+.api code { font: 12px/20px ui-monospace, 'SF Mono', 'JetBrains Mono', Consolas, monospace; }
+.api td:first-child code { color: var(--primary); font-weight: 600; white-space: nowrap; }
+.api td:nth-child(2) { max-width: 240px; }
+.api td:nth-child(2) code { color: var(--ok-fg); }
+.api td:nth-child(3) { white-space: nowrap; }
+.dt-grid.c3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 1000px) { .dt-grid.c3 { grid-template-columns: minmax(0, 1fr); } }
+/* 程式碼：標題列放「複製全部」 */
+.sp-tools { display: flex; align-items: center; gap: 8px; }
+.sp-hd .sp-all { position: static; height: 32px; }
+.sp-var:not(.code) .sp-all { display: none; }
+/* 變體：預覽網格＋一整段程式碼；點預覽，對應的程式段落反白 */
+.sp-vgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.sp-vgrid.wide { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.sp-vcode pre { padding-right: 96px; }
+.sp-var:not(.code) .sp-vcode, .sp-var.code .sp-vgrid { display: none; }
+.sp-hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.sp-hd h3 { margin: 0; font-size: 13px; line-height: 20px; font-weight: 600; color: var(--label); }
+.sp-seg { position: relative; display: grid; grid-template-columns: 1fr 1fr; width: 148px; height: 32px; padding: 3px; border-radius: var(--r-md); background: var(--soft); box-shadow: var(--inset); }
+.sp-seg i { position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc((100% - 6px) / 2); border-radius: max(2px, calc(var(--r-md) - 3px)); background: var(--tile); box-shadow: var(--raise); transition: transform calc(.5s * var(--dur)) var(--spring-soft); }
+.sp-var.code .sp-seg i { transform: translateX(100%); }
+.sp-seg button { position: relative; z-index: 1; padding: 0; border: 0; background: none; color: var(--weak); font: inherit; font-size: 13px; cursor: pointer; transition: color calc(.25s * var(--dur)); }
+.sp-seg button[aria-checked="true"] { color: var(--ink); font-weight: 600; }
+.sp-seg button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; border-radius: var(--r-sm); }
+/* 程式範例 */
+.sp-code { position: relative; border-radius: var(--r-md); background: color-mix(in srgb, var(--soft) 55%, var(--line-subtle)); }
+.sp-code pre { margin: 0; padding: 16px 18px; overflow-x: auto; font: 12.5px/21px ui-monospace, 'SF Mono', 'JetBrains Mono', Consolas, monospace; color: var(--muted); tab-size: 2; }
+.sp-code .t { color: var(--primary); }
+.sp-code .s { color: var(--ok-fg); }
+.sp-code .c { color: var(--weak); font-style: italic; }
+.sp-copy { position: absolute; top: 10px; right: 10px; height: 28px; padding: 0 10px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--tile); color: var(--muted); font: inherit; font-size: 12px; font-weight: 500; cursor: pointer; }
+.sp-copy svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sp-copy:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
+.sp-copy.done { color: var(--ok-fg); border-color: color-mix(in srgb, var(--ok-fg) 40%, transparent); }
 .dt-pn { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 4px; }
 .dt-pn button { min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--tile); box-shadow: var(--raise); color: var(--ink); font: inherit; text-align: left; cursor: pointer; transition: border-color calc(.2s * var(--dur)), transform calc(.2s * var(--dur)) var(--spring); }
 /* 滑過外框同元件牆卡片：淡主色（可以點進去的同一種回饋）*/
@@ -1594,6 +1706,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const sleep = ms => new Promise(res => { const tick = () => paused ? setTimeout(tick, 200) : res(); setTimeout(tick, ms * PACE); });
   const loop = (delay, fn) => { (async () => { await sleep(delay); for (;;) await fn(); })().catch(console.error); };
+  /* 詳細頁的「暫停這張示範」：held 裡的卡片，循環停在下一個 sleep；HOLD[id] 提供暫停後可以直接用滑鼠操作的行為 */
+  const held = new Set(), HOLD = {};
+  const own = (id) => (ms) => new Promise(res => { const tick = () => (paused || held.has(id)) ? setTimeout(tick, 200) : res(); setTimeout(tick, ms * PACE); });
+  const wait = (ms) => new Promise(res => setTimeout(res, ms));
+  const loopOn = (sl, delay, fn) => { (async () => { await sl(delay); for (;;) await fn(); })().catch(console.error); };
   const tween = (a, b, ms, cb, ease = t => 1 - Math.pow(1 - t, 3)) => new Promise(res => {
     const s = performance.now();
     (function f(n) { const t = Math.min(1, Math.max(0, (n - s) / Math.max(1, ms * ANIM))); cb(a + (b - a) * ease(t)); t < 1 ? requestAnimationFrame(f) : res(); })(s);
@@ -1646,6 +1763,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 下拉選單 */
   {
+    const sleep = own('c-dd'), loop = (d, fn) => loopOn(sleep, d, fn);
     const dd = $('#c-dd .dd'), val = $('.dd-t .roll', dd), menu = $('.dd-m', dd);
     const opts = ['全部部門', '設計部', '研發部', '客服部', '業務部'];
     opts.forEach((o, k) => menu.insertAdjacentHTML('beforeend', `<div${k ? '' : ' class="sel"'}>${o}${CHECK_S}</div>`));
@@ -1666,6 +1784,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 搜尋與標籤建議 */
   {
+    const sleep = own('c-search'), loop = (d, fn) => loopOn(sleep, d, fn);
     const box = $('#c-search .search'), q = $('.q', box), ph = $('.ph', box), caret = $('.caret', box);
     const list = $('#c-search .results'), res = $$('.res', list);
     const data = [['系統', [['系統維護', '8 篇'], ['系統升級', '3 篇']]], ['教育訓練', [['教育訓練', '12 篇'], ['新人教育訓練', '4 篇']]], ['資安', [['資安宣導', '6 篇'], ['資安演練', '2 篇']]]];
@@ -1688,7 +1807,20 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 按鈕 */
   {
+    const sleep = own('c-btn'), loop = (d, fn) => loopOn(sleep, d, fn);
     const b = $('#c-btn .btn'), r = $('.roll', b), subs = $$('#c-btn .b2'); let i = 0;
+    // 暫停後：滑過／按下有回饋，點主要鈕跑一輪「儲存中 → 已儲存」
+    let busy = false;
+    const onMain = async () => {
+      if (busy) return; busy = true; roll(r, '<i class="spin"></i>儲存中');
+      await wait(D(1400) || 600); b.classList.add('done'); roll(r, CHECK + '已儲存'); pop(b, .95);
+      await wait(1600); b.classList.remove('done'); roll(r, '儲存變更', -1); busy = false;
+    };
+    const onSub = (e) => press(e.currentTarget);
+    HOLD['c-btn'] = {
+      on() { b.classList.remove('done'); roll(r, '儲存變更', -1); subs.forEach((x) => x.classList.remove('hv')); b.addEventListener('click', onMain); subs.forEach((x) => x.addEventListener('click', onSub)); },
+      off() { b.removeEventListener('click', onMain); subs.forEach((x) => x.removeEventListener('click', onSub)); },
+    };
     loop(1500, async () => {
       press(b); roll(r, '<i class="spin"></i>儲存中');
       await sleep(1600);
@@ -1703,6 +1835,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 分段切換 */
   {
+    const sleep = own('c-seg'), loop = (d, fn) => loopOn(sleep, d, fn);
     const tabs = $$('#c-seg .seg span'), pill = $('#c-seg .seg i'), n = $('#c-seg .seg-p b'), t = $('#c-seg .seg-p span.roll');
     const data = [['7.5', '小時・今日工時'], ['38', '小時・本週工時'], ['162', '小時・本月工時']]; let i = 0;
     loop(1300, async () => {
@@ -1716,12 +1849,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 開關 */
   {
+    const sleep = own('c-tg'), loop = (d, fn) => loopOn(sleep, d, fn);
     const rows = $$('#c-tg .tgr'), seq = [1, 0, 2, 1, 0, 2]; let i = 0;
     loop(1000, async () => { rows[seq[i++ % seq.length]].classList.toggle('on'); await sleep(1250); });
   }
 
   /* 按住確認 */
   {
+    const sleep = own('c-hold'), loop = (d, fn) => loopOn(sleep, d, fn);
     const b = $('#c-hold .btn'), r = $('.roll', b), fill = $('.fill', b), bar = $('.bar', b);
     loop(1900, async () => {
       roll(r, '持續按住…'); b.animate([{ transform: 'scale(1)' }, { transform: 'scale(.97)' }], { duration: D(200), fill: 'forwards', easing: 'ease-out' });
@@ -1738,6 +1873,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 頁籤 */
   {
+    const sleep = own('c-tabs'), loop = (d, fn) => loopOn(sleep, d, fn);
     const wrap = $('#c-tabs .tabs'), ind = $('i', wrap), tabs = $$('.tab', wrap), p = $('#c-tabs .tab-p .roll');
     const txt = ['專案進度 68%，本週新增 3 件工單。', '12 件工單，其中 2 件待審核。', '5 份文件，最近更新於 11/10。', '28 筆歷程，今天有 4 筆異動。'];
     let i = 0;
@@ -1754,6 +1890,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 提示訊息 */
   {
+    const sleep = own('c-co'), loop = (d, fn) => loopOn(sleep, d, fn);
     const co = $('#c-co .co'), ico = $('svg path', co), h = $('strong .roll', co), p = $('p .roll', co), svg = $('svg', co);
     const I = { i: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 7.5v.5', c: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l3 3 5-6', t: 'M12 3l9.5 17h-19zM12 9v5M12 17v.5' };
     const data = [['info', I.i, '報表每小時更新一次', '目前顯示的是 14:00 的資料。'], ['ok', I.c, '已送出審核', '審核人會在 3 個工作天內回覆。'], ['warn', I.t, '有 3 件工單明天到期', '請確認負責人是否來得及完成。'], ['dng', I.t, '無法儲存變更', '網路連線中斷，請稍後再試一次。']];
@@ -1768,6 +1905,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 歷程 */
   {
+    const sleep = own('c-nt'), loop = (d, fn) => loopOn(sleep, d, fn);
     const box = $('#c-nt .nts');
     const I = { a: '<path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"/>', b: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', c: '<path d="M12 7.5V12l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/>' };
     const data = [['a', '李小美 變更狀態為「進行中」', '剛剛'], ['b', '陳大文 完成工單 D-2207', '2 分鐘前'], ['c', '林小華 將到期日改為 11-20', '10 分鐘前'], ['a', '張大同 新增附件 2 份', '18 分鐘前'], ['b', '黃小玲 通過審核', '1 小時前']];
@@ -1786,6 +1924,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 資料表格：排序＋列滑動 */
   {
+    const sleep = own('c-tb'), loop = (d, fn) => loopOn(sleep, d, fn);
     const body = $('#c-tb .tb-b'), ths = $$('#c-tb .th');
     const rows = [
       { id: 'C-1042', nm: '官網改版', st: ['a', '進行中'], due: '11-14', tag: ['w', '2 天內'], d: 14 },
@@ -1818,6 +1957,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 狀態徽章 */
   {
+    const sleep = own('c-bdg'), loop = (d, fn) => loopOn(sleep, d, fn);
     const bs = $$('#c-bdg .bdg');
     const tones = [['q', '規劃中'], ['a', '進行中'], ['p', '暫停'], ['c', '已結案'], ['d', '逾期']];
     const at = [0, 1, 3]; let i = 0;
@@ -1831,6 +1971,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 追蹤星號：星星彈一下＋粒子散開 */
   {
+    const sleep = own('c-star'), loop = (d, fn) => loopOn(sleep, d, fn);
     const b = $('#c-star .starb'), lab = $('#c-star .roll');
     for (let k = 0; k < 8; k++) b.insertAdjacentHTML('beforeend', '<i></i>');
     const dots = $$('i', b); let on = false;
@@ -1849,6 +1990,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 統計卡 */
   {
+    const sleep = own('c-stat'), loop = (d, fn) => loopOn(sleep, d, fn);
     const ns = $$('#c-stat .stat b');
     const sets = [[42, 316, 7], [45, 352, 5], [39, 298, 9]]; let i = 0, cur = sets[0];
     loop(2000, async () => {
@@ -1860,6 +2002,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 分段統計條 */
   {
+    const sleep = own('c-sb'), loop = (d, fn) => loopOn(sleep, d, fn);
     const n = $('#c-sb .sb-h b'), bar = $('#c-sb .sb-b'), leg = $('#c-sb .sb-l');
     const segs = [['進行中', 'var(--g2)'], ['待審核', 'var(--warn)'], ['已完成', 'var(--success)'], ['未開始', 'var(--line-strong)']];
     const sets = [[43, 18, 55, 12], [36, 9, 78, 15], [52, 24, 61, 6]];
@@ -1878,6 +2021,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 流程步驟 */
   {
+    const sleep = own('c-fl'), loop = (d, fn) => loopOn(sleep, d, fn);
     const wrap = $('#c-fl .fl'), cap = $('#c-fl header .roll');
     const steps = [['待指派', '11-04'], ['處理中', '11-06'], ['待審核', '11-11'], ['已結案', '11-14']], who = ['王小明', '李小美', '陳大文', '王小明'];
     steps.forEach(([nm]) => wrap.insertAdjacentHTML('beforeend', `<div class="fs"><p>${CHECK_S}${nm}</p><small><span class="roll"><span>未開始</span></span></small></div>`));
@@ -1897,6 +2041,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 核取方塊（含全選的半選狀態） */
   {
+    const sleep = own('c-ck'), loop = (d, fn) => loopOn(sleep, d, fn);
     const wrap = $('#c-ck .cks'), names = ['全選', '官網改版', '會員系統升級', '報表模組'];
     names.forEach((t, k) => wrap.insertAdjacentHTML('beforeend', `<div class="ck${k ? '' : ' all'}"><i><svg class="ic chk" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><svg class="ic dash" viewBox="0 0 24 24"><path d="M6 12h12"/></svg></i><span>${t}</span></div>`));
     const [all, ...items] = $$('.ck', wrap);
@@ -1912,12 +2057,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 單選清單 */
   {
+    const sleep = own('c-rad'), loop = (d, fn) => loopOn(sleep, d, fn);
     const rs = $$('#c-rad .rad'); let i = 0;
     loop(1900, async () => { i = (i + 1) % rs.length; rs.forEach((r, k) => r.classList.toggle('on', k === i)); await sleep(1800); });
   }
 
   /* 長條圖 */
   {
+    const sleep = own('c-bars'), loop = (d, fn) => loopOn(sleep, d, fn);
     const wrap = $('#c-bars .bars'), cap = $('#c-bars header .roll'), wd = '一二三四五六日';
     const sets = [[42, 58, 75, 96, 64, 30, 22], [66, 88, 52, 70, 94, 41, 28], [35, 62, 91, 57, 78, 48, 19]];
     wd.split('').forEach((w, k) => wrap.insertAdjacentHTML('beforeend', `<div class="bar" style="--k:${k}"><div><i></i></div>${w}</div>`));
@@ -1933,6 +2080,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 熱度表 */
   {
+    const sleep = own('c-ht'), loop = (d, fn) => loopOn(sleep, d, fn);
     const ht = $('#c-ht .ht'), ppl = ['李小美', '陳大文', '林小華', '張大同'], W = 8;
     ht.insertAdjacentHTML('beforeend', '<span></span>' + Array.from({ length: W }, (_, k) => `<span>W${40 + k}</span>`).join(''));
     const vals = ppl.map((_, r) => Array.from({ length: W }, (_, c) => Math.round(50 + 42 * Math.sin(r * 1.7 + c * .8))));
@@ -1952,6 +2100,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 分頁 */
   {
+    const sleep = own('c-pg'), loop = (d, fn) => loopOn(sleep, d, fn);
     const nav = $('#c-pg nav'), hl = $('i', nav), info = $('#c-pg .pg-s .roll'), N = 7, total = 128;
     nav.insertAdjacentHTML('beforeend', '<span>‹</span>' + Array.from({ length: N }, (_, k) => `<span>${k + 1}</span>`).join('') + '<span>›</span>');
     const all = $$('span', nav), prev = all[0], next = all[N + 1], pages = all.slice(1, N + 1);
@@ -1969,6 +2118,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 檔案上傳 */
   {
+    const sleep = own('c-up'), loop = (d, fn) => loopOn(sleep, d, fn);
     const up = $('#c-up .up'), nm = $('.nm', up), st = $('.st', up), bar = $('.up-b i', up), ico = $('.up-i', up);
     const files = [['設計規範_v3.pdf', 2.4, 'var(--danger)'], ['首頁視覺稿.fig', 18.6, 'var(--g3)'], ['訪談紀錄_1112.docx', 0.9, 'var(--g2)'], ['工時統計_11月.xlsx', 1.3, 'var(--success)']]; let i = 0;
     loop(200, async () => {
@@ -1983,6 +2133,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 篩選標籤：加入／移除，其餘標籤滑動補位 */
   {
+    const sleep = own('c-chips'), loop = (d, fn) => loopOn(sleep, d, fn);
     const wrap = $('#c-chips .chips'), X = '<u><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></u>';
     const pool = ['狀態：進行中', '設計部', '本月到期', '優先：高', '負責人：我', '有附件']; let i = 0;
     const kids = () => [...wrap.children];
@@ -2008,6 +2159,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 時間選擇器 */
   {
+    const sleep = own('c-tp'), loop = (d, fn) => loopOn(sleep, d, fn);
     const f = $('#c-tp .tp-f .roll'), cols = $$('#c-tp .tp-col'), hv = $('.roll', cols[0]), mv = $('.roll', cols[1]);
     let h = 9, m = 30; const p2 = n => String(n).padStart(2, '0');
     const bump = async (col, d) => {
@@ -2023,6 +2175,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* Toast */
   {
+    const sleep = own('c-toast'), loop = (d, fn) => loopOn(sleep, d, fn);
     const box = $('#c-toast .toasts');
     const I = { ok: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l3 3 5-6', info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 7.5v.5', warn: 'M12 3l9.5 17h-19zM12 9v5M12 17v.5' };
     const data = [['ok', '已儲存變更', '復原'], ['info', '已複製連結', ''], ['warn', '網路不穩，稍後重試', '重試'], ['ok', '已加入追蹤', '']]; let i = 0;
@@ -2040,6 +2193,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 骨架載入 */
   {
+    const sleep = own('c-sk'), loop = (d, fn) => loopOn(sleep, d, fn);
     const sk = $('#c-sk .sk'), av = $('.real .av', sk), p = $('.real p', sk), s = $('.real small', sk);
     const ppl = [['王', '李小美', '設計師', 1], ['陳', '陳大文', '前端工程師', 2], ['林', '林小華', '專案經理', 4]]; let i = 0;
     const fill = ([a, n, r, c]) => { av.textContent = a; av.style.background = `var(--cat${c})`; p.textContent = n; s.textContent = r; };
@@ -2053,6 +2207,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 圓餅圖：資料變動時各段平滑重分配，再依序聚焦前兩大 */
   {
+    const sleep = own('c-pie'), loop = (d, fn) => loopOn(sleep, d, fn);
     const pie = $('#c-pie .pie'), svg = $('svg', pie), [mb, ms] = $$('.pie-m .roll', pie), list = $('.pie-l', pie);
     const R = 48, C = 2 * Math.PI * R;
     const cats = [['設計部', 'var(--c1)'], ['研發部', 'var(--c3)'], ['客服部', 'var(--c2)'], ['業務部', 'var(--c4)']];
@@ -2093,6 +2248,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 折線圖：首次描線，之後資料平滑變形，游標逐點顯示數值 */
   {
+    const sleep = own('c-line'), loop = (d, fn) => loopOn(sleep, d, fn);
     const lc = $('#c-line .lc'), svg = $('svg', lc), guide = $('.lc-g', lc), dot = $('.lc-d', lc), tip = $('.lc-t', lc);
     const M = Array.from({ length: 12 }, (_, k) => `${k + 1}月`);
     const B = [32, 35, 38, 40, 44, 46, 50, 52, 55, 58, 61, 64];
@@ -2154,6 +2310,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 堆疊圖：各部門高度與分段同時變動，再輪流聚焦單一系列 */
   {
+    const sleep = own('c-stk'), loop = (d, fn) => loopOn(sleep, d, fn);
     const stk = $('#c-stk .stk'), lg = $$('#c-stk .lg span');
     const DEPTS = ['設計', '研發', '客服', '業務', '行政', '資訊'], S = ['var(--c1)', 'var(--c2)', 'var(--c4)'], MAX = 44;
     const sets = [
@@ -2185,6 +2342,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 日期選擇（提案）：開啟 → 點快捷或日期 → 選取方塊滑過去 → 關閉、欄位滾動成新日期 */
   {
+    const sleep = own('c-dp'), loop = (d, fn) => loopOn(sleep, d, fn);
     const dp = $('#c-dp .dp'), f = $('.dp-f .roll', dp), g = $('.dp-g', dp), sel = $('.dp-sel', g), pres = $$('.dp-pre span', dp);
     const W = '日一二三四五六', TODAY = 13;
     W.split('').forEach(w => g.insertAdjacentHTML('beforeend', `<b>${w}</b>`));
@@ -2211,6 +2369,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 期間選擇：膠囊滑到新期間，下方時間軸的範圍同步伸縮 */
   {
+    const sleep = own('c-ps'), loop = (d, fn) => loopOn(sleep, d, fn);
     const ps = $('#c-ps .ps'), pill = $('i', ps), its = $$('span', ps), r = $('#c-ps .ps-r .roll'), bar = $('#c-ps .ps-t i'), now = $('#c-ps .ps-t u'), lab = $('#c-ps .ps-l');
     const N = 122, idx = (m, d) => ({ 8: 0, 9: 31, 10: 61, 11: 92 })[m] + d - 1, p2 = n => String(n).padStart(2, '0');
     [['8 月', 0], ['9 月', 31], ['10 月', 61], ['11 月', 92]].forEach(([t, x]) => lab.insertAdjacentHTML('beforeend', `<span style="left:${x / N * 100}%">${t}</span>`));
@@ -2231,6 +2390,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 成員頭像群組（提案）：最多顯示 3 位，其餘收成「+N」；展開時頭像分開並顯示姓名 */
   {
+    const sleep = own('c-av'), loop = (d, fn) => loopOn(sleep, d, fn);
     const st = $('#c-av .stack'), cnt = $('#c-av .ppl-c');
     const M = [['陳', '陳大文', 2], ['林', '林小華', 4], ['張', '張大同', 3]];
     M.forEach(([a, , c]) => st.insertAdjacentHTML('beforeend', `<span class="av" style="--a:var(--cat${c})">${a}</span>`));
@@ -2260,6 +2420,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   /* 拖移排序（repo 欄位面板）：握把滑過 → 拿起浮起、原位虛線空位 → 拖過去其他列讓位 → 放下淡底淡出。
      也能實際操作：拖握把、或聚焦握把按上下鍵；開關可點。操作後 5 秒內自動播放先停 */
   {
+    const sleep = own('c-drag'), loop = (d, fn) => loopOn(sleep, d, fn);
     const box = $('#c-drag .drg'), ph = $('.drg-ph', box);
     const GRIP = '<svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg>';
     const LOCK = '<svg class="ic" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9.5" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
@@ -2333,10 +2494,27 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 表單欄位：直接送出 → 錯誤（欄框紅、訊息出現，位置早就留好不跳）→ 打字錯誤消失、字數跟著跑 → 離開 → 清空回到「尚未填寫」 */
   {
+    const sleep = own('c-ff'), loop = (d, fn) => loopOn(sleep, d, fn);
     const ff = $('#ff-a'), q = $('.q', ff), ph = $('.ph', ff), caret = $('.caret', ff), cnt = $('.cnt', ff), pill = $('.ff-e', ff), inp = $('.ff-i', ff);
     const paint = (s, dir = 1) => { q.textContent = s; ph.hidden = s.length > 0; roll(cnt, `${[...s].length} / 50`, dir); };
     const shake = () => inp.animate([{ transform: 'none' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(-2px)' }, { transform: 'none' }], { duration: D(360), easing: 'ease-out' });
     const WORDS = ['機房巡檢', '變電站季度保養']; let w = 0;
+    // 暫停後換成真的輸入框：可以打字、字數即時更新；清空後離開欄位顯示錯誤
+    let real = null;
+    const reset = () => { ff.classList.remove('bad', 'focus'); caret.hidden = true; paint(''); pill.classList.remove('off'); };
+    HOLD['c-ff'] = {
+      on() {
+        reset(); q.hidden = ph.hidden = true;
+        real = document.createElement('input');
+        Object.assign(real, { className: 'ff-real', placeholder: '例如：機房巡檢', maxLength: 50, autocomplete: 'off' });
+        real.setAttribute('aria-label', '工單名稱（示範）');
+        inp.prepend(real);
+        real.addEventListener('focus', () => ff.classList.add('focus'));
+        real.addEventListener('blur', () => { ff.classList.remove('focus'); if (!real.value.trim()) { ff.classList.add('bad'); pill.classList.add('off'); shake(); } });
+        real.addEventListener('input', () => { const v = real.value; roll(cnt, `${[...v].length} / 50`); if (v) { ff.classList.remove('bad'); pill.classList.add('off'); } else if (!ff.classList.contains('bad')) pill.classList.remove('off'); });
+      },
+      off() { real?.remove(); real = null; q.hidden = false; reset(); },
+    };
     loop(1200, async () => {
       ff.classList.add('bad'); pill.classList.add('off'); shake(); await sleep(1600);
       ff.classList.add('focus'); caret.hidden = false; await sleep(400);
@@ -2351,6 +2529,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 多選下拉：開啟 → 逐項勾選（按鈕列出名稱＋數量膠囊）→ 關閉；再開 → 清除 → 回到「全部部門」 */
   {
+    const sleep = own('c-ms'), loop = (d, fn) => loopOn(sleep, d, fn);
     const ms = $('#c-ms .ms'), val = $('.ms-t > .roll', ms), num = $('.ms-n', ms), numR = $('.roll', num), list = $('.ms-l', ms), foot = $('.ms-f .roll', ms), clr = $('.ms-f u', ms);
     const NAMES = ['設計部', '研發部', '客服部', '業務部', '財務部'];
     NAMES.forEach((t) => list.insertAdjacentHTML('beforeend', `<div class="ck"><i><svg class="ic chk" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></i><span>${t}</span></div>`));
@@ -2380,6 +2559,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 操作選單：⋯ 滑過 → 按下 → 選單從右上角長出 → 方向鍵逐項（跳過停用）→ 選取 → 收起 */
   {
+    const sleep = own('c-mn'), loop = (d, fn) => loopOn(sleep, d, fn);
     const mn = $('#c-mn .mn'), btn = $('.mn-h .b2', mn), items = $$('.mn-i', mn);
     const live = items.map((x, k) => (x.classList.contains('dis') ? -1 : k)).filter((k) => k >= 0);
     const hl = (k) => items.forEach((x, j) => x.classList.toggle('hl', j === k));
@@ -2396,6 +2576,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 對話框：按「刪除」→ 遮罩淡入、對話框放大，焦點先停在「取消」→ 滑到紅色確認鈕 → 按下 → 收起、那一列收合；下一輪換成一般確認 */
   {
+    const sleep = own('c-dl'), loop = (d, fn) => loopOn(sleep, d, fn);
     const dl = $('#c-dl .dl'), rows = $$('.dl-r', dl), ttl = $('.dl-d > b', dl), t1 = $('.dl-t1', dl), t2 = $('.dl-t2', dl), cancel = $('.cancel', dl), ok = $('.ok', dl);
     const V = [
       { row: 0, trig: '.b2.dng', title: '刪除里程碑', t1: '「現場勘查」將從這個專案移除。', t2: '關聯案件與工單不會被刪除。', ok: '刪除里程碑', dng: true },
@@ -2417,6 +2598,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 空狀態：三種語氣輪播 —— 沒有資料（info）、篩選沒結果（warn）、載入失敗（danger）；行動鈕滑過、按下後換下一種 */
   {
+    const sleep = own('c-es'), loop = (d, fn) => loopOn(sleep, d, fn);
     const es = $('#c-es .es'), m = $('.es-m', es), ttl = $('b', es), desc = $('p', es), act = $('.b2', es);
     const ICON = {
       info: '<svg class="ic" viewBox="0 0 24 24"><rect x="5.5" y="4.5" width="13" height="16" rx="2"/><path d="M9 4.5V3.5h6v1M9 11h6M9 15h4"/></svg>',
@@ -2435,6 +2617,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 說明氣泡：ⓘ 滑過（或鍵盤聚焦）→ 氣泡從箭頭處長出來 → 停留 → 收起 */
   {
+    const sleep = own('c-ip'), loop = (d, fn) => loopOn(sleep, d, fn);
     const ip = $('#c-ip .ip'), b = $('.ip-b', ip), pop2 = $('.ip-p', ip);
     const aim = () => pop2.style.setProperty('--ax', (b.offsetLeft + b.offsetWidth / 2) + 'px');
     aim(); addEventListener('resize', aim);
@@ -2460,6 +2643,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 詳情頁籤：滑過 → 按下縮 → 選中片彈性滑過去，數量膠囊轉主色，下方內容滾動切換 */
   {
+    const sleep = own('c-dtab'), loop = (d, fn) => loopOn(sleep, d, fn);
     const dt = $('#c-dtab .dt'), ind = $('.ind', dt), line = $('#c-dtab .dt-p .roll');
     const I = {
       overview: '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
@@ -2499,6 +2683,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
   /* 側邊選單：滑過 → 按下 → 選中片滑過去；群組收合；整個側欄收成圖示列，滑過顯示提示 */
   {
+    const sleep = own('c-side'), loop = (d, fn) => loopOn(sleep, d, fn);
     const app = $('#c-side .sd-app'), list = $('.sd-list', app), ind = $('.sd-ind', app), tip = $('.sd-tip', app), sub = $('.sd-sub', app), grp = $('.sd-g.sd-tg', app);
     const its = $$('.sd-it', app);
     // 每個項目加上填滿版圖示（選中時顯示）
@@ -3339,12 +3524,12 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const DOC = {
       'c-dd': { s: '穩定', d: '從固定清單選一個值，清單不長、不需要輸入。', u: ['選項 5–15 個的篩選或欄位'], x: ['選項超過 15 個：改用可搜尋的多選下拉', '只有 2–4 個互斥選項：改用分段切換'], st: 'Closed、Open、Hover、Selected、Disabled', a: ['方向鍵移動、Enter 選取、Esc 關閉', '目前值要念得出來'], r: 'app-combo・shared/components/combo.ts', k: 'select dropdown combobox 下拉 選單' },
       'c-search': { s: '穩定', d: '邊打字邊列出相符的標籤或標題，可直接選建議。', u: ['公告、知識庫的標題與標籤搜尋'], x: ['結構化篩選（部門、狀態）：用下拉或篩選標籤'], st: 'Empty、Typing、Suggestions、No results', a: ['建議清單用方向鍵瀏覽', '結果數量要告知讀屏'], r: 'app-tag-search・shared/components/tag-search.ts', k: 'search autocomplete typeahead 搜尋 建議' },
-      'c-btn': { s: '穩定', d: '觸發動作。主要鈕一個畫面只放一個，其餘用次要或圖示鈕。', u: ['送出、儲存、確認', '刪除用紅字外框，確認後才執行'], x: ['純導覽跳頁：用連結'], st: 'Default、Hover、Pressed、Loading、Success、Disabled', a: ['圖示鈕一定要有 aria-label', '焦點框不可拿掉'], r: 'button[hlmBtn]・shared/ui/button', k: 'button cta 按鈕 主要 次要 刪除' },
+      'c-btn': { s: '穩定', d: '觸發動作。主要鈕一個畫面只放一個，其餘用次要或圖示鈕。', u: ['送出表單、儲存、確認對話框', '觸發會改變資料的動作：新增、指派、刪除', '頁首與表單底部用 48，卡片、表格、工具列內用 32'], x: ['一個畫面放兩個以上的主要鈕：看不出哪個才是重點', '刪除用主要鈕：改用紅字外框，按下後再確認', '只是換頁：用連結，讀屏才不會念成「按鈕」'], st: 'Default、Hover、Pressed、Loading、Success、Disabled', a: ['圖示鈕一定要有 aria-label', '焦點框不可拿掉'], r: 'button[hlmBtn]・shared/ui/button', k: 'button cta 按鈕 主要 次要 刪除' },
       'c-seg': { s: '穩定', d: '2–4 個互斥的檢視切換，選中片會滑過去。', u: ['日／週／月、清單／看板'], x: ['超過 4 個選項：改用頁籤或下拉'], st: 'Selected、Hover、Pressed', a: ['用 role=radiogroup 或 tablist', '左右鍵切換'], r: '.cc-segmented・[appSlideIndicator]', k: 'segmented control toggle group 分段 切換' },
       'c-tg': { s: '穩定', d: '立即生效的開或關，不用再按儲存。', u: ['篩選條件、通知設定'], x: ['要按儲存才生效的表單：用核取方塊'], st: 'On、Off、Disabled、Locked', a: ['用 role=switch 與 aria-checked', '標籤要說明「開」代表什麼'], r: 'input[appSwitch]・shared/components/switch.ts', k: 'switch toggle 開關' },
       'c-hold': { s: '穩定', d: '按住一段時間才送出，防止誤觸不可復原的動作。', u: ['結案、批次作廢這類重大且常做的動作'], x: ['偶爾才做的刪除：用確認對話框比較清楚'], st: 'Default、Holding、Complete', a: ['鍵盤可按住空白鍵', '提示要寫出要按多久'], r: 'app-hold-to-confirm・shared/components/hold-to-confirm.ts', k: 'hold to confirm long press 按住 確認' },
       'c-drag': { s: '穩定', d: '拖握把調整順序，其他列滑開讓位，原位留虛線空位。', u: ['欄位顯示順序、覆核順序'], x: ['跨群組移動：用「移動到…」選單比拖移好找'], st: 'Handle hover、Lifted、Reflow、Dropped、Locked', a: ['握把可聚焦，上下鍵移動', '移動後告知目前第幾個'], r: 'cdkDrag・shared/data-list（欄位面板）', k: 'drag drop sort reorder 拖移 排序' },
-      'c-ff': { s: '穩定', d: '標籤＋輸入框＋說明／錯誤的外框；錯誤訊息佔位不跳動。', u: ['所有表單欄位'], x: ['不要用 placeholder 取代標籤'], st: 'Required、Optional、Read-only、Empty、Focus、Error、Counter', a: ['錯誤用 role=alert', '必填語意要念得出來，不只星號'], r: 'app-form-field・shared/components/form-field.ts', k: 'form field input text field 表單 欄位 輸入框' },
+      'c-ff': { s: '穩定', d: '標籤＋輸入框＋說明／錯誤的外框；錯誤訊息佔位不跳動。', u: ['需要使用者輸入或修改值的欄位', '系統帶入、但要讓人看到的值（唯讀）', '同一張表單的欄位都用它包，標籤、說明、錯誤的位置才會一致'], x: ['只用 placeholder 當標籤：打字後就看不到這格要填什麼', '錯誤訊息只寫「格式錯誤」：要說明怎麼修正', '系統帶入的值標「選填」：改用唯讀，讓人知道不能改'], st: 'Required、Optional、Read-only、Empty、Focus、Error、Counter', a: ['錯誤用 role=alert', '必填語意要念得出來，不只星號'], r: 'app-form-field・shared/components/form-field.ts', k: 'form field input text field 表單 欄位 輸入框' },
       'c-ms': { s: '穩定', d: '從清單勾選多個；沒選＝全部。按鈕列出已選名稱和數量。', u: ['部門、成員這類多選篩選'], x: ['只能選一個：用下拉選單'], st: 'None、Selected (N)、Searchable、Clear', a: ['勾選項用 aria-selected', '數量變化要告知'], r: 'app-multi-select・shared/components/multi-select.ts', k: 'multi select checkbox list 多選 下拉' },
       'c-mn': { s: '穩定', d: '⋯ 收起次要動作；單行項目，刪除類放最後用紅字。', u: ['詳情頁、列表列的更多動作'], x: ['常用動作：直接放成按鈕，不要藏'], st: 'Open、Hover、Disabled with reason、Destructive', a: ['role=menu／menuitem，方向鍵移動', 'Esc 關閉後焦點回到 ⋯'], r: '[appMenu]・shared/menu.directive.ts', k: 'menu dropdown menu kebab more actions 選單 更多' },
       'c-tabs': { s: '穩定', d: '同一頁內切換平行內容，可帶數量徽章。', u: ['列表的分類切換'], x: ['切換後網址要能分享：用詳情頁籤'], st: 'Selected、Hover、Count badge', a: ['role=tablist，左右鍵切換'], r: '[hlmTabs]・shared/ui/tabs', k: 'tabs 頁籤 分頁' },
@@ -3397,6 +3582,203 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     Promise.allSettled($$('#wall > .cell').flatMap((c) => c.getAnimations().filter((a) => a.animationName === 'rise').map((a) => a.finished))).then(() => wall.classList.add('ready'));
     const ICON_YES = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>', ICON_NO = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
     const li = (a) => a.map((x) => `<li>${esc(x)}</li>`).join('');
+    /* ---- 第二階段：變體／狀態對照／程式範例（先做按鈕、表單欄位）---- */
+    const IC = (d) => `<svg class="ic" viewBox="0 0 24 24">${d}</svg>`;
+    const I_TRASH = IC('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'), I_PLUS = IC('<path d="M12 5v14M5 12h14"/>'), I_SEARCH = IC('<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/>'), I_LOCK = IC('<rect x="5" y="11" width="14" height="9.5" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>');
+    // 表單欄位樣本：o = { label, mark: 'req'|'opt'|'', empty, cls, input, help, cnt, err }
+    const FF = (o) => `<div class="ff ${o.cls || ''}">
+      <div class="ff-l">${o.label}${o.mark === 'req' ? '<span class="req">*</span>' : o.mark === 'opt' ? '<span class="opt">（選填）</span>' : ''}${o.empty ? '<span class="ff-e">尚未填寫</span>' : ''}</div>
+      <div class="ff-i${o.ta ? ' ta' : ''}">${o.input}</div>
+      ${o.err ? '' : `<div class="ff-h"><span>${o.help || ''}</span>${o.cnt ? `<span class="cnt">${o.cnt}</span>` : ''}</div>`}
+      <div class="ff-x">${o.err || ''}</div></div>`;
+    const PH = (t) => `<span class="ph">${t}</span>`, Q = (t) => `<span class="q">${t}</span>`;
+    // 每格變體：[名稱, 說明, 預覽 HTML, 程式碼]；狀態對照只有預覽（狀態由元件自己處理，不另外寫程式）
+    // code：沒有變體區的元件才用，顯示成一塊程式範例
+    const SPEC = {
+      'c-btn': {
+        v: [
+          ['主要 Primary', '畫面最重要的一個動作，一頁只放一個', '<span class="btn">儲存變更</span>', `<!-- 送出中：停用＋aria-busy，文字改進行式 -->
+<button hlmBtn size="lg" type="submit"
+        [disabled]="saving()" [attr.aria-busy]="saving()">
+  {{ saving() ? '儲存中' : '儲存變更' }}
+</button>`],
+          ['次要 Outline', '取消、返回、其餘一般動作', '<span class="b2 lg">取消</span>', `<button hlmBtn variant="outline" size="lg"
+        type="button" (click)="cancel()">
+  取消
+</button>`],
+          ['刪除 Destructive', '不可復原的動作，按下後再確認', `<span class="b2 lg dng">${I_TRASH}刪除</span>`, `<!-- 只開確認對話框，不直接刪 -->
+<button hlmBtn variant="destructive" size="lg"
+        type="button" (click)="confirmDelete()">
+  <ng-icon name="lucideTrash2" size="16" aria-hidden="true" />
+  刪除
+</button>`],
+          ['低調 Ghost', '工具列、表格列內的輔助動作', `<span class="b2 lg gh">${I_PLUS}新增欄位</span>`, `<button hlmBtn variant="ghost" type="button"
+        (click)="addField()">
+  <ng-icon name="lucidePlus" size="16" aria-hidden="true" />
+  新增欄位
+</button>`],
+          ['圖示 Icon', '空間不足時；必須有 aria-label', `<span class="b2 ico lg">${I_TRASH}</span>`, `<button hlmBtn variant="outline" size="icon-lg"
+        type="button" aria-label="刪除">
+  <ng-icon name="lucideTrash2" size="16" aria-hidden="true" />
+</button>`],
+          ['大小 Size', '48＝表單送出、頁首；32＝工具列、卡片內', '<span style="display:flex;gap:8px;align-items:center"><span class="btn">48</span><span class="btn sm">32</span></span>', `<button hlmBtn size="lg">儲存</button>  <!-- 48 -->
+<button hlmBtn>儲存</button>            <!-- 32（預設） -->`],
+        ],
+        s: [
+          ['Default', '<span class="btn">儲存</span>'],
+          ['Hover', '<span class="btn hv">儲存</span>'],
+          ['Pressed', '<span class="btn is-press">儲存</span>'],
+          ['Focus', '<span class="btn is-focus">儲存</span>'],
+          ['Loading', '<span class="btn is-load"><i class="spin"></i>儲存中</span>'],
+          ['Success', '<span class="btn done"><span class="roll">已儲存</span></span>'],
+          ['Disabled', '<span class="btn is-off">儲存</span>'],
+        ],
+      },
+      'c-ff': {
+        wide: true,
+        v: [
+          ['必填 Required', '星號＋讀屏念「必填」；未填時顯示「尚未填寫」', FF({ label: '工單名稱', mark: 'req', empty: true, input: PH('例如：機房巡檢'), help: '顯示在工單列表與通知', cnt: '0 / 50' }), `<app-form-field label="工單名稱" for="wo-name"
+  [required]="true" help="顯示在工單列表與通知"
+  [empty]="!name().trim()" [error]="errorFor('wo-name')">
+  <input id="wo-name" [attr.maxlength]="50"
+         placeholder="例如：機房巡檢"
+         aria-describedby="wo-name-count" />
+  <p id="wo-name-count" fieldCounter aria-live="polite">
+    {{ name().length }} / 50
+  </p>
+</app-form-field>`],
+          ['選填 Optional', '標「（選填）」，不標星號', FF({ label: '備註', mark: 'opt', input: PH('補充說明'), help: '只有內部成員看得到' }), `<!-- 不給 required，自動標「（選填）」 -->
+<app-form-field label="備註" for="wo-note"
+  help="只有內部成員看得到">
+  <input id="wo-note" placeholder="補充說明" />
+</app-form-field>`],
+          ['多行 Textarea', '描述類欄位；字數放說明列右側', FF({ label: '專案描述', mark: 'opt', ta: true, input: PH('可補充背景與執行限制'), cnt: '0 / 500' }), `<app-form-field label="專案描述" for="p-desc">
+  <textarea id="p-desc" rows="3" [attr.maxlength]="500"
+            placeholder="可補充背景與執行限制"
+            aria-describedby="p-desc-count"></textarea>
+  <p id="p-desc-count" fieldCounter aria-live="polite">
+    {{ desc().length }} / 500
+  </p>
+</app-form-field>`],
+          ['帶單位 Suffix', '單位放框內右側，不寫進標籤', FF({ label: '預估工時', mark: 'req', input: Q('12') + '<span class="unit">小時</span>' }), `<app-form-field label="預估工時" for="wo-hours" [required]="true">
+  <div hlmInputGroup>
+    <input hlmInputGroupInput id="wo-hours"
+           type="number" inputmode="decimal" />
+    <span hlmInputGroupAddon align="inline-end">小時</span>
+  </div>
+</app-form-field>`],
+          ['帶圖示 Prefix', '只給有固定意義的圖示，例如搜尋', FF({ label: '指派對象', mark: 'req', input: I_SEARCH + PH('搜尋姓名或部門') }), `<app-form-field label="指派對象" for="wo-owner" [required]="true">
+  <div hlmInputGroup>
+    <span hlmInputGroupAddon>
+      <ng-icon name="lucideSearch" size="16" aria-hidden="true" />
+    </span>
+    <input hlmInputGroupInput id="wo-owner"
+           placeholder="搜尋姓名或部門" />
+  </div>
+</app-form-field>`],
+          ['唯讀 Read-only', '系統帶入：不標必填也不標選填，附鎖頭', FF({ label: '所屬專案', cls: 'ro', input: `<span>變電站季度保養</span>${I_LOCK}`, help: '由所屬案件帶入' }), `<!-- 值由系統決定：readonly 取代 required／選填 -->
+<app-form-field label="所屬專案" for="wo-proj"
+  [readonly]="true" help="由所屬案件帶入">
+  <input id="wo-proj" readonly [value]="project().name" />
+</app-form-field>`],
+        ],
+        s: [
+          ['Default', FF({ label: '工單名稱', mark: 'req', input: PH('例如：機房巡檢') })],
+          ['Focus', FF({ label: '工單名稱', mark: 'req', cls: 'focus', input: '<i class="caret" style="margin-left:0"></i>' + PH('例如：機房巡檢') })],
+          ['Filled', FF({ label: '工單名稱', mark: 'req', input: Q('機房巡檢'), cnt: '4 / 50' })],
+          ['Error', FF({ label: '工單名稱', mark: 'req', cls: 'bad', input: PH('例如：機房巡檢'), err: '請輸入工單名稱' })],
+          ['Disabled', FF({ label: '工單名稱', mark: 'req', cls: 'dis', input: Q('機房巡檢') })],
+        ],
+      },
+    };
+    /* ---- 第一階段（目標 95 分）：參數表、正確／錯誤示範、相關元件、手機版 ----
+       參數與手機規則都照 repo：hlm-button.ts、form-field.ts、styles.css 的觸控規則（767px 以下） */
+    const API = {
+      'c-btn': [
+        ['variant', "'default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'link'", "'default'", '外觀。default＝主要（實心主色），一個畫面只放一個'],
+        ['size', "'default' | 'lg' | 'icon' | 'icon-sm' | 'icon-lg'", "'default'", '高度只用兩級：default＝32、lg＝48；icon＝32 方形、icon-lg＝48 方形。xs／icon-xs（24）不在控件規範內，不要用'],
+        ['disabled', 'boolean', 'false', '停用：灰底、不能點。送出中也要停用，並加 aria-busy'],
+      ],
+      'c-ff': [
+        ['label', 'string', '—（必填）', '標籤文字，顯示在輸入框上方'],
+        ['for', 'string', "''", '輸入框的 id；點標籤會聚焦到輸入框'],
+        ['required', 'boolean', 'false', '顯示星號，讀屏念「必填」；沒給就標「（選填）」'],
+        ['readonly', 'boolean', 'false', '值由系統帶入：不標必填也不標選填'],
+        ['empty', 'boolean', 'false', '必填且尚未填寫時，標籤旁顯示「尚未填寫」'],
+        ['emptyLabel', 'string', "'尚未填寫'", '換掉「尚未填寫」的文字，例如下拉用「尚未選擇」'],
+        ['help', 'string', "''", '說明文字；出現錯誤時隱藏'],
+        ['error', 'string', "''", '錯誤訊息，role=alert；位置先留好，出現時欄位不跳動'],
+        ['[fieldCounter]', '內容投影', '—', '字數，放在說明列右側；加 aria-live="polite"'],
+      ],
+    };
+    const apiHtml = (id) => API[id] ? `<section class="sp-sec" aria-label="參數"><h3>參數</h3><div class="api-wrap"><table class="api"><thead><tr><th scope="col">參數</th><th scope="col">型別</th><th scope="col">預設</th><th scope="col">說明</th></tr></thead><tbody>${API[id].map(([n, t, v, d]) => `<tr><td><code>${esc(n)}</code></td><td><code>${esc(t).split(' | ').map((x) => `<span class="nw">${x}</span>`).join(' | ')}</code></td><td><code>${esc(v)}</code></td><td>${esc(d)}</td></tr>`).join('')}</tbody></table></div></section>` : '';
+    const A11Y = {
+      'c-btn': { 鍵盤: ['Tab 移到按鈕，Enter 或 Space 觸發', '焦點框不可拿掉'], 標籤: ['圖示鈕一定要有 aria-label', '送出中加 aria-busy，讀屏才知道正在處理'], 觸控: ['手機上 32px 按鈕的可點範圍會自動撐到 44×44，不需另外處理'] },
+      'c-ff': { 鍵盤: ['Tab 移到輸入框；點標籤也會聚焦（label 的 for 對應輸入框 id）'], 標籤: ['必填念得出來：星號對讀屏隱藏，另外念「必填」', '錯誤訊息用 role=alert，出現時自動念出；字數用 aria-live'] },
+    };
+    // 基本頁籤：有狀態對照的元件（變體頁籤）不再重複列狀態標籤，剩三格排一列
+    const basicHtml = (id, d) => `<div class="dt-grid${SPEC[id]?.s ? ' c3' : ''}">
+          <section class="dt-box"><h3><span class="doc-tag ok">${ICON_YES}使用時機</span></h3><ul>${li(d.u)}</ul></section>
+          <section class="dt-box"><h3><span class="doc-tag no">${ICON_NO}禁止使用</span></h3><ul>${li(d.x)}</ul></section>
+          ${SPEC[id]?.s ? '' : `<section class="dt-box"><h3>狀態與互動</h3><div class="doc-chips">${d.st.split('、').map((x) => `<span>${esc(x)}</span>`).join('')}</div></section>`}
+          <section class="dt-box"><h3>無障礙</h3>${A11Y[id] ? Object.entries(A11Y[id]).map(([k, v]) => `<h4 class="a11y-h">${k}</h4><ul>${li(v)}</ul>`).join('') : `<ul>${li(d.a)}</ul>`}</section>
+        </div>`;
+    // 程式碼上色：註解、字串、標籤名（先跳脫再上色）
+    const hl = (src) => esc(src).replace(/(&lt;!--[\s\S]*?--&gt;)|(&quot;[^&]*?&quot;)|(&lt;\/?)([\w-]+)/g, (m, c, s, lt, tag) => c ? `<span class="c">${c}</span>` : s ? `<span class="s">${s}</span>` : `${lt}<span class="t">${tag}</span>`);
+    const ICON_COPY = '<svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>';
+    const copyBtn = (key) => `<button class="sp-copy" type="button" data-code="${key}" aria-label="複製程式碼">${ICON_COPY}<span>複製</span></button>`;
+    // 變體：預覽排成網格（名稱與說明寫進程式碼註解），下面接一整段程式碼
+    // 段落開頭：變體名稱＋說明；程式碼本身若以註解開頭，併成同一行註解
+    const vSeg = ([n, note, , code]) => {
+      const m = code.match(/^<!-- (.+?) -->\n/);
+      return `<!-- ${n}：${note}${m ? '。' + m[1] : ''} -->\n${m ? code.slice(m[0].length) : code}`;
+    };
+    const vCode = (p) => p.v.filter((x) => x[3]).map(vSeg).join('\n\n');
+    const vGrid = (a) => a.map(([n, , html]) => `<div class="sp-pv" title="${esc(n)}">${html}</div>`).join('');
+    const vPre = (p) => p.v.filter((x) => x[3]).map((x) => hl(vSeg(x))).join('\n\n');
+    // 變體區「預覽／程式碼」切換：記住選擇，換元件時沿用
+    let spMode = 'pv';
+    function setSpMode(mode) {
+      spMode = mode;
+      const sec = $('.sp-var', dt); if (!sec) return;
+      sec.classList.toggle('code', mode === 'cd');
+      $$('.sp-seg button', sec).forEach((b) => b.setAttribute('aria-checked', b.dataset.mode === mode));
+    }
+    const tiles = (a) => a.map(([n, html]) => `<div class="sp-t"><div class="sp-pv">${html}</div><div class="sp-cap"><b>${esc(n)}</b></div></div>`).join('');
+    const specHtml = (id) => {
+      const p = SPEC[id]; if (!p) return '';
+      const hasCode = p.v?.some((x) => x[3]);
+      return (p.v ? `<section class="sp-sec sp sp-var${hasCode && spMode === 'cd' ? ' code' : ''}" aria-label="變體"><div class="sp-hd"><h3>變體</h3>${hasCode ? `<div class="sp-tools"><button class="sp-copy sp-all" type="button" data-code="v" data-label="複製全部">${ICON_COPY}<span>複製全部</span></button><div class="sp-seg" role="radiogroup" aria-label="變體顯示方式"><i></i><button type="button" role="radio" data-mode="pv" aria-checked="${spMode === 'pv'}">預覽</button><button type="button" role="radio" data-mode="cd" aria-checked="${spMode === 'cd'}">程式碼</button></div></div>` : ''}</div><div class="sp-vgrid${p.wide ? ' wide' : ''}">${vGrid(p.v)}</div>${hasCode ? `<div class="sp-code sp-vcode"><pre><code>${vPre(p)}</code></pre></div>` : ''}</section>` : '')
+        + (p.s ? `<section class="sp-sec sp" aria-label="狀態對照"><h3>狀態對照</h3><div class="sp-grid${p.wide ? ' wide st' : ' st'}">${tiles(p.s)}</div></section>` : '')
+        + apiHtml(id)
+        + (p.code ? `<section class="sp-sec" aria-label="程式範例"><h3>程式範例</h3><div class="sp-code">${copyBtn('all')}<pre><code>${hl(p.code)}</code></pre></div></section>` : '');
+    };
+    // 目前頁籤：換元件（上一個／下一個、⌘K）時沿用；從牆上點進來一律回到「基本」
+    let dtTab = 'basic';
+    const tabHash = (id, tab) => '#' + SLUG[id] + (tab === 'variants' && SPEC[id] ? '/specs' : '');
+    function moveTabBar() {
+      const bar = $('.dt-tabs', dt), on = bar && $('.tab.on', bar); if (!on) return;
+      const i = $('i', bar); i.style.width = on.offsetWidth + 'px'; i.style.transform = `translateX(${on.offsetLeft}px)`;
+    }
+    function setTab(tab, focus) {
+      // 沒有變體資料的元件只顯示基本，但不改掉使用者選的頁籤（下一個有變體的元件還是停在變體）
+      if (SPEC[dtId]) dtTab = tab; const cur = SPEC[dtId] ? tab : 'basic';
+      $$('.dt-tabs .tab', dt).forEach((b) => { const on = b.dataset.tab === cur; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); });
+      $$('.dt-panel', dt).forEach((p) => { p.hidden = p.dataset.panel !== cur; });
+      moveTabBar();
+    }
+    async function copyCode(btn) {
+      const p = SPEC[dtId] || {}, k = btn.dataset.code;
+      const txt = (k === 'all' ? p.code : k === 'v' ? vCode(p) : '') || '';
+      const lab = btn.dataset.label || '複製';
+      let ok = false;
+      try { await navigator.clipboard.writeText(txt); ok = true; } catch (e) {
+        const t = document.createElement('textarea'); t.value = txt; t.style.cssText = 'position:fixed;opacity:0'; document.body.append(t); t.select();
+        try { ok = document.execCommand('copy'); } catch (e2) {} t.remove();
+      }
+      btn.classList.toggle('done', ok); btn.innerHTML = (ok ? ICON_YES : ICON_COPY) + `<span>${ok ? '已複製' : '無法複製'}</span>`;
+      clearTimeout(btn._t); btn._t = setTimeout(() => { if (!btn.isConnected) return; btn.classList.remove('done'); btn.innerHTML = ICON_COPY + `<span>${lab}</span>`; }, 2000);
+    }
     const ICON_LINK = '<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>';
     // 複製這一頁的網址（含 #元件）；剪貼簿被擋時退回選取文字的舊做法
     async function copyLink(btn) {
@@ -3424,13 +3806,30 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const cs2 = Math.min(cols, cell.classList.contains('w2') ? 2 : 1), rs = cell.classList.contains('h2') ? 2 : 1;
       return [Math.round(colW * cs2 + gap * (cs2 - 1)), Math.round(row * rs + gap * (rs - 1))];
     };
+    const I_PAUSE = '<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>', I_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+    // 暫停這張示範：循環停住；有 HOLD 行為的元件（按鈕、表單欄位）改成可以直接操作
+    function setHold(on) {
+      const id = dtId, cell = id && $('#' + id); if (!cell || on === held.has(id)) return;
+      on ? held.add(id) : held.delete(id);
+      cell.classList.toggle('held', on); cell.classList.toggle('live', on && !!HOLD[id]);
+      HOLD[id]?.[on ? 'on' : 'off']();
+      paintPlay();
+    }
+    function paintPlay() {
+      const box = $('.dt-play', dt); if (!box) return;
+      const on = held.has(dtId), b = $('.dt-pp', box);
+      b.innerHTML = on ? I_PLAY : I_PAUSE; b.setAttribute('aria-pressed', on);
+      b.setAttribute('aria-label', on ? '播放示範' : '暫停示範'); b.title = on ? '播放' : '暫停';
+      $('small', box).textContent = on ? (HOLD[dtId] ? '已暫停，可以直接操作' : '已暫停') : '';
+    }
     function putBack() {
+      if (dtId && held.has(dtId)) setHold(false);
       if (!slot) return;
       const cell = $('#' + dtId);
       if (cell) { cell.style.width = cell.style.height = ''; slot.replaceWith(cell); }
       slot = null;
     }
-    function showDetail(id) {
+    function showDetail(id, tab = 'basic') {
       putBack();
       const d = DOC[id], cat = CAT_LABEL[catOf(id)] || catOf(id), cell = $('#' + id);
       const ids = seq(), i = ids.indexOf(id), prev = i > 0 ? ids[i - 1] : null, next = i >= 0 && i < ids.length - 1 ? ids[i + 1] : null;
@@ -3443,14 +3842,12 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           <p class="dt-def">${esc(d.d)}</p>
           <div class="doc-code">${d.r.split('・').map((x) => `<code>${esc(x)}</code>`).join('')}</div>
         </header>
-        <section class="dt-stage" aria-label="互動示範"><span class="dt-stage-l">互動示範</span></section>
+        <div class="dt-bar"><span class="dt-stage-l">互動示範</span><div class="dt-play"><small aria-live="polite"></small><button type="button" class="dt-pp"></button></div></div>
+        <section class="dt-stage" aria-label="互動示範"></section>
         </div>
-        <div class="dt-grid">
-          <section class="dt-box"><h3><span class="doc-tag ok">${ICON_YES}使用時機</span></h3><ul>${li(d.u)}</ul></section>
-          <section class="dt-box"><h3><span class="doc-tag no">${ICON_NO}禁止使用</span></h3><ul>${li(d.x)}</ul></section>
-          <section class="dt-box"><h3>狀態與互動</h3><div class="doc-chips">${d.st.split('、').map((x) => `<span>${esc(x)}</span>`).join('')}</div></section>
-          <section class="dt-box"><h3>無障礙</h3><ul>${li(d.a)}</ul></section>
-        </div>
+        ${SPEC[id] ? `<div class="tabs dt-tabs" role="tablist" aria-label="內容"><i></i><button class="tab" type="button" role="tab" id="dt-tab-basic" aria-controls="dt-pn-basic" data-tab="basic">指南</button><button class="tab" type="button" role="tab" id="dt-tab-variants" aria-controls="dt-pn-variants" data-tab="variants">規格</button></div>` : ''}
+        <div class="dt-panel" data-panel="basic" id="dt-pn-basic" role="tabpanel" aria-labelledby="dt-tab-basic">${basicHtml(id, d)}</div>
+        ${SPEC[id] ? `<div class="dt-panel" data-panel="variants" id="dt-pn-variants" role="tabpanel" aria-labelledby="dt-tab-variants" hidden>${specHtml(id)}</div>` : ''}
         <nav class="dt-pn" aria-label="其他元件">
           <button class="pv" type="button"${prev ? ` data-go="${prev}"` : ' hidden'}><small>上一個</small><b>${prev ? esc(TITLE[prev]) : ''}</b></button>
           <button class="nx" type="button"${next ? ` data-go="${next}"` : ' hidden'}><small>下一個</small><b>${next ? esc(TITLE[next]) : ''}</b></button>
@@ -3462,11 +3859,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         cell.style.width = w + 'px'; cell.style.height = h + 'px';
         $('.dt-stage', dt).append(cell);
       }
-      dtId = id; wall.classList.add('ready');
+      dtId = id; wall.classList.add('ready'); setTab(tab); paintPlay();
       shell.classList.add('on-detail'); dt.hidden = false;
       document.title = `${TITLE[id]}・${BASE_TITLE}`;
       scroller().scrollTop = 0;
-      requestAnimationFrame(() => dispatchEvent(new Event('resize')));
+      requestAnimationFrame(() => { dispatchEvent(new Event('resize')); moveTabBar(); });
       setTimeout(() => $('#dt-title')?.focus({ preventScroll: true }), 30);
     }
     function showWall() {
@@ -3483,10 +3880,16 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         fromWall = false;
       });
     }
-    const route = () => { const id = BY_SLUG[decodeURIComponent(location.hash.slice(1))]; id ? showDetail(id) : showWall(); };
+    // 網址：#button＝基本、#button/variants＝變體頁籤
+    const route = () => {
+      const [pth] = decodeURIComponent(location.hash.slice(1)).split('?'), [slug, sub] = pth.split('/'), id = BY_SLUG[slug];
+      const tab = sub === 'specs' || sub === 'variants' ? 'variants' : 'basic';
+      if (!id) return showWall();
+      if (id === dtId) setTab(tab); else showDetail(id, tab);
+    };
     function goDetail(id) {
       if (!DOC[id]) return;
-      if (dtId) { if (dtId !== id) { history.replaceState(null, '', '#' + SLUG[id]); route(); } return; }
+      if (dtId) { if (dtId !== id) { history.replaceState(null, '', tabHash(id, dtTab)); route(); } return; }
       wallY = scroller().scrollTop; fromWall = true;
       if (location.hash.slice(1) === SLUG[id]) route(); else location.hash = SLUG[id];
     }
@@ -3498,8 +3901,19 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     dt.addEventListener('click', (e) => {
       if (e.target.closest('.dt-back')) return goWall();
       const sh = e.target.closest('.dt-share'); if (sh) return copyLink(sh);
+      const cp = e.target.closest('.sp-copy'); if (cp) return copyCode(cp);
+      const md = e.target.closest('.sp-seg [data-mode]'); if (md) return setSpMode(md.dataset.mode);
+      const pl = e.target.closest('.dt-pp'); if (pl) return setHold(!held.has(dtId));
+      const tb = e.target.closest('.dt-tabs [data-tab]'); if (tb) { history.replaceState(null, '', tabHash(dtId, tb.dataset.tab)); return setTab(tb.dataset.tab); }
       const go = e.target.closest('[data-go]'); if (go) goDetail(go.dataset.go);
     });
+    // 頁籤鍵盤：左右鍵切換（ARIA tabs 慣例）
+    dt.addEventListener('keydown', (e) => {
+      if (!e.target.closest('.dt-tabs') || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+      e.preventDefault(); const t = e.key === 'ArrowLeft' || e.key === 'Home' ? 'basic' : 'variants';
+      history.replaceState(null, '', tabHash(dtId, t)); setTab(t, true);
+    });
+    addEventListener('resize', moveTabBar);
     // 點卡片進詳細頁；卡片裡本來就能操作的東西（拖移握把、開關、按鈕）照常運作
     wall.addEventListener('click', (e) => {
       const cell = e.target.closest('#wall > .cell'); if (!cell) return;

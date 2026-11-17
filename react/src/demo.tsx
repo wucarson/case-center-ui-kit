@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 import type { ComponentType } from 'react';
 import { CASES, type Case } from '../../shared/cases';
 import '../../shared/case.css';
-import { Button, Checkbox, CheckboxList, RadioGroup, Segmented, Switch } from './components';
+import { Button, Checkbox, CheckboxList, Combo, FormField, MultiSelect, RadioGroup, Segmented, Switch, TextField } from './components';
 import { styleOf } from './components/util';
 
 /** 展示頁：把 shared/cases.ts 的每個案例用元件畫出來，給 tools/compare.mjs 截圖比對 */
@@ -12,6 +12,10 @@ const RENDER: Record<string, ComponentType<any>> = {
   checkbox: (p: any) => (p.list ? <CheckboxList {...p} /> : <Checkbox {...p} />),
   'radio-group': RadioGroup,
   segmented: Segmented,
+  'form-field': TextField,
+  // 放在 FormField 裡的下拉／多選：field 是外框的設定
+  combo: ({ field, ...p }: any) => (field ? <FormField {...field}><Combo {...p} inField /></FormField> : <Combo {...p} />),
+  'multi-select': ({ field, ...p }: any) => (field ? <FormField {...field}><MultiSelect {...p} inField /></FormField> : <MultiSelect {...p} />),
 };
 
 function CaseView({ name, c }: { name: string; c: Case }) {

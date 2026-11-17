@@ -46,7 +46,9 @@ function serve(dir) {
 const refSrv = await serve(refDir);
 const implSrv = await serve(path.join(root, fw, 'dist'));
 
-const FREEZE = `*, *::before, *::after { animation: none !important; transition: none !important; caret-color: transparent !important; }`;
+const FREEZE = `*, *::before, *::after { animation: none !important; transition: none !important; caret-color: transparent !important; }
+  /* 樣本裡的 <i class="caret"> 是示意游標；實作是瀏覽器原生游標（會閃爍、不能逐點比），兩邊都不畫 */
+  .caret { display: none !important; }`;
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, protocolTimeout: 60000, args: ['--hide-scrollbars', '--font-render-hinting=none'] });
 const results = [];
 try {
@@ -62,10 +64,13 @@ try {
   const impl = await open(`http://localhost:${implSrv.address().port}/${only ? '?c=' + only : ''}`);
   const cases = await impl.$$eval('.case', (els) => els.map((e) => ({ c: e.dataset.c, id: e.dataset.id, interact: e.dataset.interact ? JSON.parse(e.dataset.interact) : null })));
   console.log('案例 ' + cases.length);
+  let curC = null;
   for (const k of cases) {
+    // 每換一個元件就重新載入元件頁：前一個元件的操作（例如按下）不會影響下一個（例如預設展開的清單）
+    if (k.c !== curC) { curC = k.c; await impl.goto(`http://localhost:${implSrv.address().port}/?c=${k.c}`, { waitUntil: 'networkidle0' }); await impl.addStyleTag({ content: FREEZE }); await impl.evaluate(() => document.fonts.ready.then(() => true)); }
     if (process.env.DEBUG) console.log('→', k.c, k.id);
     const sel = `.case[data-c="${k.c}"][data-id="${k.id}"]`;
-    const refEl = await ref.$(sel), implEl = await impl.$(sel);
+    const refEl = await ref.$(sel); let implEl = await impl.$(sel);
     if (!refEl) { results.push({ ...k, diff: -1, note: '參考頁沒有這個樣本' }); continue; }
     // 用真實操作重現狀態
     // 只顯示目前這個案例：兩頁的座標完全相同，文字不會因為小數位置不同而反鋸齒不同

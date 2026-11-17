@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import type { Component } from 'vue';
+import { h, type Component } from 'vue';
 import { CASES } from '../../shared/cases';
-import { Button, Checkbox, CheckboxList, RadioGroup, Segmented, Switch } from './components';
+import { Button, Checkbox, CheckboxList, Combo, FormField, MultiSelect, RadioGroup, Segmented, Switch, TextField } from './components';
+
+// 放在 FormField 裡的下拉／多選：field 是外框的設定
+const inField = (C: Component) => (p: Record<string, any>) => { const { field, ...rest } = p; return h(FormField, field, () => h(C, { ...rest, inField: true })); };
 
 /** 展示頁：把 shared/cases.ts 的每個案例用元件畫出來，給 tools/compare.mjs 截圖比對 */
 const RENDER: Record<string, (p: Record<string, unknown>) => Component> = {
@@ -10,6 +13,9 @@ const RENDER: Record<string, (p: Record<string, unknown>) => Component> = {
   checkbox: (p) => (p.list ? CheckboxList : Checkbox),
   'radio-group': () => RadioGroup,
   segmented: () => Segmented,
+  'form-field': () => TextField,
+  combo: (p) => (p.field ? (inField(Combo) as unknown as Component) : Combo),
+  'multi-select': (p) => (p.field ? (inField(MultiSelect) as unknown as Component) : MultiSelect),
 };
 const only = new URLSearchParams(location.search).get('c');
 const list = Object.entries(CASES).filter(([n]) => (!only || n === only) && RENDER[n]).flatMap(([n, cs]) => cs.map((c) => ({ n, c })));

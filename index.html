@@ -917,6 +917,9 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sp-pv > .dt, .sp-pv > .co, .sp-pv > .toast, .sp-pv > .pg { width: 100%; }
 .sp .dt { overflow: visible; }
 .sp .dtab.on { background: var(--tint); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 20%, transparent), 0 6px 14px -6px var(--glow); }
+/* 深色模式：詳情頁籤的選中片比底亮一階（同分段切換），保留淡主色細框 */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) :is(.dt > .ind, .sp .dtab.on) { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), inset 0 0 0 1px color-mix(in srgb, var(--primary) 24%, transparent), 0 1px 3px rgb(0 0 0 / .45); } }
+:root[data-theme="dark"] :is(.dt > .ind, .sp .dtab.on) { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), inset 0 0 0 1px color-mix(in srgb, var(--primary) 24%, transparent), 0 1px 3px rgb(0 0 0 / .45); }
 .sp .dtab.press { scale: .96; }
 .sp .bdg.ol { background: none; }
 .sp .bdg.pl { background: none; border-color: transparent; padding: 0; min-height: 0; }
@@ -4397,7 +4400,7 @@ const { colors, setPreference } = useTheme();
           out.push(`${ind}${sel.replace(/\n/g, '\n' + ind)} { ${r.style.cssText} }`);
           // 示範用的狀態 class 轉成真正的互動樣式：.hv → :hover、.is-press → :active、.is-focus → :focus-visible（停用時不套）
           for (const [re, ps, media] of AI_PSEUDO) {
-            if (!sel.match(re)) continue;
+            if (!sel.match(re) || (ps === ':hover' && /\.dd-t, \.search/.test(sel))) continue;
             // 單獨的狀態 class（例：.is-press）不能變成全站的 :active，只套在可以互動的元件上
             const live = /^.(is-press|is-focus|hv)$/.test(sel.trim()) ? ':is(.btn, .b2, .seg span, .tab, .dtab, .pg nav span, .mn-i, .chip u)' + ps + ':not(.dis):not(.is-off)' : sel.replace(re, ps + ':not(.dis):not(.is-off)');
             out.push(media ? `${ind}@media (hover: hover) and (pointer: fine) { ${live.replace(/\n/g, ' ')} { ${r.style.cssText} } }` : `${ind}${live.replace(/\n/g, '\n' + ind)} { ${r.style.cssText} }`);
@@ -4442,6 +4445,17 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-wid
 :where(button):disabled { cursor: not-allowed; }
 /* 焦點框畫在子元素上的元件（核取方塊的方框、單選的圓、開關的軌道）：外層不要再畫瀏覽器預設的焦點框 */
 :is(.ck, .rad, .tgr):focus-visible { outline: none; }
+/* 欄位裡的原生輸入框：佔滿剩餘空間；字色、提示字色同展示牆（值＝ink、提示＝label） */
+:is(.ff-i, .dd-t, .ms-s) > :is(input, textarea) { flex: 1; min-width: 0; align-self: stretch; padding: 0; border: 0; background: none; outline: none; color: var(--ink); }
+:is(.ff-i, .dd-t, .ms-s) > textarea { resize: none; line-height: inherit; }
+:is(.ff-i, .dd-t, .ms-s) > :is(input, textarea)::placeholder { color: var(--label); opacity: 1; }
+.ff.ro .ff-i > input { color: inherit; }
+/* 多選的搜尋列只有 32px：輸入框改成和文字同行高、垂直置中，位置才和展示牆一致 */
+.ms-s > input { align-self: center; height: auto; line-height: inherit; will-change: transform; }   /* 毛玻璃面板裡：輸入框文字和周圍文字同樣用灰階反鋸齒 */
+/* 欄位滑過：框線加深一階；展開、聚焦、錯誤、唯讀、停用時不套 */
+@media (hover: hover) and (pointer: fine) {
+  :is(.dd:not(.open):not(.bad) > .dd-t, .ms:not(.open) > .ms-t, .dp:not(.open) > .dp-f, .search:not(.focus), .ff:not(.focus):not(.bad):not(.ro):not(.dis) > .ff-i):hover { border-color: var(--line-strong); }
+}
 :where(input:not([type='checkbox'], [type='radio'])) { min-width: 0; padding: 0; border: 0; background: none; outline: none; }
 :where(input[type='checkbox'], input[type='radio']) { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
 

@@ -1049,7 +1049,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sh-x { width: 32px; height: 32px; display: grid; place-items: center; margin: -4px -6px 0 0; border: 0; border-radius: var(--r-md); background: none; color: var(--weak); cursor: pointer; }
 .sh-x:hover { background: var(--hover); color: var(--ink); }
 .sh { width: min(640px, calc(100vw - 32px)); gap: 12px; }
-.sh-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 3px; border-radius: var(--r-md); background: var(--soft); box-shadow: var(--inset); }
+.sh-tabs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; padding: 3px; border-radius: var(--r-md); background: var(--soft); box-shadow: var(--inset); }
 .sh-tabs button { height: 30px; border: 0; border-radius: max(2px, calc(var(--r-md) - 3px)); background: transparent; color: var(--weak); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background calc(.2s * var(--dur)), color calc(.2s * var(--dur)), scale calc(.2s * var(--dur)) var(--spring); }
 .sh-tabs button:hover { color: var(--ink); }
 .sh-tabs button:active { scale: .96; }
@@ -1059,6 +1059,11 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sh-file code { display: block; font: 600 13px/20px ui-monospace, Consolas, monospace; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sh-file small { display: block; font-size: 12px; line-height: 18px; color: var(--weak); }
 .sh-act { height: 32px; flex: none; }
+.sh-files { max-width: 100%; height: 28px; padding: 0 28px 0 8px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--field) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237b8ca8' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 6px center / 14px; color: var(--ink); font: 600 13px/20px ui-monospace, Consolas, monospace; appearance: none; -webkit-appearance: none; cursor: pointer; }
+.sh-files:hover { border-color: var(--line-strong); }
+.sh-file code[hidden] { display: none; }
+.sh-files[hidden] { display: none; }
+@media (max-width: 560px) { .sh-tabs { grid-template-columns: repeat(3, 1fr); } }
 .sh-act.done { color: var(--ok-fg); }
 .sh-code { margin: 0; height: min(340px, 45vh); overflow: auto; padding: 12px 14px; border: 1px solid var(--line-subtle); border-radius: var(--r-md); background: var(--soft); font: 12px/19px ui-monospace, Consolas, monospace; color: var(--muted); white-space: pre; tab-size: 2; }
 .sh-f { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -1824,9 +1829,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     <button type="button" role="tab" id="sh-tab-css" aria-controls="sh-code" data-k="css" aria-selected="false" tabindex="-1">工程師</button>
     <button type="button" role="tab" id="sh-tab-tw" aria-controls="sh-code" data-k="tw" aria-selected="false" tabindex="-1">Tailwind</button>
     <button type="button" role="tab" id="sh-tab-cc" aria-controls="sh-code" data-k="cc" aria-selected="false" tabindex="-1">案管中心</button>
+    <button type="button" role="tab" id="sh-tab-react" aria-controls="sh-code" data-k="react" aria-selected="false" tabindex="-1">React</button>
+    <button type="button" role="tab" id="sh-tab-vue" aria-controls="sh-code" data-k="vue" aria-selected="false" tabindex="-1">Vue</button>
   </div>
   <div class="sh-file">
-    <div><code id="sh-name"></code><small id="sh-desc"></small></div>
+    <div><code id="sh-name"></code><select class="sh-files" id="sh-files" aria-label="套件裡的檔案" hidden></select><small id="sh-desc"></small></div>
     <button class="cz-btn sh-act" type="button" data-act="copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span>複製</span></button>
     <button class="cz-btn sh-act" type="button" data-act="dl"><svg viewBox="0 0 24 24"><path d="M12 4v11M8 11l4 4 4-4"/><path d="M5 19h14"/></svg><span>下載</span></button>
   </div>
@@ -3944,6 +3951,556 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       },
     };
 
+    /* ---- 前端框架主題套件（React／Vue，TypeScript）：顏色、圓角、字級、陰影、間距、形狀、動態、圖表、設計規範 ---- */
+    // 間距與控件高度（展示牆的規範：4px 為基準；控件 32／40／48）
+    const SPACE = { 1: '4px', 2: '8px', 3: '12px', 4: '16px', 5: '20px', 6: '24px', 8: '32px', 10: '40px', 12: '48px' };
+    const CONTROL = theme.style.ui === 'compact' ? { sm: '28px', md: '34px', lg: '44px' } : { sm: '32px', md: '40px', lg: '48px' };
+    const camel = (k) => k.replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
+    const tsStr = (v) => JSON.stringify(v);
+    function pkgTokensTs(sn) {
+      const col = (mode) => TOK.color.map((k) => `      ${camel(k)}: ${tsStr(sn[mode][k])},`).join('\n');
+      const sh = (mode) => TOK.shadow.map((k) => `      ${camel(k)}: ${tsStr(sn[mode][k])},`).join('\n');
+      const d = DUR(sn);
+      const lv = TYPE_LV.map((k) => { const o = lvOut(k); return `      ${k}: { fontSize: ${tsStr(o.size)}, lineHeight: ${tsStr(String(o.lh))}, fontWeight: ${o.weight}, letterSpacing: ${tsStr(o.ls)} },`; }).join('\n');
+      return `/**
+ * 設計 token —— ${stamp()}
+ * 和 tokens.css 同一份值：JS 端（圖表、動畫、行內樣式）讀這裡，樣式表讀 CSS 變數。
+ */
+export const tokens = {
+  color: {
+    light: {
+${col('light')}
+    },
+    dark: {
+${col('dark')}
+    },
+  },
+  radius: {
+${TOK.radius.map((k) => `    ${RNAME[k]}: ${tsStr(sn.radius[k])},`).join('\n')}
+  },
+  shadow: {
+    light: {
+${sh('light')}
+    },
+    dark: {
+${sh('dark')}
+    },
+  },
+  typography: {
+    fontFamily: ${tsStr(fontStack(theme.type.family, 'zh'))},
+    levels: {
+${lv}
+    },
+  },
+  /** 間距：4px 為基準，元件內外距只用這組 */
+  space: {
+${Object.entries(SPACE).map(([k, v]) => `    ${k}: ${tsStr(v)},`).join('\n')}
+  },
+  /** 控件高度：sm＝工具列、表格內；md＝一般欄位；lg＝表單送出、頁首 */
+  control: ${tsStr(CONTROL).replace(/"(\w+)":/g, '$1: ').replace(/,/g, ', ')},
+  motion: {
+    /** 時長（已乘上主題的動態速度） */
+    duration: { fast: ${parseInt(d.fast)}, base: ${parseInt(d.base)}, slow: ${parseInt(d.slow)} },
+    /** cubic-bezier 參數：spring＝有回彈（開關、勾選）；springSoft＝輕回彈（浮層、選中片滑動）；standard＝無回彈 */
+    easing: { spring: ${tsStr(bez(sn.spring))}, springSoft: ${tsStr(bez(sn.springSoft))}, standard: ${tsStr(bez(sn.ease))} },
+    /** 依序出現：每張間隔（ms）與總長上限 */
+    stagger: { step: 55, max: 300 },
+    /** 按下縮放 */
+    pressScale: 0.96,
+  },
+  chart: {
+    /** 分類色：只分辨「是哪一個」，不帶好壞 */
+    series: { light: ${tsStr(['c1', 'c2', 'c3', 'c4'].map((k) => sn.light[k]))}, dark: ${tsStr(['c1', 'c2', 'c3', 'c4'].map((k) => sn.dark[k]))} },
+  },
+  shape: {
+    /** 介面風格：${UI_NAME[theme.style.ui]}；頁籤樣式：${theme.style.tabs} */
+    style: ${tsStr(theme.style.ui)},
+    tabs: ${tsStr(theme.style.tabs)},
+  },
+} as const;
+
+export type Tokens = typeof tokens;
+export type ThemeMode = 'light' | 'dark';
+export type ColorToken = keyof Tokens['color']['light'];
+export type TypeLevel = keyof Tokens['typography']['levels'];
+
+/** cubic-bezier(...) 字串，給 CSS transition／Web Animations 用 */
+export const easing = (name: keyof Tokens['motion']['easing']) => \`cubic-bezier(\${tokens.motion.easing[name].join(', ')})\`;
+`;
+    }
+    function pkgTokensCss() {
+      const base = EXPORT.css()[1];
+      const extra = `\n/* 間距、控件高度、動態（React／Vue 主題套件補充） */\n:root {\n${Object.entries(SPACE).map(([k, v]) => `  --space-${k}: ${v};`).join('\n')}\n${Object.entries(CONTROL).map(([k, v]) => `  --control-${k}: ${v};`).join('\n')}\n${Object.entries(DUR(snapshot())).map(([k, v]) => `  --duration-${k}: ${v};`).join('\n')}\n  --press-scale: 0.96;\n}\n\n@media (prefers-reduced-motion: reduce) {\n  :root {\n    --duration-fast: 0ms;\n    --duration-base: 0ms;\n    --duration-slow: 0ms;\n  }\n}\n`;
+      return base + extra;
+    }
+    const PKG_MOTION = `import { easing, tokens } from './tokens';
+
+/**
+ * 動態小工具（不依賴框架、不依賴動畫函式庫，用 Web Animations API）。
+ * 系統開了「減少動態效果」時一律直接到終點。
+ */
+export const reducedMotion = () =>
+  typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/** CSS transition 字串，例：transition('transform', 'base', 'springSoft') */
+export function transition(prop: string, dur: keyof typeof tokens.motion.duration = 'base', ease: keyof typeof tokens.motion.easing = 'standard') {
+  return \`\${prop} \${tokens.motion.duration[dur]}ms \${easing(ease)}\`;
+}
+
+/** 依序出現的延遲：第 i 張；張數多時自動縮短間隔，總長不超過 stagger.max */
+export function stagger(i: number, total: number) {
+  const { step, max } = tokens.motion.stagger;
+  return i * (total > 1 ? Math.min(step, max / (total - 1)) : 0);
+}
+
+/** 進場：由 96% 放大淡入（浮層、卡片） */
+export function enter(el: Element, delay = 0) {
+  if (reducedMotion()) return;
+  return el.animate(
+    [{ opacity: 0, transform: 'scale(.96)' }, { opacity: 1, transform: 'none' }],
+    { duration: tokens.motion.duration.base, easing: easing('springSoft'), delay, fill: 'backwards' },
+  );
+}
+
+/** 出場：縮小淡出，結束後 resolve（之後再移除元素） */
+export async function leave(el: Element) {
+  if (reducedMotion()) return;
+  await el.animate(
+    [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'scale(.97)' }],
+    { duration: tokens.motion.duration.fast * 0.7, easing: 'ease-in', fill: 'forwards' },
+  ).finished;
+}
+
+/** 選中片滑動（分段切換、頁籤）：把指示器移到 target 的位置 */
+export function slideTo(indicator: HTMLElement, target: HTMLElement) {
+  indicator.style.transition = reducedMotion() ? 'none' : [transition('transform', 'slow', 'springSoft'), transition('width', 'slow', 'springSoft')].join(', ');
+  indicator.style.width = target.offsetWidth + 'px';
+  indicator.style.transform = \`translateX(\${target.offsetLeft}px)\`;
+}
+
+/** 數字從 0（或舊值）滾到新值 */
+export function countUp(el: HTMLElement, to: number, from = 0, decimals = 0) {
+  if (reducedMotion()) { el.textContent = to.toFixed(decimals); return; }
+  const start = performance.now(), dur = 900;
+  const tick = (now: number) => {
+    const t = Math.min(1, (now - start) / dur), v = from + (to - from) * (1 - Math.pow(1 - t, 3));
+    el.textContent = v.toFixed(decimals);
+    if (t < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+`;
+    const PKG_CHART = `import { tokens, type ThemeMode } from './tokens';
+
+/**
+ * 圖表配色與設定（不含圖表函式庫本身）。
+ * 規範：分類色只分辨「是哪一個」；好壞用語意色（success／warn／danger）。
+ * 單一系列的長條：一般用淡主色，最大值那根用主色強調。
+ */
+export function chartPalette(mode: ThemeMode) {
+  const c = tokens.color[mode];
+  return {
+    series: [...tokens.chart.series[mode]],
+    good: c.success,
+    warning: c.warn,
+    critical: c.danger,
+    ink: c.ink,
+    label: c.label,
+    grid: c.lineSubtle,
+    surface: c.surface,
+  };
+}
+
+/** ECharts 主題物件：echarts.registerTheme('case-center', echartsTheme(mode)) */
+export function echartsTheme(mode: ThemeMode) {
+  const p = chartPalette(mode);
+  return {
+    color: p.series,
+    backgroundColor: 'transparent',
+    textStyle: { fontFamily: tokens.typography.fontFamily, color: p.ink },
+    categoryAxis: { axisLine: { lineStyle: { color: p.grid } }, axisLabel: { color: p.label }, splitLine: { show: false } },
+    valueAxis: { axisLine: { show: false }, axisLabel: { color: p.label }, splitLine: { lineStyle: { color: p.grid } } },
+    legend: { textStyle: { color: p.label }, itemGap: 16, inactiveColor: p.grid },
+    tooltip: { backgroundColor: tokens.color.light.ink, borderWidth: 0, textStyle: { color: '#fff' } },
+    bar: { itemStyle: { borderRadius: [8, 8, 3, 3] } },
+    animationDuration: 900,
+    animationEasing: 'cubicOut',
+  };
+}
+`;
+    const pkgGuide = () => `# 設計規範（重點）
+
+${stamp()}
+
+## 顏色
+- 主色只給「主要動作」與「選中」；一個畫面只有一顆主要按鈕。
+- 好壞用語意色：成功 success、注意 warn、錯誤 danger；分類圖表用 chart.series，不帶好壞意思。
+- 狀態不能只靠顏色：徽章一定寫出文字，圖表圖例要有數值。
+
+## 選中與強調
+- 選中＝淡主色底（約 14%），**不使用最前面的垂直色條**。
+- 頁籤、分段切換的選中片會彈性滑動（springSoft）。
+
+## 尺寸
+- 控件高度只用三級：sm ${CONTROL.sm}（工具列、表格內）、md ${CONTROL.md}（一般欄位）、lg ${CONTROL.lg}（表單送出、頁首）。
+- 間距以 4px 為基準，只用 space 這組值。
+- 圓角：控件 ${sn0().radius['r-md']}、小卡 ${sn0().radius['r-lg']}、卡片 ${sn0().radius['r-2xl']}；外圓角＝內圓角＋間距（同心）。
+
+## 狀態
+- 滑過：框線加深一階（line-strong）或淡底；聚焦：主色框＋3px 淡光圈。
+- 錯誤：紅框＋紅色淡光圈，底色不變；錯誤訊息位置先留好，出現時不跳動。
+- 停用：灰底、降低對比，並說明原因（選單項目用 aria-disabled，保留可聚焦）。
+
+## 動態
+- 按下縮到 ${'0.96'}；浮層由 96% 放大淡入、150ms 淡出縮小。
+- 依序出現每張隔 55ms，總長不超過 0.3 秒。
+- 系統開了「減少動態效果」時不播動畫（motion.ts 已處理）。
+
+## 文字
+- 字級七級：display、headline、title、body、label、caption、numeric；不要自己發明字級。
+- 介面說明只寫重點，不放操作步驟。
+`;
+    const sn0 = () => snapshot();
+    const PKG = {
+      react: () => {
+        const sn = snapshot();
+        return [
+          ['react/tokens.ts', pkgTokensTs(sn)],
+          ['react/tokens.css', pkgTokensCss()],
+          ['react/ThemeProvider.tsx', `import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import './tokens.css';
+import { tokens, type ThemeMode } from './tokens';
+
+type Preference = ThemeMode | 'system';
+interface ThemeContextValue {
+  /** 使用者的選擇：light／dark／system（跟隨系統） */
+  preference: Preference;
+  /** 實際套用的模式 */
+  mode: ThemeMode;
+  setPreference: (p: Preference) => void;
+  tokens: typeof tokens;
+  /** 目前模式的顏色（JS 端用，例如圖表） */
+  colors: (typeof tokens)['color'][ThemeMode];
+}
+
+const ThemeContext = createContext<ThemeContextValue | null>(null);
+const systemDark = () => typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches;
+
+/**
+ * 包住整個 App：
+ *   <ThemeProvider><App /></ThemeProvider>
+ * 會在 <html> 加 data-theme="light|dark"，tokens.css 的 CSS 變數跟著切換。
+ */
+export function ThemeProvider({ children, defaultPreference = 'system' }: { children: ReactNode; defaultPreference?: Preference }) {
+  const [preference, setPreference] = useState<Preference>(defaultPreference);
+  const [sys, setSys] = useState<ThemeMode>(() => (systemDark() ? 'dark' : 'light'));
+  useEffect(() => {
+    if (typeof matchMedia !== 'function') return;
+    const mq = matchMedia('(prefers-color-scheme: dark)');
+    const on = () => setSys(mq.matches ? 'dark' : 'light');
+    mq.addEventListener('change', on);
+    return () => mq.removeEventListener('change', on);
+  }, []);
+  const mode: ThemeMode = preference === 'system' ? sys : preference;
+  useEffect(() => { document.documentElement.dataset.theme = mode; }, [mode]);
+  const value = useMemo(() => ({ preference, mode, setPreference, tokens, colors: tokens.color[mode] }), [preference, mode]);
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+}
+
+/** const { mode, setPreference, colors } = useTheme(); */
+export function useTheme() {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error('useTheme 要放在 <ThemeProvider> 裡面');
+  return ctx;
+}
+`],
+          ['react/motion.ts', PKG_MOTION],
+          ['react/chart.ts', PKG_CHART],
+          ['react/index.ts', `export * from './tokens';\nexport * from './ThemeProvider';\nexport * from './motion';\nexport * from './chart';\n`],
+          ['react/GUIDELINES.md', pkgGuide()],
+          ['react/README.md', `# 案管中心主題（React）
+
+${stamp()}
+
+## 安裝
+把整個資料夾放進專案，例如 \`src/theme/\`。不需要另外安裝套件（需要 React 18 以上、TypeScript）。
+
+## 使用
+\`\`\`tsx
+// main.tsx
+import { ThemeProvider } from './theme';
+
+createRoot(document.getElementById('root')!).render(
+  <ThemeProvider>
+    <App />
+  </ThemeProvider>,
+);
+\`\`\`
+
+\`\`\`tsx
+// 元件裡
+import { useTheme, tokens, transition } from './theme';
+
+function Card() {
+  const { colors } = useTheme();
+  return <div style={{ borderRadius: tokens.radius.card, boxShadow: 'var(--shadow-shadow)', transition: transition('transform', 'base', 'springSoft') }} />;
+}
+\`\`\`
+
+- 樣式優先用 CSS 變數：\`var(--color-primary)\`、\`var(--radius-control)\`、\`var(--text-body)\`、\`var(--space-4)\`、\`var(--control-md)\`。
+- 深色模式：\`setPreference('dark' | 'light' | 'system')\`。
+- 圖表：\`echartsTheme(mode)\`（見 chart.ts）。
+- 設計規範：見 GUIDELINES.md。
+
+| 檔案 | 內容 |
+|---|---|
+| tokens.ts | 全部設計 token（含型別） |
+| tokens.css | CSS 變數（淺色、深色） |
+| ThemeProvider.tsx | 主題 Provider 與 useTheme |
+| AI_INSTRUCTIONS.md | 交給 AI 產出元件的指令 |
+| components/ | 全部元件樣式（components.css）與結構規格（COMPONENTS.md） |
+| motion.ts | 動態參數與小工具 |
+| chart.ts | 圖表配色、ECharts 主題 |
+| GUIDELINES.md | 設計規範重點 |
+`],
+        ];
+      },
+      vue: () => {
+        const sn = snapshot();
+        return [
+          ['vue/tokens.ts', pkgTokensTs(sn)],
+          ['vue/tokens.css', pkgTokensCss()],
+          ['vue/plugin.ts', `import { computed, inject, ref, watchEffect, type App, type InjectionKey, type Ref } from 'vue';
+import './tokens.css';
+import { tokens, type ThemeMode } from './tokens';
+
+type Preference = ThemeMode | 'system';
+interface ThemeState {
+  preference: Ref<Preference>;
+  mode: Readonly<Ref<ThemeMode>>;
+  setPreference: (p: Preference) => void;
+  tokens: typeof tokens;
+  colors: Readonly<Ref<(typeof tokens)['color'][ThemeMode]>>;
+}
+
+const KEY: InjectionKey<ThemeState> = Symbol('case-center-theme');
+
+/**
+ * main.ts：
+ *   app.use(caseCenterTheme)                       // 跟隨系統
+ *   app.use(caseCenterTheme, { preference: 'dark' })
+ * 會在 <html> 加 data-theme="light|dark"，tokens.css 的 CSS 變數跟著切換。
+ */
+export const caseCenterTheme = {
+  install(app: App, options: { preference?: Preference } = {}) {
+    const preference = ref<Preference>(options.preference ?? 'system');
+    const sys = ref<ThemeMode>('light');
+    if (typeof matchMedia === 'function') {
+      const mq = matchMedia('(prefers-color-scheme: dark)');
+      sys.value = mq.matches ? 'dark' : 'light';
+      mq.addEventListener('change', () => { sys.value = mq.matches ? 'dark' : 'light'; });
+    }
+    const mode = computed<ThemeMode>(() => (preference.value === 'system' ? sys.value : preference.value));
+    watchEffect(() => { if (typeof document !== 'undefined') document.documentElement.dataset.theme = mode.value; });
+    app.provide(KEY, {
+      preference,
+      mode,
+      setPreference: (p) => { preference.value = p; },
+      tokens,
+      colors: computed(() => tokens.color[mode.value]),
+    });
+  },
+};
+
+/** const { mode, setPreference, colors } = useTheme(); */
+export function useTheme() {
+  const t = inject(KEY);
+  if (!t) throw new Error('請先 app.use(caseCenterTheme)');
+  return t;
+}
+`],
+          ['vue/motion.ts', PKG_MOTION],
+          ['vue/chart.ts', PKG_CHART],
+          ['vue/index.ts', `export * from './tokens';\nexport * from './plugin';\nexport * from './motion';\nexport * from './chart';\n`],
+          ['vue/GUIDELINES.md', pkgGuide()],
+          ['vue/README.md', `# 案管中心主題（Vue 3）
+
+${stamp()}
+
+## 安裝
+把整個資料夾放進專案，例如 \`src/theme/\`。不需要另外安裝套件（需要 Vue 3.3 以上、TypeScript）。
+
+## 使用
+\`\`\`ts
+// main.ts
+import { createApp } from 'vue';
+import { caseCenterTheme } from './theme';
+import App from './App.vue';
+
+createApp(App).use(caseCenterTheme).mount('#app');
+\`\`\`
+
+\`\`\`vue
+<script setup lang="ts">
+import { useTheme, tokens, transition } from './theme';
+const { colors, setPreference } = useTheme();
+<\/script>
+
+<template>
+  <div :style="{ borderRadius: tokens.radius.card, transition: transition('transform', 'base', 'springSoft') }" />
+</template>
+\`\`\`
+
+- 樣式優先用 CSS 變數：\`var(--color-primary)\`、\`var(--radius-control)\`、\`var(--text-body)\`、\`var(--space-4)\`、\`var(--control-md)\`。
+- 深色模式：\`setPreference('dark' | 'light' | 'system')\`。
+- 圖表：\`echartsTheme(mode.value)\`（見 chart.ts）。
+- 設計規範：見 GUIDELINES.md。
+
+| 檔案 | 內容 |
+|---|---|
+| tokens.ts | 全部設計 token（含型別） |
+| tokens.css | CSS 變數（淺色、深色） |
+| plugin.ts | Vue 外掛與 useTheme |
+| AI_INSTRUCTIONS.md | 交給 AI 產出元件的指令 |
+| components/ | 全部元件樣式（components.css）與結構規格（COMPONENTS.md） |
+| motion.ts | 動態參數與小工具 |
+| chart.ts | 圖表配色、ECharts 主題 |
+| GUIDELINES.md | 設計規範重點 |
+`],
+        ];
+      },
+    };
+
+    /* ---- AI／框架元件規格包：元件樣式（從畫面直接抽出、變數已解析）＋每個元件的結構與規格 ---- */
+    // 頁面外框（展示牆自己的版面、面板、彈窗、詳細頁）不算元件，排除
+    const AI_EXCL = /^(\.cell\b|\.shell|\.top\b|\.top-a|\.ttl|\.wf\b|\.wall|\.cz|\.ck-|\.cmdk|\.sh\b|\.sh-|\.sp\b|\.sp-|\.dt-|\.doc|\.api|\.a11y|body|html|h1|\.ctl|\.body\b|\.sub\b|#|\*|\.ping|\.held|\.live|\.norise|\.ready|\.curtain|\.dd-k)/;
+    const DARK_PRE = [':root[data-theme="dark"] ', ":root[data-theme='dark'] ", ':root:not([data-theme="light"]) '];
+    function aiKeep(sel) {
+      // 只切最外層的逗號：:is(a, b) 裡的逗號不能切，否則括號不成對、整段樣式失效
+      const top = []; let depth = 0, cur = '';
+      for (const ch of sel) { if (ch === '(') depth++; else if (ch === ')') depth--; if (ch === ',' && !depth) { top.push(cur); cur = ''; } else cur += ch; }
+      top.push(cur);
+      return top.map((x) => x.trim()).filter((x) => {
+        let t = x; for (const p of DARK_PRE) if (t.startsWith(p)) t = t.slice(p.length);
+        if (t.startsWith(':root') || t.startsWith(':is(.cell') ) return false;
+        return !AI_EXCL.test(t.replace(/^:is\(/, ''));
+      }).join(',\n');
+    }
+    function aiRules(list, ind = '') {
+      const out = [];
+      for (const r of list) {
+        if (r instanceof CSSStyleRule) { const sel = aiKeep(r.selectorText); if (sel) out.push(`${ind}${sel.replace(/\n/g, '\n' + ind)} { ${r.style.cssText} }`); }
+        else if (r instanceof CSSMediaRule) { const inner = aiRules(r.cssRules, ind + '  '); if (inner.length) out.push(`${ind}@media ${r.conditionText} {\n${inner.join('\n')}\n${ind}}`); }
+        else if (r instanceof CSSKeyframesRule) out.push(ind + r.cssText);
+      }
+      return out;
+    }
+    function aiCss() {
+      const sheet = [...document.styleSheets].find((s) => { try { return s.cssRules && !s.href; } catch (e) { return false; } });
+      const body = aiRules(sheet ? sheet.cssRules : []).join('\n');
+      // 用到的變數全部解析成淺色、深色的實際值，這份檔案自己就能用
+      const names = [...new Set(body.match(/--[\w-]+/g) || [])].sort();
+      const prev = root.getAttribute('data-theme'), val = {};
+      for (const mode of ['light', 'dark']) { root.setAttribute('data-theme', mode); const cs = getComputedStyle(root); val[mode] = Object.fromEntries(names.map((n) => [n, cs.getPropertyValue(n).trim()])); }
+      prev ? root.setAttribute('data-theme', prev) : root.removeAttribute('data-theme');
+      const dark = names.filter((n) => val.dark[n] !== val.light[n]);
+      const decl = (mode, list, ind) => list.filter((n) => val[mode][n] !== '').map((n) => `${ind}${n}: ${val[mode][n]};`).join('\n');
+      return `/* 元件樣式 —— ${stamp()}
+   從元件展示牆畫面直接抽出：每個元件的所有狀態（滑過、聚焦、選中、展開、停用、錯誤）與動畫都在這裡，
+   變數已解析成實際值。React／Vue 元件只要輸出 COMPONENTS.md 裡的 HTML 結構與 class，外觀就和展示牆一致。
+   深色模式：<html data-theme="dark">，或跟隨系統。 */
+:root {
+  font-family: ${fontStack(theme.type.family, 'zh')};
+${decl('light', names, '  ')}
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+${decl('dark', dark, '    ')}
+  }
+}
+:root[data-theme='dark'] {
+${decl('dark', dark, '  ')}
+}
+svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+${body}
+`;
+    }
+    // 每個元件：說明、用法、狀態、無障礙、HTML 結構（目前畫面上的實際結構）、規格頁籤的變體程式碼
+    function aiComponents() {
+      const cellsNow = $$('#wall > .cell');
+      const parts = cellsNow.filter((c) => DOC[c.id]).map((c) => {
+        const d = DOC[c.id], clone = c.cloneNode(true);
+        clone.querySelectorAll('header, .cell-doc').forEach((x) => x.remove());
+        // 示範動畫留下的痕跡：文字滾動只留最後一段字、拿掉動畫寫上的行內位移
+        clone.querySelectorAll('.roll').forEach((r) => { const k = [...r.children]; k.slice(0, -1).forEach((x) => x.remove()); k.at(-1)?.removeAttribute('style'); });
+        const html = clone.innerHTML.replace(/\s+style="[^"]*--i:[^"]*"/g, '').replace(/\n\s*\n/g, '\n').trim();
+        const p = SPEC[c.id], code = p?.v ? vCode(p) : '';
+        const api = API[c.id] ? API[c.id].map(([n, t, v, ds]) => `| \`${n}\` | \`${t}\` | \`${v}\` | ${ds} |`).join('\n') : '';
+        return `## ${TITLE[c.id]}（${SLUG[c.id]}）
+
+${d.d}
+
+- 實作來源（Angular 參考）：${d.r || '—'}
+- 使用時機：${(d.u || []).join('；')}
+- 不要用：${(d.x || []).join('；')}
+- 狀態：${d.st}
+- 無障礙：${(A11Y[c.id] ? Object.values(A11Y[c.id]).flat() : d.a || []).join('；')}
+
+### HTML 結構（class 對應 components.css）
+\`\`\`html
+${html}
+\`\`\`
+${code ? `\n### 變體（Angular 寫法，換成 React／Vue 時保留同樣的 class 與 aria）\n\`\`\`html\n${code}\n\`\`\`\n` : ''}${api ? `\n### 參數\n| 參數 | 型別 | 預設 | 說明 |\n|---|---|---|---|\n${api}\n` : ''}`;
+      });
+      return `# 元件規格
+
+${stamp()}
+
+狀態 class 慣例：\`.on\` 選中、\`.open\` 展開、\`.hv\` 滑過（示範用，實作改用 :hover）、\`.dis\` 停用、\`.bad\` 錯誤、\`.focus\` 聚焦（實作改用 :focus-visible）、\`.done\` 完成。
+
+${parts.join('\n---\n\n')}`;
+    }
+    const aiPrompt = (fw) => `# 給 AI 的指令（${fw === 'react' ? 'React' : 'Vue'}）
+
+${stamp()}
+
+把這個資料夾交給 AI（Claude、ChatGPT、Copilot…），並貼上下面這段：
+
+---
+
+請用 **${fw === 'react' ? 'React 18＋TypeScript（函式元件、hooks）' : 'Vue 3＋TypeScript（<script setup>、組合式 API）'}** 實作 components/COMPONENTS.md 裡的全部元件，放在 components/ 資料夾，規則：
+
+1. **外觀必須和元件展示牆完全一致**：直接引入 \`components/components.css\`，元件輸出的 HTML 結構、class 名稱要和 COMPONENTS.md 的「HTML 結構」一模一樣；不要改寫或新增樣式，不要用其他 UI 函式庫（MUI、Ant Design、Vuetify、Element…）或 Tailwind 重做外觀。
+2. **狀態用 class 切換**：選中加 \`.on\`、展開加 \`.open\`、停用加 \`.dis\`、錯誤加 \`.bad\`；滑過與聚焦用瀏覽器的 :hover、:focus-visible（COMPONENTS.md 裡的 \`.hv\`、\`.focus\` 只是示範）。
+3. **互動照「狀態」與「無障礙」欄位**：鍵盤操作、role、aria-*、焦點管理都要做；動畫時長與曲線已經在 components.css，不要另外寫。
+4. **參數**：有「參數」表的元件照表定義 props；沒有的照「使用時機」設計最少的 props。
+5. **資料**：COMPONENTS.md 的文字與數字是示意資料，改成 props 或插槽（children／slot）。
+6. 每個元件一個檔案，附一個展示頁把所有元件與狀態排出來，方便和展示牆比對。
+7. 主題（深淺色、token）沿用同資料夾的 ${fw === 'react' ? 'ThemeProvider.tsx' : 'plugin.ts'} 與 tokens.ts，不要另外建一套。
+
+---
+
+## 檔案
+| 檔案 | 內容 |
+|---|---|
+| components/components.css | 全部元件樣式（含深色模式、所有狀態、動畫），變數已解析 |
+| components/COMPONENTS.md | 每個元件的說明、狀態、無障礙、HTML 結構、變體、參數 |
+| tokens.ts／tokens.css | 設計 token（顏色、圓角、字級、陰影、間距、動態、圖表） |
+| ${fw === 'react' ? 'ThemeProvider.tsx' : 'plugin.ts'} | 主題切換 |
+| GUIDELINES.md | 設計規範重點 |
+`;
+    // React／Vue 套件併入元件規格包：主題＋元件樣式＋結構＋給 AI 的指令，一包就能用
+    for (const fw of ['react', 'vue']) {
+      const theme0 = PKG[fw];
+      PKG[fw] = () => [
+        ...theme0(),
+        [fw + '/AI_INSTRUCTIONS.md', aiPrompt(fw)],
+        [fw + '/components/components.css', aiCss()],
+        [fw + '/components/COMPONENTS.md', aiComponents()],
+      ];
+    }
+
     /* ---- 匯出：一顆鈕下載全部（.zip）；箭頭選單只拿一種格式 ---- */
     const outBox = $('#cz-out');
     let downloads;
@@ -3969,12 +4526,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       try { await navigator.clipboard.writeText(textFallback); say(`這裡不能下載檔案，已把 ${name} 的內容複製到剪貼簿（下方也有一份）。`); }
       catch (e) { outBox.select(); say(`這裡不能下載檔案；${name} 的內容在下方，已全選，按 Ctrl＋C 複製。`); }
     }
-    const README = () => `# 設計 token 匯出\n\n${stamp()}\n\n| 檔案 | 用途 |\n|---|---|\n| tokens.json | W3C Design Tokens 格式：Figma Tokens Studio、Style Dictionary 可讀；也能在元件展示牆「⋯ › 匯入」載回來繼續調 |\n| theme.css | 通用 CSS 變數（淺色＋深色），任何網頁系統直接引入，用 var(--color-primary) 等取值 |\n| tailwind-theme.css | Tailwind v4：貼在 @import "tailwindcss"; 之後，產生 bg-primary、rounded-card、shadow-raise 等 class |\n| case-center.css | 案管中心 repo：貼在 case-center-ui-redesign/src/styles.css 最後面，覆寫展示牆樣式的值 |\n\n深色模式：theme.css 與 tailwind-theme.css 跟著系統設定，或在 <html> 加 data-theme="dark"。\n`;
+    const README = () => `# 設計 token 匯出\n\n${stamp()}\n\n| 檔案 | 用途 |\n|---|---|\n| react/、vue/ | React、Vue 套件（TypeScript）：主題（tokens、ThemeProvider／外掛、動態、圖表）＋ 元件規格（components.css、COMPONENTS.md）＋ 給 AI 的指令（AI_INSTRUCTIONS.md），用來產出和展示牆一模一樣的元件 |
+| tokens.json | W3C Design Tokens 格式：Figma Tokens Studio、Style Dictionary 可讀；也能在元件展示牆「⋯ › 匯入」載回來繼續調 |\n| theme.css | 通用 CSS 變數（淺色＋深色），任何網頁系統直接引入，用 var(--color-primary) 等取值 |\n| tailwind-theme.css | Tailwind v4：貼在 @import "tailwindcss"; 之後，產生 bg-primary、rounded-card、shadow-raise 等 class |\n| case-center.css | 案管中心 repo：貼在 case-center-ui-redesign/src/styles.css 最後面，覆寫展示牆樣式的值 |\n\n深色模式：theme.css 與 tailwind-theme.css 跟著系統設定，或在 <html> 加 data-theme="dark"。\n`;
     async function exportAll() {
       const files = Object.values(EXPORT).map((f) => f());
       if (typeof JSZip === 'undefined') { await deliver('tokens.json', files[0][1], files[0][1]); return; }
       const zip = new JSZip();
       for (const [name, data] of files) zip.file(name, data);
+      for (const make of Object.values(PKG)) for (const [name, data] of make()) zip.file(name, data);
       zip.file('README.md', README());
       const blob = await zip.generateAsync({ type: 'blob' });
       const slug = (findTheme(selected)?.name || 'custom').replace(/[^\w一-鿿-]+/g, '-');
@@ -3982,10 +4541,18 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     }
     /* ---- 分享彈窗：切換對象看程式碼，可複製、下載；底部全部下載（.zip） ---- */
     const sh = $('#sh'), shBd = $('#sh-bd');
-    const SH_DESC = { json: '給設計師・Figma Tokens Studio、Style Dictionary 可讀', css: '給工程師・CSS 變數，任何網頁都能用', tw: '給 Tailwind v4 專案・@theme 主題', cc: '給案管中心・直接套進案管中心的 styles.css' };
+    const SH_DESC = { json: '給設計師・Figma Tokens Studio、Style Dictionary 可讀', css: '給工程師・CSS 變數，任何網頁都能用', tw: '給 Tailwind v4 專案・@theme 主題', cc: '給案管中心・直接套進案管中心的 styles.css', react: 'React 套件（TypeScript）・主題＋全部元件規格；把 AI_INSTRUCTIONS.md 交給 AI 產出元件', vue: 'Vue 3 套件（TypeScript）・主題＋全部元件規格；把 AI_INSTRUCTIONS.md 交給 AI 產出元件' };
+    let shPkg = null, shAt = 0;
     let shFrom = null, shK = 'json', shFile = ['', ''];
     function shShow(k, focus) {
-      shK = k; shFile = EXPORT[k]();
+      shK = k;
+      // React／Vue 是多檔套件：檔名換成下拉，預設顯示說明檔
+      shPkg = PKG[k] ? PKG[k]() : null;
+      if (shPkg) { shAt = Math.max(0, shPkg.findIndex(([n]) => n.endsWith('AI_INSTRUCTIONS.md'))); shFile = shPkg[shAt]; }
+      else shFile = EXPORT[k]();
+      const sel = $('#sh-files');
+      sel.hidden = !shPkg; $('#sh-name').hidden = !!shPkg;
+      if (shPkg) sel.replaceChildren(...shPkg.map(([n], i) => { const o = document.createElement('option'); o.value = i; o.textContent = n; o.selected = i === shAt; return o; }));
       $$('.sh-tabs [role="tab"]', sh).forEach((b) => { const on = b.dataset.k === k; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); });
       $('#sh-code').setAttribute('aria-labelledby', 'sh-tab-' + k);
       $('#sh-name').textContent = shFile[0];
@@ -4010,6 +4577,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       if (shFrom && shFrom.isConnected) shFrom.focus({ preventScroll: true });
     }
     $('#cz-share').addEventListener('click', openShare);
+    $('#sh-files').addEventListener('change', (e) => { shAt = +e.target.value; shFile = shPkg[shAt]; $('#sh-code code').textContent = shFile[1]; $('#sh-code').scrollTop = 0; });
     $('.sh-x', sh).addEventListener('click', closeShare);
     shBd.addEventListener('click', closeShare);
     // 頁籤：點選或左右鍵切換
@@ -4043,11 +4611,17 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const act = b.dataset.act;
       if (act === 'copy') {
         const ok = await copyText(shFile[1]);
-        say(ok ? '已複製 ' + shFile[0] + ' 的內容。' : '無法複製，請在程式碼區按 Ctrl＋A 全選後手動複製。', !ok);
+        say(ok ? '已複製 ' + shFile[0].split('/').pop() + ' 的內容。' : '無法複製，請在程式碼區按 Ctrl＋A 全選後手動複製。', !ok);
         if (ok) shFlash(b, '已複製');
         return;
       }
-      const ok = act === 'all' ? await exportAll() : await deliver(shFile[0], shFile[1], null);
+      let ok;
+      if (act === 'all') ok = await exportAll();
+      else if (shPkg && typeof JSZip !== 'undefined') {
+        // 套件：下載整包
+        const zip = new JSZip(); for (const [n, d] of shPkg) zip.file(n, d);
+        ok = await deliver(shK + '-theme.zip', await zip.generateAsync({ type: 'blob' }), null);
+      } else ok = await deliver(shFile[0].split('/').pop(), shFile[1], null);
       if (ok) shFlash(b, '已下載');
     }));
     $('#cz-import-btn').addEventListener('click', () => { closeMenus(); $('#cz-import').click(); });

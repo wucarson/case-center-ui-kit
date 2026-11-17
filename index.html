@@ -1000,6 +1000,15 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sp-seg button { position: relative; z-index: 1; padding: 0; border: 0; background: none; color: var(--weak); font: inherit; font-size: 13px; cursor: pointer; transition: color calc(.25s * var(--dur)); }
 .sp-seg button[aria-checked="true"] { color: var(--ink); font-weight: 600; }
 .sp-seg button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; border-radius: var(--r-sm); }
+/* 深色模式：分段切換的滑塊要比底軌亮一階（原本用卡片底色，比底軌還暗、看不出選中） */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) :is(.seg, .sp-seg) > i { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); } }
+:root[data-theme="dark"] :is(.seg, .sp-seg) > i { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); }
+/* 欄位滑過（下拉、搜尋、表單欄位、多選、日期）：框線加深一階，同 4301 的 --cc-control-border-hover（line-strong）。
+   規格樣本用 .hv；暫停後直接操作時是真的 :hover；展開、聚焦、錯誤、唯讀、停用時不套 */
+:is(.dd-t, .search, .ms-t, .dp-f).hv, .ff.hv .ff-i { border-color: var(--line-strong); }
+@media (hover: hover) and (pointer: fine) {
+  .cell.held.live :is(.dd:not(.open) > .dd-t, .ms:not(.open) > .ms-t, .dp:not(.open) > .dp-f, .search:not(.focus), .ff:not(.focus, .bad, .ro, .dis) > .ff-i):hover { border-color: var(--line-strong); }
+}
 /* 程式範例 */
 .sp-code { position: relative; border-radius: var(--r-md); background: color-mix(in srgb, var(--soft) 55%, var(--line-subtle)); }
 .sp-code pre { margin: 0; padding: 16px 18px; overflow-x: auto; font: 12.5px/21px ui-monospace, 'SF Mono', 'JetBrains Mono', Consolas, monospace; color: var(--muted); tab-size: 2; }
@@ -1029,6 +1038,42 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .cmdk { position: fixed; z-index: 41; left: 50%; top: 12vh; width: min(560px, calc(100vw - 32px)); max-height: 70vh; display: flex; flex-direction: column; translate: -50% 0; border: 1px solid var(--line); border-radius: var(--r-lg); background: color-mix(in srgb, var(--surface) 92%, transparent); -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5); box-shadow: var(--shadow-pop); opacity: 0; transform: scale(.96) translateY(-6px); transition: opacity calc(.15s * var(--dur)) ease-in, transform calc(.15s * var(--dur)) ease-in; font-size: 14px; line-height: 22px; }
 .cmdk.open { opacity: 1; transform: none; transition: opacity calc(.2s * var(--dur)) var(--ease), transform calc(.45s * var(--dur)) var(--spring-soft); }
 .cmdk [hidden], .cmdk[hidden] { display: none !important; }
+/* 分享彈窗：沿用搜尋彈窗的外觀與進出場 */
+.sh { position: fixed; z-index: 41; left: 50%; top: 50%; width: min(520px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; translate: -50% -50%; display: flex; flex-direction: column; gap: 14px; padding: 18px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-pop); opacity: 0; transform: scale(.96); transition: opacity calc(.15s * var(--dur)) ease-in, transform calc(.15s * var(--dur)) ease-in; font-size: 14px; line-height: 22px; color: var(--ink); }
+.sh.open { opacity: 1; transform: none; transition: opacity calc(.2s * var(--dur)) var(--ease), transform calc(.45s * var(--dur)) var(--spring-soft); }
+.sh[hidden] { display: none; }
+.sh svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.sh-h { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.sh-h b { display: block; font-size: 16px; line-height: 24px; font-weight: 600; }
+.sh-h small { display: block; font-size: 12px; line-height: 18px; color: var(--weak); }
+.sh-x { width: 32px; height: 32px; display: grid; place-items: center; margin: -4px -6px 0 0; border: 0; border-radius: var(--r-md); background: none; color: var(--weak); cursor: pointer; }
+.sh-x:hover { background: var(--hover); color: var(--ink); }
+.sh { width: min(640px, calc(100vw - 32px)); gap: 12px; }
+.sh-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 3px; border-radius: var(--r-md); background: var(--soft); box-shadow: var(--inset); }
+.sh-tabs button { height: 30px; border: 0; border-radius: max(2px, calc(var(--r-md) - 3px)); background: transparent; color: var(--weak); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background calc(.2s * var(--dur)), color calc(.2s * var(--dur)), scale calc(.2s * var(--dur)) var(--spring); }
+.sh-tabs button:hover { color: var(--ink); }
+.sh-tabs button:active { scale: .96; }
+.sh-tabs button[aria-selected="true"] { background: var(--tile); color: var(--ink); box-shadow: var(--raise); }
+.sh-file { display: flex; align-items: center; gap: 8px; }
+.sh-file > div { flex: 1; min-width: 0; }
+.sh-file code { display: block; font: 600 13px/20px ui-monospace, Consolas, monospace; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sh-file small { display: block; font-size: 12px; line-height: 18px; color: var(--weak); }
+.sh-act { height: 32px; flex: none; }
+.sh-act.done { color: var(--ok-fg); }
+.sh-code { margin: 0; height: min(340px, 45vh); overflow: auto; padding: 12px 14px; border: 1px solid var(--line-subtle); border-radius: var(--r-md); background: var(--soft); font: 12px/19px ui-monospace, Consolas, monospace; color: var(--muted); white-space: pre; tab-size: 2; }
+.sh-f { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.sh-all { height: 38px; margin-left: auto; padding: 0 16px; display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: var(--r-md); background: var(--grad); color: var(--on-primary); box-shadow: 0 6px 12px -6px var(--glow), inset 0 1px 0 rgb(255 255 255 / .3); font: inherit; font-weight: 600; cursor: pointer; transition: scale calc(.2s * var(--dur)) var(--spring), filter calc(.2s * var(--dur)); }
+.sh-all:hover { filter: brightness(1.06); }
+.sh-all:active { scale: .97; }
+.sh-all.done { background: var(--ok-grad); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sh-tabs button[aria-selected="true"] { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); } }
+:root[data-theme="dark"] .sh-tabs button[aria-selected="true"] { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); }
+@media (max-width: 480px) { .sh-file { flex-wrap: wrap; } .sh-file > div { flex-basis: 100%; } }
+.sh :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.sh-note { margin: 0; min-height: 18px; font-size: 12px; line-height: 18px; color: var(--weak); }
+.sh-note:empty { display: none; }
+.sh-note.warn { color: var(--warn-fg); }
+@media (max-width: 480px) { .sh-g { grid-template-columns: minmax(0, 1fr); } }
 .ck-i { flex: none; display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 16px; border-bottom: 1px solid var(--line-subtle); color: var(--weak); }
 .ck-i svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; flex: none; }
 .ck-i input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; color: var(--ink); font: inherit; font-size: 16px; outline: none; }
@@ -1101,6 +1146,18 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .cz-seg button:hover { color: var(--ink); }
 .cz-seg button:active { scale: .95; }
 .cz-seg button[aria-pressed="true"] { background: var(--tint); color: var(--selected-fg); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 22%, transparent); }
+/* 深色模式的設定面板：選中狀態全部對齊元件的分段切換（選中片比底亮一階＋頂端亮邊、字用 ink，不用主色框）。
+   套用：風格、字型、字級／層次、底色、圓角、動畫、基本／進階／顯示。外層區塊底色調亮一點，跟面板底色拉開 */
+@media (prefers-color-scheme: dark) {
+:root:not([data-theme="light"]) .cz-blk { background: color-mix(in srgb, var(--soft) 65%, var(--hover)); }
+:root:not([data-theme="light"]) :is(.cz-seg, .cz-pane) { background: var(--soft); }
+:root:not([data-theme="light"]) :is(.cz-seg button[aria-pressed="true"], .cz-pane button[aria-selected="true"], .cz-style[aria-pressed="true"], .cz-opt[aria-pressed="true"]) { background: var(--hover); color: var(--ink); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); }
+:root:not([data-theme="light"]) .cz-seg button[aria-pressed="true"] { font-weight: 600; }
+}
+:root[data-theme="dark"] .cz-blk { background: color-mix(in srgb, var(--soft) 65%, var(--hover)); }
+:root[data-theme="dark"] :is(.cz-seg, .cz-pane) { background: var(--soft); }
+:root[data-theme="dark"] :is(.cz-seg button[aria-pressed="true"], .cz-pane button[aria-selected="true"], .cz-style[aria-pressed="true"], .cz-opt[aria-pressed="true"]) { background: var(--hover); color: var(--ink); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); }
+:root[data-theme="dark"] .cz-seg button[aria-pressed="true"] { font-weight: 600; }
 .cz-range { display: flex; align-items: center; gap: 10px; }
 .cz-range input { flex: 1; accent-color: var(--primary); }
 .cz-range output { min-width: 40px; text-align: right; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); }
@@ -1756,6 +1813,29 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
 
 <div class="ck-bd" id="ck-bd" hidden></div>
+<div class="ck-bd" id="sh-bd" hidden></div>
+<div class="sh" id="sh" role="dialog" aria-modal="true" aria-labelledby="sh-t" aria-describedby="sh-sub" hidden>
+  <div class="sh-h">
+    <div><b id="sh-t">分享主題</b><small id="sh-sub"></small></div>
+    <button class="sh-x" type="button" aria-label="關閉"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="sh-tabs" role="tablist" aria-label="分享對象">
+    <button type="button" role="tab" id="sh-tab-json" aria-controls="sh-code" data-k="json" aria-selected="true">設計師</button>
+    <button type="button" role="tab" id="sh-tab-css" aria-controls="sh-code" data-k="css" aria-selected="false" tabindex="-1">工程師</button>
+    <button type="button" role="tab" id="sh-tab-tw" aria-controls="sh-code" data-k="tw" aria-selected="false" tabindex="-1">Tailwind</button>
+    <button type="button" role="tab" id="sh-tab-cc" aria-controls="sh-code" data-k="cc" aria-selected="false" tabindex="-1">案管中心</button>
+  </div>
+  <div class="sh-file">
+    <div><code id="sh-name"></code><small id="sh-desc"></small></div>
+    <button class="cz-btn sh-act" type="button" data-act="copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span>複製</span></button>
+    <button class="cz-btn sh-act" type="button" data-act="dl"><svg viewBox="0 0 24 24"><path d="M12 4v11M8 11l4 4 4-4"/><path d="M5 19h14"/></svg><span>下載</span></button>
+  </div>
+  <pre class="sh-code" id="sh-code" role="tabpanel" tabindex="0" aria-labelledby="sh-tab-json"><code></code></pre>
+  <div class="sh-f">
+    <p class="sh-note" id="sh-note" aria-live="polite"></p>
+    <button class="sh-all" type="button" data-act="all"><svg viewBox="0 0 24 24"><path d="M12 4v11M8 11l4 4 4-4"/><path d="M5 19h14"/></svg><span>全部下載（.zip）</span></button>
+  </div>
+</div>
 <div class="cmdk" id="ck" role="dialog" aria-modal="true" aria-label="搜尋元件" hidden>
   <div class="ck-i"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input id="ck-q" type="text" role="combobox" aria-expanded="true" aria-controls="ck-l" aria-autocomplete="list" placeholder="搜尋元件：名稱、英文、程式名稱" autocomplete="off" spellcheck="false"><kbd>Esc</kbd></div>
   <div class="ck-l" id="ck-l" role="listbox" aria-label="元件"></div>
@@ -1796,14 +1876,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     <div class="cz-act">
       <button class="cz-btn pri" id="cz-save" type="button"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>儲存</span></button>
       <div class="cz-split">
-        <button class="cz-btn" id="cz-share" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="cz-share-menu"><svg viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v6.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V12"/></svg><span>分享</span></button>
-        <div class="cz-menu" id="cz-share-menu" role="menu" hidden>
-          <button role="menuitem" type="button" data-exp="all"><b>下載全部</b><span>一次拿到所有格式（推薦）</span></button>
-          <button role="menuitem" type="button" data-exp="json"><b>給設計師</b><span>Figma 用的設計檔・tokens.json</span></button>
-          <button role="menuitem" type="button" data-exp="css"><b>給工程師</b><span>任何網頁都能用・theme.css</span></button>
-          <button role="menuitem" type="button" data-exp="tw"><b>給 Tailwind 專案</b><span>tailwind-theme.css</span></button>
-          <button role="menuitem" type="button" data-exp="cc"><b>給案管中心</b><span>直接套進案管中心・case-center.css</span></button>
-        </div>
+        <button class="cz-btn" id="cz-share" type="button" aria-haspopup="dialog" aria-controls="sh"><svg viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v6.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V12"/></svg><span>分享</span></button>
       </div>
     </div>
     <input type="file" id="cz-import" accept=".json,application/json" hidden>
@@ -3162,6 +3235,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       },
     };
     const DEPTH = [0, 0.55, 1, 1.5];
+    // 淺色陰影跟著底色色調：預設偏藍（冷）；中性改灰、偏暖改暖棕，陰影才不會在暖底上泛藍
+    const SH_TINT = { neutral: [['16 24 40', '18 20 24'], ['20 40 80', '28 31 36'], ['30 70 150', '40 45 54']], warm: [['16 24 40', '32 22 12'], ['20 40 80', '52 38 22'], ['30 70 150', '90 62 30']] };
+    const tintShadow = (str, tone) => (SH_TINT[tone] || []).reduce((acc, [a, b]) => acc.split(`rgb(${a} /`).join(`rgb(${b} /`), str);
     const scaleShadow = (s, k) => s.replace(/\/ (\.\d+|\d+(?:\.\d+)?)\)/g, (m, a) => `/ ${+Math.min(1, a * k).toFixed(3)})`);
     const BOUNCE = {
       none: ['cubic-bezier(.22,1,.36,1)', 'cubic-bezier(.22,1,.36,1)'],
@@ -3209,9 +3285,15 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           out['card-edge'] = t.depth.border === 'strong' ? out.line : m === 'light' ? 'rgb(255 255 255 / .6)' : 'rgb(255 255 255 / .04)';
         }
       }
-      if (t.depth.shadow !== d.depth.shadow) {
-        const k = DEPTH[t.depth.shadow];
-        for (const [m, out] of [['light', L], ['dark', Dk]]) for (const [key, s] of Object.entries(SHADOW[m])) out[key] = k === 0 && key !== 'inset' ? 'none' : scaleShadow(s, k || 0.0001);
+      if (t.depth.shadow !== d.depth.shadow || neutralChanged) {
+        const k = DEPTH[t.depth.shadow], depthChanged = t.depth.shadow !== d.depth.shadow;
+        for (const [m, out] of [['light', L], ['dark', Dk]]) {
+          if (m === 'dark' && !depthChanged) continue;   // 深色陰影是黑色，不受色調影響
+          for (const [key, s0] of Object.entries(SHADOW[m])) {
+            const s = m === 'light' ? tintShadow(s0, c.neutral) : s0;
+            out[key] = k === 0 && key !== 'inset' ? 'none' : scaleShadow(s, k || 0.0001);
+          }
+        }
       }
       if (t.depth.glow !== d.depth.glow || c.primary !== d.color.primary || c.darkPrimary || c.success !== d.color.success) {
         const g = t.depth.glow / 100;
@@ -3315,7 +3397,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const setPath = (o, p, v) => { const ks = p.split('.'); const last = ks.pop(); ks.reduce((a, k) => a[k], o)[last] = clone(v); };
     const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
     const note = $('#cz-note');
-    const say = (msg, warn = false) => { note.textContent = msg; note.classList.toggle('warn', warn); };
+    const say = (msg, warn = false) => {
+      note.textContent = msg; note.classList.toggle('warn', warn);
+      const shn = document.getElementById('sh-note'), shd = document.getElementById('sh');
+      if (shn && shd && !shd.hidden) { shn.textContent = msg; shn.classList.toggle('warn', warn); }
+    };
 
     /* ---- 復原／重做 ---- */
     let hist = [JSON.stringify(theme)], hi = 0;
@@ -3410,7 +3496,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     })();
 
     /* ---- 選單（匯出單一格式、更多動作） ---- */
-    const menus = [['#cz-share', '#cz-share-menu'], ['#cz-more', '#cz-more-menu']];
+    const menus = [['#cz-more', '#cz-more-menu']];
     function closeMenus() { for (const [b, m] of menus) { $(m).hidden = true; $(b).setAttribute('aria-expanded', 'false'); } }
     for (const [b, m] of menus) {
       $(b).addEventListener('click', (e) => { e.stopPropagation(); const open = $(m).hidden; closeMenus(); if (open) { $(m).hidden = false; $(b).setAttribute('aria-expanded', 'true'); $(m).querySelector('button:not(:disabled)')?.focus(); } });
@@ -3866,10 +3952,19 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       outBox.hidden = true;
       const dl = await getDownloads();
       if (dl) {
-        try { await dl.save({ filename: name, data }); say(`已下載 ${name}。`); return; }
+        try { await dl.save({ filename: name, data }); say(`已下載 ${name}。`); return true; }
         catch (e) { if (e?.code !== 'unavailable') { say(`沒有下載 ${name}（取消了或被拒絕）。`, true); return; } }
       }
-      if (!textFallback) { say('這裡不能下載壓縮檔；請在「分享」選一個對象，改用複製。', true); return; }
+      // 一般瀏覽器（本機檔案、GitHub Pages）沒有 Artifact 的下載功能：用 <a download> 直接下載
+      try {
+        const type = name.endsWith('.zip') ? 'application/zip' : name.endsWith('.json') ? 'application/json' : 'text/css';
+        const blob = data instanceof Blob ? data : new Blob([data], { type });
+        const url = URL.createObjectURL(blob), a = document.createElement('a');
+        a.href = url; a.download = name; a.hidden = true; document.body.append(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+        say(`已下載 ${name}。`); return true;
+      } catch (e) { /* 再退回複製 */ }
+      if (!textFallback) { say('這裡不能下載壓縮檔，請改用下方單一格式。', true); return; }
       outBox.value = textFallback; outBox.hidden = false;
       try { await navigator.clipboard.writeText(textFallback); say(`這裡不能下載檔案，已把 ${name} 的內容複製到剪貼簿（下方也有一份）。`); }
       catch (e) { outBox.select(); say(`這裡不能下載檔案；${name} 的內容在下方，已全選，按 Ctrl＋C 複製。`); }
@@ -3883,9 +3978,78 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       zip.file('README.md', README());
       const blob = await zip.generateAsync({ type: 'blob' });
       const slug = (findTheme(selected)?.name || 'custom').replace(/[^\w一-鿿-]+/g, '-');
-      await deliver(`design-tokens-${slug}.zip`, blob, null);
+      return deliver(`design-tokens-${slug}.zip`, blob, null);
     }
-    $$('#cz-share-menu [data-exp]').forEach((b) => b.addEventListener('click', async () => { closeMenus(); if (b.dataset.exp === 'all') return exportAll(); const [name, data] = EXPORT[b.dataset.exp](); await deliver(name, data, data); }));
+    /* ---- 分享彈窗：切換對象看程式碼，可複製、下載；底部全部下載（.zip） ---- */
+    const sh = $('#sh'), shBd = $('#sh-bd');
+    const SH_DESC = { json: '給設計師・Figma Tokens Studio、Style Dictionary 可讀', css: '給工程師・CSS 變數，任何網頁都能用', tw: '給 Tailwind v4 專案・@theme 主題', cc: '給案管中心・直接套進案管中心的 styles.css' };
+    let shFrom = null, shK = 'json', shFile = ['', ''];
+    function shShow(k, focus) {
+      shK = k; shFile = EXPORT[k]();
+      $$('.sh-tabs [role="tab"]', sh).forEach((b) => { const on = b.dataset.k === k; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); });
+      $('#sh-code').setAttribute('aria-labelledby', 'sh-tab-' + k);
+      $('#sh-name').textContent = shFile[0];
+      $('#sh-desc').textContent = SH_DESC[k];
+      $('#sh-code code').textContent = shFile[1];
+      $('#sh-code').scrollTop = 0;
+    }
+    function openShare() {
+      if (!sh.hidden) return;
+      closeMenus(); shFrom = document.activeElement;
+      const tn = findTheme(selected)?.name;
+      $('#sh-sub').textContent = tn ? '目前的主題：' + tn : '目前的設定（尚未儲存成主題）';
+      $('#sh-note').textContent = '';
+      shShow(shK);
+      sh.hidden = shBd.hidden = false; void sh.offsetWidth; sh.classList.add('open'); shBd.classList.add('open');
+      $('.sh-tabs [aria-selected="true"]', sh).focus();
+    }
+    function closeShare() {
+      if (sh.hidden) return;
+      sh.classList.remove('open'); shBd.classList.remove('open');
+      setTimeout(() => { sh.hidden = shBd.hidden = true; }, D(200));
+      if (shFrom && shFrom.isConnected) shFrom.focus({ preventScroll: true });
+    }
+    $('#cz-share').addEventListener('click', openShare);
+    $('.sh-x', sh).addEventListener('click', closeShare);
+    shBd.addEventListener('click', closeShare);
+    // 頁籤：點選或左右鍵切換
+    const shTabs = $$('.sh-tabs [role="tab"]', sh);
+    shTabs.forEach((b, i) => {
+      b.addEventListener('click', () => shShow(b.dataset.k));
+      b.addEventListener('keydown', (e) => {
+        const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (!d) return;
+        e.preventDefault(); shShow(shTabs[(i + d + shTabs.length) % shTabs.length].dataset.k, true);
+      });
+    });
+    sh.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { e.stopPropagation(); closeShare(); return; }
+      if (e.key !== 'Tab') return;   // 焦點留在彈窗裡
+      const f = $$('button:not([tabindex="-1"]), pre[tabindex]', sh).filter((x) => x.offsetParent), first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+    const shFlash = (b, text) => {
+      const label = $('span', b), was = b.dataset.label || label.textContent; b.dataset.label = was;
+      b.classList.add('done'); label.textContent = text;
+      clearTimeout(b._t); b._t = setTimeout(() => { b.classList.remove('done'); label.textContent = was; }, 2000);
+    };
+    async function copyText(t) {
+      try { await navigator.clipboard.writeText(t); return true; } catch (e) {
+        const ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;opacity:0'; sh.append(ta); ta.select();
+        let ok = false; try { ok = document.execCommand('copy'); } catch (e2) {} ta.remove(); return ok;
+      }
+    }
+    $$('[data-act]', sh).forEach((b) => b.addEventListener('click', async () => {
+      const act = b.dataset.act;
+      if (act === 'copy') {
+        const ok = await copyText(shFile[1]);
+        say(ok ? '已複製 ' + shFile[0] + ' 的內容。' : '無法複製，請在程式碼區按 Ctrl＋A 全選後手動複製。', !ok);
+        if (ok) shFlash(b, '已複製');
+        return;
+      }
+      const ok = act === 'all' ? await exportAll() : await deliver(shFile[0], shFile[1], null);
+      if (ok) shFlash(b, '已下載');
+    }));
     $('#cz-import-btn').addEventListener('click', () => { closeMenus(); $('#cz-import').click(); });
     $('#cz-import').addEventListener('change', async (e) => {
       const f = e.target.files?.[0]; e.target.value = '';
@@ -3921,14 +4085,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     /* 元件說明（說明側欄與 ⌘K 搜尋共用）：s 狀態、d 定義、u 什麼時候用、x 不要用在、st 狀態與互動、a 無障礙、r repo 對應、k 別名（搜尋用） */
     const DOC = {
       'c-dd': { s: '穩定', d: '從固定清單選一個值，清單不長、不需要輸入。', u: ['選項 5–15 個的篩選或欄位'], x: ['選項超過 15 個：改用可搜尋的多選下拉', '只有 2–4 個互斥選項：改用分段切換'], st: 'Closed、Open、Hover、Selected、Disabled', a: ['方向鍵移動、Enter 選取、Esc 關閉', '目前值要念得出來'], r: 'app-combo・shared/components/combo.ts', k: 'select dropdown combobox 下拉 選單' },
-      'c-search': { s: '穩定', d: '邊打字邊列出相符的標籤或標題，可直接選建議。', u: ['公告、知識庫的標題與標籤搜尋'], x: ['結構化篩選（部門、狀態）：用下拉或篩選標籤'], st: 'Empty、Typing、Suggestions、No results', a: ['建議清單用方向鍵瀏覽', '結果數量要告知讀屏'], r: 'app-tag-search・shared/components/tag-search.ts', k: 'search autocomplete typeahead 搜尋 建議' },
+      'c-search': { s: '穩定', d: '邊打字邊列出相符的標籤或標題，可直接選建議。', u: ['公告、知識庫的標題與標籤搜尋'], x: ['結構化篩選（部門、狀態）：用下拉或篩選標籤'], st: 'Empty、Hover、Typing、Suggestions、No results', a: ['建議清單用方向鍵瀏覽', '結果數量要告知讀屏'], r: 'app-tag-search・shared/components/tag-search.ts', k: 'search autocomplete typeahead 搜尋 建議' },
       'c-btn': { s: '穩定', d: '觸發動作。主要鈕一個畫面只放一個，其餘用次要或圖示鈕。', u: ['送出表單、儲存、確認對話框', '觸發會改變資料的動作：新增、指派、刪除', '頁首與表單底部用 48，卡片、表格、工具列內用 32'], x: ['一個畫面放兩個以上的主要鈕：看不出哪個才是重點', '刪除用主要鈕：改用紅字外框，按下後再確認', '只是換頁：用連結，讀屏才不會念成「按鈕」'], st: 'Default、Hover、Pressed、Loading、Success、Disabled', a: ['圖示鈕一定要有 aria-label', '焦點框不可拿掉'], r: 'button[hlmBtn]・shared/ui/button', k: 'button cta 按鈕 主要 次要 刪除' },
       'c-seg': { s: '穩定', d: '2–4 個互斥的檢視切換，選中片會滑過去。', u: ['日／週／月、清單／看板'], x: ['超過 4 個選項：改用頁籤或下拉'], st: 'Selected、Hover、Pressed', a: ['用 role=radiogroup 或 tablist', '左右鍵切換'], r: '.cc-segmented・[appSlideIndicator]', k: 'segmented control toggle group 分段 切換' },
       'c-tg': { s: '穩定', d: '立即生效的開或關，不用再按儲存。', u: ['篩選條件、通知設定'], x: ['要按儲存才生效的表單：用核取方塊'], st: 'On、Off、Disabled、Locked', a: ['用 role=switch 與 aria-checked', '標籤要說明「開」代表什麼'], r: 'input[appSwitch]・shared/components/switch.ts', k: 'switch toggle 開關' },
       'c-hold': { s: '穩定', d: '按住一段時間才送出，防止誤觸不可復原的動作。', u: ['結案、批次作廢這類重大且常做的動作'], x: ['偶爾才做的刪除：用確認對話框比較清楚'], st: 'Default、Holding、Complete', a: ['鍵盤可按住空白鍵', '提示要寫出要按多久'], r: 'app-hold-to-confirm・shared/components/hold-to-confirm.ts', k: 'hold to confirm long press 按住 確認' },
       'c-drag': { s: '穩定', d: '拖握把調整順序，其他列滑開讓位，原位留虛線空位。', u: ['欄位顯示順序、覆核順序'], x: ['跨群組移動：用「移動到…」選單比拖移好找'], st: 'Handle hover、Lifted、Reflow、Dropped、Locked', a: ['握把可聚焦，上下鍵移動', '移動後告知目前第幾個'], r: 'cdkDrag・shared/data-list（欄位面板）', k: 'drag drop sort reorder 拖移 排序' },
-      'c-ff': { s: '穩定', d: '標籤＋輸入框＋說明／錯誤的外框；錯誤訊息佔位不跳動。', u: ['需要使用者輸入或修改值的欄位', '系統帶入、但要讓人看到的值（唯讀）', '同一張表單的欄位都用它包，標籤、說明、錯誤的位置才會一致'], x: ['只用 placeholder 當標籤：打字後就看不到這格要填什麼', '錯誤訊息只寫「格式錯誤」：要說明怎麼修正', '系統帶入的值標「選填」：改用唯讀，讓人知道不能改'], st: 'Required、Optional、Read-only、Empty、Focus、Error、Counter', a: ['錯誤用 role=alert', '必填語意要念得出來，不只星號'], r: 'app-form-field・shared/components/form-field.ts', k: 'form field input text field 表單 欄位 輸入框' },
-      'c-ms': { s: '穩定', d: '從清單勾選多個；沒選＝全部。按鈕列出已選名稱和數量。', u: ['部門、成員這類多選篩選'], x: ['只能選一個：用下拉選單'], st: 'None、Selected (N)、Searchable、Clear', a: ['勾選項用 aria-selected', '數量變化要告知'], r: 'app-multi-select・shared/components/multi-select.ts', k: 'multi select checkbox list 多選 下拉' },
+      'c-ff': { s: '穩定', d: '標籤＋輸入框＋說明／錯誤的外框；錯誤訊息佔位不跳動。', u: ['需要使用者輸入或修改值的欄位', '系統帶入、但要讓人看到的值（唯讀）', '同一張表單的欄位都用它包，標籤、說明、錯誤的位置才會一致'], x: ['只用 placeholder 當標籤：打字後就看不到這格要填什麼', '錯誤訊息只寫「格式錯誤」：要說明怎麼修正', '系統帶入的值標「選填」：改用唯讀，讓人知道不能改'], st: 'Required、Optional、Read-only、Empty、Hover、Focus、Error、Counter', a: ['錯誤用 role=alert', '必填語意要念得出來，不只星號'], r: 'app-form-field・shared/components/form-field.ts', k: 'form field input text field 表單 欄位 輸入框' },
+      'c-ms': { s: '穩定', d: '從清單勾選多個；沒選＝全部。按鈕列出已選名稱和數量。', u: ['部門、成員這類多選篩選'], x: ['只能選一個：用下拉選單'], st: 'None、Hover、Selected (N)、Searchable、Clear', a: ['勾選項用 aria-selected', '數量變化要告知'], r: 'app-multi-select・shared/components/multi-select.ts', k: 'multi select checkbox list 多選 下拉' },
       'c-mn': { s: '穩定', d: '⋯ 收起次要動作；單行項目，刪除類放最後用紅字。', u: ['詳情頁、列表列的更多動作'], x: ['常用動作：直接放成按鈕，不要藏'], st: 'Open、Hover、Disabled with reason、Destructive', a: ['role=menu／menuitem，方向鍵移動', 'Esc 關閉後焦點回到 ⋯'], r: '[appMenu]・shared/menu.directive.ts', k: 'menu dropdown menu kebab more actions 選單 更多' },
       'c-tabs': { s: '穩定', d: '同一頁內切換平行內容，可帶數量徽章。', u: ['列表的分類切換'], x: ['切換後網址要能分享：用詳情頁籤'], st: 'Selected、Hover、Count badge', a: ['role=tablist，左右鍵切換'], r: '[hlmTabs]・shared/ui/tabs', k: 'tabs 頁籤 分頁' },
       'c-dtab': { s: '穩定', d: '詳情頁的頁籤列：圖示＋數量，選中片滑動，選中時圖示填滿。', u: ['案件、工單、專案詳情'], x: ['頁籤超過 9 個：重新分組'], st: 'Selected (filled icon)、Hover、Count badge、Group divider', a: ['?tab= 寫進網址', '左右鍵切換、Home／End'], r: 'app-detail-tabs・shared/components/detail-tabs.ts', k: 'detail tabs tab bar 詳情 頁籤' },
@@ -3952,7 +4116,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       'c-up': { s: '穩定', d: '上傳附件，顯示進度、完成與檔案類型。', u: ['案件、工單附件'], x: ['大量檔案管理：用文件頁籤'], st: 'Drag over、Uploading、Complete、Failed', a: ['進度用 progressbar', '上傳結果要告知'], r: 'app-doc-list・shared/components/doc-list.ts', k: 'upload file attachment 上傳 附件 檔案' },
       'c-chips': { s: '穩定', d: '目前套用的篩選條件，可逐一移除。', u: ['列表頁的篩選列'], x: ['選擇條件本身：用下拉或多選'], st: 'Added、Removed', a: ['移除鈕 aria-label 寫出條件名稱'], r: 'app-dept-chips・.cc-chip', k: 'chip tag filter 篩選 標籤' },
       'c-tp': { s: '穩定', d: '選時間，時與分可分別上下調。', u: ['工時起訖、提醒時間'], x: ['只需要日期：用日期選擇'], st: 'Open、Adjust', a: ['可直接輸入，上下鍵調整'], r: 'app-time-picker・shared/components/time-picker.ts', k: 'time picker 時間' },
-      'c-dp': { s: '提案', d: '選單一日期，附快捷（今天、明天、一週後、月底）。', u: ['到期日、開始日'], x: ['選一段期間：用期間選擇'], st: 'Open、Preset、Selected、Close', a: ['月曆用方向鍵移動，Enter 選取'], r: 'app-date-picker・shared/components/date-picker.ts', k: 'date picker calendar 日期 月曆' },
+      'c-dp': { s: '提案', d: '選單一日期，附快捷（今天、明天、一週後、月底）。', u: ['到期日、開始日'], x: ['選一段期間：用期間選擇'], st: 'Hover、Open、Preset、Selected、Close', a: ['月曆用方向鍵移動，Enter 選取'], r: 'app-date-picker・shared/components/date-picker.ts', k: 'date picker calendar 日期 月曆' },
       'c-ps': { s: '穩定', d: '選報表期間：本月、近 30 天、近 90 天或自訂。', u: ['報表頁首'], x: ['單一日期：用日期選擇'], st: 'Preset、Custom range、Day count', a: ['範圍要以文字顯示'], r: 'app-period-picker・shared/components/period-picker.ts', k: 'period picker date range 期間 區間 範圍' },
       'c-av': { s: '提案', d: '顯示負責人與參與者，最多 3 位，其餘收成 +N。', u: ['指派對象、成員清單'], x: ['需要完整名單：用列表'], st: 'Stacked、Overflow (+N)、Expanded', a: ['+N 要能讀出完整名單'], r: 'app-people・shared/components/people.ts', k: 'avatar group people member 頭像 成員' },
       'c-toast': { s: '穩定', d: '操作結果的短暫回饋，幾秒後自動消失。', u: ['已儲存、已複製連結'], x: ['需要使用者決定的事：用對話框'], st: 'Enter、Stacked、Dismiss、Undo', a: ['用 aria-live=polite'], r: 'hlm-toaster・core/services/toast.service.ts', k: 'toast snackbar notification sonner 通知' },
@@ -4111,6 +4275,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         ],
         s: [
           ['Default', FF({ label: '工單名稱', mark: 'req', input: PH('例如：機房巡檢') })],
+          ['Hover', FF({ label: '工單名稱', mark: 'req', cls: 'hv', input: PH('例如：機房巡檢') })],
           ['Focus', FF({ label: '工單名稱', mark: 'req', cls: 'focus', input: '<i class="caret" style="margin-left:0"></i>' + PH('例如：機房巡檢') })],
           ['Filled', FF({ label: '工單名稱', mark: 'req', input: Q('機房巡檢'), cnt: '4 / 50' })],
           ['Error', FF({ label: '工單名稱', mark: 'req', cls: 'bad', input: PH('例如：機房巡檢'), err: '請輸入工單名稱' })],
@@ -4139,6 +4304,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         ],
         s: [
           ['Closed', DD({ ph: '請選擇所屬專案' })],
+          ['Hover', DD({ ph: '請選擇所屬專案' }).replace('<div class="dd-t">', '<div class="dd-t hv">')],
           ['Open', DD({ v: '變電站季度保養', items: [['變電站季度保養', 'sel'], ['機房巡檢', ''], ['設備汰換', '']] })],
           ['Typing', DD({ q: '巡檢', items: [['機房巡檢', 'hl']] })],
           ['No results', DD({ q: '空調', none: true })],
@@ -4159,6 +4325,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         ],
         s: [
           ['None', MS({ t: '全部部門', n: 0 })],
+          ['Hover', MS({ t: '全部部門', n: 0 }).replace('<div class="ms-t">', '<div class="ms-t hv">')],
           ['Selected (N)', MS({ t: '設計部、研發部', n: 2 })],
           ['Open', MS({ t: '設計部、研發部', n: 2, open: true, list: [['設計部', 1], ['研發部', 1], ['客服部', 0]], foot: '已選 2 個' })],
           ['Searchable', MS({ t: '全部部門', n: 0, open: true, q: '研', list: [['研發部', 0]], foot: '未選＝全部部門' })],

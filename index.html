@@ -101,6 +101,7 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 body {
+  overflow-x: clip;   /* 分類切換時被風吹走的卡片飛出畫面，不要撐出橫向捲軸 */
   color: var(--ink); font-family: var(--font); font-size: calc(14px * var(--fs-k) * var(--rk, 1)); line-height: calc(22px * var(--fs-k) * var(--rk, 1));
   background: var(--page);
   padding-block: 28px 48px;
@@ -138,16 +139,44 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 .wf button[aria-pressed="true"] { background: var(--tint); border-color: color-mix(in srgb, var(--primary) 40%, transparent); color: var(--selected-fg); font-weight: 600; }
 .wf button[aria-pressed="true"] small { background: var(--primary); color: var(--on-primary); }
 .shell.on-detail > .wf { display: none; }
-.wall { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-auto-rows: var(--row); grid-auto-flow: dense; gap: var(--gap); }
+.wall { position: relative; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-auto-rows: var(--row); grid-auto-flow: dense; gap: var(--gap); }
 .cell {
   background: var(--card); border: 1px solid var(--card-edge); border-radius: var(--r-2xl);
   box-shadow: var(--shadow); padding: 16px 18px 18px; min-width: 0; overflow: hidden;
   display: flex; flex-direction: column; gap: 10px;
-  animation: rise calc(.8s * var(--dur)) var(--spring-soft) backwards; animation-delay: calc(var(--i, 0) * calc(40ms * var(--dur)));
+  animation: rise var(--sd, calc(.55s * var(--dur))) var(--reveal-ease) backwards; animation-delay: calc(var(--i, 0) * calc(55ms * var(--dur)));
   transition: transform calc(.55s * var(--dur)) var(--spring-soft), box-shadow calc(.4s * var(--dur)) var(--ease);
 }
 .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
-@keyframes rise { from { opacity: 0; transform: translateY(14px) scale(.97); } }
+/* 布幕掃描：卡片上暫時蓋一塊同底色的布幕（::after），上方再疊一層光線（::before），兩者用同一組動畫一起往下滑。
+   只動 transform，卡片本身不重畫。卡片的外框、陰影、底色先出現，內容再被掃出來。畫面外的卡片 .norise 直接就位。
+   · 接近等速（頭尾稍緩），像掃描器
+   · 時間依卡片高度（--sd，JS 計算：矮 0.45 秒～高 0.8 秒），每張的掃描速度一致
+   · 光線中間亮、兩端漸隱，上方留 20px 主色餘光 */
+@keyframes rise { from { transform: none; } }   /* 只用來計時：首次進場全部播完才標記 .ready */
+@keyframes curtain-in { from { transform: translateY(0); } to { transform: translateY(calc(100% + 28px)); } }
+:root { --scan-ease: cubic-bezier(.45, .05, .55, .95); }
+.wall:not(.ready) > .cell:not(.norise), .cell.curtain-in { position: relative; }
+.wall:not(.ready) > .cell:not(.norise)::after, .cell.curtain-in::after {
+  content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none; will-change: transform;
+  background: inherit; transform: translateY(calc(100% + 28px));
+}
+/* 光線層：比布幕高 22px 起跳，光線落在布幕上緣（20–22px），上面 0–20px 是餘光 */
+.wall:not(.ready) > .cell:not(.norise)::before, .cell.curtain-in::before {
+  content: ""; position: absolute; inset: -22px 0 22px; z-index: 6; pointer-events: none; will-change: transform;
+  background:
+    linear-gradient(90deg, transparent, var(--primary) 25%, var(--primary) 75%, transparent) 0 20px / 100% 2px no-repeat,
+    linear-gradient(90deg, transparent, var(--glow) 25%, var(--glow) 75%, transparent) 0 17px / 100% 8px no-repeat,
+    linear-gradient(to bottom, transparent, color-mix(in srgb, var(--primary) 14%, transparent)) 0 0 / 100% 20px no-repeat;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+  transform: translateY(calc(100% + 28px));
+}
+.wall:not(.ready) > .cell:not(.norise)::after, .wall:not(.ready) > .cell:not(.norise)::before { animation: curtain-in var(--sd, calc(.55s * var(--dur))) var(--scan-ease) both; animation-delay: calc(var(--i, 0) * calc(55ms * var(--dur))); }
+.cell.curtain-in::after, .cell.curtain-in::before { animation: curtain-in var(--sd, calc(.55s * var(--dur))) var(--scan-ease) both; animation-delay: var(--cd, 0ms); }
+.wf { scroll-margin-top: 16px; }   /* 切換分類時捲回這裡 */
+body.hush :is(.spin, .shim, .caret) { animation-play-state: paused; }
+:root { --reveal-ease: cubic-bezier(.22, 1, .36, 1); }
+.wall:not(.ready) > .cell.norise { animation: none; }
 .w2 { grid-column: span 2; } .h2 { grid-row: span 2; }
 .cell > header { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); line-height: calc(18px * var(--fs-k) * var(--rk, 1)); font-weight: 600; color: var(--label); }
 .cell > header em { font-style: normal; font-weight: 500; color: var(--weak); }
@@ -881,6 +910,32 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sp .dd-t > span:first-child { display: inline-flex; align-items: center; white-space: nowrap; }
 .sp .dd.pin .dd-t svg { transform: none; }
 .sp .dd-t .caret { margin-left: 1px; }
+/* 第二批規格樣本 */
+.sp .tab.hv { color: var(--ink); }
+.sp .tab.on { box-shadow: inset 0 -3px 0 var(--primary); }
+.sp .tab.is-focus { outline-offset: -3px; border-radius: var(--r-sm); }
+.sp-pv > .dt, .sp-pv > .co, .sp-pv > .toast, .sp-pv > .pg { width: 100%; }
+.sp .dt { overflow: visible; }
+.sp .dtab.on { background: var(--tint); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 20%, transparent), 0 6px 14px -6px var(--glow); }
+.sp .dtab.press { scale: .96; }
+.sp .bdg.ol { background: none; }
+.sp .bdg.pl { background: none; border-color: transparent; padding: 0; min-height: 0; }
+.sp .co.neu { background: var(--soft); color: var(--ink); border-color: var(--line); }
+.sp .co.cpt { padding: 8px 12px; }
+.sp .co > .b2 { flex: none; align-self: center; }
+.sp .toast { position: static; width: 100%; }
+.sp .toast > div { min-width: 0; }
+.sp .toast b { font-weight: 600; }
+.sp .toast small { display: block; font-size: 12px; line-height: 18px; font-weight: 400; color: var(--weak); }
+.sp .tb { flex: none; }
+.sp .dues { display: flex; flex-direction: column; gap: 8px; align-self: center; }
+.sp .due-r { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.sp .pg nav span { border: 1px solid transparent; }
+.sp .pg nav span.on { background: var(--tint); border-color: var(--primary); }
+.sp .pg nav span.hv { background: var(--hover); }
+.sp .pg nav span.dis { color: var(--label); opacity: .5; }
+.sp .pg nav span.gap { width: 20px; color: var(--weak); font-weight: 400; }
+.sp .pg .sel .ic { width: 14px; height: 14px; }
 /* 詳細頁頁籤：基本（四個說明區塊）／變體（變體、狀態、程式碼）。沿用牆上的 .tabs 底線樣式 */
 .dt-tabs { margin: 4px 4px -4px; }
 .dt-tabs .tab { padding: 0 14px; border: 0; background: none; font: inherit; font-size: 14px; cursor: pointer; }
@@ -1140,8 +1195,18 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .cz-step button:hover { background: var(--hover); }
 .cz-step button:active { scale: .92; }
 .cz-step output { min-width: 44px; text-align: center; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.ctl.lang { position: relative; padding-right: 8px; }
-.ctl.lang select { appearance: none; -webkit-appearance: none; border: 0; background: none; color: inherit; font: inherit; padding-right: 2px; cursor: pointer; outline: none; }
+/* 語言：標題右側只留地球圖示；透明的 select 蓋滿按鈕，點了就是原生選單 */
+.ttl { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; }
+.top > div:first-child { flex: 1; min-width: 0; }
+/* 功能列：靠右、只留圖示；文字留給讀屏（按鈕名稱）與 title 提示 */
+.ttl .top-a { flex-wrap: wrap; margin-left: auto; }
+.top-a .ctl { width: 32px; padding: 0; justify-content: center; }
+.top-a .ctl svg { width: 16px; height: 16px; }
+.top-a .ctl { border-color: var(--line-subtle); background: var(--card); box-shadow: none; transition: background calc(.2s * var(--dur)), transform calc(.2s * var(--dur)) var(--spring); }
+.top-a .ctl:hover { background: var(--hover); }
+.top-a .ctl > :is(span, kbd) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.ctl.lang { position: relative; width: 32px; padding: 0; justify-content: center; flex: none; }
+.ctl.lang select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; appearance: none; -webkit-appearance: none; border: 0; font: inherit; cursor: pointer; }
 .ctl.lang:focus-within { outline: 3px solid var(--focus); outline-offset: 1px; }
 .cz-split > #cz-share { border-radius: var(--r-md); padding: 0 16px; }
 /* 頂部主題列 */
@@ -1302,15 +1367,16 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 <div class="shell">
   <div class="top">
     <div>
-      <h1>元件展示牆</h1>
+      <div class="ttl"><h1>元件展示牆</h1>
+        <div class="top-a">
+          <label class="ctl lang" title="預覽語言"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-3a15.7 15.7 0 0 0-1.4-3.9A8 8 0 0 1 18.9 8zM12 4c.8 1.2 1.5 2.5 1.9 4h-3.8c.4-1.5 1.1-2.8 1.9-4zM4.3 14a8.2 8.2 0 0 1 0-4h3.4a16.5 16.5 0 0 0 0 4zm.8 2h3a15.7 15.7 0 0 0 1.4 3.9A8 8 0 0 1 5.1 16zm3-8h-3a8 8 0 0 1 4.4-3.9A15.7 15.7 0 0 0 8.1 8zM12 20c-.8-1.2-1.5-2.5-1.9-4h3.8c-.4 1.5-1.1 2.8-1.9 4zm2.3-6H9.7a14.7 14.7 0 0 1 0-4h4.6a14.7 14.7 0 0 1 0 4zm.3 5.9c.6-1.2 1.1-2.5 1.4-3.9h3a8 8 0 0 1-4.4 3.9zm1.7-5.9a16.5 16.5 0 0 0 0-4h3.4a8.2 8.2 0 0 1 0 4z"/></svg><select id="lang" aria-label="預覽語言"><option value="zh">繁中</option><option value="en">English</option><option value="ja">日本語</option><option value="th">ไทย</option><option value="de">Deutsch</option></select></label>
+          <button class="ctl" id="toggle-theme" type="button"><svg viewBox="0 0 24 24"><path d=""/></svg><span>深色模式</span></button>
+          <button class="ctl" id="open-search" type="button" title="搜尋元件" aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K"><svg viewBox="0 0 24 24"><path d="M10.5 4a6.5 6.5 0 0 1 5.2 10.4l4.4 4.4-1.4 1.4-4.4-4.4A6.5 6.5 0 1 1 10.5 4zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg><span>搜尋元件</span><kbd id="ck-key">Ctrl K</kbd></button>
+          <button class="ctl" id="open-custom" type="button" title="自訂" aria-controls="cz" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h9v2H4zM15 5.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM19 7h1v2h-1zM4 15h3v2H4zM9 13.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM13 15h7v2h-7z"/></svg><span>自訂</span></button>
+          <button class="ctl" id="toggle-play" type="button"><svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg><span>暫停</span></button>
+        </div>
+      </div>
       <p>案管中心現有的共用元件與圖表；微互動自動循環播放，內容皆為示意資料。</p>
-    </div>
-    <div class="top-a">
-      <label class="ctl lang"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm6.9 6h-3a15.7 15.7 0 0 0-1.4-3.9A8 8 0 0 1 18.9 8zM12 4c.8 1.2 1.5 2.5 1.9 4h-3.8c.4-1.5 1.1-2.8 1.9-4zM4.3 14a8.2 8.2 0 0 1 0-4h3.4a16.5 16.5 0 0 0 0 4zm.8 2h3a15.7 15.7 0 0 0 1.4 3.9A8 8 0 0 1 5.1 16zm3-8h-3a8 8 0 0 1 4.4-3.9A15.7 15.7 0 0 0 8.1 8zM12 20c-.8-1.2-1.5-2.5-1.9-4h3.8c-.4 1.5-1.1 2.8-1.9 4zm2.3-6H9.7a14.7 14.7 0 0 1 0-4h4.6a14.7 14.7 0 0 1 0 4zm.3 5.9c.6-1.2 1.1-2.5 1.4-3.9h3a8 8 0 0 1-4.4 3.9zm1.7-5.9a16.5 16.5 0 0 0 0-4h3.4a8.2 8.2 0 0 1 0 4z"/></svg><select id="lang" aria-label="預覽語言"><option value="zh">繁中</option><option value="en">English</option><option value="ja">日本語</option><option value="th">ไทย</option><option value="de">Deutsch</option></select></label>
-      <button class="ctl" id="toggle-theme" type="button"><svg viewBox="0 0 24 24"><path d=""/></svg><span>深色模式</span></button>
-      <button class="ctl" id="open-search" type="button" aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K"><svg viewBox="0 0 24 24"><path d="M10.5 4a6.5 6.5 0 0 1 5.2 10.4l4.4 4.4-1.4 1.4-4.4-4.4A6.5 6.5 0 1 1 10.5 4zm0 2a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9z"/></svg><span>搜尋元件</span><kbd id="ck-key">Ctrl K</kbd></button>
-      <button class="ctl" id="open-custom" type="button" aria-controls="cz" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h9v2H4zM15 5.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM19 7h1v2h-1zM4 15h3v2H4zM9 13.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM13 15h7v2h-7z"/></svg><span>自訂</span></button>
-      <button class="ctl" id="toggle-play" type="button"><svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg><span>暫停</span></button>
     </div>
   </div>
 
@@ -1757,11 +1823,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   const CHECK_S = '<svg class="ic" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
   let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const sleep = ms => new Promise(res => { const tick = () => paused ? setTimeout(tick, 200) : res(); setTimeout(tick, ms * PACE); });
+  // 分類轉場期間暫停示範動畫（不動播放鈕的狀態）
+  let hush = false, hushT = 0;
+  const hushFor = (ms) => { hush = true; document.body.classList.add('hush'); clearTimeout(hushT); hushT = setTimeout(() => { hush = false; document.body.classList.remove('hush'); }, ms); };
+  const sleep = ms => new Promise(res => { const tick = () => (paused || hush) ? setTimeout(tick, 200) : res(); setTimeout(tick, ms * PACE); });
   const loop = (delay, fn) => { (async () => { await sleep(delay); for (;;) await fn(); })().catch(console.error); };
   /* 詳細頁的「暫停這張示範」：held 裡的卡片，循環停在下一個 sleep；HOLD[id] 提供暫停後可以直接用滑鼠操作的行為 */
   const held = new Set(), HOLD = {};
-  const own = (id) => (ms) => new Promise(res => { const tick = () => (paused || held.has(id)) ? setTimeout(tick, 200) : res(); setTimeout(tick, ms * PACE); });
+  const own = (id) => (ms) => new Promise(res => { const tick = () => (paused || hush || held.has(id)) ? setTimeout(tick, 200) : res(); setTimeout(tick, ms * PACE); });
   const wait = (ms) => new Promise(res => setTimeout(res, ms));
   // live(id, setup)：暫停這張卡片時呼叫 setup(signal) 掛事件；恢復播放時 abort，事件全部移除
   const live = (id, setup) => { let ac; HOLD[id] = { on() { ac = new AbortController(); setup(ac.signal); }, off() { ac?.abort(); } }; };
@@ -1795,7 +1864,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   $$('.cell').forEach((c, i) => c.style.setProperty('--i', i));
   const btn = $('#toggle-play');
   const paintBtn = () => {
-    btn.querySelector('span').textContent = paused ? '播放' : '暫停';
+    btn.querySelector('span').textContent = btn.title = paused ? '播放' : '暫停';
     btn.querySelector('path').setAttribute('d', paused ? 'M8 5v14l11-7z' : 'M7 5h4v14H7zM13 5h4v14h-4z');
     document.body.classList.toggle('paused', paused);
   };
@@ -1808,7 +1877,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const SUN = 'M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM11 1h2v3h-2zM11 20h2v3h-2zM1 11h3v2H1zM20 11h3v2h-3z';
     const MOON = 'M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z';
     const isDark = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-    const paint = () => { const d = isDark(); tb.querySelector('span').textContent = d ? '淺色模式' : '深色模式'; tb.querySelector('path').setAttribute('d', d ? SUN : MOON); };
+    const paint = () => { const d = isDark(); tb.querySelector('span').textContent = tb.title = d ? '淺色模式' : '深色模式'; tb.querySelector('path').setAttribute('d', d ? SUN : MOON); };
     try { const saved = localStorage.getItem('wall-theme'); if (saved === 'light' || saved === 'dark') root.dataset.theme = saved; } catch (e) {}
     tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); });
     new MutationObserver(paint).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
@@ -3224,12 +3293,13 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const orderOf = () => { const o = theme.layout.order.filter((id) => naturalOrder.includes(id)); return [...o, ...naturalOrder.filter((id) => !o.includes(id))]; };
     let wallCat = '';   // 分類篩選（空＝全部）
     const inView = (c) => !theme.layout.hidden.includes(c.id) && (!wallCat || c.cat === wallCat);
-    function applyLayout() {
+    function applyLayout(resizeAfter = 0) {
       const order = orderOf();
       for (const c of cells) { c.el.style.order = String(order.indexOf(c.id)); c.el.hidden = !inView(c); }
       paintCats?.();
       // 滑動標記、圖表都靠量位置：版面變了就讓它們重量一次
-      requestAnimationFrame(() => dispatchEvent(new Event('resize')));
+      if (resizeAfter) { clearTimeout(applyLayout._t); applyLayout._t = setTimeout(() => dispatchEvent(new Event('resize')), resizeAfter); }
+      else requestAnimationFrame(() => dispatchEvent(new Event('resize')));
     }
 
     /* ---- 草稿：存在這個瀏覽器 ---- */
@@ -3485,22 +3555,67 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       wf.innerHTML = [['', '全部', vis.length], ...Object.keys(CAT).map((k) => [k, CAT_LABEL[k] || k, vis.filter((c) => c.cat === k).length])]
         .filter(([k, , n]) => !k || n).map(([k, t, n]) => `<button type="button" data-cat="${k}" aria-pressed="${wallCat === k}">${t}<small>${n}</small></button>`).join('');
     };
+    // 切換分類：布幕掃描——離開的卡片布幕由下往上蓋回，進來的卡片布幕由上往下滑開，光線是布幕上緣；原地不位移、不縮放。
+    // 不等吹完才排版：離開的卡片先改成絕對定位留在原處飄走，版面同時重排，從點擊到新卡片出現約 0.2 秒
+    // 先離場、再重排：離開的卡片留在原本的版面裡模糊淡出；結束才重排並讓新卡片布幕光線掃開。
+    // 兩批卡片不會同時佔同一個位置，就不會重疊
+    let pending = null;
+    const EASE = 'cubic-bezier(.22, 1, .36, 1)';   // 快出慢停，同 CSS 的 --reveal-ease
+    const scanMs = (h) => D(Math.min(800, Math.max(450, h * 2.2)));   // 掃描時間依卡片高度，速度一致：矮 0.45 秒～高 0.8 秒
+    const stepOf = (n) => n > 1 ? Math.min(55, 300 / (n - 1)) : 0;   // 依序出現：每張最多隔 55ms，錯開總長不超過 0.3 秒
+    // shift：畫面正在平滑捲動時，用捲完後的位置判斷是否在畫面內
+    const inViewport = (list, shift = 0) => list.filter(([, r]) => r.top - shift < innerHeight && r.bottom - shift > 0).sort((a, b) => Math.round(a[1].top - b[1].top) || a[1].left - b[1].left);
+    const clearPending = () => { if (!pending) return; clearTimeout(pending.t); pending.out.forEach(([, a]) => a.cancel()); pending = null; };
     function setCat(k) {
       if (k === wallCat) return;
-      const before = new Map(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()]));
+      clearPending();   // 連續點擊：上一次還沒收完的直接停掉，以最後一次為準
+      const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const fits = (c) => !theme.layout.hidden.includes(c.id) && (!k || c.cat === k);
+      const out = still ? [] : inViewport(cells.filter((c) => !c.el.hidden && !fits(c)).map((c) => [c, c.el.getBoundingClientRect()]));
       wallCat = k;
       const u = new URL(location.href); k ? u.searchParams.set('cat', k) : u.searchParams.delete('cat'); history.replaceState(history.state, '', u);
-      applyLayout();
-      cells.forEach((c, i) => {
+      paintCats?.();   // 分類按鈕立即切換，不等動畫
+      // 捲到很下面才切換時，平滑捲回分類列，避免新卡片排在畫面上方、看起來一片空白
+      if (wf.getBoundingClientRect().top < 0) wf.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
+      if (!out.length) return relayout(still);
+      hushFor(D(1000));   // 轉場期間暫停卡片內的示範動畫，讓出運算
+      // 離場：原地模糊到 4px 並淡出，0.22 秒，不做光線；畫面內離開的卡片同時進行
+      pending = { out: out.map(([c]) => [c, c.el.animate([{ filter: 'blur(0)', opacity: 1 }, { filter: 'blur(4px)', opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]) };
+      pending.t = setTimeout(() => { const p = pending; pending = null; relayout(false); p.out.forEach(([, a]) => a.cancel()); }, D(220));
+    }
+    function relayout(still) {
+      const before = new Map(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()]));
+      applyLayout(still ? 0 : D(700));   // 轉場中先不讓圖表重量尺寸，結束後再量
+      if (still) return;
+      hushFor(D(700));
+      // 留下的卡片不滑動，直接到新位置；只有移動很遠的（等於重新出現）跟新卡片一起掃描
+      const entering = [];
+      cells.forEach((c) => {
         if (c.el.hidden) return;
         const b = before.get(c), a = c.el.getBoundingClientRect();
-        if (b) { const dx = b.left - a.left, dy = b.top - a.top; if (dx || dy) c.el.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'none' }], { duration: D(520), easing: SOFT }); }
-        else c.el.animate([{ opacity: 0, transform: 'scale(.96)' }, { opacity: 1, transform: 'none' }], { duration: D(360), easing: 'ease-out', delay: Math.min(i, 12) * 12, fill: 'backwards' });
+        if (!b || Math.hypot(b.left - a.left, b.top - a.top) > 320) entering.push([c, a]);
+      });
+      // 進場：只有畫面內的卡片照閱讀順序依序出現；布幕由上往下滑開
+      const shift = wf.getBoundingClientRect().top - 16;   // 還在捲回途中的距離
+      const list = inViewport(entering, Math.min(0, shift)), step = stepOf(list.length);
+      list.forEach(([c, r], i) => {
+        const el = c.el, delay = D(i * step), sd = scanMs(r.height);
+        el.style.setProperty('--cd', delay + 'ms'); el.style.setProperty('--sd', sd + 'ms');
+        el.classList.remove('curtain-in'); void el.offsetWidth; el.classList.add('curtain-in');
+        clearTimeout(el._cur); el._cur = setTimeout(() => el.classList.remove('curtain-in'), delay + sd + 50);
       });
     }
     wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });
     { const q = new URLSearchParams(location.search).get('cat'), k = q && (CAT[q] ? q : Object.keys(CAT).find((x) => CAT_LABEL[x] === q)); if (k) wallCat = k; }   // 網址可用內部名稱或畫面上的名稱（例如 表單）
     applyLayout();
+    // 首次進場：畫面內的卡片依閱讀順序重排 --i（錯開總長不超過 0.3 秒）；畫面外的不播
+    {
+      const shown = cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()]);
+      const vis = inViewport(shown), seen = new Set(vis.map(([c]) => c));
+      const step = stepOf(vis.length);
+      vis.forEach(([c, r], k) => { c.el.style.setProperty('--i', (k * step / 55).toFixed(3)); c.el.style.setProperty('--sd', scanMs(r.height) + 'ms'); });   // --i：CSS 以 55ms 為單位
+      shown.forEach(([c]) => { if (!seen.has(c)) c.el.classList.add('norise'); });
+    }
     const isDarkNow = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
     const setMode = (m) => { if (m === 'auto') delete root.dataset.theme; else root.dataset.theme = m; try { m === 'auto' ? localStorage.removeItem('wall-theme') : localStorage.setItem('wall-theme', m); } catch (e) {} };
 
@@ -3894,6 +4009,18 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const MI = { copy: '<svg class="ic" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>', link: '<svg class="ic" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>', rep: '<svg class="ic" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>', x: '<svg class="ic" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>', dots: '<svg class="ic" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="18.5" cy="12" r="1"/></svg>' };
     const MN = (items) => `<div class="mn pin"><div class="mn-p">${items}</div></div>`;
     const DL = (o) => `<div class="dl-d pin"><b>${o.t}</b><p><span>${o.p}</span>${o.n ? `<small>${o.n}</small>` : ''}</p><div class="dl-a"><span class="cancel${o.fc === 'c' ? ' fc' : ''}">取消</span><span class="ok${o.dng ? ' dng' : ''}${o.fc === 'o' ? ' is-focus' : ''}">${o.t}</span></div></div>`;
+    // 第二批規格樣本（11-17）：頁籤、詳情頁籤、徽章、提示框、Toast、表格、分頁
+    const TABS = (a, mark = {}) => `<div class="tabs" style="width:100%">${a.map(([t, n], k) => `<span class="tab ${mark[k] || ''}">${t}${n != null ? `<b>${n}</b>` : ''}</span>`).join('')}</div>`;
+    const DI = { overview: '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>', cases: '<rect x="3.5" y="7" width="17" height="12.5" rx="2"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/>', dispatch: '<rect x="5.5" y="4.5" width="13" height="16" rx="2"/><path d="M9 4.5V3.5h6v1M9 13l2 2 4-4"/>', docs: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>' };
+    // 詳情頁籤：a = [[圖示, 名稱, 數量, class]]；'|' 是群組分隔線
+    const DTABS = (a) => `<div class="dt">${a.map((x) => x === '|' ? '<i class="sep"></i>' : `<span class="dtab ${x[3] || ''}"><svg class="ic" viewBox="0 0 24 24">${DI[x[0]]}</svg>${x[1]}${x[2] != null ? `<b>${x[2]}</b>` : ''}</span>`).join('')}</div>`;
+    const BDG = (t, tone, cls = '') => `<span class="bdg ${tone} ${cls}">${cls.includes('nodot') ? '' : '<i></i>'}${t}</span>`;
+    const CO_I = { info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/>', ok: '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.8 2.8L16 10"/>', warn: '<path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.5v.5"/>', dng: '<circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/>', neu: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/>' };
+    const CO = (tone, h, p, o = {}) => `<div class="co ${tone}${o.cpt ? ' cpt' : ''}">${o.icon ? `<svg class="ic" viewBox="0 0 24 24">${CO_I[tone]}</svg>` : ''}<div><strong>${h}</strong>${p ? `<p>${p}</p>` : ''}</div>${o.act ? `<span class="b2">${o.act}</span>` : ''}</div>`;
+    const TOAST = (t, d, act) => `<div class="toast ok"><svg class="ic" viewBox="0 0 24 24">${CO_I.ok}</svg><div><b>${t}</b>${d ? `<small>${d}</small>` : ''}</div>${act ? `<em>${act}</em>` : ''}</div>`;
+    const TH = (t, s) => `<span class="th" data-s="${s}">${t}<svg viewBox="0 0 12 14"><path class="up" d="M6 1l4 5H2z"/><path class="dn" d="M6 13l4-5H2z"/></svg></span>`;
+    const DUE = (d, tag, tone) => `<span class="due-r">${d}${tag ? `<span class="tagx ${tone}">${tag}</span>` : ''}</span>`;
+    const PGN = (a) => `<div class="pg"><nav>${a.map((x) => { const [t, c] = Array.isArray(x) ? x : [x, '']; return `<span class="${c}">${t}</span>`; }).join('')}</nav></div>`;
     const SPEC = {
       'c-btn': {
         v: [
@@ -4195,6 +4322,154 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 })`],
         ],
       },
+      'c-tabs': {
+        wide: true,
+        v: [
+          ['標準 Default', '列表的分類切換', TABS([['全部'], ['待處理'], ['提及']], { 0: 'on' }), `<div role="group" aria-label="通知分類">
+  @for (t of tabs; track t.key) {
+    <button type="button" class="cc-tab-control cc-list-tab"
+            [attr.aria-current]="tab() === t.key"
+            (click)="setTab(t.key)">{{ t.label }}</button>
+  }
+</div>`],
+          ['帶數量 Count', '數量要有意義才寫；「全部」通常不寫', TABS([['全部'], ['待處理', 12], ['提及', 3]], { 1: 'on' }), `<button type="button" class="cc-tab-control cc-list-tab"
+        [attr.aria-current]="tab() === 'pending'"
+        (click)="setTab('pending')">
+  待處理
+  @if (pendingCount()) { <em>{{ pendingCount() }}</em> }
+</button>`],
+        ],
+        s: [
+          ['Selected', TABS([['全部'], ['待處理', 12]], { 0: 'on' })],
+          ['Hover', TABS([['全部'], ['待處理', 12]], { 0: 'on', 1: 'hv' })],
+          ['Count badge', TABS([['全部'], ['待處理', 12]], { 1: 'on' })],
+          ['Focus', TABS([['全部'], ['待處理', 12]], { 0: 'on', 1: 'is-focus' })],
+        ],
+      },
+      'c-dtab': {
+        wide: true,
+        v: [
+          ['標準 Default', '圖示＋名稱＋數量；選中片滑動', DTABS([['overview', '概覽', null, 'on'], ['cases', '案件', 256], ['dispatch', '工單', 575]]), `<app-detail-tabs label="專案內容"
+  [tabs]="tabs()" [selected]="tab()"
+  (selectedChange)="tab.set($event)" />
+
+// tabs：count 給 null 就不顯示數量
+tabs = computed<DetailTabItem[]>(() => [
+  { key: 'overview', label: '概覽', count: null },
+  { key: 'cases', label: '案件', count: this.cases().length },
+]);`],
+          ['分組 Group divider', '性質不同的頁籤用分隔線隔開', DTABS([['overview', '概覽', null, 'on'], ['cases', '案件', 256], '|', ['docs', '文件', 2]]), `<!-- groupStarts：從這幾個 key 開始新的一組，前面畫分隔線 -->
+<app-detail-tabs label="專案內容"
+  [tabs]="tabs()" [selected]="tab()"
+  [groupStarts]="['docs']"
+  (selectedChange)="tab.set($event)" />`],
+          ['讀屏數量 srCount', '數量的意思不明顯時補一句', DTABS([['overview', '概覽'], ['cases', '案件', 3, 'on']]), `// 讀屏念「案件，3 件未結」，不是只念「3」
+{ key: 'cases', label: '案件', count: open, srCount: \`\${open} 件未結\` }`],
+        ],
+        s: [
+          ['Selected (filled icon)', DTABS([['cases', '案件', 256, 'on']])],
+          ['Hover', DTABS([['cases', '案件', 256, 'hv']])],
+          ['Pressed', DTABS([['cases', '案件', 256, 'on press']])],
+          ['Focus', DTABS([['cases', '案件', 256, 'is-focus']])],
+        ],
+      },
+      'c-bdg': {
+        wide: true,
+        v: [
+          ['實心 Filled', '預設；列表的狀態欄', `<span style="display:flex;gap:8px;flex-wrap:wrap">${BDG('進行中', 't-a')}${BDG('已結案', 't-c')}</span>`, `<app-status-badge [status]="c.status" [map]="CASE_STATUS" />`],
+          ['外框 Outline', '頁首、卡片上，搭配其他徽章時', `<span style="display:flex;gap:8px;flex-wrap:wrap">${BDG('進行中', 't-a', 'ol')}${BDG('暫停', 't-p', 'ol')}</span>`, `<app-status-badge [status]="p.status" [map]="PROJECT_STATUS"
+  appearance="outline" />`],
+          ['純文字 Plain', '空間很小、或不需要強調時', `<span style="display:flex;gap:12px;flex-wrap:wrap">${BDG('進行中', 't-a', 'pl')}${BDG('未指派', 't-q', 'pl nodot')}</span>`, `<!-- 不在對映表裡的值：直接給 tone -->
+<app-status-badge status="未指派" tone="none"
+  appearance="plain" [showIndicator]="false" />`],
+        ],
+        s: [
+          ['plan', BDG('規劃中', 't-q')],
+          ['active', BDG('進行中', 't-a')],
+          ['pause', BDG('暫停', 't-p')],
+          ['closed', BDG('已結案', 't-c')],
+          ['danger', BDG('已退回', 't-d')],
+          ['none', BDG('未指派', 't-q', 'nodot')],
+        ],
+      },
+      'c-co': {
+        wide: true,
+        v: [
+          ['標準 Default', '標題一句話講完，內文補細節', CO('info', '報表每小時更新一次', '目前顯示的是 14:00 的資料。'), `<app-callout tone="info" heading="報表每小時更新一次">
+  <p>目前顯示的是 14:00 的資料。</p>
+</app-callout>`],
+          ['帶圖示 Icon', '需要更醒目時', CO('warn', '有 3 張工單即將到期', '請在 11-20 前完成。', { icon: true }), `<app-callout tone="warn" heading="有 3 張工單即將到期" [icon]="true">
+  <p>請在 11-20 前完成。</p>
+</app-callout>`],
+          ['播報 Live', '操作後才出現、要讓讀屏念出來', CO('ok', '案件已建立', '已一併開立 2 筆工單。'), `<app-callout tone="success" heading="案件已建立" [live]="true">
+  <p>已一併開立 2 筆工單。</p>
+</app-callout>`],
+          ['附動作 Action', '提示有明確的下一步時', CO('dng', '資料載入失敗', '', { act: '重試' }), `<app-callout tone="danger" heading="資料載入失敗">
+  <button hlmBtn variant="outline" calloutAction
+          type="button" (click)="reload()">重試</button>
+</app-callout>`],
+          ['緊湊 Compact', '彈窗底部等空間有限處', CO('neu', '權重依工時比例自動計算', '', { cpt: true }), `<app-callout tone="neutral" heading="權重依工時比例自動計算"
+  [compact]="true" />`],
+        ],
+        s: [
+          ['info', CO('info', '報表每小時更新', '', { icon: true })],
+          ['success', CO('ok', '案件已建立', '', { icon: true })],
+          ['warn', CO('warn', '即將到期', '', { icon: true })],
+          ['danger', CO('dng', '載入失敗', '', { icon: true })],
+          ['neutral', CO('neu', '計算方式', '', { icon: true })],
+        ],
+      },
+      'c-toast': {
+        wide: true,
+        v: [
+          ['一般 Plain', '只告知結果，3.2 秒消失', TOAST('已儲存'), `this.toast.show('已儲存');`],
+          ['附補述 Detail', '補一句接下來會發生什麼', TOAST('已送出審核', '等待 陳大文 覆核'), `this.toast.show('已送出審核', '等待 陳大文 覆核');`],
+          ['可復原 Undo', '可逆動作直接做，不先問；停留 5 秒（手機 8 秒）', TOAST('已移除成員', '王小明', '復原'), `// 第三個參數給函式＝顯示「復原」
+this.toast.show('已移除成員', m.name, () => this.restore(m));`],
+          ['自訂動作 Action', '結果之後的延伸動作', TOAST('已儲存', '', '同步到 ERP'), `this.toast.show('已儲存', undefined, {
+  label: '同步到 ERP', onClick: () => this.sync(),
+});`],
+        ],
+      },
+      'c-tb': {
+        wide: true,
+        v: [
+          ['排序表頭 Sort header', '點表頭切換升冪／降冪', `<div class="tb" style="width:100%"><div class="tr hd" style="grid-template-columns:1fr 1fr 1fr">${TH('案號', 'none')}<span>名稱</span>${TH('到期日', 'asc')}</div></div>`, `<th scope="col" appSortTh="no" [sort]="sort">案號</th>
+<th scope="col">名稱</th>
+<th scope="col" appSortTh="due" [sort]="sort">到期日</th>`],
+          ['到期欄 Due cell', '逾期紅、3 天內與今天琥珀；已結案只顯示日期', `<div class="dues">${DUE('11-09', '逾期 3 天', 'd')}${DUE('11-12', '今天', 'w')}${DUE('11-14', '2 天內', 'w')}${DUE('11-28')}</div>`, `<td>
+  <app-due-cell [due]="c.due" [closed]="c.status === '已結案'" />
+</td>`],
+        ],
+        s: [
+          ['Sort none', TH('到期日', 'none')],
+          ['Sort asc', TH('到期日', 'asc')],
+          ['Sort desc', TH('到期日', 'desc')],
+          ['Row hover', '<div class="tb" style="width:100%"><div class="tr hv" style="grid-template-columns:auto 1fr;border-top:0"><span class="id">C-1042</span><span>官網改版</span></div></div>'],
+          ['Overdue', DUE('11-09', '逾期 3 天', 'd')],
+          ['Due soon', DUE('11-14', '2 天內', 'w')],
+        ],
+      },
+      'c-pg': {
+        wide: true,
+        v: [
+          ['標準 Default', '左邊每頁筆數與總數，右邊頁碼', `<div class="pg" style="width:100%"><span>每頁<span class="sel">20${CHEV}</span>筆，共 <b>128</b> 筆</span><nav><span class="dis">‹</span><span class="on">1</span><span>2</span><span>3</span><span>›</span></nav></div>`, `<app-report-pager [total]="rows().length"
+  [page]="page()" [pageSize]="size()"
+  (pageChange)="page.set($event)"
+  (pageSizeChange)="size.set($event)" />`],
+          ['頁數多 Ellipsis', '頭尾固定，中間收成 …', PGN(['‹', '1', ['…', 'gap'], '5', ['6', 'on'], '7', ['…', 'gap'], '12', '›']), `<!-- 單位不是「筆」時改 unit，例如「人」 -->
+<app-report-pager [total]="members().length" unit="人"
+  [page]="page()" [pageSize]="size()" [sizes]="[20, 50, 100]"
+  (pageChange)="page.set($event)"
+  (pageSizeChange)="size.set($event)" />`],
+        ],
+        s: [
+          ['Current', PGN(['1', ['2', 'on'], '3'])],
+          ['Hover', PGN(['1', ['2', 'on'], ['3', 'hv']])],
+          ['Previous／Next', PGN(['‹', ['2', 'on'], '›'])],
+          ['Disabled', PGN([['‹', 'dis'], ['1', 'on'], '›'])],
+        ],
+      },
     };
     /* ---- 第一階段（目標 95 分）：參數表、正確／錯誤示範、相關元件、手機版 ----
        參數與手機規則都照 repo：hlm-button.ts、form-field.ts、styles.css 的觸控規則（767px 以下） */
@@ -4248,6 +4523,51 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         ['cancelLabel', 'string', "'取消'", '取消鈕文字'],
         ['destructive', 'boolean', 'false', '紅底確認鈕，預設焦點改在取消'],
         ['note', 'string', '—', '補充說明，較弱字色'],
+      ],
+      'c-dtab': [
+        ['tabs', 'readonly DetailTabItem[]', '—（必填）', '{ key, label, count, srCount? }；count 給 null 不顯示數量'],
+        ['selected', 'string', '—（必填）', '目前頁籤的 key'],
+        ['(selectedChange)', 'string', '—', '切換頁籤'],
+        ['label', 'string', '—（必填）', '頁籤列的讀屏名稱，例如「專案內容」'],
+        ['groupStarts', 'readonly string[]', '[]', '從這些 key 開始新的一組，前面畫分隔線'],
+      ],
+      'c-bdg': [
+        ['status', 'string', '—（必填）', '狀態文字，也是查對映表的 key'],
+        ['map', 'Record<string, StatusTone>', '{}', '狀態對色調的對映表，集中在 core/dictionaries.ts'],
+        ['tone', "'plan' | 'active' | 'pause' | 'closed' | 'danger' | 'none' | null", 'null', '直接指定色調；不在對映表裡的值才用'],
+        ['label', 'string | null', 'null', '顯示文字跟 status 不同時才給'],
+        ['appearance', "'filled' | 'outline' | 'plain'", "'filled'", '外觀'],
+        ['showIndicator', 'boolean', 'true', '前面的圓點'],
+      ],
+      'c-co': [
+        ['heading', 'string', '—（必填）', '標題，一句話講完重點'],
+        ['tone', "'info' | 'success' | 'warn' | 'danger' | 'neutral'", "'info'", '語氣'],
+        ['icon', 'boolean', 'false', '標題前加圖示'],
+        ['live', 'boolean', 'false', '操作後出現的提示給 true，讀屏會念出來'],
+        ['compact', 'boolean', 'false', '緊湊版，給彈窗底部等空間有限處'],
+        ['[calloutAction]', '內容投影', '—', '放在右側的動作按鈕'],
+      ],
+      'c-toast': [
+        ['title', 'string', '—（必填）', '主訊息，寫結果：「已儲存」'],
+        ['detail', 'string', '—', '補述，例如「等待 陳大文 覆核」'],
+        ['action', '() => void | { label, onClick }', '—', '給函式＝「復原」；有動作時停留 5 秒（手機 8 秒），沒有 3.2 秒'],
+        ['options.id', 'string', '—', '同 id 就地更新同一條，連續觸發的動作才用'],
+      ],
+      'c-tb': [
+        ['appSortTh', 'string', '—（必填）', 'th 上的排序欄位 key'],
+        ['sort', 'TableSort', '—（必填）', '排序狀態，同一張表的表頭共用'],
+        ['app-due-cell due', 'string', '—（必填）', '到期日'],
+        ['app-due-cell closed', 'boolean', 'false', '已結案：只顯示日期，不標逾期'],
+      ],
+      'c-pg': [
+        ['total', 'number', '—（必填）', '總筆數'],
+        ['page', 'number', '—（必填）', '目前頁，從 1 開始'],
+        ['pageSize', 'number', '—（必填）', '每頁筆數'],
+        ['sizes', 'readonly number[]', '[20, 50]', '每頁筆數的選項'],
+        ['unit', 'string', "'筆'", '單位，例如「人」'],
+        ['label', 'string', "'分頁'", '頁碼區的讀屏名稱'],
+        ['(pageChange)', 'number', '—', '換頁'],
+        ['(pageSizeChange)', 'number', '—', '換每頁筆數'],
       ],
     };
     const apiHtml = (id) => API[id] ? `<section class="sp-sec" aria-label="參數"><h3>參數</h3><div class="api-wrap"><table class="api"><thead><tr><th scope="col">參數</th><th scope="col">型別</th><th scope="col">預設</th><th scope="col">說明</th></tr></thead><tbody>${API[id].map(([n, t, v, d]) => `<tr><td><code>${esc(n)}</code></td><td><code>${esc(t).split(' | ').map((x) => `<span class="nw">${x}</span>`).join(' | ')}</code></td><td><code>${esc(v)}</code></td><td>${esc(d)}</td></tr>`).join('')}</tbody></table></div></section>` : '';

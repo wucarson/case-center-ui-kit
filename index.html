@@ -852,6 +852,35 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sp .ff.dis .ff-i { background: var(--soft); border-color: var(--line-subtle); box-shadow: none; color: var(--label); }
 .sp .ff.dis .ff-l { color: var(--label); }
 .sp .ff-x:empty { display: none; }
+/* 第一批規格樣本：浮層改成靜態攤開，寬度跟格子走 */
+.sp-pv > :is(.dd, .ms, .mn) { width: 100%; height: auto; align-self: start; }
+.sp .pin :is(.dd-m, .ms-p) { position: static; margin-top: 6px; opacity: 1; transform: none; transition: none; }
+.sp .mn.pin .mn-p { position: static; width: min(100%, 210px); margin-inline: auto; opacity: 1; transform: none; transition: none; }
+.sp .dl-d.pin { position: static; width: 100%; translate: none; opacity: 1; transform: none; transition: none; }
+.sp :is(.dd-t, .ms-t) .ph { color: var(--label); }
+.sp .ms-t > span:first-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp .ms-s .q { color: var(--ink); }
+.sp .dd-m .none { color: var(--muted); justify-content: flex-start; }
+.sp .dd.bad .dd-t { border-color: var(--danger-fg); box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 22%, transparent); }
+.sp .ck.dis { color: var(--label); }
+.sp .ck.dis i { background: var(--soft); opacity: .55; }
+.sp .rad.hv { background: var(--hover); }
+.sp .rad.dis { color: var(--label); }
+.sp .rad.dis i { background: var(--soft); border-color: var(--line-subtle); }
+.sp .rad.tall { height: auto; padding-block: 8px; align-items: flex-start; }
+.sp .rad.tall i { margin-top: 1px; }
+.sp .rad span { display: flex; flex-direction: column; }
+.sp .rad small { font-size: 12px; line-height: 18px; font-weight: 400; color: var(--weak); }
+.sp .tgr.dis { opacity: .45; }
+.sp .tg.sm { width: 32px; height: 18px; }
+.sp .tg.sm i { width: 14px; height: 14px; }
+.sp .tgr.on .tg.sm i { transform: translateX(14px); }
+.sp .tg.is-focus, .sp .seg span.is-focus { border-radius: var(--r-pill); }
+.sp .seg.sm { height: 30px; }
+.sp .seg span.hv { color: var(--ink); }
+.sp .dd-t > span:first-child { display: inline-flex; align-items: center; white-space: nowrap; }
+.sp .dd.pin .dd-t svg { transform: none; }
+.sp .dd-t .caret { margin-left: 1px; }
 /* 詳細頁頁籤：基本（四個說明區塊）／變體（變體、狀態、程式碼）。沿用牆上的 .tabs 底線樣式 */
 .dt-tabs { margin: 4px 4px -4px; }
 .dt-tabs .tab { padding: 0 14px; border: 0; background: none; font: inherit; font-size: 14px; cursor: pointer; }
@@ -3852,6 +3881,19 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const PH = (t) => `<span class="ph">${t}</span>`, Q = (t) => `<span class="q">${t}</span>`;
     // 每格變體：[名稱, 說明, 預覽 HTML, 程式碼]；狀態對照只有預覽（狀態由元件自己處理，不另外寫程式）
     // code：沒有變體區的元件才用，顯示成一塊程式範例
+    // 第一批規格樣本（11-17）：下拉、多選、核取、單選、開關、分段、選單、對話框
+    const SV = '<svg class="ic" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>', CHEV = '<svg class="ic" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+    const CKI = '<i><svg class="ic chk" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><svg class="ic dash" viewBox="0 0 24 24"><path d="M6 12h12"/></svg></i>';
+    const CK = (t, cls = '', ic = '') => `<div class="ck ${cls}">${ic ? CKI.replace('<i>', `<i class="${ic}">`) : CKI}${t ? `<span>${t}</span>` : ''}</div>`;
+    // 下拉：o = { ph, v, q（打字中）, bad, items: [[文字, 'sel'|'hl'|'']], none }
+    const DD = (o) => `<div class="dd${o.items || o.none ? ' open pin' : ''}${o.bad ? ' bad' : ''}"><div class="dd-t">${o.q != null ? `<span>${o.q}<i class="caret"></i></span>` : o.v ? `<span>${o.v}</span>` : `<span class="ph">${o.ph}</span>`}${o.items || o.none ? I_SEARCH : CHEV}</div>${o.items || o.none ? `<div class="dd-m">${o.none ? '<div class="none">沒有符合的選項</div>' : o.items.map(([t, c]) => `<div class="${c}">${t}${SV}</div>`).join('')}</div>` : ''}</div>`;
+    // 多選：o = { t（按鈕字）, n（已選數）, open, q（搜尋字）, list: [[名稱, on]], foot }
+    const MS = (o) => `<div class="ms${o.open ? ' open pin' : ''}"><div class="ms-t"><span class="${o.n ? '' : 'ph'}">${o.t}</span>${o.n ? `<span class="ms-n">${o.n}</span>` : ''}${CHEV}</div>${o.open ? `<div class="ms-p"><div class="ms-s">${I_SEARCH}${o.q ? `<span class="q">${o.q}</span>` : '搜尋部門'}</div><div class="ms-l">${o.list.map(([t, on]) => CK(t, on ? 'on' : '')).join('')}</div><div class="ms-f"><span>${o.foot}</span><u>清除</u></div></div>` : ''}</div>`;
+    const SEG = (a, on, cls = '', mark = {}) => `<div class="seg ${cls}" style="grid-template-columns:repeat(${a.length},1fr)"><i style="width:calc((100% - 6px) / ${a.length});transform:translateX(${on * 100}%)"></i>${a.map((t, k) => `<span class="${k === on ? 'on' : ''} ${mark[k] || ''}">${t}</span>`).join('')}</div>`;
+    const TG = (cls = '', sz = '') => `<div class="tgr ${cls}"><span class="tg ${sz}"><i></i></span></div>`;
+    const MI = { copy: '<svg class="ic" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>', link: '<svg class="ic" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>', rep: '<svg class="ic" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>', x: '<svg class="ic" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>', dots: '<svg class="ic" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="18.5" cy="12" r="1"/></svg>' };
+    const MN = (items) => `<div class="mn pin"><div class="mn-p">${items}</div></div>`;
+    const DL = (o) => `<div class="dl-d pin"><b>${o.t}</b><p><span>${o.p}</span>${o.n ? `<small>${o.n}</small>` : ''}</p><div class="dl-a"><span class="cancel${o.fc === 'c' ? ' fc' : ''}">取消</span><span class="ok${o.dng ? ' dng' : ''}${o.fc === 'o' ? ' is-focus' : ''}">${o.t}</span></div></div>`;
     const SPEC = {
       'c-btn': {
         v: [
@@ -3948,6 +3990,211 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           ['Disabled', FF({ label: '工單名稱', mark: 'req', cls: 'dis', input: Q('機房巡檢') })],
         ],
       },
+      'c-dd': {
+        wide: true,
+        v: [
+          ['表單欄位 In form field', '包在 app-form-field 裡；提示字寫「請選擇＋欄位名」', FF({ label: '所屬專案', mark: 'req', input: PH('請選擇所屬專案') + `<span class="unit">${CHEV}</span>` }), `<app-form-field label="所屬專案" for="c-proj" [required]="true">
+  <app-combo inputId="c-proj" label="所屬專案"
+    placeholder="請選擇所屬專案"
+    [items]="projectOptions()" [(value)]="projectPick" />
+</app-form-field>`],
+          ['錯誤 Invalid', '錯誤訊息交給 app-form-field 顯示', FF({ label: '所屬專案', mark: 'req', cls: 'bad', input: PH('請選擇所屬專案') + `<span class="unit">${CHEV}</span>`, err: '請選擇所屬專案' }), `<app-form-field label="所屬專案" for="c-proj" [required]="true"
+  [error]="errorFor('c-proj')">
+  <app-combo inputId="c-proj" label="所屬專案"
+    placeholder="請選擇所屬專案"
+    [items]="projectOptions()" [(value)]="projectPick"
+    [invalid]="!!errorFor('c-proj')" />
+</app-form-field>`],
+          ['無可見標籤 Self-labelled', '表格內放不下標籤時才用', DD({ v: '機房巡檢' }), `<!-- 包在 form-field 裡不要開：aria-label 會蓋掉「必填」 -->
+<app-combo inputId="row-3-type" label="工作類型"
+  [selfLabelled]="true"
+  [items]="types" [(value)]="row.type" />`],
+        ],
+        s: [
+          ['Closed', DD({ ph: '請選擇所屬專案' })],
+          ['Open', DD({ v: '變電站季度保養', items: [['變電站季度保養', 'sel'], ['機房巡檢', ''], ['設備汰換', '']] })],
+          ['Typing', DD({ q: '巡檢', items: [['機房巡檢', 'hl']] })],
+          ['No results', DD({ q: '空調', none: true })],
+          ['Error', DD({ ph: '請選擇所屬專案', bad: true })],
+        ],
+      },
+      'c-ms': {
+        wide: true,
+        v: [
+          ['工具列 sm', '頁首篩選；沒選＝全部', MS({ t: '設計部、研發部', n: 2 }), `<app-multi-select noun="部門" [options]="depts"
+  [selected]="deptFilter()" (changed)="deptFilter.set($event)" />`],
+          ['表單欄位 field', '篩選面板內，跟欄位同寬', FF({ label: '部門', input: PH('全部部門') + `<span class="unit">${CHEV}</span>` }), `<app-form-field label="部門" for="f-dept">
+  <app-multi-select size="field" buttonId="f-dept" noun="部門"
+    [options]="depts" [selected]="dept()" (changed)="dept.set($event)" />
+</app-form-field>`],
+          ['單選 Single', '選一個就生效並關閉', MS({ t: '王小明', n: 0 }).replace('class="ph"', ''), `<app-multi-select noun="成員" [single]="true"
+  [options]="members" [selected]="member()" (changed)="member.set($event)" />`],
+        ],
+        s: [
+          ['None', MS({ t: '全部部門', n: 0 })],
+          ['Selected (N)', MS({ t: '設計部、研發部', n: 2 })],
+          ['Open', MS({ t: '設計部、研發部', n: 2, open: true, list: [['設計部', 1], ['研發部', 1], ['客服部', 0]], foot: '已選 2 個' })],
+          ['Searchable', MS({ t: '全部部門', n: 0, open: true, q: '研', list: [['研發部', 0]], foot: '未選＝全部部門' })],
+        ],
+      },
+      'c-ck': {
+        v: [
+          ['單一 Single', '點標籤也能勾', CK('同步通知負責人', 'on'), `<label class="inline-flex min-h-ctl-sm items-center gap-2">
+  <input type="checkbox" class="accent-cc-primary size-4"
+         [checked]="notify()"
+         (change)="notify.set($any($event.target).checked)" />
+  同步通知負責人
+</label>`],
+          ['全選 Select all', '部分選取時顯示半選', `<div class="cks" style="width:100%">${CK('全部成員', 'all some')}${CK('王小明', 'on')}${CK('陳大文')}</div>`, `<!-- 部分選取：indeterminate；讀屏念「部分勾選」 -->
+<input type="checkbox" class="accent-cc-primary size-4"
+       aria-label="全選"
+       [checked]="allChecked()" [indeterminate]="someChecked()"
+       (change)="toggleAll()" />`],
+        ],
+        s: [
+          ['Unchecked', CK('', '')],
+          ['Checked', CK('', 'on')],
+          ['Indeterminate', CK('', 'some')],
+          ['Focus', CK('', 'on', 'is-focus')],
+          ['Disabled', CK('', 'dis')],
+        ],
+      },
+      'c-rad': {
+        wide: true,
+        v: [
+          ['清單 List', '選項短、不需說明', '<div class="rads" style="width:100%"><div class="rad on"><i></i>依部門</div><div class="rad"><i></i>依專案</div><div class="rad"><i></i>依成員</div></div>', `<div role="radiogroup" aria-label="分組方式">
+  @for (o of groups; track o) {
+    <label class="flex min-h-ctl-sm items-center gap-2">
+      <input type="radio" name="groupBy" class="accent-cc-primary size-4"
+             [checked]="groupBy() === o" (change)="groupBy.set(o)" />
+      {{ o }}
+    </label>
+  }
+</div>`],
+          ['帶說明 With description', '選項要比較差異時', '<div class="rads" style="width:100%"><div class="rad on tall"><i></i><span><b>完成後開始</b><small>前一個完成才開始</small></span></div><div class="rad tall"><i></i><span><b>同時進行</b><small>可以一起做</small></span></div></div>', `<!-- 選項附說明：整張卡可點，方向鍵切換 -->
+<div role="radiogroup" aria-labelledby="dep-mode-label">
+  @for (t of types; track t) {
+    <button type="button" role="radio"
+            [attr.aria-checked]="type() === t"
+            [attr.tabindex]="type() === t ? 0 : -1"
+            (click)="setType(t)">
+      <b>{{ label(t) }}</b><small>{{ hint(t) }}</small>
+    </button>
+  }
+</div>`],
+        ],
+        s: [
+          ['Unselected', '<div class="rad"><i></i>依專案</div>'],
+          ['Selected', '<div class="rad on"><i></i>依部門</div>'],
+          ['Hover', '<div class="rad hv"><i></i>依專案</div>'],
+          ['Focus', '<div class="rad"><i class="is-focus"></i>依專案</div>'],
+          ['Disabled', '<div class="rad dis"><i></i>依成員</div>'],
+        ],
+      },
+      'c-tg': {
+        v: [
+          ['標準 Default', '設定列：標籤在左、開關在右', '<div class="tgr on" style="width:100%"><span>到期前提醒</span><span class="tg"><i></i></span></div>', `<label for="set-notify-on">到期前提醒</label>
+<input appSwitch id="set-notify-on"
+       [checked]="notify()" (checkedChange)="notify.set($event)" />`],
+          ['小號 sm', '欄位面板、表格內', '<div class="tgr on" style="width:100%"><span>顯示負責人</span><span class="tg sm"><i></i></span></div>', `<!-- 沒有可見標籤：aria-label 寫出控制的對象 -->
+<input appSwitch="sm" [checked]="col.shown"
+       [attr.aria-label]="'顯示' + col.name"
+       (checkedChange)="toggle(col, $event)" />`],
+        ],
+        s: [
+          ['Off', TG()],
+          ['On', TG('on')],
+          ['Focus', '<div class="tgr on"><span class="tg is-focus"><i></i></span></div>'],
+          ['Disabled', TG('dis')],
+          ['Disabled (On)', TG('on dis')],
+        ],
+      },
+      'c-seg': {
+        v: [
+          ['標準 Default', '2–4 個互斥檢視', `<div style="width:100%">${SEG(['日', '週', '月'], 0)}</div>`, `<div class="cc-segmented" role="group" aria-label="期間">
+  @for (p of periods; track p) {
+    <button type="button" class="cc-segmented-item"
+            [attr.aria-pressed]="period() === p"
+            (click)="period.set(p)">{{ p }}</button>
+  }
+</div>`],
+          ['小號帶數量 sm', '對話框、卡片內；選項可帶數量', `<div style="width:100%">${SEG(['全部 12', '已選 3'], 0, 'sm')}</div>`, `<div class="cc-segmented cc-segmented-sm" role="group" aria-label="案件清單範圍">
+  <button type="button" class="cc-segmented-item"
+          [attr.aria-pressed]="scope() === 'all'"
+          (click)="scope.set('all')">全部 {{ total }}</button>
+  <button type="button" class="cc-segmented-item"
+          [attr.aria-pressed]="scope() === 'selected'"
+          (click)="scope.set('selected')">已選 {{ picked().length }}</button>
+</div>`],
+        ],
+        s: [
+          ['Selected', `<div style="width:100%">${SEG(['日', '週', '月'], 1)}</div>`],
+          ['Hover', `<div style="width:100%">${SEG(['日', '週', '月'], 0, '', { 2: 'hv' })}</div>`],
+          ['Pressed', `<div style="width:100%">${SEG(['日', '週', '月'], 0, '', { 2: 'hv is-press' })}</div>`],
+          ['Focus', `<div style="width:100%">${SEG(['日', '週', '月'], 0, '', { 0: 'is-focus' })}</div>`],
+        ],
+      },
+      'c-mn': {
+        wide: true,
+        v: [
+          ['一般 Default', '⋯ 鈕開啟；單行項目、圖示在前', MN(`<div class="mn-i">${MI.copy}複製</div><div class="mn-i">${MI.link}設定相依</div>`), `<hlm-popover align="end" [sideOffset]="4">
+  <button hlmPopoverTrigger type="button" class="cc-icon-button"
+          [attr.aria-label]="'更多操作：' + c.title">
+    <ng-icon name="lucideEllipsis" size="18" aria-hidden="true" />
+  </button>
+  <div hlmPopoverContent *hlmPopoverPortal appMenu
+       class="w-48 gap-0 p-1" [attr.aria-label]="'更多操作：' + c.title">
+    <button type="button" brnOverlayClose role="menuitem"
+            class="cc-menu-item" (click)="copy()">
+      <ng-icon name="lucideCopy" size="16" aria-hidden="true" />
+      複製
+    </button>
+  </div>
+</hlm-popover>`],
+          ['停用附原因 Disabled with reason', '不要藏起來，寫出為什麼不能用', MN(`<div class="mn-i dis">${MI.rep}建立排程規則<small>這張案件沒有對應的專案</small></div>`), `<!-- aria-disabled 保留可聚焦，讀屏才念得到原因 -->
+<div role="menuitem" class="cc-menu-item items-start py-2"
+     tabindex="-1" aria-disabled="true">
+  建立排程規則
+  <small>這張案件沒有對應的專案</small>
+</div>`],
+          ['刪除類 Destructive', '放最後，前面加分隔線', MN(`<div class="mn-i">${MI.copy}複製</div><div class="mn-sep"></div><div class="mn-i dng">${MI.x}取消案件</div>`), `<div class="cc-menu-separator" role="separator"></div>
+<button type="button" brnOverlayClose role="menuitem"
+        class="cc-menu-item cc-menu-item--danger" (click)="cancelCase()">
+  <ng-icon name="lucideX" size="16" aria-hidden="true" />
+  取消案件
+</button>`],
+        ],
+        s: [
+          ['Trigger', `<div class="mn-h"><span class="b2 ico">${MI.dots}</span></div>`],
+          ['Trigger open', `<div class="mn-h"><span class="b2 ico on">${MI.dots}</span></div>`],
+          ['Item hover', MN(`<div class="mn-i hl">${MI.copy}複製</div>`)],
+          ['Destructive hover', MN(`<div class="mn-i dng hl">${MI.x}取消案件</div>`)],
+          ['Disabled', MN(`<div class="mn-i dis">${MI.rep}建立排程規則</div>`)],
+        ],
+      },
+      'c-dl': {
+        wide: true,
+        v: [
+          ['一般 Default', '標題與觸發按鈕同名；焦點在確認鈕', DL({ t: '確認結案', p: '案件將標記為「已結案」。', fc: 'o' }), `this.dialog.open<boolean>(ConfirmDialog, {
+  title: '確認結案',   // 與觸發按鈕同名
+  body: [\`案件「\${c.title}」將標記為「已結案」。\`],
+  confirmLabel: '確認結案',
+}).closed.subscribe((ok) => { if (ok) this.close(c); });`],
+          ['破壞性 Destructive', '確認鈕紅底；焦點先在取消', DL({ t: '刪除里程碑', p: '「現場勘查」將從這個專案移除。', dng: true, fc: 'c' }), `this.dialog.open<boolean>(ConfirmDialog, {
+  title: '刪除里程碑',
+  body: [\`「\${m.name}」將從這個專案移除。\`],
+  confirmLabel: '刪除里程碑',
+  destructive: true,   // 紅底確認鈕，預設焦點在取消
+})`],
+          ['附補充 Note', '影響範圍用較弱字色補一句', DL({ t: '刪除里程碑', p: '「現場勘查」將從這個專案移除。', n: '關聯案件與工單不會被刪除。', dng: true }), `this.dialog.open<boolean>(ConfirmDialog, {
+  title: '刪除里程碑',
+  body: [\`「\${m.name}」將從這個專案移除。\`],
+  note: '關聯案件與工單不會被刪除。',
+  confirmLabel: '刪除里程碑',
+  destructive: true,
+})`],
+        ],
+      },
     };
     /* ---- 第一階段（目標 95 分）：參數表、正確／錯誤示範、相關元件、手機版 ----
        參數與手機規則都照 repo：hlm-button.ts、form-field.ts、styles.css 的觸控規則（767px 以下） */
@@ -3967,6 +4214,40 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         ['help', 'string', "''", '說明文字；出現錯誤時隱藏'],
         ['error', 'string', "''", '錯誤訊息，role=alert；位置先留好，出現時欄位不跳動'],
         ['[fieldCounter]', '內容投影', '—', '字數，放在說明列右側；加 aria-live="polite"'],
+      ],
+      'c-dd': [
+        ['inputId', 'string', '—（必填）', '輸入框 id；外層 app-form-field 的 for 要對上'],
+        ['label', 'string', '—（必填）', '欄位名稱，給展開鈕與清單念；不會命名輸入框'],
+        ['items', 'readonly string[]', '—（必填）', '選項'],
+        ['[(value)]', 'string', "''", '目前值，雙向綁定'],
+        ['placeholder', 'string', "''", '未選時的提示，寫「請選擇＋欄位名」'],
+        ['invalid', 'boolean', 'false', '錯誤外框＋aria-invalid；訊息由 app-form-field 顯示'],
+        ['selfLabelled', 'boolean', 'false', '沒有外部標籤時才開，改用 label 命名輸入框'],
+      ],
+      'c-ms': [
+        ['options', 'readonly string[]', '—（必填）', '選項'],
+        ['selected', 'readonly string[]', '[]', '已選；空陣列＝全部'],
+        ['(changed)', 'string[]', '—', '選取變更'],
+        ['size', "'sm' | 'field'", "'sm'", 'sm＝頁首工具列；field＝篩選面板，跟欄位同寬'],
+        ['noun', 'string', "''", '「部門」「客戶」；按鈕字與搜尋提示都用它'],
+        ['unit', 'string', "'個'", '量詞，例如客戶用「家」'],
+        ['anyLabel', 'string | null', 'null', '沒選時的字；沒給就是「全部＋noun」'],
+        ['buttonId', 'string | null', 'null', '給外面的 label[for] 對上'],
+        ['single', 'boolean', 'false', '單選：選一個就生效並關閉'],
+      ],
+      'c-tg': [
+        ['appSwitch', "'' | 'sm'", "''", '空＝標準 44×20；sm＝欄位面板用 32×16'],
+        ['checked', 'boolean', 'false', '原生屬性'],
+        ['(checkedChange)', 'boolean', '—', '切換後的值；立即生效，不用再按儲存'],
+        ['disabled', 'boolean', 'false', '原生屬性'],
+      ],
+      'c-dl': [
+        ['title', 'string', '—（必填）', '與觸發按鈕同名，不寫「確定要…嗎？」'],
+        ['body', 'readonly string[]', '—（必填）', '一段一行，寫短句'],
+        ['confirmLabel', 'string', '—（必填）', '確認鈕文字，通常與標題相同'],
+        ['cancelLabel', 'string', "'取消'", '取消鈕文字'],
+        ['destructive', 'boolean', 'false', '紅底確認鈕，預設焦點改在取消'],
+        ['note', 'string', '—', '補充說明，較弱字色'],
       ],
     };
     const apiHtml = (id) => API[id] ? `<section class="sp-sec" aria-label="參數"><h3>參數</h3><div class="api-wrap"><table class="api"><thead><tr><th scope="col">參數</th><th scope="col">型別</th><th scope="col">預設</th><th scope="col">說明</th></tr></thead><tbody>${API[id].map(([n, t, v, d]) => `<tr><td><code>${esc(n)}</code></td><td><code>${esc(t).split(' | ').map((x) => `<span class="nw">${x}</span>`).join(' | ')}</code></td><td><code>${esc(v)}</code></td><td>${esc(d)}</td></tr>`).join('')}</tbody></table></div></section>` : '';

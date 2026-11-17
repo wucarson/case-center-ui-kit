@@ -1,0 +1,14 @@
+{
+  "name": "case-center-ui-kit-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "export": "node export.mjs",
+    "compare": "node compare.mjs"
+  },
+  "dependencies": {
+    "pixelmatch": "^6.0.0",
+    "pngjs": "^7.0.0",
+    "puppeteer-core": "^23.9.0"
+  }
+}

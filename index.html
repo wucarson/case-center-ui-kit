@@ -4380,16 +4380,29 @@ const { colors, setPreference } = useTheme();
       const top = []; let depth = 0, cur = '';
       for (const ch of sel) { if (ch === '(') depth++; else if (ch === ')') depth--; if (ch === ',' && !depth) { top.push(cur); cur = ''; } else cur += ch; }
       top.push(cur);
-      return top.map((x) => x.trim()).filter((x) => {
-        let t = x; for (const p of DARK_PRE) if (t.startsWith(p)) t = t.slice(p.length);
-        if (t.startsWith(':root') || t.startsWith(':is(.cell') ) return false;
-        return !AI_EXCL.test(t.replace(/^:is\(/, ''));
-      }).join(',\n');
+      // 規格頁的變體與狀態寫在 .sp 底下（例：.sp .b2.lg、.sp .ff.dis）：拿掉 .sp 前綴，當成元件本身的樣式
+      return top.map((x) => x.trim()).map((x) => {
+        let pre = '', t = x; for (const p of DARK_PRE) if (t.startsWith(p)) { pre = p; t = t.slice(p.length); }
+        if (t.startsWith('.sp ')) t = t.slice(4);
+        if (t.startsWith(':root') || t.startsWith(':is(.cell') || AI_EXCL.test(t.replace(/^:is\(/, ''))) return '';
+        return pre + t;
+      }).filter(Boolean).join(',\n');
     }
+    const AI_PSEUDO = [[/\.hv\b/g, ':hover', true], [/\.is-press\b/g, ':active', false], [/\.is-focus\b/g, ':focus-visible', false]];
     function aiRules(list, ind = '') {
       const out = [];
       for (const r of list) {
-        if (r instanceof CSSStyleRule) { const sel = aiKeep(r.selectorText); if (sel) out.push(`${ind}${sel.replace(/\n/g, '\n' + ind)} { ${r.style.cssText} }`); }
+        if (r instanceof CSSStyleRule) {
+          const sel = aiKeep(r.selectorText); if (!sel) continue;
+          out.push(`${ind}${sel.replace(/\n/g, '\n' + ind)} { ${r.style.cssText} }`);
+          // 示範用的狀態 class 轉成真正的互動樣式：.hv → :hover、.is-press → :active、.is-focus → :focus-visible（停用時不套）
+          for (const [re, ps, media] of AI_PSEUDO) {
+            if (!sel.match(re)) continue;
+            // 單獨的狀態 class（例：.is-press）不能變成全站的 :active，只套在可以互動的元件上
+            const live = /^.(is-press|is-focus|hv)$/.test(sel.trim()) ? ':is(.btn, .b2, .seg span, .tab, .dtab, .pg nav span, .mn-i, .chip u)' + ps + ':not(.dis):not(.is-off)' : sel.replace(re, ps + ':not(.dis):not(.is-off)');
+            out.push(media ? `${ind}@media (hover: hover) and (pointer: fine) { ${live.replace(/\n/g, ' ')} { ${r.style.cssText} } }` : `${ind}${live.replace(/\n/g, '\n' + ind)} { ${r.style.cssText} }`);
+          }
+        }
         else if (r instanceof CSSMediaRule) { const inner = aiRules(r.cssRules, ind + '  '); if (inner.length) out.push(`${ind}@media ${r.conditionText} {\n${inner.join('\n')}\n${ind}}`); }
         else if (r instanceof CSSKeyframesRule) out.push(ind + r.cssText);
       }
@@ -4422,6 +4435,15 @@ ${decl('dark', dark, '    ')}
 ${decl('dark', dark, '  ')}
 }
 svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+*, *::before, *::after { box-sizing: border-box; }   /* 展示牆全站的盒模型：寬高包含內距與邊框 */
+/* 原生元素歸零：元件用 <button>、<input> 實作時，外觀和展示牆一致 */
+:where(button, input, select, textarea) { margin: 0; font: inherit; color: inherit; letter-spacing: inherit; }
+:where(button) { padding: 0; border: 0; background: none; text-align: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:where(button):disabled { cursor: not-allowed; }
+/* 焦點框畫在子元素上的元件（核取方塊的方框、單選的圓、開關的軌道）：外層不要再畫瀏覽器預設的焦點框 */
+:is(.ck, .rad, .tgr):focus-visible { outline: none; }
+:where(input:not([type='checkbox'], [type='radio'])) { min-width: 0; padding: 0; border: 0; background: none; outline: none; }
+:where(input[type='checkbox'], input[type='radio']) { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
 
 ${body}
 `;
@@ -4490,6 +4512,11 @@ ${stamp()}
 | ${fw === 'react' ? 'ThemeProvider.tsx' : 'plugin.ts'} | 主題切換 |
 | GUIDELINES.md | 設計規範重點 |
 `;
+    // 供 tools/export.mjs 讀取：元件專案用的樣式、token，以及規格頁每個變體與狀態的樣本（像素比對的標準答案）
+    window.__wallExport = () => ({
+      css: aiCss(), tokensTs: pkgTokensTs(snapshot()), tokensCss: pkgTokensCss(),
+      fixtures: Object.fromEntries(Object.entries(SPEC).map(([id, p]) => [SLUG[id], { title: TITLE[id], wide: !!p.wide, variants: (p.v || []).map(([n, , h]) => [n, h]), states: (p.s || []).map(([n, h]) => [n, h]) }])),
+    });
     // React／Vue 套件併入元件規格包：主題＋元件樣式＋結構＋給 AI 的指令，一包就能用
     for (const fw of ['react', 'vue']) {
       const theme0 = PKG[fw];
@@ -4792,7 +4819,7 @@ ${stamp()}
         s: [
           ['Default', '<span class="btn">儲存</span>'],
           ['Hover', '<span class="btn hv">儲存</span>'],
-          ['Pressed', '<span class="btn is-press">儲存</span>'],
+          ['Pressed', '<span class="btn hv is-press">儲存</span>'],   // 按下時滑鼠也在上面：同時有滑過與按下
           ['Focus', '<span class="btn is-focus">儲存</span>'],
           ['Loading', '<span class="btn is-load"><i class="spin"></i>儲存中</span>'],
           ['Success', '<span class="btn done"><span class="roll">已儲存</span></span>'],

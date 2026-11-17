@@ -1,0 +1,7 @@
+/* 比對用的案例容器：和展示牆規格頁的樣本格（.sp-pv）同樣的尺寸與排版；參考頁、React、Vue 共用 */
+html, body { margin: 0; background: var(--card); color: var(--ink); font-size: 14px; line-height: 22px; -webkit-font-smoothing: antialiased; }
+.cases { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px; align-items: flex-start; }
+.case { box-sizing: border-box; width: 320px; min-height: 104px; display: grid; place-items: center; padding: 18px 16px; border-radius: 10px; background: color-mix(in srgb, var(--soft) 55%, var(--line-subtle)); }
+.case > .ff { width: 100%; align-self: start; }
+.case > :is(.dd, .ms, .mn) { width: 100%; height: auto; align-self: start; }
+.case > .dl-d { width: 100%; }

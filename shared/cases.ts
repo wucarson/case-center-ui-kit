@@ -34,6 +34,9 @@ const DT = {
   docs: { key: 'docs', label: '文件', icon: 'docs', count: 2 },
 };
 
+// 頭像群組的示意成員
+const PEOPLE = [{ name: '陳大文', initial: '陳', color: 2 }, { name: '林小華', initial: '林', color: 4 }, { name: '張大同', initial: '張', color: 3 }, { name: '王小明', initial: '王', color: 1 }, { name: '黃小玲', initial: '黃', color: 2 }];
+
 export const CASES: Record<string, Case[]> = {
   button: [
     { id: 'v0', props: { children: '儲存變更' } },
@@ -243,5 +246,35 @@ export const CASES: Record<string, Case[]> = {
     { id: 's2', props: { tone: 'warn', heading: '即將到期', icon: true } },
     { id: 's3', props: { tone: 'danger', heading: '載入失敗', icon: true } },
     { id: 's4', props: { tone: 'neutral', heading: '計算方式', icon: true } },
+  ],
+  'empty-state': [
+    { id: 'v0', props: { tone: 'info', heading: '還沒有工單', text: '建立第一張工單開始派工', action: '新增工單' } },
+    { id: 'v1', props: { tone: 'warn', heading: '找不到符合的案件', text: '試試放寬篩選條件', action: '清除篩選' } },
+    { id: 'v2', props: { tone: 'danger', heading: '載入失敗', text: '網路不穩，請稍後再試', action: '重試' } },
+    { id: 's0', props: { tone: 'info', heading: '還沒有工單', text: '建立第一張工單開始派工', action: '新增工單' } },
+    { id: 's1', props: { tone: 'info', heading: '還沒有工單', text: '建立第一張工單開始派工', action: '新增工單' }, interact: { type: 'hover', selector: 'button' } },
+  ],
+  timeline: [
+    { id: 'v0', props: { style: 'width:100%', items: [{ type: 'edit', text: '李小美 變更狀態為「進行中」', time: '剛剛' }, { type: 'done', text: '陳大文 完成工單 D-2207', time: '2 分鐘前' }, { type: 'due', text: '林小華 將到期日改為 11-20', time: '10 分鐘前' }] } },
+    { id: 's0', props: { style: 'width:100%', items: [{ type: 'edit', text: '李小美 變更狀態', time: '剛剛' }] } },
+    { id: 's1', props: { style: 'width:100%', items: [{ type: 'done', text: '陳大文 完成工單', time: '2 分鐘前' }] } },
+    { id: 's2', props: { style: 'width:100%', items: [{ type: 'due', text: '林小華 改到期日', time: '10 分鐘前' }] } },
+  ],
+  'avatar-group': [
+    { id: 'v0', props: { people: PEOPLE.slice(0, 2) } },
+    { id: 'v1', props: { people: PEOPLE } },
+    { id: 's0', props: { people: PEOPLE.slice(0, 3) } },
+    { id: 's1', props: { people: PEOPLE.slice(0, 3) }, interact: { type: 'hover', selector: '.stack' } },
+  ],
+  skeleton: [
+    { id: 'v0', props: { loading: true, avatar: { initial: '王', color: 1 }, title: '李小美', subtitle: '設計師', style: 'width:100%' } },
+    { id: 'v1', props: { loading: false, avatar: { initial: '王', color: 1 }, title: '李小美', subtitle: '設計師', style: 'width:100%' } },
+  ],
+  'star-toggle': [
+    { id: 'v0', props: { on: false, label: '追蹤案件' } },
+    { id: 'v1', props: { on: true, label: '追蹤案件' } },
+    { id: 's0', props: { on: false, label: '追蹤案件' } },
+    { id: 's1', props: { on: true, label: '追蹤案件' } },
+    { id: 's2', props: { on: false, label: '追蹤案件' }, interact: { type: 'focus', selector: '.starb' } },
   ],
 };

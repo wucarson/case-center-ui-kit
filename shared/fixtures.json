@@ -713,6 +713,125 @@
       ]
     ]
   },
+  "empty-state": {
+    "title": "空狀態",
+    "wide": true,
+    "variants": [
+      [
+        "無資料 Empty",
+        "<div class=\"es info\"><span class=\"es-m\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"5.5\" y=\"4.5\" width=\"13\" height=\"16\" rx=\"2\"/><path d=\"M9 4.5V3.5h6v1M9 11h6M9 15h4\"/></svg></span><b>還沒有工單</b><p>建立第一張工單開始派工</p><span class=\"b2\">新增工單</span></div>"
+      ],
+      [
+        "查無結果 No results",
+        "<div class=\"es warn\"><span class=\"es-m\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4M8.5 11h5\"/></svg></span><b>找不到符合的案件</b><p>試試放寬篩選條件</p><span class=\"b2\">清除篩選</span></div>"
+      ],
+      [
+        "載入失敗 Error",
+        "<div class=\"es danger\"><span class=\"es-m\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M12 3.5l9 16H3z\"/><path d=\"M12 10v4M12 17v.5\"/></svg></span><b>載入失敗</b><p>網路不穩，請稍後再試</p><span class=\"b2\">重試</span></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"es info\"><span class=\"es-m\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"5.5\" y=\"4.5\" width=\"13\" height=\"16\" rx=\"2\"/><path d=\"M9 4.5V3.5h6v1M9 11h6M9 15h4\"/></svg></span><b>還沒有工單</b><p>建立第一張工單開始派工</p><span class=\"b2\">新增工單</span></div>"
+      ],
+      [
+        "Action hover",
+        "<div class=\"es info\"><span class=\"es-m\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"5.5\" y=\"4.5\" width=\"13\" height=\"16\" rx=\"2\"/><path d=\"M9 4.5V3.5h6v1M9 11h6M9 15h4\"/></svg></span><b>還沒有工單</b><p>建立第一張工單開始派工</p><span class=\"b2 hv\">新增工單</span></div>"
+      ]
+    ]
+  },
+  "timeline": {
+    "title": "歷程",
+    "wide": true,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"nts\" style=\"width:100%\"><div class=\"nt\"><i class=\"a\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M4 20h4L19 9l-4-4L4 16zM13 7l4 4\"/></svg></i><div><p>李小美 變更狀態為「進行中」</p><small>剛剛</small></div></div><div class=\"nt\"><i class=\"b\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg></i><div><p>陳大文 完成工單 D-2207</p><small>2 分鐘前</small></div></div><div class=\"nt\"><i class=\"c\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M12 7.5V12l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z\"/></svg></i><div><p>林小華 將到期日改為 11-20</p><small>10 分鐘前</small></div></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Edit",
+        "<div class=\"nts\" style=\"width:100%\"><div class=\"nt\"><i class=\"a\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M4 20h4L19 9l-4-4L4 16zM13 7l4 4\"/></svg></i><div><p>李小美 變更狀態</p><small>剛剛</small></div></div></div>"
+      ],
+      [
+        "Done",
+        "<div class=\"nts\" style=\"width:100%\"><div class=\"nt\"><i class=\"b\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg></i><div><p>陳大文 完成工單</p><small>2 分鐘前</small></div></div></div>"
+      ],
+      [
+        "Due",
+        "<div class=\"nts\" style=\"width:100%\"><div class=\"nt\"><i class=\"c\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M12 7.5V12l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z\"/></svg></i><div><p>林小華 改到期日</p><small>10 分鐘前</small></div></div></div>"
+      ]
+    ]
+  },
+  "avatar-group": {
+    "title": "成員頭像群組",
+    "wide": true,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"ppl-r\"><div class=\"stack\"><span class=\"av\" style=\"--a:var(--cat2)\">陳</span><span class=\"av\" style=\"--a:var(--cat4)\">林</span></div><span class=\"ppl-c\">共 2 位</span></div>"
+      ],
+      [
+        "超過 Overflow",
+        "<div class=\"ppl-r\"><div class=\"stack\"><span class=\"av\" style=\"--a:var(--cat2)\">陳</span><span class=\"av\" style=\"--a:var(--cat4)\">林</span><span class=\"av\" style=\"--a:var(--cat3)\">張</span><span class=\"av more\">+2</span></div><span class=\"ppl-c\">共 5 位</span></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"ppl-r\"><div class=\"stack\"><span class=\"av\" style=\"--a:var(--cat2)\">陳</span><span class=\"av\" style=\"--a:var(--cat4)\">林</span><span class=\"av\" style=\"--a:var(--cat3)\">張</span></div><span class=\"ppl-c\">共 3 位</span></div>"
+      ],
+      [
+        "Hover (spread)",
+        "<div class=\"ppl-r\"><div class=\"stack spread\"><span class=\"av\" style=\"--a:var(--cat2)\">陳</span><span class=\"av\" style=\"--a:var(--cat4)\">林</span><span class=\"av\" style=\"--a:var(--cat3)\">張</span></div><span class=\"ppl-c\">共 3 位</span></div>"
+      ]
+    ]
+  },
+  "skeleton": {
+    "title": "骨架載入",
+    "wide": true,
+    "variants": [
+      [
+        "載入中 Loading",
+        "<div class=\"sk\" style=\"width:100%\"><div class=\"ghost\"><span class=\"av shim\"></span><span class=\"ls\"><b class=\"shim\"></b><b class=\"shim\"></b></span></div><div class=\"real\"><span class=\"av\" style=\"background:var(--cat1)\">王</span><div><p>李小美</p><small>設計師</small></div></div></div>"
+      ],
+      [
+        "載入完成 Loaded",
+        "<div class=\"sk loaded\" style=\"width:100%\"><div class=\"ghost\"><span class=\"av shim\"></span><span class=\"ls\"><b class=\"shim\"></b><b class=\"shim\"></b></span></div><div class=\"real\"><span class=\"av\" style=\"background:var(--cat1)\">王</span><div><p>李小美</p><small>設計師</small></div></div></div>"
+      ]
+    ],
+    "states": []
+  },
+  "star-toggle": {
+    "title": "追蹤星號",
+    "wide": false,
+    "variants": [
+      [
+        "未追蹤 Off",
+        "<span class=\"starb\"><svg viewBox=\"0 0 24 24\"><path d=\"M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z\"/></svg></span>"
+      ],
+      [
+        "已追蹤 On",
+        "<span class=\"starb on\"><svg viewBox=\"0 0 24 24\"><path d=\"M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z\"/></svg></span>"
+      ]
+    ],
+    "states": [
+      [
+        "Off",
+        "<span class=\"starb\"><svg viewBox=\"0 0 24 24\"><path d=\"M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z\"/></svg></span>"
+      ],
+      [
+        "On",
+        "<span class=\"starb on\"><svg viewBox=\"0 0 24 24\"><path d=\"M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z\"/></svg></span>"
+      ],
+      [
+        "Focus",
+        "<span class=\"starb is-focus\"><svg viewBox=\"0 0 24 24\"><path d=\"M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z\"/></svg></span>"
+      ]
+    ]
+  },
   "info-popover": {
     "title": "說明氣泡",
     "wide": false,

@@ -1,5 +1,6 @@
 import '../../../shared/components.css';
 
+export { AvatarGroup, type AvatarGroupProps, type AvatarPerson } from './AvatarGroup';
 export { Button, type ButtonProps } from './Button';
 export { Callout, type CalloutProps, type CalloutTone } from './Callout';
 export { Checkbox, CheckboxList, type CheckboxProps } from './Checkbox';
@@ -7,6 +8,7 @@ export { Combo, type ComboProps } from './Combo';
 export { ConfirmDialog, type ConfirmDialogProps } from './ConfirmDialog';
 export { DatePicker, type DatePickerProps } from './DatePicker';
 export { DetailTabs, type DetailTabItem, type DetailTabsProps } from './DetailTabs';
+export { EmptyState, type EmptyStateProps, type EmptyTone } from './EmptyState';
 export { FormField, TextField, type FormFieldProps, type TextFieldProps } from './FormField';
 export { Icon } from './Icon';
 export { InfoPopover, type InfoPopoverProps } from './InfoPopover';
@@ -18,8 +20,11 @@ export { RadioGroup, type RadioGroupProps, type RadioOption } from './RadioGroup
 export { Segmented, type SegmentedProps } from './Segmented';
 export { Sidebar, type SidebarGroup, type SidebarItem, type SidebarProps } from './Sidebar';
 export { Stepper, type StepperProps, type StepperStep } from './Stepper';
+export { Skeleton, type SkeletonProps } from './Skeleton';
+export { StarToggle, type StarToggleProps } from './StarToggle';
 export { StatusBadge, type BadgeTone, type StatusBadgeProps } from './StatusBadge';
 export { Switch, type SwitchProps } from './Switch';
 export { Tabs, type TabItem, type TabsProps } from './Tabs';
 export { TimePicker, type TimePickerProps } from './TimePicker';
+export { Timeline, type TimelineItem, type TimelineProps, type TimelineType } from './Timeline';
 export { Toast, Toaster, toast, dismiss, type ToastData } from './Toast';

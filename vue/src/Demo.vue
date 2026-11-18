@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { h, type Component } from 'vue';
 import { CASES } from '../../shared/cases';
-import { Button, Callout, Checkbox, CheckboxList, Combo, ConfirmDialog, DatePicker, DetailTabs, FormField, InfoPopover, Menu, MenuPanel, MultiSelect, Pagination, PeriodPicker, RadioGroup, Segmented, Sidebar, StatusBadge, Stepper, Switch, Tabs, TextField, TimePicker, Toast } from './components';
+import { AvatarGroup, Button, Callout, Checkbox, CheckboxList, Combo, ConfirmDialog, DatePicker, DetailTabs, EmptyState, FormField, InfoPopover, Menu, MenuPanel, MultiSelect, Pagination, PeriodPicker, RadioGroup, Segmented, Sidebar, Skeleton, StarToggle, StatusBadge, Stepper, Switch, Tabs, TextField, TimePicker, Timeline, Toast } from './components';
 
 // 放在 FormField 裡的下拉／多選：field 是外框的設定
 const inField = (C: Component) => (p: Record<string, any>) => { const { field, ...rest } = p; return h(FormField, field, () => h(C, { ...rest, inField: true })); };
@@ -29,6 +29,11 @@ const RENDER: Record<string, (p: Record<string, unknown>) => Component> = {
   tabs: () => Tabs,
   'status-badge': () => StatusBadge,
   callout: () => Callout,
+  'empty-state': () => EmptyState,
+  timeline: () => Timeline,
+  'avatar-group': () => AvatarGroup,
+  skeleton: () => Skeleton,
+  'star-toggle': () => StarToggle,
   'detail-tabs': () => DetailTabs,
 };
 const only = new URLSearchParams(location.search).get('c');

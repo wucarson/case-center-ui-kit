@@ -1,5 +1,6 @@
 import '../../../shared/components.css';
 
+export { default as AvatarGroup } from './AvatarGroup.vue';
 export { default as Button } from './Button.vue';
 export { default as Callout } from './Callout.vue';
 export { default as Checkbox } from './Checkbox.vue';
@@ -8,6 +9,7 @@ export { default as Combo } from './Combo.vue';
 export { default as ConfirmDialog } from './ConfirmDialog.vue';
 export { default as DatePicker } from './DatePicker.vue';
 export { default as DetailTabs } from './DetailTabs.vue';
+export { default as EmptyState } from './EmptyState.vue';
 export { default as FormField } from './FormField.vue';
 export { default as Icon } from './Icon.vue';
 export { default as InfoPopover } from './InfoPopover.vue';
@@ -21,9 +23,12 @@ export { default as RadioGroup } from './RadioGroup.vue';
 export { default as Segmented } from './Segmented.vue';
 export { default as Sidebar } from './Sidebar.vue';
 export { default as Stepper } from './Stepper.vue';
+export { default as Skeleton } from './Skeleton.vue';
+export { default as StarToggle } from './StarToggle.vue';
 export { default as StatusBadge } from './StatusBadge.vue';
 export { default as Switch } from './Switch.vue';
 export { default as Tabs } from './Tabs.vue';
 export { default as TimePicker } from './TimePicker.vue';
+export { default as Timeline } from './Timeline.vue';
 export { default as Toast } from './Toast.vue';
 export { Toaster, toast, dismiss, type ToastData } from './toaster';

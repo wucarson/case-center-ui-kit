@@ -4407,7 +4407,7 @@ const { colors, setPreference } = useTheme();
             if (!sel.match(re) || (ps === ':hover' && /\.dd-t, \.search/.test(sel))) continue;
             // 單獨的狀態 class（例：.is-press）不能變成全站的 :active，只套在可以互動的元件上；
             // 用 :where() 保持低優先權，讓元件自己的設定（例：.tab.is-focus 的 outline-offset）蓋得過
-            const live = /^.(is-press|is-focus|hv)$/.test(sel.trim()) ? ':where(.btn, .b2, .seg span, .tab, .dtab, .pg nav span, .mn-i, .chip u)' + ps + ':not(.dis):not(.is-off)' : sel.replace(re, ps + ':not(.dis):not(.is-off)');
+            const live = /^.(is-press|is-focus|hv)$/.test(sel.trim()) ? ':where(.btn, .b2, .seg span, .tab, .dtab, .pg nav span, .mn-i, .chip u, .starb)' + ps + ':not(.dis):not(.is-off)' : sel.replace(re, ps + ':not(.dis):not(.is-off)');
             out.push(media ? `${ind}@media (hover: hover) and (pointer: fine) { ${live.replace(/\n/g, ' ')} { ${r.style.cssText} } }` : `${ind}${live.replace(/\n/g, '\n' + ind)} { ${r.style.cssText} }`);
           }
         }
@@ -4872,6 +4872,36 @@ ${stamp()}
       docs: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
     };
     const SD_IT = [['home', '首頁'], ['cases', '案件', 43], ['dispatch', '工單', 12], ['folder', '專案'], ['chart', '成員績效'], ['docs', '報表']];
+    // 第 3 批規格樣本（11-18）：流程步驟、側邊選單
+    const FS = (st, nm, note) => '<div class="fs ' + st + '"><p>' + SV + nm + '</p><small>' + note + '</small></div>';
+    const FLW = (k) => '<div class="fl" style="width:100%">' + [['待指派', '11-04', '王小明'], ['處理中', '11-06', '李小美'], ['待審核', '11-11', '陳大文'], ['已結案', '11-14', '王小明']].map(([nm, d, w], j) => (j < k ? FS('done', nm, d + ' 完成') : j === k ? FS('cur', nm, w + '・進行中') : FS('todo', nm, '未開始'))).join('') + '</div>';
+    const SDI = {
+      home: '<path d="M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z"/>',
+      cases: '<rect x="3.5" y="7" width="17" height="12.5" rx="2"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/>',
+      dispatch: '<rect x="5.5" y="4.5" width="13" height="16" rx="2"/><path d="M9 4.5V3.5h6v1M9 13l2 2 4-4"/>',
+      folder: '<path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.5l2 2.5H19a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18z"/>',
+      chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+      docs: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+    };
+    const SD_IT = [['home', '首頁'], ['cases', '案件', 43], ['dispatch', '工單', 12], ['folder', '專案'], ['chart', '成員績效'], ['docs', '報表']];
+    const SDIT = (j, o) => { const [k, t, n] = SD_IT[j], c = [j === o.on && 'on', j === o.hv && 'hv'].filter(Boolean).join(' '); return '<span class="sd-it' + (c ? ' ' + c : '') + '"><svg class="ic ln" viewBox="0 0 24 24">' + SDI[k] + '</svg><svg class="ic fl" viewBox="0 0 24 24">' + ICON_FILL[k] + '</svg><span>' + t + '</span>' + (n ? '<b>' + n + '</b>' : '') + '</span>'; };
+    // o：work＝「工作」群組的項目、admin＝加上可收合的「管理」群組、full＝品牌列與使用者、mini＝收合、on／hv＝選中／滑過的項目、shut＝「管理」收起
+    const SD = (o = {}) => { const work = o.work || [0, 1, 2, 3], sh = o.shut ? ' shut' : '';
+      return '<div class="sd-app' + (o.mini ? ' mini' : '') + '"><nav class="sd">' + (o.full ? '<div class="sd-brand"><i class="sd-logo">案</i><b>案管中心</b></div>' : '')
+        + '<div class="sd-list">' + (o.on !== undefined ? '<i class="sd-ind"></i>' : '')
+        + (work.length ? '<span class="sd-g">工作</span>' + work.map((j) => SDIT(j, o)).join('') : '')
+        + (o.admin ? '<span class="sd-g sd-tg' + sh + '">管理<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span><div class="sd-sub' + sh + '"><div>' + SDIT(4, o) + SDIT(5, o) + '</div></div>' : '')
+        + '</div>' + (o.full ? '<div class="sd-me"><i class="av">王</i><span>王小明</span></div>' : '') + '</nav></div>'; };
+    // 第 4 批規格樣本（11-18）：空狀態、歷程、頭像群組、骨架、追蹤星號
+    const ES_I = { info: '<rect x="5.5" y="4.5" width="13" height="16" rx="2"/><path d="M9 4.5V3.5h6v1M9 11h6M9 15h4"/>', warn: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4M8.5 11h5"/>', danger: '<path d="M12 3.5l9 16H3z"/><path d="M12 10v4M12 17v.5"/>' };
+    const ES = (tone, t, d, act, cls = '') => '<div class="es ' + tone + '"><span class="es-m"><svg class="ic" viewBox="0 0 24 24">' + ES_I[tone] + '</svg></span><b>' + t + '</b><p>' + d + '</p><span class="b2' + (cls ? ' ' + cls : '') + '">' + act + '</span></div>';
+    const NT_I = { a: '<path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"/>', b: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', c: '<path d="M12 7.5V12l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/>' };
+    const NT1 = ([t, p, w]) => '<div class="nt"><i class="' + t + '"><svg class="ic" viewBox="0 0 24 24">' + NT_I[t] + '</svg></i><div><p>' + p + '</p><small>' + w + '</small></div></div>';
+    const NTS = (a) => '<div class="nts" style="width:100%">' + a.map(NT1).join('') + '</div>';
+    const AV_M = [['陳', 2], ['林', 4], ['張', 3], ['王', 1]];
+    const AVG = (n, cls = '') => '<div class="ppl-r"><div class="stack' + (cls ? ' ' + cls : '') + '">' + AV_M.slice(0, Math.min(n, 3)).map(([a, c]) => '<span class="av" style="--a:var(--cat' + c + ')">' + a + '</span>').join('') + (n > 3 ? '<span class="av more">+' + (n - 3) + '</span>' : '') + '</div><span class="ppl-c">共 ' + n + ' 位</span></div>';
+    const SKL = (loaded) => '<div class="sk' + (loaded ? ' loaded' : '') + '" style="width:100%"><div class="ghost"><span class="av shim"></span><span class="ls"><b class="shim"></b><b class="shim"></b></span></div><div class="real"><span class="av" style="background:var(--cat1)">王</span><div><p>李小美</p><small>設計師</small></div></div></div>';
+    const STAR = (cls = '') => '<span class="starb' + (cls ? ' ' + cls : '') + '"><svg viewBox="0 0 24 24"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z"/></svg></span>';
     const SDIT = (j, o) => { const [k, t, n] = SD_IT[j], c = [j === o.on && 'on', j === o.hv && 'hv'].filter(Boolean).join(' '); return '<span class="sd-it' + (c ? ' ' + c : '') + '"><svg class="ic ln" viewBox="0 0 24 24">' + SDI[k] + '</svg><svg class="ic fl" viewBox="0 0 24 24">' + ICON_FILL[k] + '</svg><span>' + t + '</span>' + (n ? '<b>' + n + '</b>' : '') + '</span>'; };
     // o：work＝「工作」群組的項目、admin＝加上可收合的「管理」群組、full＝品牌列與使用者、mini＝收合、on／hv＝選中／滑過的項目、shut＝「管理」收起
     const SD = (o = {}) => { const work = o.work || [0, 1, 2, 3], sh = o.shut ? ' shut' : '';
@@ -5361,6 +5391,58 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
       },
       'c-tp': {
         v: [
+      'c-es': {
+        wide: true,
+        v: [
+          ['無資料 Empty', '還沒有內容：說明下一步', ES('info', '還沒有工單', '建立第一張工單開始派工', '新增工單'), '<app-empty-state tone="info" heading="還沒有工單"\n  text="建立第一張工單開始派工" action="新增工單" (act)="create()" />'],
+          ['查無結果 No results', '篩選後沒有符合：給放寬的方法', ES('warn', '找不到符合的案件', '試試放寬篩選條件', '清除篩選'), '<app-empty-state tone="warn" heading="找不到符合的案件" ... />'],
+          ['載入失敗 Error', '說原因、給重試', ES('danger', '載入失敗', '網路不穩，請稍後再試', '重試'), '<app-empty-state tone="danger" heading="載入失敗" ... />'],
+        ],
+        s: [
+          ['Default', ES('info', '還沒有工單', '建立第一張工單開始派工', '新增工單')],
+          ['Action hover', ES('info', '還沒有工單', '建立第一張工單開始派工', '新增工單', 'hv')],
+        ],
+      },
+      'c-nt': {
+        wide: true,
+        v: [
+          ['標準 Default', '最新的在最上面；人名＋動作，時間用相對', NTS([['a', '李小美 變更狀態為「進行中」', '剛剛'], ['b', '陳大文 完成工單 D-2207', '2 分鐘前'], ['c', '林小華 將到期日改為 11-20', '10 分鐘前']]), '<app-timeline [items]="history()" />'],
+        ],
+        s: [
+          ['Edit', NTS([['a', '李小美 變更狀態', '剛剛']])],
+          ['Done', NTS([['b', '陳大文 完成工單', '2 分鐘前']])],
+          ['Due', NTS([['c', '林小華 改到期日', '10 分鐘前']])],
+        ],
+      },
+      'c-av': {
+        wide: true,
+        v: [
+          ['標準 Default', '3 位以內全部顯示', AVG(2), '<app-avatar-group [people]="assignees()" />'],
+          ['超過 Overflow', '最多顯示 3 位，其餘收成 +N', AVG(5), '<app-avatar-group [people]="assignees()" [max]="3" />'],
+        ],
+        s: [
+          ['Default', AVG(3)],
+          ['Hover (spread)', AVG(3, 'spread')],
+        ],
+      },
+      'c-sk': {
+        wide: true,
+        v: [
+          ['載入中 Loading', '形狀照實際內容，避免載入後跳動', SKL(false), '<app-skeleton [loading]="loading()">…</app-skeleton>'],
+          ['載入完成 Loaded', '淡入實際內容', SKL(true), '<!-- 內容就緒後 loading=false，骨架淡出、內容淡入 -->'],
+        ],
+      },
+      'c-star': {
+        v: [
+          ['未追蹤 Off', '點一下追蹤', STAR(), '<app-star-toggle [(on)]="starred" label="追蹤案件" />'],
+          ['已追蹤 On', '填滿＋星光', STAR('on'), '<!-- aria-pressed 表示是否已追蹤 -->'],
+        ],
+        s: [
+          ['Off', STAR()],
+          ['On', STAR('on')],
+          ['Focus', STAR('is-focus')],
+        ],
+      },
           ['標準 Default', '欄位＋時、分各自上下調', TP(), '<app-time-picker label="開始時間" [(value)]="start" />'],
         ],
         s: [

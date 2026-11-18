@@ -1987,6 +1987,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     btn.querySelector('span').textContent = btn.title = paused ? '播放' : '暫停';
     btn.querySelector('path').setAttribute('d', paused ? 'M8 5v14l11-7z' : 'M7 5h4v14H7zM13 5h4v14h-4z');
     document.body.classList.toggle('paused', paused);
+    document.dispatchEvent(new Event('playchange'));   // 詳細頁的播放鈕跟著更新
   };
   btn.addEventListener('click', () => { paused = !paused; paintBtn(); });
   paintBtn();
@@ -5724,10 +5725,12 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
     }
     function paintPlay() {
       const box = $('.dt-play', dt); if (!box) return;
-      const on = held.has(dtId), b = $('.dt-pp', box);
+      const on = held.has(dtId) || paused, b = $('.dt-pp', box);   // 整個展示牆暫停時，這張也算停住
       b.innerHTML = on ? I_PLAY : I_PAUSE; b.setAttribute('aria-pressed', on);
       b.setAttribute('aria-label', on ? '播放示範' : '暫停示範'); b.title = on ? '播放' : '暫停';
     }
+    // 首頁（整體）的播放／暫停和詳細頁（這一張）共用同一個狀態：按首頁的「播放」會解除這張的暫停
+    document.addEventListener('playchange', () => { if (!paused && dtId && held.has(dtId)) setHold(false); else paintPlay(); });
     function putBack() {
       if (dtId && held.has(dtId)) setHold(false);
       if (!slot) return;
@@ -5809,7 +5812,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
       const sh = e.target.closest('.dt-share'); if (sh) return copyLink(sh);
       const cp = e.target.closest('.sp-copy'); if (cp) return copyCode(cp);
       const md = e.target.closest('.sp-seg [data-mode]'); if (md) return setSpMode(md.dataset.mode);
-      const pl = e.target.closest('.dt-pp'); if (pl) return setHold(!held.has(dtId));
+      const pl = e.target.closest('.dt-pp'); if (pl) { if (paused) { setHold(false); return btn.click(); } return setHold(!held.has(dtId)); }   // 整體暫停中按播放＝恢復整個展示牆
       const tb = e.target.closest('.dt-tabs [data-tab]'); if (tb) { history.replaceState(null, '', tabHash(dtId, tb.dataset.tab)); return setTab(tb.dataset.tab); }
       const go = e.target.closest('[data-go]'); if (go) goDetail(go.dataset.go);
     });

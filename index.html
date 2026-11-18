@@ -953,9 +953,12 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 /* 互動示範：右上角播放／暫停（只控制這張）；暫停後可以直接操作 */
 .dt-play { position: absolute; top: 12px; right: 12px; z-index: 2; }
 .dt-stage:has(> .dt-play) { padding-top: 72px; }   /* 按鈕佔上方空白，不壓到卡片標題 */
-.dt-play { opacity: 0; transition: opacity calc(.2s * var(--dur)) var(--ease); }
-.dt-stage:hover .dt-play, .dt-stage:focus-within .dt-play, .dt-play:has([aria-pressed="true"]) { opacity: 1; }
-@media (hover: none) { .dt-play { opacity: 1; } }
+/* 進場：從右上角彈出（縮放＋微位移＋去模糊，彈性曲線）；離場：稍等一下再快速收起，滑鼠短暫移開不閃爍 */
+.dt-play { opacity: 0; scale: .6; translate: 6px -6px; filter: blur(4px); pointer-events: none; transform-origin: 100% 0;
+  transition: opacity calc(.16s * var(--dur)) ease-in calc(.12s * var(--dur)), scale calc(.2s * var(--dur)) ease-in calc(.12s * var(--dur)), translate calc(.2s * var(--dur)) ease-in calc(.12s * var(--dur)), filter calc(.16s * var(--dur)) ease-in calc(.12s * var(--dur)); }
+.dt-stage:hover .dt-play, .dt-stage:focus-within .dt-play, .dt-play:has([aria-pressed="true"]) { opacity: 1; scale: 1; translate: 0 0; filter: none; pointer-events: auto;
+  transition: opacity calc(.22s * var(--dur)) var(--ease), scale calc(.5s * var(--dur)) var(--spring), translate calc(.5s * var(--dur)) var(--spring), filter calc(.22s * var(--dur)) var(--ease); }
+@media (hover: none) { .dt-play { opacity: 1; scale: 1; translate: 0 0; filter: none; pointer-events: auto; } }
 .dt-play button { width: 48px; height: 48px; display: grid; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--tile); box-shadow: var(--raise); color: var(--ink); cursor: pointer; transition: transform calc(.2s * var(--dur)) var(--spring), border-color calc(.2s * var(--dur)); }
 .dt-play button:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
 .dt-play button:active { transform: scale(.92); }
@@ -5729,7 +5732,9 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
     function paintPlay() {
       const box = $('.dt-play', dt); if (!box) return;
       const on = held.has(dtId) || paused, b = $('.dt-pp', box);   // 整個展示牆暫停時，這張也算停住
+      const changed = b.dataset.on !== undefined && b.dataset.on !== String(on); b.dataset.on = on;
       b.innerHTML = on ? I_PLAY : I_PAUSE; b.setAttribute('aria-pressed', on);
+      if (changed) b.firstElementChild.animate([{ transform: 'scale(.4) rotate(-40deg)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: D(380), easing: SPRING });   // 圖示換成另一個時彈一下
       b.setAttribute('aria-label', on ? '播放示範' : '暫停示範'); b.title = on ? '播放' : '暫停';
     }
     // 首頁（整體）的播放／暫停和詳細頁（這一張）共用同一個狀態：按首頁的「播放」會解除這張的暫停

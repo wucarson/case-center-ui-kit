@@ -114,4 +114,25 @@ export const CASES: Record<string, Case[]> = {
     { id: 's3', props: { noun: '部門', options: ['設計部', '研發部', '客服部'], value: ['設計部', '研發部'], defaultOpen: true, inlineMenu: true } },
     { id: 's4', props: { noun: '部門', options: ['設計部', '研發部', '客服部'], value: [], defaultOpen: true, defaultQuery: '研', inlineMenu: true } },
   ],
+  menu: [
+    { id: 'v0', props: { inline: true, items: [{ icon: 'copy', label: '複製' }, { icon: 'link', label: '設定相依' }] } },
+    { id: 'v1', props: { inline: true, items: [{ icon: 'repeat', label: '建立排程規則', disabledReason: '這張案件沒有對應的專案' }] } },
+    { id: 'v2', props: { inline: true, items: [{ icon: 'copy', label: '複製' }, { separator: true }, { icon: 'x', label: '取消案件', danger: true }] } },
+    { id: 's0', props: { label: '更多操作', items: [] } },
+    { id: 's1', props: { label: '更多操作', items: [], defaultOpen: true } },
+    { id: 's2', props: { inline: true, items: [{ icon: 'copy', label: '複製' }] }, interact: { type: 'hover' } },
+    { id: 's3', props: { inline: true, items: [{ icon: 'x', label: '取消案件', danger: true }] }, interact: { type: 'hover' } },
+    { id: 's4', props: { inline: true, items: [{ icon: 'repeat', label: '建立排程規則', disabled: true }] } },
+  ],
+  dialog: [
+    { id: 'v0', props: { open: true, inline: true, title: '確認結案', body: '案件將標記為「已結案」。' }, interact: { type: 'focus', target: 1 } },
+    { id: 'v1', props: { open: true, inline: true, destructive: true, title: '刪除里程碑', body: '「現場勘查」將從這個專案移除。' }, interact: { type: 'focus', target: 0 } },
+    { id: 'v2', props: { open: true, inline: true, destructive: true, title: '刪除里程碑', body: '「現場勘查」將從這個專案移除。', note: '關聯案件與工單不會被刪除。' } },
+  ],
+  toast: [
+    { id: 'v0', props: { title: '已儲存' } },
+    { id: 'v1', props: { title: '已送出審核', detail: '等待 陳大文 覆核' } },
+    { id: 'v2', props: { title: '已移除成員', detail: '王小明', action: { label: '復原' } } },
+    { id: 'v3', props: { title: '已儲存', action: { label: '同步到 ERP' } } },
+  ],
 };

@@ -79,13 +79,13 @@ try {
     let release = null;
     await impl.bringToFront();
     if (k.interact) {
-      const targets = await implEl.$$('button, [role="switch"], [role="checkbox"], [role="radio"], [tabindex="0"], input, [role="combobox"]');
+      const targets = await implEl.$$('button, [role="switch"], [role="checkbox"], [role="radio"], [tabindex="0"], input, [role="combobox"], [role="menuitem"]');
       const t = targets[k.interact.target || 0];
       if (k.interact.type === 'hover') await t.hover();
       if (k.interact.type === 'focus') { await impl.keyboard.press('Shift'); await t.focus(); }
       if (k.interact.type === 'press') { const b = await t.boundingBox(); await impl.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await impl.mouse.down(); release = () => impl.mouse.up(); }
     }
-    await new Promise((r) => setTimeout(r, 30));
+    await new Promise((r) => setTimeout(r, k.interact ? 100 : 30));   // 操作後等畫面更新（框架的狀態更新）
     // 背景分頁不重繪：截圖前切到前景（先截元件頁，操作中的狀態才不會跑掉）
     await impl.bringToFront();
     const b = PNG.sync.read(Buffer.from(await implEl.screenshot()));

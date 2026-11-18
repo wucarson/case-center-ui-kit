@@ -1,4 +1,4 @@
-/* 元件樣式 —— 主題：案管中心預設・匯出自元件展示牆 2026-11-17
+/* 元件樣式 —— 主題：案管中心預設・匯出自元件展示牆 2026-11-18
    從元件展示牆畫面直接抽出：每個元件的所有狀態（滑過、聚焦、選中、展開、停用、錯誤）與動畫都在這裡，
    變數已解析成實際值。React／Vue 元件只要輸出 COMPONENTS.md 裡的 HTML 結構與 class，外觀就和展示牆一致。
    深色模式：<html data-theme="dark">，或跟隨系統。 */
@@ -193,7 +193,7 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-wid
 :where(button) { padding: 0; border: 0; background: none; text-align: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 :where(button):disabled { cursor: not-allowed; }
 /* 焦點框畫在子元素上的元件（核取方塊的方框、單選的圓、開關的軌道）：外層不要再畫瀏覽器預設的焦點框 */
-:is(.ck, .rad, .tgr):focus-visible { outline: none; }
+:is(.ck, .rad, .tgr, .dl-a .cancel):focus-visible { outline: none; }
 /* 欄位裡的原生輸入框：佔滿剩餘空間；字色、提示字色同展示牆（值＝ink、提示＝label） */
 :is(.ff-i, .dd-t, .ms-s) > :is(input, textarea) { flex: 1; min-width: 0; align-self: stretch; padding: 0; border: 0; background: none; outline: none; color: var(--ink); }
 :is(.ff-i, .dd-t, .ms-s) > textarea { resize: none; line-height: inherit; }

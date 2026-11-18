@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { h, type Component } from 'vue';
 import { CASES } from '../../shared/cases';
-import { Button, Checkbox, CheckboxList, Combo, FormField, MultiSelect, RadioGroup, Segmented, Switch, TextField } from './components';
+import { Button, Checkbox, CheckboxList, Combo, ConfirmDialog, FormField, Menu, MenuPanel, MultiSelect, RadioGroup, Segmented, Switch, TextField, Toast } from './components';
 
 // 放在 FormField 裡的下拉／多選：field 是外框的設定
 const inField = (C: Component) => (p: Record<string, any>) => { const { field, ...rest } = p; return h(FormField, field, () => h(C, { ...rest, inField: true })); };
@@ -16,6 +16,9 @@ const RENDER: Record<string, (p: Record<string, unknown>) => Component> = {
   'form-field': () => TextField,
   combo: (p) => (p.field ? (inField(Combo) as unknown as Component) : Combo),
   'multi-select': (p) => (p.field ? (inField(MultiSelect) as unknown as Component) : MultiSelect),
+  menu: (p) => (p.inline ? MenuPanel : Menu),
+  dialog: () => ConfirmDialog,
+  toast: () => Toast,
 };
 const only = new URLSearchParams(location.search).get('c');
 const list = Object.entries(CASES).filter(([n]) => (!only || n === only) && RENDER[n]).flatMap(([n, cs]) => cs.map((c) => ({ n, c })));

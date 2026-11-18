@@ -1,6 +1,7 @@
 import '../../../shared/components.css';
 
 export { default as Button } from './Button.vue';
+export { default as Callout } from './Callout.vue';
 export { default as Checkbox } from './Checkbox.vue';
 export { default as CheckboxList } from './CheckboxList.vue';
 export { default as Combo } from './Combo.vue';
@@ -20,6 +21,7 @@ export { default as RadioGroup } from './RadioGroup.vue';
 export { default as Segmented } from './Segmented.vue';
 export { default as Sidebar } from './Sidebar.vue';
 export { default as Stepper } from './Stepper.vue';
+export { default as StatusBadge } from './StatusBadge.vue';
 export { default as Switch } from './Switch.vue';
 export { default as Tabs } from './Tabs.vue';
 export { default as TimePicker } from './TimePicker.vue';

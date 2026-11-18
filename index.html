@@ -1488,14 +1488,14 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="neu"], :root[data-theme="dark"][data-ui="neu"], :root:not([data-theme="light"])[data-ui="neu"] {
   --card: var(--page); --tile: var(--page); --field: var(--page);
   --card-edge: transparent; --hi: transparent; --sheen: transparent;
-  --shadow: -3px -3px 10px var(--neu-hi), 3px 3px 10px var(--neu-lo);
-  --shadow-lift: -5px -5px 14px var(--neu-hi), 5px 5px 14px var(--neu-lo);
-  --raise: -2px -2px 5px var(--neu-hi), 2px 2px 5px var(--neu-lo);
-  --inset: inset 2px 2px 4px var(--neu-lo), inset -2px -2px 4px var(--neu-hi);
+  --shadow: -3px -3px 8.5px var(--neu-hi), 3px 3px 8.5px var(--neu-lo);
+  --shadow-lift: -5px -5px 12px var(--neu-hi), 5px 5px 12px var(--neu-lo);
+  --raise: -2px -2px 4.25px var(--neu-hi), 2px 2px 4.25px var(--neu-lo);
+  --inset: inset 2px 2px 3.4px var(--neu-lo), inset -2px -2px 3.4px var(--neu-hi);
 }
-:root[data-ui="neu"] { --neu-hi: color-mix(in srgb, color-mix(in srgb, var(--page) 12%, #ffffff) 80%, transparent); --neu-lo: color-mix(in srgb, color-mix(in srgb, var(--page) 60%, #7d8ca8) 80%, transparent); }   /* 模糊半徑收小，顏色加深一點補回立體感 */
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --neu-hi: color-mix(in srgb, color-mix(in srgb, var(--page) 86%, #ffffff) 80%, transparent); --neu-lo: rgb(0 0 0 / .52); } }
-:root[data-theme="dark"][data-ui="neu"] { --neu-hi: color-mix(in srgb, color-mix(in srgb, var(--page) 86%, #ffffff) 80%, transparent); --neu-lo: rgb(0 0 0 / .52); }
+:root[data-ui="neu"] { --neu-hi: color-mix(in srgb, color-mix(in srgb, var(--page) 12%, #ffffff) 96%, transparent); --neu-lo: color-mix(in srgb, color-mix(in srgb, var(--page) 60%, #7d8ca8) 72%, transparent); }   /* 模糊半徑收小，顏色加深一點補回立體感 */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --neu-hi: color-mix(in srgb, color-mix(in srgb, var(--page) 86%, #ffffff) 96%, transparent); --neu-lo: rgb(0 0 0 / .47); } }
+:root[data-theme="dark"][data-ui="neu"] { --neu-hi: color-mix(in srgb, color-mix(in srgb, var(--page) 86%, #ffffff) 96%, transparent); --neu-lo: rgb(0 0 0 / .47); }
 :root[data-ui="neu"] :is(.b2, .top-a .ctl, .search, .dd-t, .tp-f, .dp-f, .stat, .nt, .tp-col .v) { border-color: transparent; }
 :root[data-ui="neu"] .seg { background: var(--page); }
 :root[data-ui="neu"] .tg { background: color-mix(in srgb, var(--page) 62%, var(--line-strong)); }   /* 關閉的開關底槽要看得到（深色時特別需要） */
@@ -1572,8 +1572,8 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="neu"] .ff-i { border-color: transparent; }
 :root[data-ui="neu"] :is(.dd-m, .ms-p, .mn-p, .ip-p, .dp-p, .toast, .dl-d) { background: var(--page); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: transparent; box-shadow: var(--shadow-lift); }
 :root[data-ui="neu"] :is(.btn, .b2, .top-a .ctl):is(:active, .is-press) { box-shadow: var(--inset); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 10px var(--neu-hi), 3px 3px 10px var(--neu-lo), inset 0 1px 0 rgb(255 255 255 / .05); } }
-:root[data-theme="dark"][data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 10px var(--neu-hi), 3px 3px 10px var(--neu-lo), inset 0 1px 0 rgb(255 255 255 / .05); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 8.5px var(--neu-hi), 3px 3px 8.5px var(--neu-lo), inset 0 1px 0 rgb(255 255 255 / .05); } }
+:root[data-theme="dark"][data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 8.5px var(--neu-hi), 3px 3px 8.5px var(--neu-lo), inset 0 1px 0 rgb(255 255 255 / .05); }
 
 /* Swiss Style：字級拉開層次、卡片不填色只留頂線、互動用底線與色塊 */
 :root[data-ui="swiss"] body::before { display: none; }
@@ -4112,7 +4112,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       flat: { background: surface, border: `1px solid ${line}`, 'box-shadow': 'none' },
       glass: { background: `color-mix(in srgb, ${surface} 50%, transparent)`, border: `1px solid color-mix(in srgb, ${hi} 75%, transparent)`, 'backdrop-filter': 'blur(22px) saturate(170%)', 'box-shadow-extra': `inset 0 1px 0 ${hi}` },
       contrast: { border: `2px solid ${lineStrong}` },
-      neu: { background: page, border: '0', 'box-shadow': `-3px -3px 10px color-mix(in srgb, color-mix(in srgb, ${page} 12%, #ffffff) 80%, transparent), 3px 3px 10px color-mix(in srgb, color-mix(in srgb, ${page} 60%, #7d8ca8) 80%, transparent)` },
+      neu: { background: page, border: '0', 'box-shadow': `-3px -3px 8.5px color-mix(in srgb, color-mix(in srgb, ${page} 12%, #ffffff) 96%, transparent), 3px 3px 8.5px color-mix(in srgb, color-mix(in srgb, ${page} 60%, #7d8ca8) 72%, transparent)` },
       swiss: { border: '0', 'border-top': `3px solid ${ink}`, 'border-radius': '0', 'box-shadow': 'none' },
       y2k: { border: '1px solid transparent', background: 'linear-gradient(180deg, rgb(255 255 255 / .75), rgb(255 255 255 / 0) 28%) padding-box, linear-gradient(180deg, #fbfcfe 0%, #f1f4f8 60%, #e6ebf2 100%) padding-box, linear-gradient(135deg, #ffffff, #8e9bb0 30%, #ffffff 52%, #6f7b8f 78%, #ffffff) border-box', 'box-shadow': '0 10px 28px -10px rgb(60 90 150 / .4)' },
     })[theme.style.ui];

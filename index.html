@@ -1407,13 +1407,29 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
   --field: color-mix(in srgb, var(--surface) 70%, transparent);
   --card-edge: color-mix(in srgb, var(--hi) 75%, transparent);
 }
+:root[data-ui="glass"] body::before, :root[data-ui="glass"] body::after {
+  content: ""; position: fixed; inset: -15%; z-index: -1; pointer-events: none; will-change: transform; transform-origin: 50% 50%;
+}
+/* 兩層色光反向慢慢飄：只動 transform（不重畫漸層），週期跟「動畫速度」連動 */
 :root[data-ui="glass"] body::before {
   opacity: 1; -webkit-mask-image: none; mask-image: none;
   background:
-    radial-gradient(42vw 42vw at 10% 12%, color-mix(in srgb, var(--c1) 34%, transparent), transparent 70%),
-    radial-gradient(38vw 38vw at 92% 28%, color-mix(in srgb, var(--c3) 30%, transparent), transparent 70%),
-    radial-gradient(48vw 48vw at 55% 105%, color-mix(in srgb, var(--c2) 28%, transparent), transparent 70%);
+    radial-gradient(34vw 34vw at 14% 16%, color-mix(in srgb, var(--c1) 34%, transparent), transparent 70%),
+    radial-gradient(32vw 32vw at 88% 30%, color-mix(in srgb, var(--c3) 30%, transparent), transparent 70%);
+  animation: glass-a calc(34s * var(--dur)) ease-in-out infinite alternate;
 }
+:root[data-ui="glass"] body::after {
+  background:
+    radial-gradient(40vw 40vw at 56% 100%, color-mix(in srgb, var(--c2) 28%, transparent), transparent 70%),
+    radial-gradient(26vw 26vw at 24% 66%, color-mix(in srgb, var(--c4) 20%, transparent), transparent 70%);
+  animation: glass-b calc(26s * var(--dur)) ease-in-out infinite alternate;
+}
+@keyframes glass-a { from { transform: translate3d(-3vw, -2vh, 0) scale(1) rotate(0deg); } to { transform: translate3d(3vw, 3vh, 0) scale(1.08) rotate(4deg); } }
+@keyframes glass-b { from { transform: translate3d(3vw, 2vh, 0) scale(1.06) rotate(0deg); } to { transform: translate3d(-4vw, -3vh, 0) scale(1) rotate(-5deg); } }
+/* 暫停播放、分類轉場時停住；減少動態效果時不動 */
+:root[data-ui="glass"] body:is(.paused, .hush)::before, :root[data-ui="glass"] body:is(.paused, .hush)::after { animation-play-state: paused; }
+body.reduce::before, body.reduce::after { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="glass"] body::before, :root[data-ui="glass"] body::after { animation: none; } }
 :root[data-ui="glass"] .cell {
   -webkit-backdrop-filter: blur(22px) saturate(170%); backdrop-filter: blur(22px) saturate(170%);
   box-shadow: inset 0 1px 0 var(--hi), inset 0 -1px 0 color-mix(in srgb, var(--hi) 35%, transparent), var(--shadow);
@@ -1426,24 +1442,43 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 :root[data-ui="contrast"] :is(.ctl, .b2, .stat, .nt, .tp-col .v, .search, .dd-t, .tp-f, .dp-f) { border: 1.5px solid var(--line-strong); }
 :root[data-ui="contrast"] :is(.tab, .dtab).on { text-decoration: underline 2px; text-underline-offset: 6px; }
 
-/* 緊湊：內距、元件高度、字級各縮一級，適合資料多的畫面 */
-:root[data-ui="compact"] .wall { font-size: 13px; line-height: 20px; }
-:root[data-ui="compact"] .cell { padding: 12px 14px 14px; gap: 8px; }
-:root[data-ui="compact"] :is(.ctl, .b2) { height: 28px; padding: 0 10px; font-size: 12px; }
-:root[data-ui="compact"] .btn { height: 40px; min-width: 112px; padding: 0 18px; }
-:root[data-ui="compact"] :is(.search, .dd-t, .tp-f, .dp-f) { height: 34px; }
-:root[data-ui="compact"] :is(.res, .dd-m div, .dp-g span) { height: 30px; }
-:root[data-ui="compact"] :is(.seg, .rad) { height: 32px; }
-:root[data-ui="compact"] .tab { height: 32px; padding: 0 10px; font-size: 13px; }
-:root[data-ui="compact"] .dtab { height: 34px; padding: 0 8px; font-size: 13px; }
-:root[data-ui="compact"] .tr { height: 36px; }
-:root[data-ui="compact"] :is(.stat, .nt) { padding: 8px 10px; }
-:root[data-ui="compact"] .sd { gap: 4px; padding: 8px 6px 6px; }
-:root[data-ui="compact"] .sd-it { height: 26px; font-size: 12px; }
-:root[data-ui="compact"] .sd-g { height: 20px; }
-:root[data-ui="compact"] .sd-brand { height: 24px; }
-:root[data-ui="compact"] .sd-me { padding-top: 6px; }
-:root[data-ui="compact"] .sd-me .av { width: 24px; height: 24px; font-size: 11px; }
+/* 間距「緊」：內距、元件高度、字級各縮一級，適合資料多的畫面（設定面板「間距」同時調卡片距離） */
+:root[data-density="compact"] .wall { font-size: 13px; line-height: 20px; }
+:root[data-density="compact"] .cell { padding: 12px 14px 14px; gap: 8px; }
+:root[data-density="compact"] .b2 { height: 28px; padding: 0 10px; font-size: 12px; }
+:root[data-density="compact"] .btn { height: 40px; min-width: 112px; padding: 0 18px; }
+:root[data-density="compact"] :is(.search, .dd-t, .tp-f, .dp-f) { height: 34px; }
+:root[data-density="compact"] :is(.res, .dd-m div, .dp-g span) { height: 30px; }
+:root[data-density="compact"] :is(.seg, .rad) { height: 32px; }
+:root[data-density="compact"] .tab { height: 32px; padding: 0 10px; font-size: 13px; }
+:root[data-density="compact"] .dtab { height: 34px; padding: 0 8px; font-size: 13px; }
+:root[data-density="compact"] .tr { height: 36px; }
+:root[data-density="compact"] :is(.stat, .nt) { padding: 8px 10px; }
+:root[data-density="compact"] .sd { gap: 4px; padding: 8px 6px 6px; }
+:root[data-density="compact"] .sd-it { height: 26px; font-size: 12px; }
+:root[data-density="compact"] .sd-g { height: 20px; }
+:root[data-density="compact"] .sd-brand { height: 24px; }
+:root[data-density="compact"] .sd-me { padding-top: 6px; }
+:root[data-density="compact"] .sd-me .av { width: 24px; height: 24px; font-size: 11px; }
+
+/* 間距「鬆」：對稱放大約 12%，字級不變 */
+:root[data-density="relaxed"] .cell { padding: 20px 22px 22px; gap: 12px; }
+:root[data-density="relaxed"] .b2 { height: 36px; padding: 0 14px; }
+:root[data-density="relaxed"] .btn { height: 54px; min-width: 140px; padding: 0 28px; }
+:root[data-density="relaxed"] :is(.search, .dd-t, .tp-f, .dp-f) { height: 46px; }
+:root[data-density="relaxed"] :is(.res, .dd-m div, .dp-g span) { height: 38px; }
+:root[data-density="relaxed"] :is(.seg, .rad) { height: 40px; }
+:root[data-density="relaxed"] .tab { height: 42px; padding: 0 14px; }
+:root[data-density="relaxed"] .dtab { height: 44px; padding: 0 12px; }
+:root[data-density="relaxed"] .tr { height: 50px; }
+:root[data-density="relaxed"] .stat { padding: 14px 16px; }
+:root[data-density="relaxed"] .nt { padding: 12px 14px; }
+:root[data-density="relaxed"] .sd { gap: 8px; padding: 12px 10px 10px; }
+:root[data-density="relaxed"] .sd-it { height: 34px; }
+:root[data-density="relaxed"] .sd-g { height: 28px; }
+:root[data-density="relaxed"] .sd-brand { height: 32px; }
+:root[data-density="relaxed"] .sd-me { padding-top: 10px; }
+:root[data-density="relaxed"] .sd-me .av { width: 32px; height: 32px; }
 
 /* 扁平：無高光、無陰影，靠線條與色塊分層 */
 :root[data-ui="flat"] { --hi: transparent; --sheen: transparent; --card-edge: var(--line); }
@@ -1469,12 +1504,10 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 :root[data-tabs="block"] .dt > .ind { top: 4px; bottom: 4px; border-radius: max(2px, calc(var(--r-md) - 4px)); background: var(--tile); box-shadow: var(--raise); }
 
 /* 風格卡（設定面板） */
-.cz-styles { grid-template-columns: repeat(5, 1fr); }
 .cz-style i { width: 34px; height: 22px; }
 .cz-style i[data-ui="standard"] { border-radius: 8px; border-color: var(--line); box-shadow: 0 3px 8px rgb(30 70 150 / .25); }
 .cz-style i[data-ui="glass"] { border-radius: 9px; border-color: rgb(255 255 255 / .8); background: linear-gradient(135deg, rgb(255 255 255 / .75), rgb(255 255 255 / .25)), linear-gradient(135deg, var(--c1), var(--c3)); box-shadow: 0 3px 8px rgb(30 70 150 / .2); }
 .cz-style i[data-ui="contrast"] { border: 2px solid var(--ink); border-radius: 6px; box-shadow: none; }
-.cz-style i[data-ui="compact"] { border-radius: 5px; border-color: var(--line-strong); box-shadow: none; background: repeating-linear-gradient(180deg, var(--line-strong) 0 2px, transparent 2px 5px) center / 22px 12px no-repeat, var(--surface); }
 .cz-style i[data-ui="flat"] { border-radius: 4px; border-color: var(--line-strong); background: var(--soft); box-shadow: none; }
 /* ==== 字型七級（對齊 Material 3）：大標 display、標題 headline、子標題 title、內文 body、標籤 label、說明 caption、數字 numeric ==== */
 body { --rk: var(--k-body); font-size: calc(14px * var(--fs-k) * var(--rk)); line-height: calc(14px * var(--fs-k) * var(--rk) * var(--t-body-lh)); font-weight: var(--t-body-w); letter-spacing: var(--t-body-ls); }
@@ -3198,7 +3231,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false },
       layout: { cols: 4, density: 'standard', hidden: [], order: [] },
     };
-    const UI_KEYS = ['standard', 'flat', 'glass', 'contrast', 'compact'];
+    const UI_KEYS = ['standard', 'flat', 'glass', 'contrast'];
     /* 字型：依「字型」與目前預覽語言組出字型堆疊；思源字型從 Google Fonts 載入 */
     let LANG = 'zh';
     try { const l = localStorage.getItem('wall-lang'); if (['zh', 'en', 'ja', 'th', 'de'].includes(l)) LANG = l; } catch (e) {}
@@ -3410,7 +3443,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     let lastAuto = null;
     function apply() {
       // 舊版存過的風格（寫實、手繪）已移除：改回標準
+      // 舊版的「緊湊」風格改成間距「緊」
+      if (theme.style.ui === 'compact') { theme.style.ui = 'standard'; theme.layout.density = 'compact'; }
       if (!UI_KEYS.includes(theme.style.ui)) theme.style.ui = 'standard';
+      if (!['compact', 'standard', 'relaxed'].includes(theme.layout.density)) theme.layout.density = 'standard';
       if (!['auto', 'underline', 'pill', 'block'].includes(theme.style.tabs)) theme.style.tabs = 'auto';
       const v = vars(theme);
       styleEl.textContent = `:root { ${block(v.root)} ${block(v.light)} }\n` +
@@ -3426,6 +3462,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       root.lang = { zh: 'zh-Hant', en: 'en', ja: 'ja', th: 'th', de: 'de' }[LANG];
       const ui = theme.style.ui, tb = theme.style.tabs;
       ui === 'standard' ? root.removeAttribute('data-ui') : root.setAttribute('data-ui', ui);
+      theme.layout.density === 'standard' ? root.removeAttribute('data-density') : root.setAttribute('data-density', theme.layout.density);
       tb === 'auto' ? root.removeAttribute('data-tabs') : root.setAttribute('data-tabs', tb);
       // 自動播放：只在設定真的變了才動播放鈕；第一次載入且是預設（開）時，尊重系統的「減少動態效果」
       if (theme.motion.autoplay !== lastAuto) {
@@ -3580,14 +3617,13 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
     /* ---- 風格：外觀＋各自的滑感（形狀、層次、動態一起換；之後仍可個別微調） ---- */
     const STYLES = [
-      ['standard', '標準', { shape: DEFAULT.shape, depth: DEFAULT.depth, motion: { speed: 1, bounce: 'standard' }, density: 'standard' }],
-      ['flat', '扁平', { shape: { card: 12, control: 8, pill: 'soft' }, depth: { shadow: 0, glow: 0, border: 'standard' }, motion: { speed: 1.25, bounce: 'none' }, density: 'standard' }],
-      ['glass', '液態玻璃', { shape: { card: 24, control: 12, pill: 'full' }, depth: { shadow: 1, glow: 80, border: 'subtle' }, motion: { speed: 0.75, bounce: 'soft' }, density: 'standard' }],
-      ['contrast', '高對比', { shape: { card: 16, control: 8, pill: 'full' }, depth: { shadow: 1, glow: 0, border: 'standard' }, motion: { speed: 1.25, bounce: 'none' }, density: 'standard' }],
-      ['compact', '緊湊', { shape: { card: 12, control: 6, pill: 'full' }, depth: { shadow: 1, glow: 60, border: 'standard' }, motion: { speed: 1.25, bounce: 'none' }, density: 'compact' }],
+      ['standard', '標準', { shape: DEFAULT.shape, depth: DEFAULT.depth, motion: { speed: 1, bounce: 'standard' } }],
+      ['flat', '扁平', { shape: { card: 12, control: 8, pill: 'soft' }, depth: { shadow: 0, glow: 0, border: 'standard' }, motion: { speed: 1.25, bounce: 'none' } }],
+      ['glass', '液態玻璃', { shape: { card: 24, control: 12, pill: 'full' }, depth: { shadow: 1, glow: 80, border: 'subtle' }, motion: { speed: 0.75, bounce: 'soft' } }],
+      ['contrast', '高對比', { shape: { card: 16, control: 8, pill: 'full' }, depth: { shadow: 1, glow: 0, border: 'standard' }, motion: { speed: 1.25, bounce: 'none' } }],
     ];
     const stylesEl = () => el('div', { class: 'cz-styles', role: 'group', 'aria-label': '介面風格' }, STYLES.map(([key, name, s]) => el('button', { type: 'button', class: 'cz-style', 'aria-pressed': String(theme.style.ui === key), onclick: () => {
-      theme.style.ui = key; theme.shape = clone(s.shape); theme.depth = clone(s.depth); theme.motion.speed = s.motion.speed; theme.motion.bounce = s.motion.bounce; theme.layout.density = s.density;
+      theme.style.ui = key; theme.shape = clone(s.shape); theme.depth = clone(s.depth); theme.motion.speed = s.motion.speed; theme.motion.bounce = s.motion.bounce; 
       changed(); renderAll(); flash();
     } }, el('i', { 'data-ui': key }), name)));
     const resetBtn = $('#cz-reset');
@@ -3884,7 +3920,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const show = [
         blk('版面',
           row('每列幾格', 'layout.cols', seg('layout.cols', [[2, '2'], [3, '3'], [4, '4'], [5, '5']], '每列幾格')),
-          row('間距', 'layout.density', seg('layout.density', [['compact', '緊'], ['standard', '標準'], ['relaxed', '鬆']], '間距'))),
+          row('間距', 'layout.density', seg('layout.density', [['compact', '緊'], ['standard', '標準'], ['relaxed', '鬆']], '間距')),
+          el('p', { class: 'cz-hint' }, '同時調整卡片距離與元件內的間距。')),
         blk('元件',
           row('類別', 'layout.hidden', catsEl()),
           el('div', { class: 'cz-filter', role: 'group', 'aria-label': '依類別篩選' }, ['全部', ...Object.keys(CAT)].map((k) => el('button', { type: 'button', 'aria-pressed': String(k === catFilter), onclick: () => { catFilter = k; renderAll(); } }, CAT_LABEL[k] || k))),
@@ -3942,17 +3979,19 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       return out;
     }
     /* 介面風格：卡片外觀（surface＝各系統自己的表面色變數） */
-    const UI_NAME = { standard: '標準', flat: '扁平', glass: '液態玻璃', contrast: '高對比', compact: '緊湊' };
-    // 緊湊的間距 token（標準值：卡片內距 16px 18px、控制項 40px、字級 14px）
+    const UI_NAME = { standard: '標準', flat: '扁平', glass: '液態玻璃', contrast: '高對比' };
+    // 間距 token（標準值：卡片內距 16px 18px、控制項 40px、字級 14px；Tailwind --spacing 0.25rem）
     const COMPACT = { 'space-card': '12px 14px', 'control-height': '34px', 'control-height-sm': '28px', 'font-size-base': '13px' };
+    const RELAXED = { 'space-card': '20px 22px', 'control-height': '44px', 'control-height-sm': '36px' };
+    const DENS = { compact: { vars: COMPACT, spacing: '0.22rem', control: { sm: '28px', md: '34px', lg: '44px' } }, relaxed: { vars: RELAXED, spacing: '0.28rem', control: { sm: '36px', md: '44px', lg: '52px' } } };
+    const dens = () => DENS[theme.layout.density] || null;
     const uiSpec = (surface, ink, hi, line, lineStrong) => ({
       standard: null,
       flat: { background: surface, border: `1px solid ${line}`, 'box-shadow': 'none' },
       glass: { background: `color-mix(in srgb, ${surface} 50%, transparent)`, border: `1px solid color-mix(in srgb, ${hi} 75%, transparent)`, 'backdrop-filter': 'blur(22px) saturate(170%)', 'box-shadow-extra': `inset 0 1px 0 ${hi}` },
       contrast: { border: `2px solid ${lineStrong}` },
-      compact: { padding: COMPACT['space-card'] },
     })[theme.style.ui];
-    const compactVars = (prefix, ind) => theme.style.ui === 'compact' ? Object.entries(COMPACT).map(([k, v]) => `${ind}--${prefix}${k}: ${v};`).join('\n') + '\n' : '';
+    const compactVars = (prefix, ind) => dens() ? Object.entries(dens().vars).map(([k, v]) => `${ind}--${prefix}${k}: ${v};`).join('\n') + '\n' : '';
     const uiDecl = (sp, ind) => sp ? Object.entries(sp).filter(([k]) => k !== 'box-shadow-extra').map(([k, v]) => `${ind}${k}: ${v};`).join('\n') : '';
     const fontNote = () => { const w = webFontOf(theme.type, 'zh'); return w ? { url: gfUrl(w), name: w } : null; };
     const TYPE_LV = ['display', 'headline', 'title', 'body', 'label', 'caption', 'numeric'];
@@ -3973,7 +4012,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           shadow: { light: Object.fromEntries(TOK.shadow.map((k) => [k, { $type: 'shadow', $value: sn.light[k], $description: 'CSS box-shadow' }])), dark: Object.fromEntries(TOK.shadow.map((k) => [k, { $type: 'shadow', $value: sn.dark[k], $description: 'CSS box-shadow' }])) },
           motion: { duration: Object.fromEntries(Object.entries(DUR(sn)).map(([k, v]) => [k, { $type: 'duration', $value: v }])), easing: { spring: { $type: 'cubicBezier', $value: bez(sn.spring) }, springSoft: { $type: 'cubicBezier', $value: bez(sn.springSoft) }, standard: { $type: 'cubicBezier', $value: bez(sn.ease) } } },
           typography: { fontFamily: { $type: 'fontFamily', $value: fontStack(theme.type.family, 'zh') }, ...Object.fromEntries(TYPE_LV.map((k) => { const o = lvOut(k); return [k, { $type: 'typography', $value: { fontFamily: '{typography.fontFamily}', fontSize: o.size, fontWeight: o.weight, lineHeight: o.lh, letterSpacing: o.ls }, ...(k === 'numeric' ? { $description: 'font-variant-numeric: tabular-nums' } : {}) }]; })) },
-          style: { ui: { $type: 'string', $value: theme.style.ui, $description: UI_NAME[theme.style.ui] }, tabs: { $type: 'string', $value: theme.style.tabs, $description: '頁籤樣式：auto／underline／pill／block' }, card: Object.fromEntries(Object.entries(uiSpec('{color.light.surface}', '{color.light.ink}', 'rgb(255 255 255 / .9)', '{color.light.line}', '{color.light.line-strong}') || {}).map(([k, v]) => [k, { $type: 'string', $value: v }])), ...(theme.style.ui === 'compact' ? { spacing: Object.fromEntries(Object.entries(COMPACT).map(([k, v]) => [k, { $type: 'dimension', $value: v }])) } : {}) },
+          style: { ui: { $type: 'string', $value: theme.style.ui, $description: UI_NAME[theme.style.ui] }, tabs: { $type: 'string', $value: theme.style.tabs, $description: '頁籤樣式：auto／underline／pill／block' }, card: Object.fromEntries(Object.entries(uiSpec('{color.light.surface}', '{color.light.ink}', 'rgb(255 255 255 / .9)', '{color.light.line}', '{color.light.line-strong}') || {}).map(([k, v]) => [k, { $type: 'string', $value: v }])), ...(dens() ? { spacing: Object.fromEntries(Object.entries(dens().vars).map(([k, v]) => [k, { $type: 'dimension', $value: v }])) } : {}) },
           $extensions: { 'case-center.wall-theme': clone(theme) },
         };
         return ['tokens.json', JSON.stringify(doc, null, 2)];
@@ -3983,19 +4022,19 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         const vars = (mode) => [...TOK.color.map((k) => `  --color-${k}: ${sn[mode][k]};`), ...TOK.shadow.map((k) => `  --shadow-${k}: ${sn[mode][k]};`)].join('\n');
         const common = [...TOK.radius.map((k) => `  --radius-${RNAME[k]}: ${sn.radius[k]};`), `  --ease-spring: ${sn.spring};`, `  --ease-spring-soft: ${sn.springSoft};`, `  --ease-standard: ${sn.ease};`, ...Object.entries(DUR(sn)).map(([k, v]) => `  --duration-${k}: ${v};`)].join('\n');
         const sp = uiSpec('var(--color-surface)', 'var(--color-ink)', 'rgb(255 255 255 / .6)', 'var(--color-line)', 'var(--color-line-strong)');
-        const card = `\n/* 卡片（介面風格：${UI_NAME[theme.style.ui]}；頁籤：${theme.style.tabs}） */\n.ui-card {\n  background: ${sp?.background || 'var(--color-surface)'};\n  border-radius: var(--radius-card);\n  box-shadow: ${sp?.['box-shadow'] || (sp?.['box-shadow-extra'] ? sp['box-shadow-extra'] + ', ' : '') + 'var(--shadow-shadow)'};\n${uiDecl(sp && Object.fromEntries(Object.entries(sp).filter(([k]) => !['background', 'box-shadow'].includes(k))), '  ')}\n}\n`.replace(/\n\n}/, '\n}');
+        const card = `\n/* 卡片（介面風格：${UI_NAME[theme.style.ui]}；頁籤：${theme.style.tabs}） */\n.ui-card {\n  background: ${sp?.background || 'var(--color-surface)'};\n  border-radius: var(--radius-card);\n  box-shadow: ${sp?.['box-shadow'] || (sp?.['box-shadow-extra'] ? sp['box-shadow-extra'] + ', ' : '') + 'var(--shadow-shadow)'};\n${[uiDecl(sp && Object.fromEntries(Object.entries(sp).filter(([k]) => !['background', 'box-shadow'].includes(k))), '  '), dens() ? '  padding: ' + dens().vars['space-card'] + ';' : ''].filter(Boolean).join('\n')}\n}\n`.replace(/\n\n}/, '\n}');
         return ['theme.css', `${fontNote() ? `@import url('${fontNote().url}');\n` : ''}/* ${stamp()} */\n:root {\n${common}\n${typeVars('', '  ')}${compactVars('', '  ')}${vars('light')}\n}\n@media (prefers-color-scheme: dark) {\n  :root:not([data-theme='light']) {\n${vars('dark').replace(/^/gm, '  ')}\n  }\n}\n:root[data-theme='dark'], .dark {\n${vars('dark')}\n}\n${card}`];
       },
       tw: () => {
         const sn = snapshot();
         const lightVars = [...TOK.color.map((k) => `  --color-${k}: ${sn.light[k]};`), ...TOK.radius.map((k) => `  --radius-${RNAME[k]}: ${sn.radius[k]};`), ...TOK.shadow.map((k) => `  --shadow-${k}: ${sn.light[k]};`), `  --ease-spring: ${sn.spring};`, `  --ease-spring-soft: ${sn.springSoft};`].join('\n');
         const darkVars = [...TOK.color.map((k) => `    --color-${k}: ${sn.dark[k]};`), ...TOK.shadow.map((k) => `    --shadow-${k}: ${sn.dark[k]};`)].join('\n');
-        return ['tailwind-theme.css', `/* ${stamp()}\n   Tailwind v4：貼在 @import "tailwindcss"; 之後。${fontNote() ? `\n   字型：在 <head> 加上 <link rel="stylesheet" href="${fontNote().url}">` : ''}產生 bg-primary、text-ink、rounded-card、shadow-raise、ease-spring 等 class */\n@theme {\n${theme.style.ui === 'compact' ? '  --spacing: 0.22rem;\n' : ''}${typeVars('', '  ').replace('--font-family:', '--font-sans:')}${lightVars}\n}\n@layer base {\n  :root[data-theme='dark'], .dark {\n${darkVars}\n  }\n}\n`];
+        return ['tailwind-theme.css', `/* ${stamp()}\n   Tailwind v4：貼在 @import "tailwindcss"; 之後。${fontNote() ? `\n   字型：在 <head> 加上 <link rel="stylesheet" href="${fontNote().url}">` : ''}產生 bg-primary、text-ink、rounded-card、shadow-raise、ease-spring 等 class */\n@theme {\n${dens() ? '  --spacing: ' + dens().spacing + ';\n' : ''}${typeVars('', '  ').replace('--font-family:', '--font-sans:')}${lightVars}\n}\n@layer base {\n  :root[data-theme='dark'], .dark {\n${darkVars}\n  }\n}\n`];
       },
       cc: () => {
         const sp = uiSpec('var(--color-cc-surface)', 'var(--color-cc-ink)', 'rgb(255 255 255 / .6)', 'var(--color-cc-line)', 'var(--color-cc-line-strong)');
-        // 緊湊：卡片內距交給 Tailwind 的 --spacing 等比縮小（repo 卡片用 p-* class），不直接寫死 padding
-        const ccStyle = () => sp && theme.style.ui !== 'compact' ? `  /* 介面風格：${UI_NAME[theme.style.ui]} */\n` + Object.entries(sp).map(([k, v]) => k === 'box-shadow-extra' ? `  box-shadow: ${v}, var(--cc-wall-card);` : `  ${k}: ${v};`).join('\n') + '\n' : '';
+        // 間距緊／鬆：卡片內距交給 Tailwind 的 --spacing 等比縮小（repo 卡片用 p-* class），不直接寫死 padding
+        const ccStyle = () => sp ? `  /* 介面風格：${UI_NAME[theme.style.ui]} */\n` + Object.entries(sp).map(([k, v]) => k === 'box-shadow-extra' ? `  box-shadow: ${v}, var(--cc-wall-card);` : `  ${k}: ${v};`).join('\n') + '\n' : '';
         // repo 的字型七級（styles.css @theme --text-*）：以 repo 原本的值為基準，乘上展示牆調整的比例；預設主題＝repo 原值
         const REPO_T = { display: [32, 40, 0], headline: [20, 28, 0], title: [16, 24, 0], body: [14, 22, 0], label: [14, 20, 0], caption: [12, 18, 0], numeric: [28, 36, -2] };
         const ccLevels = () => TYPE_LV.map((k) => {
@@ -4004,7 +4043,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           return [`  --text-${k}: ${size}px;`, `  --text-${k}--line-height: ${lh};`, k === 'body' || k === 'caption' ? '' : `  --text-${k}--font-weight: ${lv.weight};`, ls ? `  --text-${k}--letter-spacing: ${ls / 100}em;` : ''].filter(Boolean).join('\n');
         }).join('\n');
         const ccType = () => `\n/* 字型七級（對應 styles.css 的 --text-display 等 token；舊字級 text-sm、text-base… 會跟著連動）${fontNote() ? `\n   請在 index.html 的 <head> 加上 <link rel="stylesheet" href="${fontNote().url}">` : ''} */\n:root {\n${ccLevels()}\n${theme.type.family !== 'system' ? `  --font-sans: ${fontStack(theme.type.family, 'zh')};\n` : ''}}\n`;
-        const ccFont = () => theme.style.ui === 'compact' ? `\n/* 介面風格：緊湊（間距、元件高度等比縮小約 12%，字級 13px） */\n:root {\n  --spacing: 0.22rem;\n}\nbody {\n  font-size: ${COMPACT['font-size-base']};\n}\n` : '';
+        const ccFont = () => { const d = dens(); if (!d) return ''; const note = theme.layout.density === 'compact' ? '緊（間距、元件高度等比縮小約 12%，字級 13px）' : '鬆（間距、元件高度等比放大約 12%）'; return `\n/* 間距：${note} */\n:root {\n  --spacing: ${d.spacing};\n}\n` + (d.vars['font-size-base'] ? `body {\n  font-size: ${d.vars['font-size-base']};\n}\n` : ''); };
         const sn = snapshot();
         const MAP = { primary: ['--color-cc-primary', '--color-cc-chart-case'], 'primary-dark': ['--color-cc-primary-dark'], focus: ['--color-cc-focus'], 'on-primary': ['--primary-foreground'], success: ['--color-cc-success'], 'ok-bg': ['--color-cc-active-bg', '--color-cc-closed-bg'], 'ok-fg': ['--color-cc-active-fg', '--color-cc-closed-fg'], 'warn-bg': ['--color-cc-warn-bg'], 'warn-fg': ['--color-cc-warn-chart'], danger: ['--color-cc-danger'], 'danger-bg': ['--color-cc-danger-bg'], 'danger-fg': ['--color-cc-danger-fg'], 'info-bg': ['--color-cc-plan-bg', '--color-cc-status-active-bg'], 'info-fg': ['--color-cc-plan-fg', '--color-cc-status-active-fg'], c1: ['--color-cc-chart-series-1'], c2: ['--color-cc-chart-series-2'], c3: ['--color-cc-chart-series-3'], c4: ['--color-cc-chart-series-4'], ink: ['--color-cc-ink'], muted: ['--color-cc-muted'], weak: ['--color-cc-muted-weak'], label: ['--color-cc-label', '--color-cc-muted-faint'], line: ['--color-cc-line', '--color-cc-line-card'], 'line-strong': ['--color-cc-line-strong'], 'line-subtle': ['--color-cc-line-subtle'], hover: ['--color-cc-hover-subtle'], glow: ['--cc-glow'], raise: ['--cc-wall-raise'], inset: ['--cc-wall-inset'], shadow: ['--cc-wall-card'] };
         const block2 = (mode, ind) => Object.entries(MAP).flatMap(([k, names]) => names.map((n) => `${ind}${n}: ${sn[mode][k]};`)).join('\n');
@@ -4016,7 +4055,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     /* ---- 前端框架主題套件（React／Vue，TypeScript）：顏色、圓角、字級、陰影、間距、形狀、動態、圖表、設計規範 ---- */
     // 間距與控件高度（展示牆的規範：4px 為基準；控件 32／40／48）
     const SPACE = { 1: '4px', 2: '8px', 3: '12px', 4: '16px', 5: '20px', 6: '24px', 8: '32px', 10: '40px', 12: '48px' };
-    const CONTROL = theme.style.ui === 'compact' ? { sm: '28px', md: '34px', lg: '44px' } : { sm: '32px', md: '40px', lg: '48px' };
+    const CONTROL = () => dens()?.control || { sm: '32px', md: '40px', lg: '48px' };
     const camel = (k) => k.replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
     const tsStr = (v) => JSON.stringify(v);
     function pkgTokensTs(sn) {
@@ -4059,7 +4098,7 @@ ${lv}
 ${Object.entries(SPACE).map(([k, v]) => `    ${k}: ${tsStr(v)},`).join('\n')}
   },
   /** 控件高度：sm＝工具列、表格內；md＝一般欄位；lg＝表單送出、頁首 */
-  control: ${tsStr(CONTROL).replace(/"(\w+)":/g, '$1: ').replace(/,/g, ', ')},
+  control: ${tsStr(CONTROL()).replace(/"(\w+)":/g, '$1: ').replace(/,/g, ', ')},
   motion: {
     /** 時長（已乘上主題的動態速度） */
     duration: { fast: ${parseInt(d.fast)}, base: ${parseInt(d.base)}, slow: ${parseInt(d.slow)} },
@@ -4204,7 +4243,7 @@ ${stamp()}
 - 頁籤、分段切換的選中片會彈性滑動（springSoft）。
 
 ## 尺寸
-- 控件高度只用三級：sm ${CONTROL.sm}（工具列、表格內）、md ${CONTROL.md}（一般欄位）、lg ${CONTROL.lg}（表單送出、頁首）。
+- 控件高度只用三級：sm ${CONTROL().sm}（工具列、表格內）、md ${CONTROL().md}（一般欄位）、lg ${CONTROL().lg}（表單送出、頁首）。
 - 間距以 4px 為基準，只用 space 這組值。
 - 圓角：控件 ${sn0().radius['r-md']}、小卡 ${sn0().radius['r-lg']}、卡片 ${sn0().radius['r-2xl']}；外圓角＝內圓角＋間距（同心）。
 

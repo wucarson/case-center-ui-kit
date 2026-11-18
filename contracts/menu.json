@@ -1,0 +1,63 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "menu",
+  "title": "操作選單",
+  "tier": "logic",
+  "logic": "core/menu.ts",
+  "description": "⋯ 收起次要動作：觸發鈕＋浮起的清單（靠右對齊）。",
+  "use": "一列或一張卡片上的次要動作，常用動作仍放在外面。",
+  "instead": [
+    { "when": "只有一到兩個動作", "use": "button" },
+    { "when": "是在選一個值，不是執行動作", "use": "combo" }
+  ],
+  "parts": [
+    { "name": "host", "selector": ".mn-h", "element": "div", "classes": { "mn-h": "觸發鈕外層" } },
+    {
+      "name": "trigger",
+      "selector": ".mn-h > button",
+      "element": "button",
+      "classes": { "b2": "次要按鈕", "ico": "只有圖示", "on": "清單打開中" },
+      "attrs": {
+        "type": { "values": ["button"], "required": true },
+        "aria-haspopup": { "values": ["menu"], "required": true },
+        "aria-expanded": { "values": ["true", "false"], "required": true },
+        "aria-label": { "required": true }
+      },
+      "sync": [{ "class": "on", "attr": "aria-expanded", "value": "true" }]
+    },
+    { "name": "pinned", "selector": ".mn", "element": "div", "classes": { "mn": "清單外層", "pin": "固定展開（說明頁、側欄內）", "open": "打開" } },
+    {
+      "name": "panel",
+      "selector": ".mn-p",
+      "element": "div",
+      "classes": { "mn-p": "清單" },
+      "attrs": { "role": { "values": ["menu"], "required": true }, "aria-label": {} }
+    },
+    {
+      "name": "item",
+      "selector": ".mn-p > .mn-i",
+      "element": "div",
+      "classes": { "mn-i": "項目", "dng": "刪除類（紅字）", "dis": "停用", "hl": "滑過或鍵盤停留" },
+      "attrs": {
+        "role": { "values": ["menuitem"], "required": true },
+        "tabindex": { "values": ["-1"], "required": true },
+        "aria-disabled": { "values": ["true"] }
+      },
+      "sync": [{ "class": "dis", "attr": "aria-disabled", "value": "true" }]
+    },
+    {
+      "name": "separator",
+      "selector": ".mn-p > .mn-sep",
+      "element": "div",
+      "classes": { "mn-sep": "分隔線：放在刪除類前面" },
+      "attrs": { "role": { "values": ["separator"], "required": true } }
+    }
+  ],
+  "keyboard": [
+    { "keys": "↑、↓", "action": "移動（停用項也停得到，才念得到原因）" },
+    { "keys": "Home、End", "action": "跳到第一個、最後一個" },
+    { "keys": "Enter、Space", "action": "選取並關閉" },
+    { "keys": "Esc", "action": "關閉，焦點回到觸發鈕" }
+  ],
+  "example": "<div class=\"mn-h\"><button type=\"button\" class=\"b2 ico\" aria-label=\"更多操作\" aria-haspopup=\"menu\" aria-expanded=\"false\"><svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\">…</svg></button></div>"
+}

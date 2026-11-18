@@ -1,0 +1,27 @@
+# 案管中心元件（Angular，試驗）
+
+開關、操作選單兩個元件，驗證「共用邏輯＋JSON 契約＋框架外殼」的做法。
+
+| 目錄 | 內容 |
+|---|---|
+| `../core/` | 共用邏輯（純 TypeScript）：class、aria、鍵盤規則，不依賴框架 |
+| `../contracts/` | JSON 契約：每個部件的標籤、class、aria、鍵盤 |
+| `src/app/` | Angular 外殼：只負責渲染與接事件 |
+| `src/demo.ts` | 展示頁，讀 `shared/cases.ts`，給比對工具截圖 |
+
+外殼用屬性選擇器（`<div ccSwitch>`、`<div ccMenu>`），元件本身就是根元素，不會多包一層，標記才會和展示牆相同。
+
+```html
+<div ccSwitch [(checked)]="remind" label="到期前提醒"></div>
+<div ccSwitch [(checked)]="on" aria-label="顯示負責人"></div>
+<div ccMenu [items]="actions" label="更多操作：現場設備異常排查"></div>
+```
+
+## 驗證
+
+```sh
+npm run build
+cd ../tools
+node compare.mjs angular switch        # 逐點比對展示牆
+node check-contracts.mjs angular       # 契約檢查
+```

@@ -1286,6 +1286,9 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .cz-menu.end { width: 180px; }
 .cz-menu.down { top: calc(100% + 6px); bottom: auto; }
 .cz-hint { margin: -6px 0 0; font-size: 12px; line-height: 18px; color: var(--weak); }
+.cz-locked { opacity: .45; }
+.cz-locked :is(button, input) { cursor: not-allowed; }
+.cz-locked + .cz-hint { margin-top: 6px; }
 .cz-tprev { padding: 6px 10px; border-radius: var(--r-sm); background: var(--surface); color: var(--ink); line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cz-tgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: auto auto; grid-auto-flow: column; gap: 4px 6px; }
 .cz-tgrid > span { font-size: 11px; font-weight: 600; color: var(--weak); }
@@ -3606,6 +3609,23 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     styleEl.id = 'theme-vars';
     // 放在 body 最後：claude.ai 會把頁面包進 <body>，原本的樣式表也在 body 裡；覆寫要排在它後面才會贏
     document.body.appendChild(styleEl);
+    // 外觀設定只作用在元件牆：設定面板（.cz）重新宣告樣式表原本的預設變數，主題引擎與風格寫在 :root 的覆寫傳不進去
+    {
+      const light = [], dark = [];
+      const take = (st, out) => { for (const k of st) if (k.startsWith('--')) out.push(`${k}: ${st.getPropertyValue(k).trim()};`); };
+      for (const sh of document.styleSheets) {
+        if (sh.ownerNode === styleEl) continue;
+        let rules; try { rules = sh.cssRules; } catch (e) { continue; }
+        for (const r of rules) {
+          if (r.selectorText === ':root') take(r.style, light);
+          else if (r.selectorText === ':root[data-theme="dark"]') take(r.style, dark);
+        }
+      }
+      const czDefaults = document.createElement('style');
+      czDefaults.id = 'cz-defaults';
+      czDefaults.textContent = `.cz { ${light.join(' ')} }\n@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cz { ${dark.join(' ')} } }\n:root[data-theme="dark"] .cz { ${dark.join(' ')} }`;
+      document.body.appendChild(czDefaults);
+    }
 
     let theme = clone(DEFAULT);
     let lastAuto = null;
@@ -3842,6 +3862,13 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       quick.push([b, on]);
       return b;
     }));
+    // Swiss Style 沒有圓角：圓角相關的控制項停用，旁邊註明原因
+    const lockShape = (node) => {
+      if (theme.style.ui !== 'swiss') return node;
+      node.querySelectorAll('button, input').forEach((c) => { c.disabled = true; });
+      node.classList.add('cz-locked');
+      return el('div', {}, node, el('p', { class: 'cz-hint' }, 'Swiss Style 固定直角，不能調整圓角。'));
+    };
     const thumb = (cls, style = '') => el('i', { class: 'cz-th ' + cls, style, 'aria-hidden': 'true' });
     const qrow = (label, ...kids) => el('div', { class: 'cz-q' }, el('div', { class: 'cz-ql' }, label), ...kids);
 
@@ -4027,7 +4054,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           const p = (k === 'cool' ? COOL : NEUTRAL[k]).light;
           return { name, thumb: thumb('tone', `background:linear-gradient(90deg, ${p.page} 0 34%, ${p['line-strong']} 34% 67%, ${p.muted} 67%);border-color:${p['line-strong']}`), on: () => c.neutral === k, pick: () => { c.neutral = k; } };
         }))),
-        qrow('圓角', opts('圓角', RADIUS.map(([name, s, r]) => ({ name, thumb: thumb('r', `border-top-left-radius:${r}`), on: () => same(theme.shape, s), pick: () => { theme.shape = clone(s); } })))),
+        qrow('圓角', lockShape(opts('圓角', RADIUS.map(([name, s, r]) => ({ name, thumb: thumb('r', `border-top-left-radius:${r}`), on: () => same(theme.shape, s), pick: () => { theme.shape = clone(s); } }))))),
         qrow('動畫', opts('動畫', MOTION.map(([name, m, d]) => {
           const t = thumb('mo'); t.innerHTML = `<svg viewBox="0 0 24 24"><path d="${d}"/></svg>`;
           return { name, thumb: t,
@@ -4081,9 +4108,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
               seg(p + '.weight', [[400, '一般'], [500, '中等'], [600, '半粗'], [700, '粗']], n + '粗細')));
           })),
         blk('圓角細節',
-          row('卡片', 'shape.card', range('shape.card', 0, 32, 1, (v) => v + 'px', '卡片圓角')),
-          row('按鈕與欄位', 'shape.control', range('shape.control', 0, 20, 1, (v) => v + 'px', '按鈕與欄位圓角')),
-          row('標籤', 'shape.pill', seg('shape.pill', [['full', '膠囊'], ['soft', '方塊']], '標籤形狀'))),
+          lockShape(el('div', { class: 'cz-lockable' },
+            row('卡片', 'shape.card', range('shape.card', 0, 32, 1, (v) => v + 'px', '卡片圓角')),
+            row('按鈕與欄位', 'shape.control', range('shape.control', 0, 20, 1, (v) => v + 'px', '按鈕與欄位圓角')),
+            row('標籤', 'shape.pill', seg('shape.pill', [['full', '膠囊'], ['soft', '方塊']], '標籤形狀'))))),
         blk('動畫細節',
           row('速度', 'motion.speed', range('motion.speed', 0.5, 2, 0.25, (v) => v + '×', '動畫速度')),
           row('彈跳感', 'motion.bounce', seg('motion.bounce', [['none', '無'], ['soft', '柔和'], ['standard', '標準'], ['strong', '強']], '彈跳感')),

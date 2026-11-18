@@ -5,7 +5,8 @@
  * interact：要用真實操作重現的狀態（滑過、按下、鍵盤聚焦）；target 是第幾個可互動的子項（預設 0）。
  * wrap：樣本外層包的元素（照抄樣本的 style）。
  */
-export type Interact = { type: 'hover' | 'press' | 'focus'; target?: number };
+/** selector：要操作的元素（沒給就用 target：第幾個可互動的子項） */
+export type Interact = { type: 'hover' | 'press' | 'focus'; target?: number; selector?: string };
 export interface Case {
   id: string;
   props?: Record<string, unknown>;
@@ -134,5 +135,34 @@ export const CASES: Record<string, Case[]> = {
     { id: 'v1', props: { title: '已送出審核', detail: '等待 陳大文 覆核' } },
     { id: 'v2', props: { title: '已移除成員', detail: '王小明', action: { label: '復原' } } },
     { id: 'v3', props: { title: '已儲存', action: { label: '同步到 ERP' } } },
+  ],
+  'info-popover': [
+    { id: 'v0', props: { label: '加權進度', value: '68%', valueNote: '3 / 5 個里程碑', children: '依里程碑權重加總；沒設權重的平均分配。' } },
+    { id: 'v1', props: { label: '加權進度', value: '68%', valueNote: '3 / 5 個里程碑', children: '依里程碑權重加總；沒設權重的平均分配。', defaultOpen: true } },
+    { id: 's0', props: { label: '加權進度', value: '68%', valueNote: '3 / 5 個里程碑', children: '依里程碑權重加總；沒設權重的平均分配。' } },
+    // 滑過、氣泡還沒打開的瞬間：拉長打開延遲才截得穩
+    { id: 's1', props: { label: '加權進度', value: '68%', valueNote: '3 / 5 個里程碑', children: '依里程碑權重加總；沒設權重的平均分配。', openDelay: 60000 }, interact: { type: 'hover' } },
+    { id: 's2', props: { label: '加權進度', value: '68%', valueNote: '3 / 5 個里程碑', children: '依里程碑權重加總；沒設權重的平均分配。' }, interact: { type: 'focus' } },
+    { id: 's3', props: { label: '加權進度', value: '68%', valueNote: '3 / 5 個里程碑', children: '依里程碑權重加總；沒設權重的平均分配。', defaultOpen: true } },
+  ],
+  'date-picker': [
+    { id: 'v0', props: { label: '結束日期', value: '2026-11-20', help: '結束日期・預設為一週後', today: '2026-11-13', min: '2026-11-13' } },
+    { id: 'v1', props: { label: '結束日期', value: '2026-11-20', help: '結束日期・預設為一週後', today: '2026-11-13', min: '2026-11-13', defaultOpen: true } },
+    { id: 's0', props: { label: '結束日期', value: '2026-11-20', help: '結束日期・預設為一週後', today: '2026-11-13', min: '2026-11-13' } },
+    { id: 's1', props: { label: '結束日期', value: '2026-11-20', help: '結束日期・預設為一週後', today: '2026-11-13', min: '2026-11-13' }, interact: { type: 'hover' } },
+    { id: 's2', props: { label: '結束日期', value: '2026-11-20', help: '結束日期・預設為一週後', today: '2026-11-13', min: '2026-11-13', defaultOpen: true } },
+    { id: 's3', props: { label: '結束日期', value: '2026-11-20', help: '結束日期・預設為一週後', today: '2026-11-13', min: '2026-11-13', defaultOpen: true }, interact: { type: 'hover', selector: '.dp-g span:nth-of-type(26)' } },
+    { id: 's4', props: { label: '結束日期', value: '2026-11-20', help: '結束日期・預設為一週後', today: '2026-11-13', min: '2026-11-13', defaultOpen: true }, interact: { type: 'hover', selector: '.dp-pre span:nth-child(4)' } },
+  ],
+  'time-picker': [
+    { id: 'v0', props: { label: '開始時間', value: '09:30' } },
+    { id: 's0', props: { label: '開始時間', value: '09:30' } },
+    { id: 's1', props: { label: '開始時間', value: '09:30' }, interact: { type: 'hover', selector: '.tp-col u' } },
+  ],
+  'period-picker': [
+    { id: 'v0', props: { value: 'month', today: '2026-11-13', style: 'width:100%' } },
+    { id: 's0', props: { value: 'month', today: '2026-11-13', style: 'width:100%' } },
+    { id: 's1', props: { value: '30d', today: '2026-11-13', style: 'width:100%' } },
+    { id: 's2', props: { value: 'custom', today: '2026-11-13', custom: ['2026-11-03', '2026-11-12'], style: 'width:100%' } },
   ],
 };

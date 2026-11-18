@@ -652,5 +652,117 @@
         "<div class=\"pg\"><nav><span class=\"dis\">‹</span><span class=\"on\">1</span><span class=\"\">›</span></nav></div>"
       ]
     ]
+  },
+  "info-popover": {
+    "title": "說明氣泡",
+    "wide": false,
+    "variants": [
+      [
+        "關閉 Closed",
+        "<div class=\"ip\"><div class=\"ip-l\">加權進度<span class=\"ip-b\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 11v5M12 7.5v.5\"></path></svg></span></div><div class=\"ip-v\">68%<small>3 / 5 個里程碑</small></div></div>"
+      ],
+      [
+        "展開 Open",
+        "<div class=\"ip\"><div class=\"ip-l\">加權進度<span class=\"ip-b\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 11v5M12 7.5v.5\"></path></svg></span></div><div class=\"ip-v\">68%<small>3 / 5 個里程碑</small></div><div class=\"ip-p show\" role=\"tooltip\" style=\"--ax: 63px;\">依里程碑權重加總；沒設權重的平均分配。</div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"ip\"><div class=\"ip-l\">加權進度<span class=\"ip-b\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 11v5M12 7.5v.5\"></path></svg></span></div><div class=\"ip-v\">68%<small>3 / 5 個里程碑</small></div></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"ip\"><div class=\"ip-l\">加權進度<span class=\"ip-b hv\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 11v5M12 7.5v.5\"></path></svg></span></div><div class=\"ip-v\">68%<small>3 / 5 個里程碑</small></div></div>"
+      ],
+      [
+        "Focus",
+        "<div class=\"ip\"><div class=\"ip-l\">加權進度<span class=\"ip-b fc\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 11v5M12 7.5v.5\"></path></svg></span></div><div class=\"ip-v\">68%<small>3 / 5 個里程碑</small></div></div>"
+      ],
+      [
+        "Open",
+        "<div class=\"ip\"><div class=\"ip-l\">加權進度<span class=\"ip-b\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 11v5M12 7.5v.5\"></path></svg></span></div><div class=\"ip-v\">68%<small>3 / 5 個里程碑</small></div><div class=\"ip-p show\" role=\"tooltip\" style=\"--ax: 63px;\">依里程碑權重加總；沒設權重的平均分配。</div></div>"
+      ]
+    ]
+  },
+  "date-picker": {
+    "title": "日期選擇",
+    "wide": true,
+    "variants": [
+      [
+        "欄位 Field",
+        "<div class=\"dp\"><div class=\"dp-f\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div></div>"
+      ],
+      [
+        "展開 Open",
+        "<div class=\"dp open\"><div class=\"dp-f\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"></rect><path d=\"M3.5 10h17M8 3v4M16 3v4\"></path></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div><div class=\"dp-p\"><div class=\"dp-pre\"><span>今天</span><span>明天</span><span class=\"on\">一週後</span><span>月底</span></div><div class=\"dp-c\"><div class=\"dp-m\"><span>2026 年 11 月</span><span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"></path></svg><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M9 6l6 6-6 6\"></path></svg></span></div><div class=\"dp-g\"><i class=\"dp-sel\" style=\"transform: translate(182px, 93px);\"></i><b>日</b><b>一</b><b>二</b><b>三</b><b>四</b><b>五</b><b>六</b><span class=\"off\">1</span><span class=\"off\">2</span><span class=\"off\">3</span><span class=\"off\">4</span><span class=\"off\">5</span><span class=\"off\">6</span><span class=\"off\">7</span><span class=\"off\">8</span><span class=\"off\">9</span><span class=\"off\">10</span><span class=\"off\">11</span><span class=\"off\">12</span><span class=\"today\">13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span class=\"on\">20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span></div></div></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Closed",
+        "<div class=\"dp\"><div class=\"dp-f\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"dp\"><div class=\"dp-f hv\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div></div>"
+      ],
+      [
+        "Open",
+        "<div class=\"dp open\"><div class=\"dp-f\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"></rect><path d=\"M3.5 10h17M8 3v4M16 3v4\"></path></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div><div class=\"dp-p\"><div class=\"dp-pre\"><span>今天</span><span>明天</span><span class=\"on\">一週後</span><span>月底</span></div><div class=\"dp-c\"><div class=\"dp-m\"><span>2026 年 11 月</span><span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"></path></svg><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M9 6l6 6-6 6\"></path></svg></span></div><div class=\"dp-g\"><i class=\"dp-sel\" style=\"transform: translate(182px, 93px);\"></i><b>日</b><b>一</b><b>二</b><b>三</b><b>四</b><b>五</b><b>六</b><span class=\"off\">1</span><span class=\"off\">2</span><span class=\"off\">3</span><span class=\"off\">4</span><span class=\"off\">5</span><span class=\"off\">6</span><span class=\"off\">7</span><span class=\"off\">8</span><span class=\"off\">9</span><span class=\"off\">10</span><span class=\"off\">11</span><span class=\"off\">12</span><span class=\"today\">13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span class=\"on\">20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span></div></div></div></div>"
+      ],
+      [
+        "Day hover",
+        "<div class=\"dp open\"><div class=\"dp-f\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"></rect><path d=\"M3.5 10h17M8 3v4M16 3v4\"></path></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div><div class=\"dp-p\"><div class=\"dp-pre\"><span>今天</span><span>明天</span><span class=\"on\">一週後</span><span>月底</span></div><div class=\"dp-c\"><div class=\"dp-m\"><span>2026 年 11 月</span><span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"></path></svg><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M9 6l6 6-6 6\"></path></svg></span></div><div class=\"dp-g\"><i class=\"dp-sel\" style=\"transform: translate(182px, 93px);\"></i><b>日</b><b>一</b><b>二</b><b>三</b><b>四</b><b>五</b><b>六</b><span class=\"off\">1</span><span class=\"off\">2</span><span class=\"off\">3</span><span class=\"off\">4</span><span class=\"off\">5</span><span class=\"off\">6</span><span class=\"off\">7</span><span class=\"off\">8</span><span class=\"off\">9</span><span class=\"off\">10</span><span class=\"off\">11</span><span class=\"off\">12</span><span class=\"today\">13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span class=\"on\">20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span class=\"hv\">26</span><span>27</span><span>28</span><span>29</span><span>30</span></div></div></div></div>"
+      ],
+      [
+        "Preset hover",
+        "<div class=\"dp open\"><div class=\"dp-f\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"></rect><path d=\"M3.5 10h17M8 3v4M16 3v4\"></path></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div><div class=\"dp-p\"><div class=\"dp-pre\"><span>今天</span><span>明天</span><span class=\"on\">一週後</span><span class=\"hv\">月底</span></div><div class=\"dp-c\"><div class=\"dp-m\"><span>2026 年 11 月</span><span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"></path></svg><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M9 6l6 6-6 6\"></path></svg></span></div><div class=\"dp-g\"><i class=\"dp-sel\" style=\"transform: translate(182px, 93px);\"></i><b>日</b><b>一</b><b>二</b><b>三</b><b>四</b><b>五</b><b>六</b><span class=\"off\">1</span><span class=\"off\">2</span><span class=\"off\">3</span><span class=\"off\">4</span><span class=\"off\">5</span><span class=\"off\">6</span><span class=\"off\">7</span><span class=\"off\">8</span><span class=\"off\">9</span><span class=\"off\">10</span><span class=\"off\">11</span><span class=\"off\">12</span><span class=\"today\">13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span class=\"on\">20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span></div></div></div></div>"
+      ]
+    ]
+  },
+  "time-picker": {
+    "title": "時間選擇器",
+    "wide": false,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"tp\"><div class=\"tp-f\"><span class=\"roll\"><span>09:30</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/></svg></div><div class=\"tp-c\"><div class=\"tp-col\"><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>09</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div><b>:</b><div class=\"tp-col\"><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>30</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"tp\"><div class=\"tp-f\"><span class=\"roll\"><span>09:30</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/></svg></div><div class=\"tp-c\"><div class=\"tp-col\"><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>09</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div><b>:</b><div class=\"tp-col\"><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>30</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div></div></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"tp\"><div class=\"tp-f\"><span class=\"roll\"><span>09:30</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/></svg></div><div class=\"tp-c\"><div class=\"tp-col\"><u class=\"hv\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>09</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div><b>:</b><div class=\"tp-col\"><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>30</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div></div></div>"
+      ]
+    ]
+  },
+  "period-picker": {
+    "title": "期間選擇",
+    "wide": true,
+    "variants": [
+      [
+        "標準 Default",
+        "<div style=\"width:100%\"><div class=\"ps\"><i style=\"width: 50px; transform: translateX(3px);\"></i><span class=\"on\">本月</span><span>近 30 天</span><span>近 90 天</span><span>自訂<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"></path></svg></span></div><div class=\"ps-r\">2026-11-01 ～ 2026-11-13・共 13 天</div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "本月",
+        "<div style=\"width:100%\"><div class=\"ps\"><i style=\"width: 50px; transform: translateX(3px);\"></i><span class=\"on\">本月</span><span>近 30 天</span><span>近 90 天</span><span>自訂<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"></path></svg></span></div><div class=\"ps-r\">2026-11-01 ～ 2026-11-13・共 13 天</div></div>"
+      ],
+      [
+        "近 30 天",
+        "<div style=\"width:100%\"><div class=\"ps\"><i style=\"width: 72px; transform: translateX(53px);\"></i><span>本月</span><span class=\"on\">近 30 天</span><span>近 90 天</span><span>自訂<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"></path></svg></span></div><div class=\"ps-r\">2026-10-15 ～ 2026-11-13・共 30 天</div></div>"
+      ],
+      [
+        "自訂",
+        "<div style=\"width:100%\"><div class=\"ps\"><i style=\"width: 66px; transform: translateX(195px);\"></i><span>本月</span><span>近 30 天</span><span>近 90 天</span><span class=\"on\">自訂<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"></path></svg></span></div><div class=\"ps-r\">2026-11-03 ～ 2026-11-12・共 10 天</div></div>"
+      ]
+    ]
   }
 }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { h, type Component } from 'vue';
 import { CASES } from '../../shared/cases';
-import { Button, Checkbox, CheckboxList, Combo, ConfirmDialog, FormField, Menu, MenuPanel, MultiSelect, RadioGroup, Segmented, Switch, TextField, Toast } from './components';
+import { Button, Checkbox, CheckboxList, Combo, ConfirmDialog, DatePicker, FormField, InfoPopover, Menu, MenuPanel, MultiSelect, PeriodPicker, RadioGroup, Segmented, Switch, TextField, TimePicker, Toast } from './components';
 
 // 放在 FormField 裡的下拉／多選：field 是外框的設定
 const inField = (C: Component) => (p: Record<string, any>) => { const { field, ...rest } = p; return h(FormField, field, () => h(C, { ...rest, inField: true })); };
@@ -19,6 +19,10 @@ const RENDER: Record<string, (p: Record<string, unknown>) => Component> = {
   menu: (p) => (p.inline ? MenuPanel : Menu),
   dialog: () => ConfirmDialog,
   toast: () => Toast,
+  'info-popover': () => InfoPopover,
+  'date-picker': () => DatePicker,
+  'time-picker': () => TimePicker,
+  'period-picker': () => PeriodPicker,
 };
 const only = new URLSearchParams(location.search).get('c');
 const list = Object.entries(CASES).filter(([n]) => (!only || n === only) && RENDER[n]).flatMap(([n, cs]) => cs.map((c) => ({ n, c })));

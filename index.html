@@ -1,4 +1,5 @@
 <title>元件展示牆</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* 版面：4 欄 bento（固定列高、dense 補位）。元件清單取自 case-center-ui-redesign/src/app/shared；配色為展示牆的高對比漸層延伸版 */
@@ -824,6 +825,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 #wall > .cell[hidden] { display: none; }   /* .cell 的 display:flex 會蓋掉 hidden；分類篩選與自訂面板的隱藏都靠這條 */
 .dt-stage > .cell[hidden] { display: flex !important; }
 .dt-stage > .cell:hover { transform: none; }
+@media (max-width: 540px) { .dt-stage { padding: 24px 12px; grid-template-columns: minmax(0, 1fr); } .dt-hero { padding: 14px 14px 18px; } }
 .dt-stage > .cell .cell-doc { display: none; }
 .dt-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 @media (max-width: 760px) { .dt-grid { grid-template-columns: 1fr; } }
@@ -855,6 +857,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sp-t { min-width: 0; display: grid; grid-row: span 2; grid-template-rows: subgrid; grid-template-columns: minmax(0, 1fr); row-gap: 8px; }
 .sp-pv { min-height: 104px; display: grid; place-items: center; padding: 18px 16px; border-radius: var(--r-md); background: color-mix(in srgb, var(--soft) 55%, var(--line-subtle)); }
 .sp-pv > .ff { width: 100%; align-self: start; }
+.sp-pv > .ip { width: 100%; align-self: start; }
+.sp-pv > .dp { align-self: start; }
 .sp-cap { display: flex; flex-direction: column; gap: 1px; padding: 0 2px; }
 .sp-cap b { font-size: 13px; line-height: 20px; font-weight: 600; color: var(--ink); }
 .sp-cap small { font-size: 12px; line-height: 18px; color: var(--weak); }
@@ -993,6 +997,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 /* 變體：預覽網格＋一整段程式碼；點預覽，對應的程式段落反白 */
 .sp-vgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
 .sp-vgrid.wide { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.sp-vgrid.xl, .sp-grid.xl.st { grid-template-columns: repeat(auto-fill, minmax(min(460px, 100%), 1fr)); }   /* 日期選擇：面板較寬 */
 .sp-vcode pre { padding-right: 96px; }
 .sp-var:not(.code) .sp-vcode, .sp-var.code .sp-vgrid { display: none; }
 .sp-hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
@@ -4444,7 +4449,7 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-wid
 :where(button) { padding: 0; border: 0; background: none; text-align: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 :where(button):disabled { cursor: not-allowed; }
 /* 焦點框畫在子元素上的元件（核取方塊的方框、單選的圓、開關的軌道）：外層不要再畫瀏覽器預設的焦點框 */
-:is(.ck, .rad, .tgr, .dl-a .cancel):focus-visible { outline: none; }
+:is(.ck, .rad, .tgr, .dl-a .cancel, .ip-b):focus-visible { outline: none; }
 /* 欄位裡的原生輸入框：佔滿剩餘空間；字色、提示字色同展示牆（值＝ink、提示＝label） */
 :is(.ff-i, .dd-t, .ms-s) > :is(input, textarea) { flex: 1; min-width: 0; align-self: stretch; padding: 0; border: 0; background: none; outline: none; color: var(--ink); }
 :is(.ff-i, .dd-t, .ms-s) > textarea { resize: none; line-height: inherit; }
@@ -4527,9 +4532,15 @@ ${stamp()}
 | GUIDELINES.md | 設計規範重點 |
 `;
     // 供 tools/export.mjs 讀取：元件專案用的樣式、token，以及規格頁每個變體與狀態的樣本（像素比對的標準答案）
+    // 樣本放進畫面外的容器排版、量好選中片位置，再取出 HTML
+    function settleHtml(h) {
+      if (!/class="(ps|dp-g|ip)\b/.test(h)) return h;
+      const box = document.createElement('div'); box.className = 'case-x'; box.style.cssText = 'position:absolute;left:-9999px;top:0;width:460px'; box.innerHTML = h; document.body.append(box);
+      settleIndicators(box); const out = box.innerHTML; box.remove(); return out;
+    }
     window.__wallExport = () => ({
       css: aiCss(), tokensTs: pkgTokensTs(snapshot()), tokensCss: pkgTokensCss(),
-      fixtures: Object.fromEntries(Object.entries(SPEC).map(([id, p]) => [SLUG[id], { title: TITLE[id], wide: !!p.wide, variants: (p.v || []).map(([n, , h]) => [n, h]), states: (p.s || []).map(([n, h]) => [n, h]) }])),
+      fixtures: Object.fromEntries(Object.entries(SPEC).map(([id, p]) => [SLUG[id], { title: TITLE[id], wide: !!p.wide, variants: (p.v || []).map(([n, , h]) => [n, settleHtml(h)]), states: (p.s || []).map(([n, h]) => [n, settleHtml(h)]) }])),
     });
     // React／Vue 套件併入元件規格包：主題＋元件樣式＋結構＋給 AI 的指令，一包就能用
     for (const fw of ['react', 'vue']) {
@@ -4800,6 +4811,25 @@ ${stamp()}
     const TH = (t, s) => `<span class="th" data-s="${s}">${t}<svg viewBox="0 0 12 14"><path class="up" d="M6 1l4 5H2z"/><path class="dn" d="M6 13l4-5H2z"/></svg></span>`;
     const DUE = (d, tag, tone) => `<span class="due-r">${d}${tag ? `<span class="tagx ${tone}">${tag}</span>` : ''}</span>`;
     const PGN = (a) => `<div class="pg"><nav>${a.map((x) => { const [t, c] = Array.isArray(x) ? x : [x, '']; return `<span class="${c}">${t}</span>`; }).join('')}</nav></div>`;
+    // 第 2 批規格樣本（11-18）：資訊提示、日期、時間、期間選擇。選中片、箭頭位置由 settleIndicators 量好
+    const SVGI = (d) => '<svg class="ic" viewBox="0 0 24 24">' + d + '</svg>';
+    const I_CAL = SVGI('<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>'), I_PREV = SVGI('<path d="M15 6l-6 6 6 6"/>'), I_NEXT = SVGI('<path d="M9 6l6 6-6 6"/>');
+    const I_CLOCK = SVGI('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>'), I_UP = SVGI('<path d="M6 15l6-6 6 6"/>'), I_DOWN = SVGI('<path d="M6 9l6 6 6-6"/>'), I_INFO = SVGI('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/>');
+    const DPW = '日一二三四五六';
+    const DPG = (sel, mark = {}) => '<div class="dp-g"><i class="dp-sel"></i>' + DPW.split('').map((w) => '<b>' + w + '</b>').join('')
+      + Array.from({ length: 30 }, (_, k) => { const d = k + 1, c = [d < 13 && 'off', d === 13 && 'today', d === sel && 'on', mark[d]].filter(Boolean).join(' '); return '<span' + (c ? ' class="' + c + '"' : '') + '>' + d + '</span>'; }).join('') + '</div>';
+    const DPP = (pre, sel, mark = {}, preHv = -1) => '<div class="dp-p"><div class="dp-pre">' + ['今天', '明天', '一週後', '月底'].map((t, i) => '<span' + (i === pre ? ' class="on"' : i === preHv ? ' class="hv"' : '') + '>' + t + '</span>').join('') + '</div><div class="dp-c"><div class="dp-m"><span>2026 年 11 月</span><span>' + I_PREV + I_NEXT + '</span></div>' + DPG(sel, mark) + '</div></div>';
+    const DP = (o = {}) => '<div class="dp' + (o.open ? ' open' : '') + '"><div class="dp-f"><span class="roll"><span>2026-11-20（五）</span></span>' + I_CAL + '</div><div class="dp-h">結束日期・預設為一週後</div>' + (o.open ? DPP(2, 20, o.mark, o.preHv) : '') + '</div>';
+    const TPC = (v, hv) => '<div class="tp-col"><u' + (hv ? ' class="hv"' : '') + '>' + I_UP + '</u><span class="v"><span class="roll"><span>' + v + '</span></span></span><u>' + I_DOWN + '</u></div>';
+    const TP = (hv) => '<div class="tp"><div class="tp-f"><span class="roll"><span>09:30</span></span>' + I_CLOCK + '</div><div class="tp-c">' + TPC('09', hv) + '<b>:</b>' + TPC('30') + '</div></div>';
+    const PS = (on, range) => '<div style="width:100%"><div class="ps"><i></i>' + ['本月', '近 30 天', '近 90 天', '自訂'].map((t, i) => '<span' + (i === on ? ' class="on"' : '') + '>' + t + (i === 3 ? I_DOWN : '') + '</span>').join('') + '</div><div class="ps-r">' + range + '</div></div>';
+    const IP = (cls = '', open = false) => '<div class="ip"><div class="ip-l">加權進度<span class="ip-b' + (cls ? ' ' + cls : '') + '">' + I_INFO + '</span></div><div class="ip-v">68%<small>3 / 5 個里程碑</small></div>' + (open ? '<div class="ip-p show" role="tooltip">依里程碑權重加總；沒設權重的平均分配。</div>' : '') + '</div>';
+    // 選中片、日期圓、氣泡箭頭：照實際排版量位置（規格頁、匯出樣本、React／Vue 元件用同一套量法）
+    function settleIndicators(r) {
+      r.querySelectorAll('.ps').forEach((ps) => { const i = ps.querySelector(':scope > i'), on = ps.querySelector(':scope > span.on'); if (!i || !on) return; i.style.width = on.offsetWidth + 'px'; i.style.transform = 'translateX(' + on.offsetLeft + 'px)'; });
+      r.querySelectorAll('.dp-g').forEach((g) => { const sel = g.querySelector('.dp-sel'), on = g.querySelector('span.on'); if (!sel || !on) return; sel.style.transform = 'translate(' + (on.offsetLeft + (on.offsetWidth - 32) / 2) + 'px, ' + (on.offsetTop + (on.offsetHeight - 32) / 2) + 'px)'; });
+      r.querySelectorAll('.ip').forEach((ip) => { const b = ip.querySelector('.ip-b'), p = ip.querySelector('.ip-p'); if (!b || !p) return; p.style.setProperty('--ax', (b.offsetLeft + b.offsetWidth / 2 - p.offsetLeft) + 'px'); });
+    }
     const SPEC = {
       'c-btn': {
         v: [
@@ -5252,6 +5282,52 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
           ['Disabled', PGN([['‹', 'dis'], ['1', 'on'], '›'])],
         ],
       },
+      'c-ip': {
+        v: [
+          ['關閉 Closed', 'ⓘ 放在標籤後面', IP(), '<app-info-popover label="加權進度：算法">依里程碑權重加總；沒設權重的平均分配。</app-info-popover>'],
+          ['展開 Open', '滑過或點擊打開，只寫重點', IP('', true), '<!-- 滑過 150ms 打開；點擊釘住；Esc 關閉 -->'],
+        ],
+        s: [
+          ['Default', IP()],
+          ['Hover', IP('hv')],
+          ['Focus', IP('fc')],
+          ['Open', IP('', true)],
+        ],
+      },
+      'c-dp': {
+        wide: true, xl: true,
+        v: [
+          ['欄位 Field', '值與說明；點了打開月曆', DP(), '<app-date-picker label="結束日期" [(value)]="due" help="預設為一週後" />'],
+          ['展開 Open', '左側快捷、右側月曆；選了就生效', DP({ open: true }), '<!-- 快捷：今天、明天、一週後、月底（超出範圍的停用） -->'],
+        ],
+        s: [
+          ['Closed', DP()],
+          ['Hover', DP().replace('<div class="dp-f">', '<div class="dp-f hv">')],
+          ['Open', DP({ open: true })],
+          ['Day hover', DP({ open: true, mark: { 26: 'hv' } })],
+          ['Preset hover', DP({ open: true, preHv: 3 })],
+        ],
+      },
+      'c-tp': {
+        v: [
+          ['標準 Default', '欄位＋時、分各自上下調', TP(), '<app-time-picker label="開始時間" [(value)]="start" />'],
+        ],
+        s: [
+          ['Default', TP()],
+          ['Hover', TP(true)],
+        ],
+      },
+      'c-ps': {
+        wide: true,
+        v: [
+          ['標準 Default', '快捷期間＋範圍文字', PS(0, '2026-11-01 ～ 2026-11-13・共 13 天'), '<app-period-picker [(value)]="period" />'],
+        ],
+        s: [
+          ['本月', PS(0, '2026-11-01 ～ 2026-11-13・共 13 天')],
+          ['近 30 天', PS(1, '2026-10-15 ～ 2026-11-13・共 30 天')],
+          ['自訂', PS(3, '2026-11-03 ～ 2026-11-12・共 10 天')],
+        ],
+      },
     };
     /* ---- 第一階段（目標 95 分）：參數表、正確／錯誤示範、相關元件、手機版 ----
        參數與手機規則都照 repo：hlm-button.ts、form-field.ts、styles.css 的觸控規則（767px 以下） */
@@ -5389,8 +5465,8 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
     const specHtml = (id) => {
       const p = SPEC[id]; if (!p) return '';
       const hasCode = p.v?.some((x) => x[3]);
-      return (p.v ? `<section class="sp-sec sp sp-var${hasCode && spMode === 'cd' ? ' code' : ''}" aria-label="變體"><div class="sp-hd"><h3>變體</h3>${hasCode ? `<div class="sp-tools"><button class="sp-copy sp-all" type="button" data-code="v" data-label="複製全部">${ICON_COPY}<span>複製全部</span></button><div class="sp-seg" role="radiogroup" aria-label="變體顯示方式"><i></i><button type="button" role="radio" data-mode="pv" aria-checked="${spMode === 'pv'}">預覽</button><button type="button" role="radio" data-mode="cd" aria-checked="${spMode === 'cd'}">程式碼</button></div></div>` : ''}</div><div class="sp-vgrid${p.wide ? ' wide' : ''}">${vGrid(p.v)}</div>${hasCode ? `<div class="sp-code sp-vcode"><pre><code>${vPre(p)}</code></pre></div>` : ''}</section>` : '')
-        + (p.s ? `<section class="sp-sec sp" aria-label="狀態對照"><h3>狀態對照</h3><div class="sp-grid${p.wide ? ' wide st' : ' st'}">${tiles(p.s)}</div></section>` : '')
+      return (p.v ? `<section class="sp-sec sp sp-var${hasCode && spMode === 'cd' ? ' code' : ''}" aria-label="變體"><div class="sp-hd"><h3>變體</h3>${hasCode ? `<div class="sp-tools"><button class="sp-copy sp-all" type="button" data-code="v" data-label="複製全部">${ICON_COPY}<span>複製全部</span></button><div class="sp-seg" role="radiogroup" aria-label="變體顯示方式"><i></i><button type="button" role="radio" data-mode="pv" aria-checked="${spMode === 'pv'}">預覽</button><button type="button" role="radio" data-mode="cd" aria-checked="${spMode === 'cd'}">程式碼</button></div></div>` : ''}</div><div class="sp-vgrid${p.wide ? ' wide' : ''}${p.xl ? ' xl' : ''}">${vGrid(p.v)}</div>${hasCode ? `<div class="sp-code sp-vcode"><pre><code>${vPre(p)}</code></pre></div>` : ''}</section>` : '')
+        + (p.s ? `<section class="sp-sec sp" aria-label="狀態對照"><h3>狀態對照</h3><div class="sp-grid${p.wide ? ' wide st' : ' st'}${p.xl ? ' xl' : ''}">${tiles(p.s)}</div></section>` : '')
         + apiHtml(id)
         + (p.code ? `<section class="sp-sec" aria-label="程式範例"><h3>程式範例</h3><div class="sp-code">${copyBtn('all')}<pre><code>${hl(p.code)}</code></pre></div></section>` : '');
     };
@@ -5406,6 +5482,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
       if (SPEC[dtId]) dtTab = tab; const cur = SPEC[dtId] ? tab : 'basic';
       $$('.dt-tabs .tab', dt).forEach((b) => { const on = b.dataset.tab === cur; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); });
       $$('.dt-panel', dt).forEach((p) => { p.hidden = p.dataset.panel !== cur; });
+      settleIndicators(dt); requestAnimationFrame(() => settleIndicators(dt));   // 詳細頁剛打開時還沒排版，下一格再量一次
       moveTabBar();
     }
     async function copyCode(btn) {
@@ -5444,7 +5521,8 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
     const cardSize = (cell) => {
       const cs = getComputedStyle(wall), cols = +cs.getPropertyValue('--cols') || 4, gap = parseFloat(cs.getPropertyValue('--gap')) || 16, row = parseFloat(cs.getPropertyValue('--row')) || 196;
       const colW = (shell.clientWidth - gap * (cols - 1)) / cols;
-      const cs2 = Math.min(cols, cell.classList.contains('w2') ? 2 : 1), rs = cell.classList.contains('h2') ? 2 : 1;
+      const phone = matchMedia('(max-width: 540px)').matches;   // 手機：詳細頁的示範卡片一律撐滿（半寬卡片也是）
+      const cs2 = phone ? cols : Math.min(cols, cell.classList.contains('w2') ? 2 : 1), rs = cell.classList.contains('h2') ? 2 : 1;
       return [Math.round(colW * cs2 + gap * (cs2 - 1)), Math.round(row * rs + gap * (rs - 1))];
     };
     const I_PAUSE = '<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>', I_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';

@@ -193,7 +193,7 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-wid
 :where(button) { padding: 0; border: 0; background: none; text-align: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 :where(button):disabled { cursor: not-allowed; }
 /* 焦點框畫在子元素上的元件（核取方塊的方框、單選的圓、開關的軌道）：外層不要再畫瀏覽器預設的焦點框 */
-:is(.ck, .rad, .tgr, .dl-a .cancel):focus-visible { outline: none; }
+:is(.ck, .rad, .tgr, .dl-a .cancel, .ip-b):focus-visible { outline: none; }
 /* 欄位裡的原生輸入框：佔滿剩餘空間；字色、提示字色同展示牆（值＝ink、提示＝label） */
 :is(.ff-i, .dd-t, .ms-s) > :is(input, textarea) { flex: 1; min-width: 0; align-self: stretch; padding: 0; border: 0; background: none; outline: none; color: var(--ink); }
 :is(.ff-i, .dd-t, .ms-s) > textarea { resize: none; line-height: inherit; }

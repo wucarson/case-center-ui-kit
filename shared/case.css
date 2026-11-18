@@ -5,3 +5,6 @@ html, body { margin: 0; background: var(--card); color: var(--ink); font-size: 1
 .case > .ff { width: 100%; align-self: start; }
 .case > :is(.dd, .ms, .mn) { width: 100%; height: auto; align-self: start; }
 .case > .dl-d { width: 100%; }
+.case[data-c="date-picker"] { width: 460px; }
+.case > .ip { width: 100%; align-self: start; }
+.case > .dp { align-self: start; }

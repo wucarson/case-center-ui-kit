@@ -80,7 +80,7 @@ try {
     await impl.bringToFront();
     if (k.interact) {
       const targets = await implEl.$$('button, [role="switch"], [role="checkbox"], [role="radio"], [tabindex="0"], input, [role="combobox"], [role="menuitem"]');
-      const t = targets[k.interact.target || 0];
+      const t = k.interact.selector ? await implEl.$(k.interact.selector) : targets[k.interact.target || 0];
       if (k.interact.type === 'hover') await t.hover();
       if (k.interact.type === 'focus') { await impl.keyboard.press('Shift'); await t.focus(); }
       if (k.interact.type === 'press') { const b = await t.boundingBox(); await impl.mouse.move(b.x + b.width / 2, b.y + b.height / 2); await impl.mouse.down(); release = () => impl.mouse.up(); }

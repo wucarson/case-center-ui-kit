@@ -1508,7 +1508,7 @@ body.reduce::before, body.reduce::after { animation: none !important; }
   --shadow: none; --shadow-lift: none; --raise: none; --inset: none;
   --font: 'Helvetica Neue', Helvetica, Arial, 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
 }
-:root[data-ui="swiss"] .cell { border-width: 3px 0 0; border-color: var(--ink); border-radius: 0; }
+:root[data-ui="swiss"] .cell { border-style: solid; border-width: 3px 1px 1px; border-color: var(--ink) var(--line-strong) var(--line-strong); border-radius: 0; }   /* 細線框＋頂端粗線，卡片區塊清楚 */
 :root[data-ui="swiss"] .cell:hover { transform: none; }
 :root[data-ui="swiss"] .cell > header { font-weight: 700; }
 :root[data-ui="swiss"] .cell > header em { text-transform: uppercase; letter-spacing: .08em; font-size: 11px; }
@@ -1578,7 +1578,7 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 /* Swiss Style：字級拉開層次、卡片不填色只留頂線、互動用底線與色塊 */
 :root[data-ui="swiss"] body::before { display: none; }
 :root[data-ui="swiss"] .cell { background: transparent; transition: border-color calc(.2s * var(--dur)) var(--ease); }
-:root[data-ui="swiss"] .cell:hover { border-color: var(--primary); }
+:root[data-ui="swiss"] .cell:hover { border-top-color: var(--primary); }
 :root[data-ui="swiss"] .cell > header { font-size: calc(15px * var(--fs-k)); line-height: 1.3; letter-spacing: -.01em; color: var(--ink); }
 :root[data-ui="swiss"] .cell > header em { font-size: 10.5px; font-weight: 600; color: var(--weak); }
 :root[data-ui="swiss"] .stat b { font-size: calc(32px * var(--fs-k)); font-weight: 700; letter-spacing: -.03em; }
@@ -4113,7 +4113,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       glass: { background: `color-mix(in srgb, ${surface} 50%, transparent)`, border: `1px solid color-mix(in srgb, ${hi} 75%, transparent)`, 'backdrop-filter': 'blur(22px) saturate(170%)', 'box-shadow-extra': `inset 0 1px 0 ${hi}` },
       contrast: { border: `2px solid ${lineStrong}` },
       neu: { background: page, border: '0', 'box-shadow': `-3px -3px 8.5px color-mix(in srgb, color-mix(in srgb, ${page} 12%, #ffffff) 96%, transparent), 3px 3px 8.5px color-mix(in srgb, color-mix(in srgb, ${page} 60%, #7d8ca8) 72%, transparent)` },
-      swiss: { border: '0', 'border-top': `3px solid ${ink}`, 'border-radius': '0', 'box-shadow': 'none' },
+      swiss: { border: `1px solid ${lineStrong}`, 'border-top': `3px solid ${ink}`, 'border-radius': '0', 'box-shadow': 'none' },
       y2k: { border: '1px solid transparent', background: 'linear-gradient(180deg, rgb(255 255 255 / .75), rgb(255 255 255 / 0) 28%) padding-box, linear-gradient(180deg, #fbfcfe 0%, #f1f4f8 60%, #e6ebf2 100%) padding-box, linear-gradient(135deg, #ffffff, #8e9bb0 30%, #ffffff 52%, #6f7b8f 78%, #ffffff) border-box', 'box-shadow': '0 10px 28px -10px rgb(60 90 150 / .4)' },
     })[theme.style.ui];
     const compactVars = (prefix, ind) => dens() ? Object.entries(dens().vars).map(([k, v]) => `${ind}--${prefix}${k}: ${v};`).join('\n') + '\n' : '';

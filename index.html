@@ -1056,32 +1056,67 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sh-h small { display: block; font-size: 12px; line-height: 18px; color: var(--weak); }
 .sh-x { width: 32px; height: 32px; display: grid; place-items: center; margin: -4px -6px 0 0; border: 0; border-radius: var(--r-md); background: none; color: var(--weak); cursor: pointer; }
 .sh-x:hover { background: var(--hover); color: var(--ink); }
-.sh { width: min(640px, calc(100vw - 32px)); gap: 12px; }
-.sh-tabs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; padding: 3px; border-radius: var(--r-md); background: var(--soft); box-shadow: var(--inset); }
-.sh-tabs button { height: 30px; border: 0; border-radius: max(2px, calc(var(--r-md) - 3px)); background: transparent; color: var(--weak); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background calc(.2s * var(--dur)), color calc(.2s * var(--dur)), scale calc(.2s * var(--dur)) var(--spring); }
-.sh-tabs button:hover { color: var(--ink); }
+.sh { width: min(760px, calc(100vw - 32px)); gap: 12px; }
+/* 版面：標題列 → 兩個下拉（內容、檔案）→ 說明＋複製下載 → 全寬程式碼 → 套件下載 */
+.sh-h > div:first-child { min-width: 0; display: flex; align-items: baseline; flex-wrap: wrap; column-gap: 10px; }
+.sh-h > div:first-child small { display: inline-flex; align-items: center; gap: 6px; }
+.sh-h > div:first-child small::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 3px var(--tint); }
+.sh-tabs { position: relative; display: flex; gap: 2px; padding: 3px; border-radius: var(--r-md); background: var(--soft); box-shadow: var(--inset); overflow-x: auto; scrollbar-width: none; }
+.sh-tabs::-webkit-scrollbar { display: none; }
+.sh-tabs button { position: relative; z-index: 1; flex: 1 1 0; min-width: 92px; height: 54px; padding: 0 12px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; line-height: 16px; border: 0; border-radius: max(2px, calc(var(--r-md) - 3px)); background: none; color: var(--weak); font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: color calc(.25s * var(--dur)), scale calc(.3s * var(--dur)) var(--spring); }
+.sh-tabs button:hover, .sh-tabs button[aria-selected="true"] { color: var(--ink); }
 .sh-tabs button:active { scale: .96; }
-.sh-tabs button[aria-selected="true"] { background: var(--tile); color: var(--ink); box-shadow: var(--raise); }
-.sh-file { display: flex; align-items: center; gap: 8px; }
-.sh-file > div { flex: 1; min-width: 0; }
-.sh-file code { display: block; font: 600 13px/20px ui-monospace, Consolas, monospace; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sh-file small { display: block; font-size: 12px; line-height: 18px; color: var(--weak); }
-.sh-act { height: 32px; flex: none; }
-.sh-files { max-width: 100%; height: 28px; padding: 0 28px 0 8px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--field) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237b8ca8' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 6px center / 14px; color: var(--ink); font: 600 13px/20px ui-monospace, Consolas, monospace; appearance: none; -webkit-appearance: none; cursor: pointer; }
+.sh-tabs button svg { width: 18px; height: 18px; stroke-width: 1.7; }
+.sh-tabs svg.sh-fl { display: none; fill: currentColor; stroke: none; }
+.sh-tabs [aria-selected="true"] svg.sh-ln { display: none; }
+.sh-tabs [aria-selected="true"] svg.sh-fl { display: block; animation: sh-ok calc(.35s * var(--dur)) var(--spring); }
+.sh-tabs > i { position: absolute; top: 3px; bottom: 3px; left: 0; width: 0; border-radius: max(2px, calc(var(--r-md) - 3px)); background: var(--tile); box-shadow: var(--raise); transition: transform calc(.6s * var(--dur)) var(--spring-soft), width calc(.6s * var(--dur)) var(--spring-soft); }
+.sh-tabs.still > i { transition: none; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sh-tabs > i { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); } }
+:root[data-theme="dark"] .sh-tabs > i { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); }
+/* 編輯器視窗：工具列（選檔、複製、下載這個檔案）＋程式碼，同一個圓角外框 */
+.sh-desc { margin: -2px 0 0; font-size: 12px; line-height: 18px; color: var(--weak); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sh-ed { flex: none; display: flex; flex-direction: column; border: 1px solid var(--line-subtle); border-radius: var(--r-md); background: var(--soft); overflow: hidden; }
+.sh-bar { flex: none; height: 40px; display: flex; align-items: center; gap: 4px; padding: 0 4px 0 6px; border-bottom: 1px solid var(--line-subtle); background: color-mix(in srgb, var(--ink) 3%, var(--soft)); }
+.sh-bar .sh-files { flex: 0 1 auto; min-width: 0; margin: 0; height: 30px; border-color: transparent; background-color: transparent; transition: background-color calc(.2s * var(--dur)); }
+.sh-bar .sh-files:hover { border-color: transparent; background-color: var(--hover); }
+.sh-bar > code { flex: 0 1 auto; min-width: 0; padding: 0 8px; font: 600 13px/30px ui-monospace, Consolas, monospace; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sh-bar > code[hidden] { display: none; }
+.sh-bar > .sh-sp { flex: 1; }
+.sh-bar .sh-act { background: none; box-shadow: none; color: var(--muted); }
+.sh-bar .sh-act:hover { background: var(--hover); color: var(--ink); }
+.sh-bar .sh-act.done { color: var(--ok-fg); }
+.sh-ed .sh-code { height: 300px; border: 0; border-radius: 0; background: none; }
+@media (max-width: 480px) { .sh-bar .sh-files, .sh-bar > code { flex: 1 1 auto; } }
+.sh-files { max-width: 100%; height: 30px; margin: -2px 0 2px -2px; padding: 0 30px 0 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--field) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237b8ca8' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center / 14px; color: var(--ink); font: 600 13px/20px ui-monospace, Consolas, monospace; appearance: none; -webkit-appearance: none; cursor: pointer; transition: border-color calc(.2s * var(--dur)); }
 .sh-files:hover { border-color: var(--line-strong); }
-.sh-file code[hidden] { display: none; }
-.sh-files[hidden] { display: none; }
-@media (max-width: 560px) { .sh-tabs { grid-template-columns: repeat(3, 1fr); } }
+.sh-files[hidden], .sh-file code[hidden] { display: none; }
+.sh-hr { display: flex; align-items: center; gap: 8px; }
+.sh-hr .cz-btn { height: 32px; }
+.sh-hr .sh-x { margin: 0 -6px 0 0; }
+.sh-file { display: flex; align-items: center; gap: 8px; }
+.sh-act { width: 32px; height: 32px; padding: 0; flex: none; }
+.sh-act span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .sh-act.done { color: var(--ok-fg); }
-.sh-code { margin: 0; height: min(340px, 45vh); overflow: auto; padding: 12px 14px; border: 1px solid var(--line-subtle); border-radius: var(--r-md); background: var(--soft); font: 12px/19px ui-monospace, Consolas, monospace; color: var(--muted); white-space: pre; tab-size: 2; }
+.sh-act .ok, .sh-act.done svg:not(.ok) { display: none; }
+.sh-act.done .ok { display: block; animation: sh-ok calc(.35s * var(--dur)) var(--spring); }
+@keyframes sh-ok { from { scale: .4; opacity: 0; } }
+.sh-code.wrap { white-space: pre-wrap; overflow-wrap: anywhere; }
+.sh-code { margin: 0; flex: none; height: 340px; overflow: auto; padding: 12px 14px; border: 1px solid var(--line-subtle); border-radius: var(--r-md); background: var(--soft); font: 12px/19px ui-monospace, Consolas, monospace; color: var(--muted); white-space: pre; tab-size: 2; }
+.sh-act[hidden], .sh-all[hidden] { display: none; }
+.sh-all { white-space: nowrap; }
+.sh-f { min-height: 38px; }
+.sh-link { flex: none; padding: 4px 2px; border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; cursor: pointer; transition: color calc(.2s * var(--dur)), text-decoration-color calc(.2s * var(--dur)); }
+.sh-link:hover { color: var(--ink); text-decoration-color: currentColor; }
+.sh-link.done { color: var(--ok-fg); }
+.sh-f .sh-note { flex: 1; min-width: 0; }
+.sh-hr .sh-link { font-size: 12px; }
+@media (max-width: 480px) { .sh-f { flex-wrap: wrap; } .sh-f .sh-all { flex: 1 1 100%; justify-content: center; } .sh-hr .cz-btn span { display: none; } }
 .sh-f { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .sh-all { height: 38px; margin-left: auto; padding: 0 16px; display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: var(--r-md); background: var(--grad); color: var(--on-primary); box-shadow: 0 6px 12px -6px var(--glow), inset 0 1px 0 rgb(255 255 255 / .3); font: inherit; font-weight: 600; cursor: pointer; transition: scale calc(.2s * var(--dur)) var(--spring), filter calc(.2s * var(--dur)); }
 .sh-all:hover { filter: brightness(1.06); }
 .sh-all:active { scale: .97; }
 .sh-all.done { background: var(--ok-grad); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sh-tabs button[aria-selected="true"] { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); } }
-:root[data-theme="dark"] .sh-tabs button[aria-selected="true"] { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); }
-@media (max-width: 480px) { .sh-file { flex-wrap: wrap; } .sh-file > div { flex-basis: 100%; } }
 .sh :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 .sh-note { margin: 0; min-height: 18px; font-size: 12px; line-height: 18px; color: var(--weak); }
 .sh-note:empty { display: none; }
@@ -1829,25 +1864,23 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 <div class="sh" id="sh" role="dialog" aria-modal="true" aria-labelledby="sh-t" aria-describedby="sh-sub" hidden>
   <div class="sh-h">
     <div><b id="sh-t">分享主題</b><small id="sh-sub"></small></div>
-    <button class="sh-x" type="button" aria-label="關閉"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="sh-hr"><button class="sh-link" type="button" data-act="all" title="6 種格式打包成一個 .zip"><span>下載所有格式（6 種）</span></button>
+    <button class="sh-x" type="button" aria-label="關閉"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   </div>
-  <div class="sh-tabs" role="tablist" aria-label="分享對象">
-    <button type="button" role="tab" id="sh-tab-json" aria-controls="sh-code" data-k="json" aria-selected="true">設計師</button>
-    <button type="button" role="tab" id="sh-tab-css" aria-controls="sh-code" data-k="css" aria-selected="false" tabindex="-1">工程師</button>
-    <button type="button" role="tab" id="sh-tab-tw" aria-controls="sh-code" data-k="tw" aria-selected="false" tabindex="-1">Tailwind</button>
-    <button type="button" role="tab" id="sh-tab-cc" aria-controls="sh-code" data-k="cc" aria-selected="false" tabindex="-1">案管中心</button>
-    <button type="button" role="tab" id="sh-tab-react" aria-controls="sh-code" data-k="react" aria-selected="false" tabindex="-1">React</button>
-    <button type="button" role="tab" id="sh-tab-vue" aria-controls="sh-code" data-k="vue" aria-selected="false" tabindex="-1">Vue</button>
+  <div class="sh-tabs" id="sh-pick" role="tablist" aria-label="分享內容"><i></i></div>
+  <p class="sh-desc" id="sh-desc"></p>
+  <div class="sh-ed">
+    <div class="sh-bar">
+      <select class="sh-files" id="sh-files" aria-label="檔案" hidden></select><code id="sh-name"></code>
+      <i class="sh-sp"></i>
+      <button class="cz-btn sh-act" type="button" data-act="copy" aria-label="複製" title="複製"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>複製</span></button>
+      <button class="cz-btn sh-act" type="button" data-act="dl" id="sh-one" aria-label="下載這個檔案" title="下載這個檔案"><svg viewBox="0 0 24 24"><path d="M12 4v11M8 11l4 4 4-4"/><path d="M5 19h14"/></svg><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>下載</span></button>
+    </div>
+    <pre class="sh-code" id="sh-code" tabindex="0" aria-label="檔案內容"><code></code></pre>
   </div>
-  <div class="sh-file">
-    <div><code id="sh-name"></code><select class="sh-files" id="sh-files" aria-label="套件裡的檔案" hidden></select><small id="sh-desc"></small></div>
-    <button class="cz-btn sh-act" type="button" data-act="copy"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg><span>複製</span></button>
-    <button class="cz-btn sh-act" type="button" data-act="dl"><svg viewBox="0 0 24 24"><path d="M12 4v11M8 11l4 4 4-4"/><path d="M5 19h14"/></svg><span>下載</span></button>
-  </div>
-  <pre class="sh-code" id="sh-code" role="tabpanel" tabindex="0" aria-labelledby="sh-tab-json"><code></code></pre>
   <div class="sh-f">
     <p class="sh-note" id="sh-note" aria-live="polite"></p>
-    <button class="sh-all" type="button" data-act="all"><svg viewBox="0 0 24 24"><path d="M12 4v11M8 11l4 4 4-4"/><path d="M5 19h14"/></svg><span>全部下載（.zip）</span></button>
+    <button class="sh-all" type="button" data-act="pkg" id="sh-pkg"><svg viewBox="0 0 24 24"><path d="M12 4v11M8 11l4 4 4-4"/><path d="M5 19h14"/></svg><span>下載</span></button>
   </div>
 </div>
 <div class="cmdk" id="ck" role="dialog" aria-modal="true" aria-label="搜尋元件" hidden>
@@ -4586,6 +4619,7 @@ ${stamp()}
       const zip = new JSZip();
       for (const [name, data] of files) zip.file(name, data);
       for (const make of Object.values(PKG)) for (const [name, data] of make()) zip.file(name, data);
+      zip.file('GUIDELINES.md', guidelines());
       zip.file('README.md', README());
       const blob = await zip.generateAsync({ type: 'blob' });
       const slug = (findTheme(selected)?.name || 'custom').replace(/[^\w一-鿿-]+/g, '-');
@@ -4593,34 +4627,76 @@ ${stamp()}
     }
     /* ---- 分享彈窗：切換對象看程式碼，可複製、下載；底部全部下載（.zip） ---- */
     const sh = $('#sh'), shBd = $('#sh-bd');
-    const SH_DESC = { json: '給設計師・Figma Tokens Studio、Style Dictionary 可讀', css: '給工程師・CSS 變數，任何網頁都能用', tw: '給 Tailwind v4 專案・@theme 主題', cc: '給案管中心・直接套進案管中心的 styles.css', react: 'React 套件（TypeScript）・主題＋全部元件規格；把 AI_INSTRUCTIONS.md 交給 AI 產出元件', vue: 'Vue 3 套件（TypeScript）・主題＋全部元件規格；把 AI_INSTRUCTIONS.md 交給 AI 產出元件' };
-    let shPkg = null, shAt = 0;
-    let shFrom = null, shK = 'json', shFile = ['', ''];
-    function shShow(k, focus) {
-      shK = k;
-      // React／Vue 是多檔套件：檔名換成下拉，預設顯示說明檔
-      shPkg = PKG[k] ? PKG[k]() : null;
-      if (shPkg) { shAt = Math.max(0, shPkg.findIndex(([n]) => n.endsWith('AI_INSTRUCTIONS.md'))); shFile = shPkg[shAt]; }
-      else shFile = EXPORT[k]();
-      const sel = $('#sh-files');
-      sel.hidden = !shPkg; $('#sh-name').hidden = !!shPkg;
-      if (shPkg) sel.replaceChildren(...shPkg.map(([n], i) => { const o = document.createElement('option'); o.value = i; o.textContent = n; o.selected = i === shAt; return o; }));
-      $$('.sh-tabs [role="tab"]', sh).forEach((b) => { const on = b.dataset.k === k; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); });
-      $('#sh-code').setAttribute('aria-labelledby', 'sh-tab-' + k);
+    // Design Guidelines：設計基礎（目前主題的值）＋各元件的使用原則，給看文件的人
+    function guidelines() {
+      const sn = snapshot(), A = (k) => (A11Y[k] ? Object.values(A11Y[k]).flat() : DOC[k].a || []);
+      const comp = Object.entries(CAT).map(([cat, ids]) => `### ${cat}\n\n` + ids.filter((k) => DOC[k]).map((k) => { const d = DOC[k];
+        return `#### ${TITLE[k]}（${SLUG[k]}）\n\n${d.d}\n\n- 使用時機：${(d.u || []).join('；')}\n- 不要用：${(d.x || []).join('；')}\n- 狀態：${d.st}\n- 無障礙：${A(k).join('；')}\n`; }).join('\n')).join('\n');
+      return `# Design Guidelines\n\n${stamp()}\n\n## 基礎\n\n### 顏色\n\n| Token | 淺色 | 深色 |\n|---|---|---|\n${TOK.color.map((k) => `| \`${k}\` | \`${sn.light[k]}\` | \`${sn.dark[k]}\` |`).join('\n')}\n\n### 圓角\n\n| Token | 值 |\n|---|---|\n${TOK.radius.map((k) => `| \`${RNAME[k]}\` | \`${sn.radius[k]}\` |`).join('\n')}\n\n### 字級\n\n| 層級 | 大小 | 字重 | 行高 |\n|---|---|---|---|\n${TYPE_LV.map((k) => { const o = lvOut(k); return `| ${k} | ${o.size} | ${o.weight} | ${o.lh} |`; }).join('\n')}\n\n### 動態\n\n${Object.entries(DUR(sn)).map(([k, v]) => `- ${k}：${v}`).join('\n')}\n- 彈性曲線：\`${sn.spring}\`\n- 標準曲線：\`${sn.ease}\`\n\n## 元件\n\n${comp}`;
+    }
+    const SH_ITEMS = [
+      { k: 'guide', g: 'Docs', t: 'Guidelines', n: 'Design Guidelines', d: '設計基礎與各元件的使用時機、不要用的情境、無障礙', files: () => [['GUIDELINES.md', guidelines()]] },
+      { k: 'tokens', g: 'Docs', t: 'Tokens', n: 'Design Tokens', d: 'tokens.json 給 Figma Tokens Studio、Style Dictionary；theme.css 是 CSS 變數', files: () => [EXPORT.json(), EXPORT.css()] },
+      { k: 'react', g: 'Frameworks', n: 'React', d: 'TypeScript 套件：主題＋元件規格；把 AI_INSTRUCTIONS.md 交給 AI 產出元件', files: () => PKG.react(), pkg: true },
+      { k: 'vue', g: 'Frameworks', n: 'Vue', d: 'Vue 3 TypeScript 套件：主題＋元件規格；把 AI_INSTRUCTIONS.md 交給 AI 產出元件', files: () => PKG.vue(), pkg: true },
+      { k: 'tw', g: 'Frameworks', n: 'Tailwind', d: 'Tailwind v4 的 @theme 主題，貼在 @import "tailwindcss"; 之後', files: () => [EXPORT.tw()] },
+      { k: 'cc', g: 'Frameworks', n: 'Angular', d: '案管中心（Angular）：直接套進 styles.css', files: () => [EXPORT.cc()] },
+    ];
+    const SH_IC = {"guide":"<path d=\"M6.5 3.5h8l4 4v13h-12z\"/><path d=\"M14.5 3.5v4h4M9.5 12h5M9.5 16h3.5\"/>","tokens":"<path d=\"M12 3.5a8.5 8.5 0 1 0 0 17c1 0 1.5-.7 1.5-1.5 0-1-.8-1.3-.8-2.2 0-.9.7-1.5 1.6-1.5h2.2a4 4 0 0 0 4-4c0-4.3-3.8-7.8-8.5-7.8z\"/><circle cx=\"7.8\" cy=\"11.2\" r=\"1\"/><circle cx=\"10.3\" cy=\"7.4\" r=\"1\"/><circle cx=\"14.8\" cy=\"7.6\" r=\"1\"/>","react":"<ellipse cx=\"12\" cy=\"12\" rx=\"9.5\" ry=\"3.6\"/><ellipse cx=\"12\" cy=\"12\" rx=\"9.5\" ry=\"3.6\" transform=\"rotate(60 12 12)\"/><ellipse cx=\"12\" cy=\"12\" rx=\"9.5\" ry=\"3.6\" transform=\"rotate(120 12 12)\"/><circle cx=\"12\" cy=\"12\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"/>","vue":"<path d=\"M2.5 4.5h4L12 14l5.5-9.5h4L12 20.5z\"/><path d=\"M7.5 4.5L12 12l4.5-7.5\"/>","tw":"<path d=\"M7 10.5c.9-2.8 2.7-4.1 5.4-3.7 1.7.3 2.7 2 4.5 2 1.4 0 2.5-.7 3.6-2-.9 2.8-2.7 4.1-5.4 3.7-1.7-.3-2.7-2-4.5-2-1.4 0-2.5.7-3.6 2zM3 16.5c.9-2.8 2.7-4.1 5.4-3.7 1.7.3 2.7 2 4.5 2 1.4 0 2.5-.7 3.6-2-.9 2.8-2.7 4.1-5.4 3.7-1.7-.3-2.7-2-4.5-2-1.4 0-2.5.7-3.6 2z\"/>","cc":"<path d=\"M12 2.8l8.5 3-1.3 11L12 21.2l-7.2-4.4-1.3-11z\"/><path d=\"M8.6 16L12 7.5l3.4 8.5M9.9 13h4.2\"/>"};
+    const SH_FL = {"guide":"<path fill-rule=\"evenodd\" d=\"M6 2.5h8.6l5 5V20a1.5 1.5 0 0 1-1.5 1.5H6A1.5 1.5 0 0 1 4.5 20V4A1.5 1.5 0 0 1 6 2.5zM8.5 11.2h7v1.6h-7zM8.5 15.2h4.5v1.6H8.5z\"/>","tokens":"<path fill-rule=\"evenodd\" d=\"M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-1-.8-1.3-.8-2.1 0-.8.6-1.4 1.5-1.4h2.3A4.3 4.3 0 0 0 21 11.5C21 6.8 17 3 12 3zM7.8 10a1.2 1.2 0 1 0 0 2.4a1.2 1.2 0 1 0 0-2.4zM10.3 6.2a1.2 1.2 0 1 0 0 2.4a1.2 1.2 0 1 0 0-2.4zM14.8 6.4a1.2 1.2 0 1 0 0 2.4a1.2 1.2 0 1 0 0-2.4z\"/>","react":"<g style=\"fill:none;stroke:currentColor;stroke-width:2.3\"><ellipse cx=\"12\" cy=\"12\" rx=\"9.5\" ry=\"3.6\"/><ellipse cx=\"12\" cy=\"12\" rx=\"9.5\" ry=\"3.6\" transform=\"rotate(60 12 12)\"/><ellipse cx=\"12\" cy=\"12\" rx=\"9.5\" ry=\"3.6\" transform=\"rotate(120 12 12)\"/></g><circle cx=\"12\" cy=\"12\" r=\"2.2\"/>","vue":"<path d=\"M1.8 4h4.5L12 13.8 17.7 4h4.5L12 21.2z\"/>","tw":"<path d=\"M7 10.5c.9-2.8 2.7-4.1 5.4-3.7 1.7.3 2.7 2 4.5 2 1.4 0 2.5-.7 3.6-2-.9 2.8-2.7 4.1-5.4 3.7-1.7-.3-2.7-2-4.5-2-1.4 0-2.5.7-3.6 2zM3 16.5c.9-2.8 2.7-4.1 5.4-3.7 1.7.3 2.7 2 4.5 2 1.4 0 2.5-.7 3.6-2-.9 2.8-2.7 4.1-5.4 3.7-1.7-.3-2.7-2-4.5-2-1.4 0-2.5.7-3.6 2z\"/>","cc":"<path fill-rule=\"evenodd\" d=\"M12 2.3l9 3.2-1.4 11.6L12 21.7l-7.6-4.6L3 5.5zM12 6.6L8 16.4h1.9l.85-2.2h2.5l.85 2.2H16zM12 9.7l.85 2.8h-1.7z\"/>"};
+    const shPickEl = $('#sh-pick');
+    shPickEl.insertAdjacentHTML('beforeend', SH_ITEMS.map((x, i) => `<button type="button" role="tab" id="sh-tab-${x.k}" aria-controls="sh-code" data-k="${x.k}" aria-selected="false" tabindex="-1" title="${x.n}"><svg class="sh-ln" viewBox="0 0 24 24">${SH_IC[x.k]}</svg><svg class="sh-fl" viewBox="0 0 24 24" aria-hidden="true">${SH_FL[x.k]}</svg>${x.t || x.n}</button>`).join(''));
+    const shTabsAll = () => $$('[role="tab"]', shPickEl);
+    // 選中片：量選中頁籤的位置；still＝不播動畫（打開時直接定位）
+    function shInd(still) {
+      const on = $('[aria-selected="true"]', shPickEl), i = $('i', shPickEl); if (!on || sh.hidden) return;
+      shPickEl.classList.toggle('still', !!still);
+      i.style.width = on.offsetWidth + 'px'; i.style.transform = `translateX(${on.offsetLeft}px)`;
+      on.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: still ? 'auto' : 'smooth' });
+      if (still) requestAnimationFrame(() => shPickEl.classList.remove('still'));
+    }
+    let shFiles = [], shAt = 0, shFrom = null, shFile = ['', ''];
+    let shK = (() => { try { const k = localStorage.getItem('wall-share'); return SH_ITEMS.some((x) => x.k === k) ? k : 'guide'; } catch (e) { return 'guide'; } })();
+    const shItem = () => SH_ITEMS.find((x) => x.k === shK);
+    function shPick(i, focus) {
+      shAt = i; shFile = shFiles[i];
+      // 單檔項目隱藏工具列的 ↓（底部主要按鈕就是同一個檔案）
+      $('#sh-one').hidden = shFiles.length < 2; $('#sh-one').title = $('#sh-one').ariaLabel = '下載 ' + shFile[0].split('/').pop();
+      $('#sh-files').value = i;
       $('#sh-name').textContent = shFile[0];
-      $('#sh-desc').textContent = SH_DESC[k];
       $('#sh-code code').textContent = shFile[1];
+      $('#sh-code').classList.toggle('wrap', shFile[0].endsWith('.md'));
       $('#sh-code').scrollTop = 0;
+    }
+    function shShow(k, focus) {
+      shK = k; try { localStorage.setItem('wall-share', k); } catch (e) {}
+      const it = shItem(); shFiles = it.files();
+      shTabsAll().forEach((b) => { const on = b.dataset.k === k; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus(); });
+      $('#sh-code').setAttribute('aria-labelledby', 'sh-tab-' + k);
+      shInd();
+      // 多檔：檔名換成下拉選單
+      const many = shFiles.length > 1, sel = $('#sh-files');
+      sel.hidden = !many; $('#sh-name').hidden = many;
+      sel.replaceChildren(...shFiles.map(([n], i) => { const o = document.createElement('option'); o.value = i; o.textContent = n; return o; }));
+      $('#sh-desc').textContent = $('#sh-desc').title = it.d;
+      // 主要按鈕寫明下載什麼：多檔＝整包（幾個檔案），單檔＝檔名
+      // 名稱＋格式：多檔＝React (zip)；單檔＝Tailwind.css
+      const nm = it.t || it.n;
+      $('#sh-pkg span').textContent = shFiles.length > 1 ? `${nm} (zip)` : nm + shFiles[0][0].slice(shFiles[0][0].lastIndexOf('.')); delete $('#sh-pkg').dataset.label;
+      $('#sh-pkg').title = shFiles.length > 1 ? `${shFiles.length} 個檔案打包成 .zip` : '下載 ' + shFiles[0][0].split('/').pop();
+      // 套件預設先看給 AI 的說明檔
+      shPick(Math.max(0, shFiles.findIndex(([n]) => n.endsWith('AI_INSTRUCTIONS.md'))));
     }
     function openShare() {
       if (!sh.hidden) return;
       closeMenus(); shFrom = document.activeElement;
       const tn = findTheme(selected)?.name;
-      $('#sh-sub').textContent = tn ? '目前的主題：' + tn : '目前的設定（尚未儲存成主題）';
+      $('#sh-sub').textContent = tn || '未儲存的設定';
       $('#sh-note').textContent = '';
       shShow(shK);
       sh.hidden = shBd.hidden = false; void sh.offsetWidth; sh.classList.add('open'); shBd.classList.add('open');
-      $('.sh-tabs [aria-selected="true"]', sh).focus();
+      shInd(true);
+      $('[aria-selected="true"]', shPickEl).focus();
     }
     function closeShare() {
       if (sh.hidden) return;
@@ -4629,22 +4705,18 @@ ${stamp()}
       if (shFrom && shFrom.isConnected) shFrom.focus({ preventScroll: true });
     }
     $('#cz-share').addEventListener('click', openShare);
-    $('#sh-files').addEventListener('change', (e) => { shAt = +e.target.value; shFile = shPkg[shAt]; $('#sh-code code').textContent = shFile[1]; $('#sh-code').scrollTop = 0; });
     $('.sh-x', sh).addEventListener('click', closeShare);
     shBd.addEventListener('click', closeShare);
-    // 頁籤：點選或左右鍵切換
-    const shTabs = $$('.sh-tabs [role="tab"]', sh);
-    shTabs.forEach((b, i) => {
-      b.addEventListener('click', () => shShow(b.dataset.k));
-      b.addEventListener('keydown', (e) => {
-        const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (!d) return;
-        e.preventDefault(); shShow(shTabs[(i + d + shTabs.length) % shTabs.length].dataset.k, true);
-      });
+    shPickEl.addEventListener('click', (e) => { const b = e.target.closest('[role="tab"]'); if (b) shShow(b.dataset.k); });
+    shPickEl.addEventListener('keydown', (e) => {
+      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (!d) return;
+      e.preventDefault(); const i = SH_ITEMS.indexOf(shItem()); shShow(SH_ITEMS[(i + d + SH_ITEMS.length) % SH_ITEMS.length].k, true);
     });
+    addEventListener('resize', () => shInd(true));
     sh.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') { e.stopPropagation(); closeShare(); return; }
       if (e.key !== 'Tab') return;   // 焦點留在彈窗裡
-      const f = $$('button:not([tabindex="-1"]), pre[tabindex]', sh).filter((x) => x.offsetParent), first = f[0], last = f[f.length - 1];
+      const f = $$('button:not([tabindex="-1"]), select, pre[tabindex]', sh).filter((x) => x.offsetParent), first = f[0], last = f[f.length - 1];
       if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     });
@@ -4669,11 +4741,11 @@ ${stamp()}
       }
       let ok;
       if (act === 'all') ok = await exportAll();
-      else if (shPkg && typeof JSZip !== 'undefined') {
-        // 套件：下載整包
-        const zip = new JSZip(); for (const [n, d] of shPkg) zip.file(n, d);
-        ok = await deliver(shK + '-theme.zip', await zip.generateAsync({ type: 'blob' }), null);
-      } else ok = await deliver(shFile[0].split('/').pop(), shFile[1], null);
+      else if (act === 'pkg' && shFiles.length > 1 && typeof JSZip !== 'undefined') {
+        // 目前這一項的整包
+        const zip = new JSZip(); for (const [n, d] of shFiles) zip.file(n, d);
+        ok = await deliver(shItem().n.toLowerCase().replace(/\s+/g, '-') + '.zip', await zip.generateAsync({ type: 'blob' }), null);
+      } else { const [n, d] = act === 'pkg' ? shFiles[0] : shFile; ok = await deliver(n.split('/').pop(), d, null); }
       if (ok) shFlash(b, '已下載');
     }));
     $('#cz-import-btn').addEventListener('click', () => { closeMenus(); $('#cz-import').click(); });
@@ -4824,10 +4896,41 @@ ${stamp()}
     const TP = (hv) => '<div class="tp"><div class="tp-f"><span class="roll"><span>09:30</span></span>' + I_CLOCK + '</div><div class="tp-c">' + TPC('09', hv) + '<b>:</b>' + TPC('30') + '</div></div>';
     const PS = (on, range) => '<div style="width:100%"><div class="ps"><i></i>' + ['本月', '近 30 天', '近 90 天', '自訂'].map((t, i) => '<span' + (i === on ? ' class="on"' : '') + '>' + t + (i === 3 ? I_DOWN : '') + '</span>').join('') + '</div><div class="ps-r">' + range + '</div></div>';
     const IP = (cls = '', open = false) => '<div class="ip"><div class="ip-l">加權進度<span class="ip-b' + (cls ? ' ' + cls : '') + '">' + I_INFO + '</span></div><div class="ip-v">68%<small>3 / 5 個里程碑</small></div>' + (open ? '<div class="ip-p show" role="tooltip">依里程碑權重加總；沒設權重的平均分配。</div>' : '') + '</div>';
+    // 第 3 批規格樣本（11-18）：流程步驟、側邊選單
+    const FS = (st, nm, note) => '<div class="fs ' + st + '"><p>' + SV + nm + '</p><small>' + note + '</small></div>';
+    const FLW = (k) => '<div class="fl" style="width:100%">' + [['待指派', '11-04', '王小明'], ['處理中', '11-06', '李小美'], ['待審核', '11-11', '陳大文'], ['已結案', '11-14', '王小明']].map(([nm, d, w], j) => (j < k ? FS('done', nm, d + ' 完成') : j === k ? FS('cur', nm, w + '・進行中') : FS('todo', nm, '未開始'))).join('') + '</div>';
+    const SDI = {
+      home: '<path d="M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z"/>',
+      cases: '<rect x="3.5" y="7" width="17" height="12.5" rx="2"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/>',
+      dispatch: '<rect x="5.5" y="4.5" width="13" height="16" rx="2"/><path d="M9 4.5V3.5h6v1M9 13l2 2 4-4"/>',
+      folder: '<path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.5l2 2.5H19a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18z"/>',
+      chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+      docs: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+    };
+    const SD_IT = [['home', '首頁'], ['cases', '案件', 43], ['dispatch', '工單', 12], ['folder', '專案'], ['chart', '成員績效'], ['docs', '報表']];
+    const SDIT = (j, o) => { const [k, t, n] = SD_IT[j], c = [j === o.on && 'on', j === o.hv && 'hv'].filter(Boolean).join(' '); return '<span class="sd-it' + (c ? ' ' + c : '') + '"><svg class="ic ln" viewBox="0 0 24 24">' + SDI[k] + '</svg><svg class="ic fl" viewBox="0 0 24 24">' + ICON_FILL[k] + '</svg><span>' + t + '</span>' + (n ? '<b>' + n + '</b>' : '') + '</span>'; };
+    // o：work＝「工作」群組的項目、admin＝加上可收合的「管理」群組、full＝品牌列與使用者、mini＝收合、on／hv＝選中／滑過的項目、shut＝「管理」收起
+    const SD = (o = {}) => { const work = o.work || [0, 1, 2, 3], sh = o.shut ? ' shut' : '';
+      return '<div class="sd-app' + (o.mini ? ' mini' : '') + '"><nav class="sd">' + (o.full ? '<div class="sd-brand"><i class="sd-logo">案</i><b>案管中心</b></div>' : '')
+        + '<div class="sd-list">' + (o.on !== undefined ? '<i class="sd-ind"></i>' : '')
+        + (work.length ? '<span class="sd-g">工作</span>' + work.map((j) => SDIT(j, o)).join('') : '')
+        + (o.admin ? '<span class="sd-g sd-tg' + sh + '">管理<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span><div class="sd-sub' + sh + '"><div>' + SDIT(4, o) + SDIT(5, o) + '</div></div>' : '')
+        + '</div>' + (o.full ? '<div class="sd-me"><i class="av">王</i><span>王小明</span></div>' : '') + '</nav></div>'; };
+    // 第 4 批規格樣本（11-18）：空狀態、歷程、頭像群組、骨架、追蹤星號
+    const ES_I = { info: '<rect x="5.5" y="4.5" width="13" height="16" rx="2"/><path d="M9 4.5V3.5h6v1M9 11h6M9 15h4"/>', warn: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4M8.5 11h5"/>', danger: '<path d="M12 3.5l9 16H3z"/><path d="M12 10v4M12 17v.5"/>' };
+    const ES = (tone, t, d, act, cls = '') => '<div class="es ' + tone + '"><span class="es-m"><svg class="ic" viewBox="0 0 24 24">' + ES_I[tone] + '</svg></span><b>' + t + '</b><p>' + d + '</p><span class="b2' + (cls ? ' ' + cls : '') + '">' + act + '</span></div>';
+    const NT_I = { a: '<path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"/>', b: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', c: '<path d="M12 7.5V12l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/>' };
+    const NT1 = ([t, p, w]) => '<div class="nt"><i class="' + t + '"><svg class="ic" viewBox="0 0 24 24">' + NT_I[t] + '</svg></i><div><p>' + p + '</p><small>' + w + '</small></div></div>';
+    const NTS = (a) => '<div class="nts" style="width:100%">' + a.map(NT1).join('') + '</div>';
+    const AV_M = [['陳', 2], ['林', 4], ['張', 3], ['王', 1]];
+    const AVG = (n, cls = '') => '<div class="ppl-r"><div class="stack' + (cls ? ' ' + cls : '') + '">' + AV_M.slice(0, Math.min(n, 3)).map(([a, c]) => '<span class="av" style="--a:var(--cat' + c + ')">' + a + '</span>').join('') + (n > 3 ? '<span class="av more">+' + (n - 3) + '</span>' : '') + '</div><span class="ppl-c">共 ' + n + ' 位</span></div>';
+    const SKL = (loaded) => '<div class="sk' + (loaded ? ' loaded' : '') + '" style="width:100%"><div class="ghost"><span class="av shim"></span><span class="ls"><b class="shim"></b><b class="shim"></b></span></div><div class="real"><span class="av" style="background:var(--cat1)">王</span><div><p>李小美</p><small>設計師</small></div></div></div>';
+    const STAR = (cls = '') => '<span class="starb' + (cls ? ' ' + cls : '') + '"><svg viewBox="0 0 24 24"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z"/></svg></span>';
     // 選中片、日期圓、氣泡箭頭：照實際排版量位置（規格頁、匯出樣本、React／Vue 元件用同一套量法）
     function settleIndicators(r) {
       r.querySelectorAll('.ps').forEach((ps) => { const i = ps.querySelector(':scope > i'), on = ps.querySelector(':scope > span.on'); if (!i || !on) return; i.style.width = on.offsetWidth + 'px'; i.style.transform = 'translateX(' + on.offsetLeft + 'px)'; });
       r.querySelectorAll('.dp-g').forEach((g) => { const sel = g.querySelector('.dp-sel'), on = g.querySelector('span.on'); if (!sel || !on) return; sel.style.transform = 'translate(' + (on.offsetLeft + (on.offsetWidth - 32) / 2) + 'px, ' + (on.offsetTop + (on.offsetHeight - 32) / 2) + 'px)'; });
+      r.querySelectorAll('.sd-list').forEach((l) => { const i = l.querySelector(':scope > .sd-ind'), on = l.querySelector('.sd-it.on'); if (!i || !on) return; i.style.height = on.offsetHeight + 'px'; i.style.transform = 'translateY(' + on.offsetTop + 'px)'; });
       r.querySelectorAll('.ip').forEach((ip) => { const b = ip.querySelector('.ip-b'), p = ip.querySelector('.ip-p'); if (!b || !p) return; p.style.setProperty('--ax', (b.offsetLeft + b.offsetWidth / 2 - p.offsetLeft) + 'px'); });
     }
     const SPEC = {
@@ -4860,61 +4963,10 @@ ${stamp()}
           ['大小 Size', '48＝表單送出、頁首；32＝工具列、卡片內', '<span style="display:flex;gap:8px;align-items:center"><span class="btn">48</span><span class="btn sm">32</span></span>', `<button hlmBtn size="lg">儲存</button>  <!-- 48 -->
 <button hlmBtn>儲存</button>            <!-- 32（預設） -->`],
         ],
-    // 第 3 批規格樣本（11-18）：流程步驟、側邊選單
-    const FS = (st, nm, note) => '<div class="fs ' + st + '"><p>' + SV + nm + '</p><small>' + note + '</small></div>';
-    const FLW = (k) => '<div class="fl" style="width:100%">' + [['待指派', '11-04', '王小明'], ['處理中', '11-06', '李小美'], ['待審核', '11-11', '陳大文'], ['已結案', '11-14', '王小明']].map(([nm, d, w], j) => (j < k ? FS('done', nm, d + ' 完成') : j === k ? FS('cur', nm, w + '・進行中') : FS('todo', nm, '未開始'))).join('') + '</div>';
-    const SDI = {
-      home: '<path d="M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z"/>',
-      cases: '<rect x="3.5" y="7" width="17" height="12.5" rx="2"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/>',
-      dispatch: '<rect x="5.5" y="4.5" width="13" height="16" rx="2"/><path d="M9 4.5V3.5h6v1M9 13l2 2 4-4"/>',
-      folder: '<path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.5l2 2.5H19a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18z"/>',
-      chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
-      docs: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
-    };
-    const SD_IT = [['home', '首頁'], ['cases', '案件', 43], ['dispatch', '工單', 12], ['folder', '專案'], ['chart', '成員績效'], ['docs', '報表']];
-    // 第 3 批規格樣本（11-18）：流程步驟、側邊選單
-    const FS = (st, nm, note) => '<div class="fs ' + st + '"><p>' + SV + nm + '</p><small>' + note + '</small></div>';
-    const FLW = (k) => '<div class="fl" style="width:100%">' + [['待指派', '11-04', '王小明'], ['處理中', '11-06', '李小美'], ['待審核', '11-11', '陳大文'], ['已結案', '11-14', '王小明']].map(([nm, d, w], j) => (j < k ? FS('done', nm, d + ' 完成') : j === k ? FS('cur', nm, w + '・進行中') : FS('todo', nm, '未開始'))).join('') + '</div>';
-    const SDI = {
-      home: '<path d="M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z"/>',
-      cases: '<rect x="3.5" y="7" width="17" height="12.5" rx="2"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/>',
-      dispatch: '<rect x="5.5" y="4.5" width="13" height="16" rx="2"/><path d="M9 4.5V3.5h6v1M9 13l2 2 4-4"/>',
-      folder: '<path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.5l2 2.5H19a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18z"/>',
-      chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
-      docs: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
-    };
-    const SD_IT = [['home', '首頁'], ['cases', '案件', 43], ['dispatch', '工單', 12], ['folder', '專案'], ['chart', '成員績效'], ['docs', '報表']];
-    const SDIT = (j, o) => { const [k, t, n] = SD_IT[j], c = [j === o.on && 'on', j === o.hv && 'hv'].filter(Boolean).join(' '); return '<span class="sd-it' + (c ? ' ' + c : '') + '"><svg class="ic ln" viewBox="0 0 24 24">' + SDI[k] + '</svg><svg class="ic fl" viewBox="0 0 24 24">' + ICON_FILL[k] + '</svg><span>' + t + '</span>' + (n ? '<b>' + n + '</b>' : '') + '</span>'; };
-    // o：work＝「工作」群組的項目、admin＝加上可收合的「管理」群組、full＝品牌列與使用者、mini＝收合、on／hv＝選中／滑過的項目、shut＝「管理」收起
-    const SD = (o = {}) => { const work = o.work || [0, 1, 2, 3], sh = o.shut ? ' shut' : '';
-      return '<div class="sd-app' + (o.mini ? ' mini' : '') + '"><nav class="sd">' + (o.full ? '<div class="sd-brand"><i class="sd-logo">案</i><b>案管中心</b></div>' : '')
-        + '<div class="sd-list">' + (o.on !== undefined ? '<i class="sd-ind"></i>' : '')
-        + (work.length ? '<span class="sd-g">工作</span>' + work.map((j) => SDIT(j, o)).join('') : '')
-        + (o.admin ? '<span class="sd-g sd-tg' + sh + '">管理<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span><div class="sd-sub' + sh + '"><div>' + SDIT(4, o) + SDIT(5, o) + '</div></div>' : '')
-        + '</div>' + (o.full ? '<div class="sd-me"><i class="av">王</i><span>王小明</span></div>' : '') + '</nav></div>'; };
-    // 第 4 批規格樣本（11-18）：空狀態、歷程、頭像群組、骨架、追蹤星號
-    const ES_I = { info: '<rect x="5.5" y="4.5" width="13" height="16" rx="2"/><path d="M9 4.5V3.5h6v1M9 11h6M9 15h4"/>', warn: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4M8.5 11h5"/>', danger: '<path d="M12 3.5l9 16H3z"/><path d="M12 10v4M12 17v.5"/>' };
-    const ES = (tone, t, d, act, cls = '') => '<div class="es ' + tone + '"><span class="es-m"><svg class="ic" viewBox="0 0 24 24">' + ES_I[tone] + '</svg></span><b>' + t + '</b><p>' + d + '</p><span class="b2' + (cls ? ' ' + cls : '') + '">' + act + '</span></div>';
-    const NT_I = { a: '<path d="M4 20h4L19 9l-4-4L4 16zM13 7l4 4"/>', b: '<path d="M5 12.5l4.5 4.5L19 7.5"/>', c: '<path d="M12 7.5V12l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/>' };
-    const NT1 = ([t, p, w]) => '<div class="nt"><i class="' + t + '"><svg class="ic" viewBox="0 0 24 24">' + NT_I[t] + '</svg></i><div><p>' + p + '</p><small>' + w + '</small></div></div>';
-    const NTS = (a) => '<div class="nts" style="width:100%">' + a.map(NT1).join('') + '</div>';
-    const AV_M = [['陳', 2], ['林', 4], ['張', 3], ['王', 1]];
-    const AVG = (n, cls = '') => '<div class="ppl-r"><div class="stack' + (cls ? ' ' + cls : '') + '">' + AV_M.slice(0, Math.min(n, 3)).map(([a, c]) => '<span class="av" style="--a:var(--cat' + c + ')">' + a + '</span>').join('') + (n > 3 ? '<span class="av more">+' + (n - 3) + '</span>' : '') + '</div><span class="ppl-c">共 ' + n + ' 位</span></div>';
-    const SKL = (loaded) => '<div class="sk' + (loaded ? ' loaded' : '') + '" style="width:100%"><div class="ghost"><span class="av shim"></span><span class="ls"><b class="shim"></b><b class="shim"></b></span></div><div class="real"><span class="av" style="background:var(--cat1)">王</span><div><p>李小美</p><small>設計師</small></div></div></div>';
-    const STAR = (cls = '') => '<span class="starb' + (cls ? ' ' + cls : '') + '"><svg viewBox="0 0 24 24"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z"/></svg></span>';
-    const SDIT = (j, o) => { const [k, t, n] = SD_IT[j], c = [j === o.on && 'on', j === o.hv && 'hv'].filter(Boolean).join(' '); return '<span class="sd-it' + (c ? ' ' + c : '') + '"><svg class="ic ln" viewBox="0 0 24 24">' + SDI[k] + '</svg><svg class="ic fl" viewBox="0 0 24 24">' + ICON_FILL[k] + '</svg><span>' + t + '</span>' + (n ? '<b>' + n + '</b>' : '') + '</span>'; };
-    // o：work＝「工作」群組的項目、admin＝加上可收合的「管理」群組、full＝品牌列與使用者、mini＝收合、on／hv＝選中／滑過的項目、shut＝「管理」收起
-    const SD = (o = {}) => { const work = o.work || [0, 1, 2, 3], sh = o.shut ? ' shut' : '';
-      return '<div class="sd-app' + (o.mini ? ' mini' : '') + '"><nav class="sd">' + (o.full ? '<div class="sd-brand"><i class="sd-logo">案</i><b>案管中心</b></div>' : '')
-        + '<div class="sd-list">' + (o.on !== undefined ? '<i class="sd-ind"></i>' : '')
-        + (work.length ? '<span class="sd-g">工作</span>' + work.map((j) => SDIT(j, o)).join('') : '')
-        + (o.admin ? '<span class="sd-g sd-tg' + sh + '">管理<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span><div class="sd-sub' + sh + '"><div>' + SDIT(4, o) + SDIT(5, o) + '</div></div>' : '')
-        + '</div>' + (o.full ? '<div class="sd-me"><i class="av">王</i><span>王小明</span></div>' : '') + '</nav></div>'; };
         s: [
           ['Default', '<span class="btn">儲存</span>'],
           ['Hover', '<span class="btn hv">儲存</span>'],
           ['Pressed', '<span class="btn hv is-press">儲存</span>'],   // 按下時滑鼠也在上面：同時有滑過與按下
-      r.querySelectorAll('.sd-list').forEach((l) => { const i = l.querySelector(':scope > .sd-ind'), on = l.querySelector('.sd-it.on'); if (!i || !on) return; i.style.height = on.offsetHeight + 'px'; i.style.transform = 'translateY(' + on.offsetTop + 'px)'; });
           ['Focus', '<span class="btn is-focus">儲存</span>'],
           ['Loading', '<span class="btn is-load"><i class="spin"></i>儲存中</span>'],
           ['Success', '<span class="btn done"><span class="roll">已儲存</span></span>'],
@@ -5363,34 +5415,6 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
           ['Group closed', SD({ work: [], admin: 1, shut: 1 })],
         ],
       },
-      'c-ip': {
-        v: [
-          ['關閉 Closed', 'ⓘ 放在標籤後面', IP(), '<app-info-popover label="加權進度：算法">依里程碑權重加總；沒設權重的平均分配。</app-info-popover>'],
-          ['展開 Open', '滑過或點擊打開，只寫重點', IP('', true), '<!-- 滑過 150ms 打開；點擊釘住；Esc 關閉 -->'],
-        ],
-        s: [
-          ['Default', IP()],
-          ['Hover', IP('hv')],
-          ['Focus', IP('fc')],
-          ['Open', IP('', true)],
-        ],
-      },
-      'c-dp': {
-        wide: true, xl: true,
-        v: [
-          ['欄位 Field', '值與說明；點了打開月曆', DP(), '<app-date-picker label="結束日期" [(value)]="due" help="預設為一週後" />'],
-          ['展開 Open', '左側快捷、右側月曆；選了就生效', DP({ open: true }), '<!-- 快捷：今天、明天、一週後、月底（超出範圍的停用） -->'],
-        ],
-        s: [
-          ['Closed', DP()],
-          ['Hover', DP().replace('<div class="dp-f">', '<div class="dp-f hv">')],
-          ['Open', DP({ open: true })],
-          ['Day hover', DP({ open: true, mark: { 26: 'hv' } })],
-          ['Preset hover', DP({ open: true, preHv: 3 })],
-        ],
-      },
-      'c-tp': {
-        v: [
       'c-es': {
         wide: true,
         v: [
@@ -5443,6 +5467,34 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
           ['Focus', STAR('is-focus')],
         ],
       },
+      'c-ip': {
+        v: [
+          ['關閉 Closed', 'ⓘ 放在標籤後面', IP(), '<app-info-popover label="加權進度：算法">依里程碑權重加總；沒設權重的平均分配。</app-info-popover>'],
+          ['展開 Open', '滑過或點擊打開，只寫重點', IP('', true), '<!-- 滑過 150ms 打開；點擊釘住；Esc 關閉 -->'],
+        ],
+        s: [
+          ['Default', IP()],
+          ['Hover', IP('hv')],
+          ['Focus', IP('fc')],
+          ['Open', IP('', true)],
+        ],
+      },
+      'c-dp': {
+        wide: true, xl: true,
+        v: [
+          ['欄位 Field', '值與說明；點了打開月曆', DP(), '<app-date-picker label="結束日期" [(value)]="due" help="預設為一週後" />'],
+          ['展開 Open', '左側快捷、右側月曆；選了就生效', DP({ open: true }), '<!-- 快捷：今天、明天、一週後、月底（超出範圍的停用） -->'],
+        ],
+        s: [
+          ['Closed', DP()],
+          ['Hover', DP().replace('<div class="dp-f">', '<div class="dp-f hv">')],
+          ['Open', DP({ open: true })],
+          ['Day hover', DP({ open: true, mark: { 26: 'hv' } })],
+          ['Preset hover', DP({ open: true, preHv: 3 })],
+        ],
+      },
+      'c-tp': {
+        v: [
           ['標準 Default', '欄位＋時、分各自上下調', TP(), '<app-time-picker label="開始時間" [(value)]="start" />'],
         ],
         s: [
@@ -5576,7 +5628,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
     // 程式碼上色：註解、字串、標籤名（先跳脫再上色）
     const hl = (src) => esc(src).replace(/(&lt;!--[\s\S]*?--&gt;)|(&quot;[^&]*?&quot;)|(&lt;\/?)([\w-]+)/g, (m, c, s, lt, tag) => c ? `<span class="c">${c}</span>` : s ? `<span class="s">${s}</span>` : `${lt}<span class="t">${tag}</span>`);
     const ICON_COPY = '<svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>';
-    const copyBtn = (key) => `<button class="sp-copy" type="button" data-code="${key}" aria-label="複製程式碼">${ICON_COPY}<span>複製</span></button>`;
+    const copyBtn = (key) => `<button class="sp-copy" type="button" data-code="${key}" aria-label="複製程式碼">${ICON_COPY}<svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>複製</span></button>`;
     // 變體：預覽排成網格（名稱與說明寫進程式碼註解），下面接一整段程式碼
     // 段落開頭：變體名稱＋說明；程式碼本身若以註解開頭，併成同一行註解
     const vSeg = ([n, note, , code]) => {

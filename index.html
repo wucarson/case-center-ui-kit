@@ -4679,7 +4679,7 @@ ${stamp()}
     function shWarm() {
       const next = () => SH_WARM.map((k) => SH_ITEMS.find((x) => x.k === k)).find((x) => !shHas(x));
       const run = () => { if (sh.hidden) return; const it = next(); if (!it) return; shGet(it); step(); };
-      const step = () => { if (next()) (window.requestIdleCallback ? requestIdleCallback(run, { timeout: 1500 }) : setTimeout(run, 150)); };
+      const step = () => { if (next()) (window.requestIdleCallback ? requestIdleCallback(run, { timeout: 250 }) : setTimeout(run, 150)); };
       step();
     }
     // 程式碼進場：前幾行（看得到的部分）逐行解碼——亂碼由左到右換成真的字
@@ -4698,7 +4698,7 @@ ${stamp()}
       const els = lines.map(() => { const l = document.createElement('span'), d = document.createElement('span'), m = document.createElement('span'); m.className = 'mx'; l.append(d, m); return [l, d, m]; });
       code.replaceChildren(...els.flatMap(([l], i) => (i < els.length - 1 ? [l, '\n'] : [l])), tail);
       pre.setAttribute('aria-busy', 'true');
-      const STAG = D(9), LINE = D(230), t0 = performance.now();
+      const TOTAL = D(1000), LINE = TOTAL * .45, STAG = (TOTAL - LINE) / Math.max(1, els.length - 1), t0 = performance.now();   // 整段固定 1 秒
       (function frame(now) {
         if (my !== shFx) return;
         const t = now - t0;

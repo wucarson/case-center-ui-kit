@@ -822,10 +822,6 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentcolor; stroke-wid
 .tab:focus-visible:not(.dis):not(.is-off) { outline-offset: -3px; border-radius: var(--r-sm); }
 .dt { overflow: visible; }
 .dtab.on { background: var(--tint); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 20%, transparent), 0 6px 14px -6px var(--glow); }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) :is(.dt > .ind, .sp .dtab.on) { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), inset 0 0 0 1px color-mix(in srgb, var(--primary) 24%, transparent), 0 1px 3px rgb(0 0 0 / .45); }
-}
-:root[data-theme="dark"] :is(.dt > .ind, .sp .dtab.on) { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), inset 0 0 0 1px color-mix(in srgb, var(--primary) 24%, transparent), 0 1px 3px rgb(0 0 0 / .45); }
 .dtab.press { scale: 0.96; }
 .bdg.ol { background: none; }
 .bdg.pl { background: none; border-color: transparent; padding: 0px; min-height: 0px; }

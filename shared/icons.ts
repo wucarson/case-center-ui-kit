@@ -28,6 +28,24 @@ export const ICONS = {
   chevronLeft: '<path d="M15 6l-6 6 6 6"/>',
   chevronRight: '<path d="M9 6l6 6-6 6"/>',
   chevronUp: '<path d="M6 15l6-6 6 6"/>',
+  home: '<path d="M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z"/>',
+  folder: '<path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.5l2 2.5H19a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18z"/>',
+  chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
 } as const;
 
 export type IconName = keyof typeof ICONS;
+
+/**
+ * 填滿版圖示：選中的側欄項目、詳情頁籤用（<svg class="ic fl">；.k 的細節以底色鏤空）。
+ */
+export const ICONS_FILL = {
+  overview: '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
+  cases: '<rect x="3.5" y="7" width="17" height="12.5" rx="2"/><path fill="none" d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/><path class="k" d="M3.5 12.5h17"/>',
+  dispatch: '<rect x="5.5" y="4.5" width="13" height="16" rx="2"/><path fill="none" d="M9 4.5V3.5h6v1"/><path class="k" d="M9 13l2 2 4-4"/>',
+  docs: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path class="k" d="M14 3v5h5M9 13h6M9 17h4"/>',
+  home: '<path d="M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z"/>',
+  folder: '<path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.5l2 2.5H19a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18z"/>',
+  chart: '<rect x="3" y="10" width="3.5" height="10" rx="1"/><rect x="10.25" y="4" width="3.5" height="16" rx="1"/><rect x="17.5" y="13" width="3.5" height="7" rx="1"/>',
+} as const;
+
+export type FillIconName = keyof typeof ICONS_FILL;

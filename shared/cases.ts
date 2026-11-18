@@ -18,6 +18,12 @@ export interface Case {
   interact?: Interact;
 }
 
+// 側邊選單的示意資料（和展示牆樣本相同）
+const SIDE_WORK = { label: '工作', items: [{ key: 'home', label: '首頁', icon: 'home' }, { key: 'cases', label: '案件', icon: 'cases', count: 43 }, { key: 'dispatch', label: '工單', icon: 'dispatch', count: 12 }, { key: 'projects', label: '專案', icon: 'folder' }] };
+const SIDE_WORK2 = { ...SIDE_WORK, items: SIDE_WORK.items.slice(0, 2) };
+const SIDE_ADMIN = { label: '管理', collapsible: true, items: [{ key: 'perf', label: '成員績效', icon: 'chart' }, { key: 'reports', label: '報表', icon: 'docs' }] };
+const SIDE_FULL = { groups: [SIDE_WORK, SIDE_ADMIN], brand: { logo: '案', name: '案管中心' }, user: { name: '王小明', initial: '王' } };
+
 export const CASES: Record<string, Case[]> = {
   button: [
     { id: 'v0', props: { children: '儲存變更' } },
@@ -164,5 +170,28 @@ export const CASES: Record<string, Case[]> = {
     { id: 's0', props: { value: 'month', today: '2026-11-13', style: 'width:100%' } },
     { id: 's1', props: { value: '30d', today: '2026-11-13', style: 'width:100%' } },
     { id: 's2', props: { value: 'custom', today: '2026-11-13', custom: ['2026-11-03', '2026-11-12'], style: 'width:100%' } },
+  ],
+  pagination: [
+    { id: 'v0', props: { total: 56, page: 1, pageSize: 20, style: 'width:100%' } },
+    { id: 'v1', props: { total: 240, page: 6, pageSize: 20, showSize: false } },
+    { id: 's0', props: { total: 60, page: 2, pageSize: 20, showSize: false } },
+    { id: 's1', props: { total: 60, page: 2, pageSize: 20, showSize: false }, interact: { type: 'hover', selector: 'nav > span:nth-child(4)' } },
+    { id: 's2', props: { total: 60, page: 2, pageSize: 20, showSize: false }, interact: { type: 'hover', selector: 'nav > span:last-child' } },
+    { id: 's3', props: { total: 60, page: 1, pageSize: 20, showSize: false } },
+  ],
+  stepper: [
+    { id: 'v0', props: { current: 1, style: 'width:100%', steps: [{ label: '待指派', note: '11-04 完成' }, { label: '處理中', note: '李小美・進行中' }, { label: '待審核' }, { label: '已結案' }] } },
+    { id: 'v1', props: { current: 3, style: 'width:100%', steps: [{ label: '待指派', note: '11-04 完成' }, { label: '處理中', note: '11-06 完成' }, { label: '待審核', note: '11-11 完成' }, { label: '已結案', note: '王小明・進行中' }] } },
+    { id: 's0', props: { current: 1, steps: [{ label: '待指派', note: '11-04 完成' }] } },
+    { id: 's1', props: { current: 0, steps: [{ label: '處理中', note: '李小美・進行中' }] } },
+    { id: 's2', props: { current: -1, steps: [{ label: '待審核' }] } },
+  ],
+  sidebar: [
+    { id: 'v0', props: { ...SIDE_FULL, value: 'home' } },
+    { id: 'v1', props: { ...SIDE_FULL, value: 'home', collapsed: true } },
+    { id: 's0', props: { groups: [SIDE_WORK2] } },
+    { id: 's1', props: { groups: [SIDE_WORK2] }, interact: { type: 'hover', selector: '.sd-it:nth-of-type(3)' } },
+    { id: 's2', props: { groups: [SIDE_WORK2], value: 'home' } },
+    { id: 's3', props: { groups: [{ ...SIDE_ADMIN, defaultOpen: false }] } },
   ],
 };

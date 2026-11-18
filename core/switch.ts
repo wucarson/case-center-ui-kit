@@ -24,7 +24,14 @@ export const switchRootClass = (s: SwitchState) => cx('tgr', s.checked && 'on', 
 export const switchTrackClass = (s: SwitchState, focusVisible: boolean) => cx('tg', s.size === 'sm' && 'sm', focusVisible && 'is-focus');
 
 /** 外層的 role、aria、tabindex（值為 null 時不輸出） */
-export const switchRootAttrs = (s: SwitchState) => ({
+export interface SwitchRootAttrs {
+  role: 'switch';
+  'aria-checked': 'true' | 'false';
+  'aria-disabled': 'true' | null;
+  tabindex: '0' | '-1';
+}
+
+export const switchRootAttrs = (s: SwitchState): SwitchRootAttrs => ({
   role: 'switch',
   'aria-checked': s.checked ? 'true' : 'false',
   'aria-disabled': s.disabled ? 'true' : null,

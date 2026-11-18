@@ -1,36 +1,26 @@
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
-import type { IconName } from '../../../shared/icons';
+import { onOutsidePointer } from '../../../core/dom';
+import {
+  MENU_FLOAT_STYLE, focusFirstMenuItem, focusMenuItem, isMenuItemOff, menuItemClass, menuKey, menuSelect, menuTriggerClass,
+  type MenuItem,
+} from '../../../core/menu';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
 
-export type MenuItem =
-  | { separator: true }
-  | {
-      separator?: false;
-      label: string;
-      icon?: IconName;
-      /** 刪除類：放最後、前面加分隔線，紅字 */
-      danger?: boolean;
-      /** 停用時寫出原因（不要藏起來） */
-      disabledReason?: string;
-      disabled?: boolean;
-      onSelect?: () => void;
-    };
+export type { MenuItem };
 
-/** 選單清單（.mn-p）。↑↓ 移動（停用項也停得到，才念得到原因）、Enter 選取、Esc 關閉。 */
+/** 選單清單（.mn-p）。↑↓ 移動（停用項也停得到，才念得到原因）、Enter 選取、Esc 關閉。規則在 core/menu.ts。 */
 export function MenuPanel({ items, onClose, inline, style, 'aria-label': label }: { items: MenuItem[]; onClose?: () => void; inline?: boolean; style?: CSSProperties; 'aria-label'?: string }) {
   const [cursor, setCursor] = useState(-1);
   const ref = useRef<HTMLDivElement>(null);
-  const idx = items.map((it, i) => (it.separator ? -1 : i)).filter((i) => i >= 0);
-  const focusAt = (i: number) => { setCursor(i); ref.current?.querySelectorAll<HTMLElement>('[role="menuitem"]')[idx.indexOf(i)]?.focus(); };
-  const select = (it: MenuItem) => { if (it.separator || it.disabled || it.disabledReason) return; it.onSelect?.(); onClose?.(); };
+  const select = (it: MenuItem) => { if (menuSelect(it)) onClose?.(); };
   const onKeyDown = (e: KeyboardEvent) => {
-    const k = idx.indexOf(cursor);
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); focusAt(idx[(k + (e.key === 'ArrowDown' ? 1 : -1) + idx.length) % idx.length]); }
-    else if (e.key === 'Home') { e.preventDefault(); focusAt(idx[0]); }
-    else if (e.key === 'End') { e.preventDefault(); focusAt(idx[idx.length - 1]); }
-    else if (e.key === 'Escape') { e.preventDefault(); onClose?.(); }
-    else if ((e.key === 'Enter' || e.key === ' ') && cursor >= 0) { e.preventDefault(); select(items[cursor]); }
+    const r = menuKey(items, cursor, e.key);
+    if (!r) return;
+    e.preventDefault();
+    if (r.type === 'move') { setCursor(r.index); if (ref.current) focusMenuItem(ref.current, items, r.index); }
+    else if (r.type === 'select') select(items[r.index]);
+    else onClose?.();
   };
   const panel = (
     <div ref={ref} className="mn-p" role="menu" aria-label={label} style={style} onKeyDown={onKeyDown}>
@@ -39,8 +29,8 @@ export function MenuPanel({ items, onClose, inline, style, 'aria-label': label }
           key={i}
           role="menuitem"
           tabIndex={-1}
-          aria-disabled={it.disabled || !!it.disabledReason || undefined}
-          className={cx('mn-i', it.danger && 'dng', (it.disabled || it.disabledReason) && 'dis', i === cursor && 'hl')}
+          aria-disabled={isMenuItemOff(it) || undefined}
+          className={menuItemClass(it, i === cursor)}
           onMouseEnter={() => setCursor(i)}
           onMouseLeave={() => setCursor(-1)}
           onClick={() => select(it)}
@@ -68,21 +58,21 @@ export function Menu({ items, label, defaultOpen, className, style }: MenuProps)
   const root = useRef<HTMLDivElement>(null);
   const btn = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    if (!open) return;
-    const off = (e: MouseEvent) => { if (!root.current?.contains(e.target as Node)) setOpen(false); };
-    document.addEventListener('mousedown', off);
+    if (!open || !root.current) return;
+    const el = root.current;
+    const off = onOutsidePointer(el, () => setOpen(false));
     // 打開時焦點落在第一個可用項目
-    requestAnimationFrame(() => root.current?.querySelector<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])')?.focus());
-    return () => document.removeEventListener('mousedown', off);
+    const raf = requestAnimationFrame(() => focusFirstMenuItem(el));
+    return () => { off(); cancelAnimationFrame(raf); };
   }, [open]);
   const close = () => { setOpen(false); btn.current?.focus(); };
   return (
     <div ref={root} className={cx('mn-h', className)} style={{ position: 'relative', ...styleOf(style) }}>
-      <button ref={btn} type="button" className={cx('b2', 'ico', open && 'on')} aria-label={label} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+      <button ref={btn} type="button" className={menuTriggerClass(open)} aria-label={label} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
         <Icon name="dots" />
       </button>
       {open && items.length > 0 && (
-        <MenuPanel items={items} onClose={close} aria-label={label} style={{ width: 210, opacity: 1, transform: 'none', zIndex: 20 }} />
+        <MenuPanel items={items} onClose={close} aria-label={label} style={MENU_FLOAT_STYLE} />
       )}
     </div>
   );

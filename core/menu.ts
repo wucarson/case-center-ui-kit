@@ -67,4 +67,4 @@ export function focusFirstMenuItem(root: Element) {
 }
 
 /** 浮起清單的位置與寬度（觸發鈕右下，靠右對齊） */
-export const MENU_FLOAT_STYLE = { width: '210px', opacity: '1', transform: 'none', 'z-index': '20' } as const;
+export const MENU_FLOAT_STYLE = { width: '210px', opacity: '1', transform: 'none', zIndex: '20' };

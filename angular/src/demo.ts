@@ -3,7 +3,7 @@ import { CASES, type Case } from '../../shared/cases';
 import { Menu, MenuPanel, type MenuItem } from './app/menu';
 import { Switch } from './app/switch';
 
-type SwitchProps = { checked: boolean; label?: string; size?: 'md' | 'sm'; disabled?: boolean; style?: string };
+type SwitchProps = { 'aria-label'?: string; checked: boolean; label?: string; size?: 'md' | 'sm'; disabled?: boolean; style?: string };
 type MenuProps = { items: MenuItem[]; label?: string; inline?: boolean; defaultOpen?: boolean };
 
 const only = new URLSearchParams(location.search).get('c');
@@ -18,7 +18,7 @@ const pick = (name: string) => (!only || only === name ? CASES[name] : []);
     @for (c of switches; track c.id) {
       <div class="case" data-c="switch" [attr.data-id]="c.id" [attr.data-interact]="interact(c)">
         @let p = sw(c);
-        <div ccSwitch [checked]="p.checked" [label]="p.label" [size]="p.size ?? 'md'" [disabled]="!!p.disabled" [style]="p.style ?? null"></div>
+        <div ccSwitch [attr.aria-label]="p['aria-label'] ?? null" [checked]="p.checked" [label]="p.label" [size]="p.size ?? 'md'" [disabled]="!!p.disabled" [style]="p.style ?? null"></div>
       </div>
     }
     @for (c of menus; track c.id) {

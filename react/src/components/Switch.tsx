@@ -1,4 +1,5 @@
 import type { CSSProperties, KeyboardEvent } from 'react';
+import { isSwitchToggleKey, switchNext, switchRootAttrs, switchRootClass, switchTrackClass, type SwitchState } from '../../../core/switch';
 import { cx, styleOf, useFocusVisible } from './util';
 
 export interface SwitchProps {
@@ -14,26 +15,28 @@ export interface SwitchProps {
   style?: string | CSSProperties;
 }
 
-/** 開關：立即生效，不用再按儲存。Space／Enter 切換。 */
+/** 開關：立即生效，不用再按儲存。Space／Enter 切換。規則在 core/switch.ts。 */
 export function Switch({ checked, onChange, label, size = 'md', disabled, className, style, ...aria }: SwitchProps) {
   const { focusVisible, focusProps } = useFocusVisible();
-  const toggle = () => { if (!disabled) onChange?.(!checked); };
-  const onKeyDown = (e: KeyboardEvent) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); } };
+  const s: SwitchState = { checked, disabled, size };
+  const a = switchRootAttrs(s);
+  const toggle = () => { const next = switchNext(s); if (next !== null) onChange?.(next); };
+  const onKeyDown = (e: KeyboardEvent) => { if (isSwitchToggleKey(e.key)) { e.preventDefault(); toggle(); } };
   return (
     <div
       role="switch"
-      aria-checked={checked}
-      aria-disabled={disabled || undefined}
+      aria-checked={a['aria-checked']}
+      aria-disabled={a['aria-disabled'] ?? undefined}
       aria-label={aria['aria-label']}
-      tabIndex={disabled ? -1 : 0}
-      className={cx('tgr', checked && 'on', disabled && 'dis', className)}
+      tabIndex={Number(a.tabindex)}
+      className={cx(switchRootClass(s), className)}
       style={styleOf(style)}
       onClick={toggle}
       onKeyDown={onKeyDown}
       {...focusProps}
     >
       {label && <span>{label}</span>}
-      <span className={cx('tg', size === 'sm' && 'sm', focusVisible && 'is-focus')}><i /></span>
+      <span className={switchTrackClass(s, focusVisible)}><i /></span>
     </div>
   );
 }

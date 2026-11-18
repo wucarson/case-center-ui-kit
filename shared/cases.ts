@@ -56,11 +56,11 @@ export const CASES: Record<string, Case[]> = {
   switch: [
     { id: 'v0', props: { checked: true, label: '到期前提醒', style: 'width:100%' } },
     { id: 'v1', props: { checked: true, size: 'sm', label: '顯示負責人', style: 'width:100%' } },
-    { id: 's0', props: { checked: false } },
-    { id: 's1', props: { checked: true } },
-    { id: 's2', props: { checked: true }, interact: { type: 'focus' } },
-    { id: 's3', props: { checked: false, disabled: true } },
-    { id: 's4', props: { checked: true, disabled: true } },
+    { id: 's0', props: { 'aria-label': '到期前提醒', checked: false } },
+    { id: 's1', props: { 'aria-label': '到期前提醒', checked: true } },
+    { id: 's2', props: { 'aria-label': '到期前提醒', checked: true }, interact: { type: 'focus' } },
+    { id: 's3', props: { 'aria-label': '到期前提醒', checked: false, disabled: true } },
+    { id: 's4', props: { 'aria-label': '到期前提醒', checked: true, disabled: true } },
   ],
   checkbox: [
     { id: 'v0', props: { checked: true, label: '同步通知負責人' } },

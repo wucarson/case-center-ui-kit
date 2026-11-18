@@ -4014,8 +4014,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         clearTimeout(el._cur); el._cur = setTimeout(() => el.classList.remove('curtain-in'), delay + sd + 50);
       });
     }
-    /* 科技進場（數位方塊）：卡片上暫時疊一張畫布，方塊以卡片底色蓋住內容，依「位置 65%＋隨機 35%」的順序由左往右逐塊淡出，
-       淡出途中閃一下主色；每秒 60 格平滑淡出（不用逐格切圖）。reverse＝離場：方塊由右往左補回來 */
+    /* 科技進場（數位方塊）：卡片上暫時疊一張畫布，方塊以卡片底色蓋住內容，依「位置 85%＋隨機 15%」的順序由左往右逐塊淡出，
+       淡出途中閃一下線條色（深淺色各自對比）；每秒 60 格平滑淡出（不用逐格切圖）。reverse＝離場：方塊由右往左補回來 */
     function digiStop(el) { if (el._digi) { cancelAnimationFrame(el._digi.raf); el._digi.cv.remove(); el._digi = null; } el.classList.remove('digi'); }
     function digiPlay(el, delay = 0, reverse = false, dur = D(600)) {
       digiStop(el);
@@ -4027,9 +4027,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const cs = getComputedStyle(el), rs = getComputedStyle(document.documentElement);
       const bg = cs.backgroundColor, am = bg.match(/\/\s*([\d.]+)\s*\)$|rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)/), alpha = am ? +(am[1] ?? am[2]) : 1;   // 取卡片底色的透明度
       const cover = alpha > 0.9 ? bg : rs.getPropertyValue('--surface').trim();   // 透明或半透明的卡片（Y2K、玻璃）改用卡片色
-      const lit = rs.getPropertyValue('--primary').trim();
+      const lit = rs.getPropertyValue('--line-strong').trim();   // 閃色用線條色：淺色時比卡片深、深色時比卡片亮，跟著深淺色走
       const FW = 0.32;   // 每塊淡出佔總長的比例：越大越柔
-      const t = Array.from({ length: cols * rows }, (_, i) => (i % cols) / Math.max(1, cols - 1) * 0.65 + Math.random() * 0.35);
+      const t = Array.from({ length: cols * rows }, (_, i) => (i % cols) / Math.max(1, cols - 1) * 0.85 + Math.random() * 0.15);
       el.classList.add('digi'); el.append(cv);
       const start = performance.now() + delay;
       const frame = (now) => {

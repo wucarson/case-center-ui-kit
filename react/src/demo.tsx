@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 import type { ComponentType } from 'react';
 import { CASES, type Case } from '../../shared/cases';
 import '../../shared/case.css';
-import { Button, Checkbox, CheckboxList, Combo, ConfirmDialog, DatePicker, FormField, InfoPopover, Menu, MenuPanel, MultiSelect, Pagination, PeriodPicker, RadioGroup, Segmented, Sidebar, Stepper, Switch, TextField, TimePicker, Toast } from './components';
+import { Button, Checkbox, CheckboxList, Combo, ConfirmDialog, DatePicker, DetailTabs, FormField, InfoPopover, Menu, MenuPanel, MultiSelect, Pagination, PeriodPicker, RadioGroup, Segmented, Sidebar, Stepper, Switch, Tabs, TextField, TimePicker, Toast } from './components';
 import { styleOf } from './components/util';
 
 /** 展示頁：把 shared/cases.ts 的每個案例用元件畫出來，給 tools/compare.mjs 截圖比對 */
@@ -26,6 +26,8 @@ const RENDER: Record<string, ComponentType<any>> = {
   pagination: Pagination,
   stepper: Stepper,
   sidebar: Sidebar,
+  tabs: Tabs,
+  'detail-tabs': DetailTabs,
 };
 
 function CaseView({ name, c }: { name: string; c: Case }) {

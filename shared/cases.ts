@@ -24,6 +24,16 @@ const SIDE_WORK2 = { ...SIDE_WORK, items: SIDE_WORK.items.slice(0, 2) };
 const SIDE_ADMIN = { label: '管理', collapsible: true, items: [{ key: 'perf', label: '成員績效', icon: 'chart' }, { key: 'reports', label: '報表', icon: 'docs' }] };
 const SIDE_FULL = { groups: [SIDE_WORK, SIDE_ADMIN], brand: { logo: '案', name: '案管中心' }, user: { name: '王小明', initial: '王' } };
 
+// 頁籤、詳情頁籤的示意資料（和展示牆樣本相同）
+const TABS3 = { style: 'width:100%', tabs: [{ key: 'all', label: '全部' }, { key: 'todo', label: '待處理', count: 12 }, { key: 'at', label: '提及', count: 3 }] };
+const TABS2 = { style: 'width:100%', tabs: TABS3.tabs.slice(0, 2) };
+const DT = {
+  overview: { key: 'overview', label: '概覽', icon: 'overview' },
+  cases: { key: 'cases', label: '案件', icon: 'cases', count: 256 },
+  dispatch: { key: 'dispatch', label: '工單', icon: 'dispatch', count: 575 },
+  docs: { key: 'docs', label: '文件', icon: 'docs', count: 2 },
+};
+
 export const CASES: Record<string, Case[]> = {
   button: [
     { id: 'v0', props: { children: '儲存變更' } },
@@ -193,5 +203,22 @@ export const CASES: Record<string, Case[]> = {
     { id: 's1', props: { groups: [SIDE_WORK2] }, interact: { type: 'hover', selector: '.sd-it:nth-of-type(3)' } },
     { id: 's2', props: { groups: [SIDE_WORK2], value: 'home' } },
     { id: 's3', props: { groups: [{ ...SIDE_ADMIN, defaultOpen: false }] } },
+  ],
+  tabs: [
+    { id: 'v0', props: { ...TABS3, value: 'all', tabs: [{ key: 'all', label: '全部' }, { key: 'todo', label: '待處理' }, { key: 'at', label: '提及' }] } },
+    { id: 'v1', props: { ...TABS3, value: 'todo' } },
+    { id: 's0', props: { ...TABS2, value: 'all' } },
+    { id: 's1', props: { ...TABS2, value: 'all' }, interact: { type: 'hover', selector: '.tab:nth-child(2)' } },
+    { id: 's2', props: { ...TABS2, value: 'todo' } },
+    { id: 's3', props: { ...TABS2, value: 'all' }, interact: { type: 'focus', selector: '.tab:nth-child(2)' } },
+  ],
+  'detail-tabs': [
+    { id: 'v0', props: { value: 'overview', tabs: [DT.overview, DT.cases, DT.dispatch] } },
+    { id: 'v1', props: { value: 'overview', tabs: [DT.overview, DT.cases, DT.docs], groupStarts: ['docs'] } },
+    { id: 'v2', props: { value: 'cases', tabs: [{ ...DT.overview, count: null }, { ...DT.cases, count: 3, srCount: '3 件未結' }] } },
+    { id: 's0', props: { value: 'cases', tabs: [DT.cases] } },
+    { id: 's1', props: { value: '', tabs: [DT.cases] }, interact: { type: 'hover', selector: '.dtab' } },
+    { id: 's2', props: { value: 'cases', tabs: [DT.cases] }, interact: { type: 'press', selector: '.dtab' } },
+    { id: 's3', props: { value: '', tabs: [DT.cases] }, interact: { type: 'focus', selector: '.dtab' } },
   ],
 };

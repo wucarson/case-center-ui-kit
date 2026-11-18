@@ -768,9 +768,9 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentcolor; stroke-wid
 .btn.hv { background: linear-gradient(color-mix(in srgb, #000 10%, transparent), color-mix(in srgb, #000 10%, transparent)), var(--grad); }
 @media (hover: hover) and (pointer: fine) { .btn:hover:not(.dis):not(.is-off) { background: linear-gradient(color-mix(in srgb, #000 10%, transparent), color-mix(in srgb, #000 10%, transparent)), var(--grad); } }
 .is-press { transform: scale(0.96); }
-:is(.btn, .b2, .seg span, .tab, .dtab, .pg nav span, .mn-i, .chip u):active:not(.dis):not(.is-off) { transform: scale(0.96); }
+:where(.btn, .b2, .seg span, .tab, .dtab, .pg nav span, .mn-i, .chip u):active:not(.dis):not(.is-off) { transform: scale(0.96); }
 .is-focus { outline: 3px solid var(--focus); outline-offset: 2px; }
-:is(.btn, .b2, .seg span, .tab, .dtab, .pg nav span, .mn-i, .chip u):focus-visible:not(.dis):not(.is-off) { outline: 3px solid var(--focus); outline-offset: 2px; }
+:where(.btn, .b2, .seg span, .tab, .dtab, .pg nav span, .mn-i, .chip u):focus-visible:not(.dis):not(.is-off) { outline: 3px solid var(--focus); outline-offset: 2px; }
 .is-load { gap: 8px; }
 .is-load .spin { width: 14px; height: 14px; }
 .btn.is-off { background: var(--soft); color: var(--label); box-shadow: none; }

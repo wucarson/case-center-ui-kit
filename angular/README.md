@@ -1,6 +1,6 @@
-# 案管中心元件（Angular，試驗）
+# 案管中心元件（Angular）
 
-開關、操作選單兩個元件，驗證「共用邏輯＋JSON 契約＋框架外殼」的做法。
+「共用邏輯＋JSON 契約＋框架外殼」的 Angular 版。目前有：按鈕、提示訊息、空狀態、骨架、狀態徽章、流程步驟、歷程、圖示、開關、操作選單。
 
 | 目錄 | 內容 |
 |---|---|
@@ -12,6 +12,9 @@
 外殼用屬性選擇器（`<div ccSwitch>`、`<div ccMenu>`），元件本身就是根元素，不會多包一層，標記才會和展示牆相同。
 
 ```html
+<button ccButton variant="outline" size="lg">取消</button>
+<span ccStatusBadge label="進行中" tone="active"></span>
+<div ccEmptyState tone="info" heading="還沒有工單" text="建立第一張工單開始派工" action="新增工單" (act)="create()"></div>
 <div ccSwitch [(checked)]="remind" label="到期前提醒"></div>
 <div ccSwitch [(checked)]="on" aria-label="顯示負責人"></div>
 <div ccMenu [items]="actions" label="更多操作：現場設備異常排查"></div>

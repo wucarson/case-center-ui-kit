@@ -1,0 +1,23 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "empty-state",
+  "title": "空狀態",
+  "tier": "class",
+  "logic": "core/display.ts",
+  "description": "沒有內容、查無結果或載入失敗時，說明原因並給下一步。",
+  "use": "列表、表格、面板沒有資料時。",
+  "parts": [
+    {
+      "name": "root",
+      "selector": ".es",
+      "element": "div",
+      "classes": { "es": "空狀態", "info": "還沒有內容", "warn": "查無結果", "danger": "載入失敗" },
+      "attrs": { "role": { "values": ["status", "alert"], "required": true } },
+      "sync": [{ "class": "danger", "attr": "role", "value": "alert" }]
+    },
+    { "name": "mark", "selector": ".es > .es-m", "element": "span", "classes": { "es-m": "圖示底" } },
+    { "name": "heading", "selector": ".es > b", "element": "b", "classes": {} },
+    { "name": "text", "selector": ".es > p", "element": "p", "classes": {} }
+  ],
+  "example": "<div class=\"es info\" role=\"status\"><span class=\"es-m\"><svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\">…</svg></span><b>還沒有工單</b><p>建立第一張工單開始派工</p><button type=\"button\" class=\"b2\">新增工單</button></div>"
+}

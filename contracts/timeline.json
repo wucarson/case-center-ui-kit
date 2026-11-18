@@ -1,0 +1,15 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "timeline",
+  "title": "歷程",
+  "tier": "class",
+  "logic": "core/display.ts",
+  "description": "最新的在最上面；每筆是圖示＋人名動作＋相對時間。",
+  "use": "案件、工單的變更紀錄。",
+  "parts": [
+    { "name": "root", "selector": ".nts", "element": "div", "classes": { "nts": "歷程清單" }, "attrs": { "role": { "values": ["list"], "required": true }, "aria-label": {} } },
+    { "name": "item", "selector": ".nts > .nt", "element": "div", "classes": { "nt": "一筆" }, "attrs": { "role": { "values": ["listitem"], "required": true } } },
+    { "name": "mark", "selector": ".nt > i", "element": "i", "classes": { "a": "變更、新增", "b": "完成、通過", "c": "時間、期限" }, "attrs": { "aria-hidden": { "values": ["true"], "required": true } } }
+  ],
+  "example": "<div class=\"nts\" role=\"list\"><div class=\"nt\" role=\"listitem\"><i class=\"a\" aria-hidden=\"true\"><svg class=\"ic\" viewBox=\"0 0 24 24\">…</svg></i><div><p>李小美 變更狀態為「進行中」</p><small>剛剛</small></div></div></div>"
+}

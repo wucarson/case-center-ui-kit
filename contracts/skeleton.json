@@ -1,0 +1,24 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "skeleton",
+  "title": "骨架",
+  "tier": "class",
+  "logic": "core/display.ts",
+  "description": "骨架形狀照實際內容，載入後不跳動。",
+  "use": "人員列、卡片等載入中的佔位。",
+  "parts": [
+    {
+      "name": "root",
+      "selector": ".sk",
+      "element": "div",
+      "classes": { "sk": "骨架", "loaded": "載入完成：骨架淡出、內容淡入" },
+      "attrs": { "aria-busy": { "values": ["true", "false"], "required": true } },
+      "sync": [{ "class": "loaded", "attr": "aria-busy", "value": "false" }]
+    },
+    { "name": "ghost", "selector": ".sk > .ghost", "element": "div", "classes": { "ghost": "骨架層" }, "attrs": { "aria-hidden": { "values": ["true"], "required": true } } },
+    { "name": "real", "selector": ".sk > .real", "element": "div", "classes": { "real": "內容層" }, "attrs": { "aria-hidden": { "values": ["true", "false"], "required": true } } },
+    { "name": "avatar", "selector": ".sk .av", "element": "span", "classes": { "av": "頭像", "shim": "骨架閃光" } },
+    { "name": "line", "selector": ".sk .ls > b", "element": "b", "classes": { "shim": "骨架閃光" } }
+  ],
+  "example": "<div class=\"sk\" aria-busy=\"true\"><div class=\"ghost\" aria-hidden=\"true\">…</div><div class=\"real\" aria-hidden=\"true\">…</div></div>"
+}

@@ -1094,8 +1094,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sh-bar .sh-act.done { color: var(--ok-fg); }
 .sh-ed .sh-code { height: clamp(260px, calc(100dvh - 330px), 520px); border: 0; border-radius: 0; background: none; transition: opacity calc(.15s * var(--dur)); }
 .sh-code.busy { opacity: .3; }
-/* 進場：逐行「解碼」，前緣是發光的綠色亂碼 */
-.sh-code .mx { color: var(--ok-fg); text-shadow: 0 0 8px color-mix(in srgb, var(--ok-fg) 65%, transparent); }
+/* 進場：逐行「解碼」，前緣是發光的主色亂碼 */
+.sh-code .mx { color: var(--primary); text-shadow: 0 0 8px color-mix(in srgb, var(--primary) 65%, transparent); }
 @media (max-width: 480px) { .sh-bar .sh-files, .sh-bar > code { flex: 1 1 auto; } }
 .sh-files { max-width: 100%; height: 30px; margin: -2px 0 2px -2px; padding: 0 30px 0 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--field) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237b8ca8' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center / 14px; color: var(--ink); font: 600 13px/20px ui-monospace, Consolas, monospace; appearance: none; -webkit-appearance: none; cursor: pointer; transition: border-color calc(.2s * var(--dur)); }
 .sh-files:hover { border-color: var(--line-strong); }

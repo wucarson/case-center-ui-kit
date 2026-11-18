@@ -922,8 +922,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sp .dt { overflow: visible; }
 .sp .dtab.on { background: var(--tint); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 20%, transparent), 0 6px 14px -6px var(--glow); }
 /* 深色模式：詳情頁籤的選中片比底亮一階（同分段切換），保留淡主色細框 */
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) :is(.dt > .ind, .sp .dtab.on) { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), inset 0 0 0 1px color-mix(in srgb, var(--primary) 24%, transparent), 0 1px 3px rgb(0 0 0 / .45); } }
-:root[data-theme="dark"] :is(.dt > .ind, .sp .dtab.on) { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), inset 0 0 0 1px color-mix(in srgb, var(--primary) 24%, transparent), 0 1px 3px rgb(0 0 0 / .45); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]):not([data-tabs="underline"]):not([data-tabs="block"]) :is(.dt > .ind, .sp .dtab.on) { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), inset 0 0 0 1px color-mix(in srgb, var(--primary) 24%, transparent), 0 1px 3px rgb(0 0 0 / .45); } }
+:root[data-theme="dark"]:not([data-tabs="underline"]):not([data-tabs="block"]) :is(.dt > .ind, .sp .dtab.on) { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), inset 0 0 0 1px color-mix(in srgb, var(--primary) 24%, transparent), 0 1px 3px rgb(0 0 0 / .45); }
 .sp .dtab.press { scale: .96; }
 .sp .bdg.ol { background: none; }
 .sp .bdg.pl { background: none; border-color: transparent; padding: 0; min-height: 0; }
@@ -1446,7 +1446,6 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           <button class="ctl" id="toggle-play" type="button"><svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg><span>暫停</span></button>
         </div>
       </div>
-      <p>案管中心現有的共用元件與圖表；微互動自動循環播放，內容皆為示意資料。</p>
     </div>
   </div>
 

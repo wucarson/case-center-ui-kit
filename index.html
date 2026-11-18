@@ -174,11 +174,10 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 }
 .wall:not(.ready) > .cell:not(.norise)::after, .wall:not(.ready) > .cell:not(.norise)::before { animation: curtain-in var(--sd, calc(.55s * var(--dur))) var(--scan-ease) both; animation-delay: calc(var(--i, 0) * calc(55ms * var(--dur))); }
 .cell.curtain-in::after, .cell.curtain-in::before { animation: curtain-in var(--sd, calc(.55s * var(--dur))) var(--scan-ease) both; animation-delay: var(--cd, 0ms); }
-/* ==== 進場效果「科技」（data-enter="hud"）：數位方塊由 JS 在卡片上疊畫布處理（digiPlay），卡片的掃描偽元素在這個模式關掉 ==== */
+/* ==== 進場效果「科技」（data-enter="hud"）：描框由 JS 在卡片位置疊畫布處理（digiPlay），卡片的掃描偽元素在這個模式關掉 ==== */
 :root[data-enter="hud"] :is(.wall:not(.ready) > .cell:not(.norise), .cell.curtain-in)::before,
 :root[data-enter="hud"] :is(.wall:not(.ready) > .cell:not(.norise), .cell.curtain-in)::after { display: none; }
-.cell.digi { position: relative; }
-.digi-cv { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
+.digi-cv { position: absolute; z-index: 20; pointer-events: none; }
 
 .wf { scroll-margin-top: 16px; }   /* 切換分類時捲回這裡 */
 body.hush :is(.spin, .shim, .caret) { animation-play-state: paused; }
@@ -3966,7 +3965,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     let pending = null;
     const EASE = 'cubic-bezier(.22, 1, .36, 1)';   // 快出慢停，同 CSS 的 --reveal-ease
     const scanMs = (h) => D(Math.min(800, Math.max(450, h * 2.2)));
-    const enterMs = (h) => scanMs(h);   // 掃描依卡片高度；科技（數位方塊）由 digiPlay 自己計時 0.6 秒   // 掃描時間依卡片高度，速度一致：矮 0.45 秒～高 0.8 秒
+    const enterMs = (h) => scanMs(h);   // 掃描依卡片高度；科技（描框）由 digiPlay 自己計時約 0.77 秒   // 掃描時間依卡片高度，速度一致：矮 0.45 秒～高 0.8 秒
     const stepOf = (n) => n > 1 ? Math.min(55, 300 / (n - 1)) : 0;   // 依序出現：每張最多隔 55ms，錯開總長不超過 0.3 秒
     // shift：畫面正在平滑捲動時，用捲完後的位置判斷是否在畫面內
     const inViewport = (list, shift = 0) => list.filter(([, r]) => r.top - shift < innerHeight && r.bottom - shift > 0).sort((a, b) => Math.round(a[1].top - b[1].top) || a[1].left - b[1].left);
@@ -3986,8 +3985,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       hushFor(D(1000));   // 轉場期間暫停卡片內的示範動畫，讓出運算
       // 離場：原地模糊到 4px 並淡出，0.22 秒，不做光線；畫面內離開的卡片同時進行
       const digi = theme.motion.enter === 'hud';
-      if (digi) out.forEach(([c]) => digiPlay(c.el, 0, true, D(200)));
-      const exitKf = () => (digi ? [{ opacity: 1 }, { opacity: 1, offset: .75 }, { opacity: 0 }] : [{ filter: 'blur(0)', opacity: 1 }, { filter: 'blur(4px)', opacity: 0 }]);
+      const exitKf = () => (digi ? [{ opacity: 1 }, { opacity: 0 }] : [{ filter: 'blur(0)', opacity: 1 }, { filter: 'blur(4px)', opacity: 0 }]);   // 科技：離場只淡出
       pending = { out: out.map(([c]) => [c, c.el.animate(exitKf(c.el), { duration: D(220), easing: EASE, fill: 'forwards' })]) };
       pending.t = setTimeout(() => { const p = pending; pending = null; relayout(false); p.out.forEach(([c, a]) => { a.cancel(); digiStop(c.el); }); }, D(220));
     }
@@ -4014,41 +4012,43 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         clearTimeout(el._cur); el._cur = setTimeout(() => el.classList.remove('curtain-in'), delay + sd + 50);
       });
     }
-    /* 科技進場（數位方塊）：卡片上暫時疊一張畫布，方塊以卡片底色蓋住內容，從左上角一顆起點依距離向外擴散（距離 88%＋隨機 12%），每顆往中心縮小消失，
-       淡出途中閃一下線條色（深淺色各自對比）；每秒 60 格平滑淡出（不用逐格切圖）。reverse＝離場：方塊由右往左補回來 */
-    function digiStop(el) { if (el._digi) { cancelAnimationFrame(el._digi.raf); el._digi.cv.remove(); el._digi = null; } el.classList.remove('digi'); }
-    function digiPlay(el, delay = 0, reverse = false, dur = D(600)) {
+    /* 科技進場（描框）：卡片先隱藏，在它的位置疊一張畫布，從左上角逆時針描出外框（左邊往下 → 底邊往右 → 右邊往上 → 頂邊往左），
+       描完後卡片淡入、外框同時淡出。畫布放在頁面座標（document.body），捲動時跟著卡片走 */
+    function digiStop(el) { const d = el._digi; if (!d) return; cancelAnimationFrame(d.raf); d.cv.remove(); d.fade.cancel(); el._digi = null; }
+    function digiPlay(el, delay = 0) {
       digiStop(el);
-      if (!(dur > 0)) return;
-      const w = el.clientWidth, h = el.clientHeight, dpr = Math.min(2, devicePixelRatio || 1), B = 12;
-      const cols = Math.ceil(w / B), rows = Math.ceil(h / B);
-      const cv = document.createElement('canvas'); cv.className = 'digi-cv'; cv.width = Math.ceil(w * dpr); cv.height = Math.ceil(h * dpr);
+      const STROKE = D(450), FADE = D(320), total = STROKE + FADE;
+      if (!(total > 0)) return;
+      const r = el.getBoundingClientRect(), w = r.width, h = r.height, dpr = Math.min(2, devicePixelRatio || 1);
+      const rad = Math.min(parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0, w / 2, h / 2);
+      const cv = document.createElement('canvas'); cv.className = 'digi-cv';
+      cv.width = Math.ceil(w * dpr); cv.height = Math.ceil(h * dpr);
+      Object.assign(cv.style, { left: r.left + scrollX + 'px', top: r.top + scrollY + 'px', width: w + 'px', height: h + 'px' });
+      document.body.append(cv);
       const g = cv.getContext('2d'); g.scale(dpr, dpr);
-      const cs = getComputedStyle(el), rs = getComputedStyle(document.documentElement);
-      const bg = cs.backgroundColor, am = bg.match(/\/\s*([\d.]+)\s*\)$|rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)/), alpha = am ? +(am[1] ?? am[2]) : 1;   // 取卡片底色的透明度
-      const cover = alpha > 0.9 ? bg : rs.getPropertyValue('--surface').trim();   // 透明或半透明的卡片（Y2K、玻璃）改用卡片色
-      const lit = rs.getPropertyValue('--line-strong').trim();   // 閃色用線條色：淺色時比卡片深、深色時比卡片亮，跟著深淺色走
-      const FW = 0.32;   // 每塊淡出佔總長的比例：越大越柔
-      const maxD = Math.hypot(cols - 1, rows - 1) || 1;
-      const t = Array.from({ length: cols * rows }, (_, i) => Math.hypot(i % cols, Math.floor(i / cols)) / maxD * 0.88 + Math.random() * 0.12);   // 單顆起點向外擴散成群
-      el.classList.add('digi'); el.append(cv);
+      const line = getComputedStyle(document.documentElement).getPropertyValue('--line-strong').trim();   // 線條色：跟著深淺色、底色走
+      const lw = 1.5, o = lw / 2, W = w - lw, H = h - lw, R = Math.max(0, rad - o);
+      const path = new Path2D();
+      path.moveTo(o, o + R); path.lineTo(o, o + H - R); path.arcTo(o, o + H, o + R, o + H, R);
+      path.lineTo(o + W - R, o + H); path.arcTo(o + W, o + H, o + W, o + H - R, R);
+      path.lineTo(o + W, o + R); path.arcTo(o + W, o, o + W - R, o, R);
+      path.lineTo(o + R, o); path.arcTo(o, o, o, o + R, R);
+      const L = 2 * (W - 2 * R) + 2 * (H - 2 * R) + 2 * Math.PI * R;
+      // 卡片本體：描框期間隱藏（含延遲等待），描完淡入
+      const fade = el.animate([{ opacity: 0 }, { opacity: 0, offset: STROKE / total, easing: 'cubic-bezier(.22, 1, .36, 1)' }, { opacity: 1 }], { duration: total, delay, fill: 'backwards' });
+      const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
       const start = performance.now() + delay;
       const frame = (now) => {
-        const p0 = Math.min(1, Math.max(0, (now - start) / dur)), p = reverse ? 1 - p0 : p0;
+        const e = now - start;
         g.clearRect(0, 0, w, h);
-        for (let i = 0; i < t.length; i++) {
-          const k = (p - t[i] * (1 - FW)) / FW;   // 這塊的淡出進度
-          if (k >= 1) continue;
-          const x = (i % cols) * B, y = Math.floor(i / cols) * B;
-          const e = k <= 0 ? 0 : k * k * (3 - 2 * k), sz = B * (1 - e), o = (B - sz) / 2;
-          g.globalAlpha = 1; g.fillStyle = cover; g.fillRect(x + o, y + o, sz, sz);
-          if (k > 0) { g.globalAlpha = Math.sin(Math.PI * k) * 0.6; g.fillStyle = lit; g.fillRect(x + o, y + o, sz, sz); }
+        if (e >= 0) {
+          g.globalAlpha = 1 - Math.min(1, Math.max(0, (e - STROKE) / FADE));
+          g.lineWidth = lw; g.lineCap = 'round'; g.strokeStyle = line;
+          g.setLineDash([L * ease(Math.min(1, e / STROKE)), L]); g.stroke(path);
         }
-        g.globalAlpha = 1;
-        if (p0 < 1) el._digi.raf = requestAnimationFrame(frame);
-        else if (!reverse) digiStop(el);
+        if (e < total) el._digi.raf = requestAnimationFrame(frame); else digiStop(el);
       };
-      el._digi = { cv, raf: requestAnimationFrame(frame) };
+      el._digi = { cv, fade, raf: requestAnimationFrame(frame) };
     }
     function replayEnter() {
       if (matchMedia('(prefers-reduced-motion: reduce)').matches || theme.motion.reduce) return;

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { focusNth } from '../../../core/choice';
+import { detailTabAriaLabel, detailTabClass, detailTabSeparator, tabsKey } from '../../../core/tabs';
 import type { FillIconName } from '../../../shared/icons';
 import Icon from './Icon.vue';
-import { cx, type StyleProp } from './util';
+import type { StyleProp } from './util';
 
 export interface DetailTabItem {
   key: string;
@@ -15,7 +17,7 @@ export interface DetailTabItem {
   srCount?: string;
 }
 
-/** 詳情頁籤：圖示＋名稱＋數量，選中時淡主色底、圖示填滿。左右鍵切換、Home／End 跳頭尾。v-model:value */
+/** 詳情頁籤：圖示＋名稱＋數量，選中時淡主色底、圖示填滿。左右鍵切換、Home／End 跳頭尾。v-model:value。規則在 core/tabs.ts。 */
 const props = withDefaults(defineProps<{
   tabs: DetailTabItem[];
   value: string;
@@ -28,15 +30,14 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{ 'update:value': [string] }>();
 const root = ref<HTMLElement>();
 const onKey = (e: KeyboardEvent, i: number) => {
-  const n = props.tabs.length;
-  const j = e.key === 'ArrowRight' ? (i + 1) % n : e.key === 'ArrowLeft' ? (i - 1 + n) % n : e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : -1;
+  const j = tabsKey(e.key, i, props.tabs.length);
   if (j < 0) return;
   e.preventDefault();
   emit('update:value', props.tabs[j].key);
-  root.value?.querySelectorAll<HTMLElement>('[role="tab"]')[j]?.focus();
+  if (root.value) focusNth(root.value, '[role="tab"]', j);
 };
 </script>
 
 <template>
-  <div ref="root" class="dt" :style="style" role="tablist" :aria-label="label"><template v-for="(t, i) in tabs" :key="t.key"><i v-if="i > 0 && groupStarts.includes(t.key)" class="sep" aria-hidden="true" /><span :class="cx('dtab', t.key === value && 'on')" role="tab" :aria-selected="t.key === value" :aria-label="t.srCount ? `${t.label}，${t.srCount}` : undefined" :tabindex="t.key === value ? 0 : -1" @click="emit('update:value', t.key)" @keydown="onKey($event, i)"><Icon :name="t.icon" class="ln" /><Icon :name="t.icon" fill />{{ t.label }}<b v-if="t.count != null">{{ t.count }}</b></span></template></div>
+  <div ref="root" class="dt" :style="style" role="tablist" :aria-label="label"><template v-for="(t, i) in tabs" :key="t.key"><i v-if="detailTabSeparator(i, t.key, groupStarts)" class="sep" aria-hidden="true" /><span :class="detailTabClass(t.key === value)" role="tab" :aria-selected="t.key === value" :aria-label="detailTabAriaLabel(t) ?? undefined" :tabindex="t.key === value ? 0 : -1" @click="emit('update:value', t.key)" @keydown="onKey($event, i)"><Icon :name="t.icon" class="ln" /><Icon :name="t.icon" fill />{{ t.label }}<b v-if="t.count != null">{{ t.count }}</b></span></template></div>
 </template>

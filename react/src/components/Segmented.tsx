@@ -1,4 +1,5 @@
 import { useRef, type CSSProperties, type KeyboardEvent } from 'react';
+import { focusNth, segmentedClass, segmentedColumns, segmentedKey, segmentedThumb } from '../../../core/choice';
 import { cx, styleOf } from './util';
 
 export interface SegmentedProps {
@@ -14,28 +15,26 @@ export interface SegmentedProps {
   style?: string | CSSProperties;
 }
 
-/** 分段切換：選中片彈性滑動。左右鍵切換。 */
+/** 分段切換：選中片彈性滑動。左右鍵切換。規則在 core/choice.ts。 */
 export function Segmented({ options, value, onChange, size = 'md', className, style, ...aria }: SegmentedProps) {
   const ref = useRef<HTMLDivElement>(null);
   const n = options.length;
-  const pick = (i: number, focus = false) => {
-    onChange?.(i);
-    if (focus) ref.current?.querySelectorAll<HTMLElement>('[role="radio"]')[i]?.focus();
-  };
   const onKeyDown = (e: KeyboardEvent, i: number) => {
-    const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-    if (d) { e.preventDefault(); pick((i + d + n) % n, true); }
-    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); pick(i); }
+    const r = segmentedKey(e.key, i, n);
+    if (!r) return;
+    e.preventDefault();
+    onChange?.(r.index);
+    if (r.focus && ref.current) focusNth(ref.current, '[role="radio"]', r.index);
   };
   return (
     <div
       ref={ref}
       role="radiogroup"
       aria-label={aria['aria-label']}
-      className={cx('seg', size === 'sm' && 'sm', className)}
-      style={{ gridTemplateColumns: `repeat(${n},1fr)`, ...styleOf(style) }}
+      className={cx(segmentedClass(size), className)}
+      style={{ gridTemplateColumns: segmentedColumns(n), ...styleOf(style) }}
     >
-      <i style={{ width: `calc((100% - 6px) / ${n})`, transform: `translateX(${value * 100}%)` }} />
+      <i style={segmentedThumb(n, value)} />
       {options.map((t, i) => (
         <span
           key={t}
@@ -43,7 +42,7 @@ export function Segmented({ options, value, onChange, size = 'md', className, st
           aria-checked={i === value}
           tabIndex={i === value ? 0 : -1}
           className={i === value ? 'on' : undefined}
-          onClick={() => pick(i)}
+          onClick={() => onChange?.(i)}
           onKeyDown={(e) => onKeyDown(e, i)}
         >
           {t}

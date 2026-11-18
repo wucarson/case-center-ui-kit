@@ -1,5 +1,5 @@
 import type { CSSProperties, KeyboardEvent } from 'react';
-import { pageItems } from '../../../shared/pages';
+import { PAGE_ARROW, isPageKey, pageArrowOff, pageCount, pageItems, pageLabel, pageTarget } from '../../../core/pagination';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
 
@@ -23,16 +23,16 @@ export interface PaginationProps {
   style?: string | CSSProperties;
 }
 
-/** 分頁：頁數多時頭尾固定、中間收成 …；第一頁停用「‹」、最後一頁停用「›」。 */
+/** 分頁：頁數多時頭尾固定、中間收成 …；第一頁停用「‹」、最後一頁停用「›」。規則在 core/pagination.ts。 */
 export function Pagination({ total, page, pageSize, sizes = [20, 50], unit = '筆', label = '分頁', showSize = true, onPageChange, onPageSizeChange, className, style }: PaginationProps) {
-  const pages = Math.max(1, Math.ceil(total / pageSize));
-  const go = (p: number) => { if (p >= 1 && p <= pages && p !== page) onPageChange?.(p); };
-  const key = (p: number) => (e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(p); } };
+  const pages = pageCount(total, pageSize);
+  const go = (p: number) => { const t = pageTarget(p, page, pages); if (t !== null) onPageChange?.(t); };
+  const key = (p: number) => (e: KeyboardEvent) => { if (isPageKey(e.key)) { e.preventDefault(); go(p); } };
   const arrow = (d: -1 | 1) => {
-    const off = d < 0 ? page <= 1 : page >= pages;
+    const off = pageArrowOff(d, page, pages);
     return (
-      <span role="button" tabIndex={off ? -1 : 0} aria-label={d < 0 ? '上一頁' : '下一頁'} aria-disabled={off || undefined} className={off ? 'dis' : undefined} onClick={() => go(page + d)} onKeyDown={key(page + d)}>
-        {d < 0 ? '‹' : '›'}
+      <span role="button" tabIndex={off ? -1 : 0} aria-label={PAGE_ARROW[d].label} aria-disabled={off || undefined} className={off ? 'dis' : undefined} onClick={() => go(page + d)} onKeyDown={key(page + d)}>
+        {PAGE_ARROW[d].text}
       </span>
     );
   };
@@ -52,7 +52,7 @@ export function Pagination({ total, page, pageSize, sizes = [20, 50], unit = '�
         {pageItems(page, pages).map((p, i) =>
           p === null
             ? <span key={'g' + i} className="gap" aria-hidden="true">…</span>
-            : <span key={p} role="button" tabIndex={0} aria-label={`第 ${p} 頁`} aria-current={p === page ? 'page' : undefined} className={p === page ? 'on' : undefined} onClick={() => go(p)} onKeyDown={key(p)}>{p}</span>,
+            : <span key={p} role="button" tabIndex={0} aria-label={pageLabel(p)} aria-current={p === page ? 'page' : undefined} className={p === page ? 'on' : undefined} onClick={() => go(p)} onKeyDown={key(p)}>{p}</span>,
         )}
         {arrow(1)}
       </nav>

@@ -1,4 +1,6 @@
 import { Fragment, useRef, type CSSProperties, type KeyboardEvent } from 'react';
+import { focusNth } from '../../../core/choice';
+import { detailTabAriaLabel, detailTabClass, detailTabSeparator, tabsKey } from '../../../core/tabs';
 import type { FillIconName } from '../../../shared/icons';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
@@ -26,16 +28,15 @@ export interface DetailTabsProps {
   style?: string | CSSProperties;
 }
 
-/** 詳情頁籤：圖示＋名稱＋數量，選中時淡主色底、圖示填滿。左右鍵切換、Home／End 跳頭尾。 */
+/** 詳情頁籤：圖示＋名稱＋數量，選中時淡主色底、圖示填滿。左右鍵切換、Home／End 跳頭尾。規則在 core/tabs.ts。 */
 export function DetailTabs({ tabs, value, onChange, groupStarts = [], label, className, style }: DetailTabsProps) {
   const ref = useRef<HTMLDivElement>(null);
   const onKeyDown = (e: KeyboardEvent, i: number) => {
-    const n = tabs.length;
-    const j = e.key === 'ArrowRight' ? (i + 1) % n : e.key === 'ArrowLeft' ? (i - 1 + n) % n : e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : -1;
+    const j = tabsKey(e.key, i, tabs.length);
     if (j < 0) return;
     e.preventDefault();
     onChange?.(tabs[j].key);
-    ref.current?.querySelectorAll<HTMLElement>('[role="tab"]')[j]?.focus();
+    if (ref.current) focusNth(ref.current, '[role="tab"]', j);
   };
   return (
     <div ref={ref} className={cx('dt', className)} style={styleOf(style)} role="tablist" aria-label={label}>
@@ -43,12 +44,12 @@ export function DetailTabs({ tabs, value, onChange, groupStarts = [], label, cla
         const on = t.key === value;
         return (
           <Fragment key={t.key}>
-            {i > 0 && groupStarts.includes(t.key) && <i className="sep" aria-hidden="true" />}
+            {detailTabSeparator(i, t.key, groupStarts) && <i className="sep" aria-hidden="true" />}
             <span
-              className={cx('dtab', on && 'on')}
+              className={detailTabClass(on)}
               role="tab"
               aria-selected={on}
-              aria-label={t.srCount ? `${t.label}，${t.srCount}` : undefined}
+              aria-label={detailTabAriaLabel(t) ?? undefined}
               tabIndex={on ? 0 : -1}
               onClick={() => onChange?.(t.key)}
               onKeyDown={(e) => onKeyDown(e, i)}

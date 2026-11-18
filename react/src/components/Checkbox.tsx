@@ -1,4 +1,5 @@
 import type { CSSProperties, KeyboardEvent } from 'react';
+import { checkboxAttrs, checkboxClass, checkboxNext, isCheckboxToggleKey } from '../../../core/choice';
 import { ICONS } from '../../../shared/icons';
 import { cx, styleOf, useFocusVisible } from './util';
 
@@ -16,19 +17,21 @@ export interface CheckboxProps {
   style?: string | CSSProperties;
 }
 
-/** 核取方塊：要按儲存才生效的多選。Space 切換。 */
+/** 核取方塊：要按儲存才生效的多選。Space 切換。規則在 core/choice.ts。 */
 export function Checkbox({ checked = false, indeterminate, onChange, label, selectAll, disabled, className, style, ...aria }: CheckboxProps) {
   const { focusVisible, focusProps } = useFocusVisible();
-  const toggle = () => { if (!disabled) onChange?.(indeterminate ? true : !checked); };
-  const onKeyDown = (e: KeyboardEvent) => { if (e.key === ' ') { e.preventDefault(); toggle(); } };
+  const s = { checked, indeterminate, selectAll, disabled };
+  const a = checkboxAttrs(s);
+  const toggle = () => { const next = checkboxNext(s); if (next !== null) onChange?.(next); };
+  const onKeyDown = (e: KeyboardEvent) => { if (isCheckboxToggleKey(e.key)) { e.preventDefault(); toggle(); } };
   return (
     <div
       role="checkbox"
-      aria-checked={indeterminate ? 'mixed' : checked}
-      aria-disabled={disabled || undefined}
+      aria-checked={a['aria-checked']}
+      aria-disabled={a['aria-disabled'] ?? undefined}
       aria-label={aria['aria-label']}
-      tabIndex={disabled ? -1 : 0}
-      className={cx('ck', selectAll && 'all', indeterminate ? 'some' : checked && 'on', disabled && 'dis', className)}
+      tabIndex={Number(a.tabindex)}
+      className={cx(checkboxClass(s), className)}
       style={styleOf(style)}
       onClick={toggle}
       onKeyDown={onKeyDown}

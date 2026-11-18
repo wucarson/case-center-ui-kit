@@ -1,0 +1,34 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "segmented",
+  "title": "分段切換",
+  "tier": "logic",
+  "logic": "core/choice.ts",
+  "description": "2–4 個互斥選項，選中片彈性滑動。",
+  "use": "切換檢視、時間範圍等短選項。",
+  "instead": [{ "when": "選項文字長或需要說明", "use": "radio-group" }],
+  "parts": [
+    { "name": "root", "selector": ".seg", "element": "div", "classes": { "seg": "分段切換", "sm": "小號：對話框、卡片內" }, "attrs": { "role": { "values": ["radiogroup"], "required": true }, "aria-label": {} } },
+    { "name": "thumb", "selector": ".seg > i", "element": "i", "classes": {} },
+    {
+      "name": "option",
+      "selector": ".seg > span",
+      "element": "span",
+      "classes": { "on": "選中" },
+      "attrs": {
+        "role": { "values": ["radio"], "required": true },
+        "aria-checked": { "values": ["true", "false"], "required": true },
+        "tabindex": { "values": ["0", "-1"], "required": true }
+      },
+      "sync": [
+        { "class": "on", "attr": "aria-checked", "value": "true" },
+        { "class": "on", "attr": "tabindex", "value": "0" }
+      ]
+    }
+  ],
+  "keyboard": [
+    { "keys": "←、→", "action": "選上一個、下一個（循環）" },
+    { "keys": "Space、Enter", "action": "選取" }
+  ],
+  "example": "<div role=\"radiogroup\" class=\"seg\" style=\"grid-template-columns:repeat(3,1fr)\"><i style=\"width:calc((100% - 6px) / 3);transform:translateX(0%)\"></i><span role=\"radio\" aria-checked=\"true\" tabindex=\"0\" class=\"on\">日</span><span role=\"radio\" aria-checked=\"false\" tabindex=\"-1\">週</span><span role=\"radio\" aria-checked=\"false\" tabindex=\"-1\">月</span></div>"
+}

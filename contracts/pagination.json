@@ -1,0 +1,36 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "pagination",
+  "title": "分頁",
+  "tier": "logic",
+  "logic": "core/pagination.ts",
+  "description": "頁數多時頭尾固定、中間收成 …；第一頁停用「‹」、最後一頁停用「›」。",
+  "use": "列表、表格超過一頁時。",
+  "parts": [
+    { "name": "root", "selector": ".pg", "element": "div", "classes": { "pg": "分頁列" } },
+    { "name": "size", "selector": ".pg .sel", "element": "span", "classes": { "sel": "每頁筆數" } },
+    { "name": "size-select", "selector": ".pg .sel > select", "element": "select", "classes": {}, "attrs": { "aria-label": { "required": true } } },
+    { "name": "nav", "selector": ".pg > nav", "element": "nav", "classes": {}, "attrs": { "aria-label": { "required": true } } },
+    {
+      "name": "page",
+      "selector": ".pg > nav > span:not(.gap)",
+      "element": "span",
+      "classes": { "on": "目前頁", "dis": "停用（第一頁的 ‹、最後一頁的 ›）" },
+      "attrs": {
+        "role": { "values": ["button"], "required": true },
+        "tabindex": { "values": ["0", "-1"], "required": true },
+        "aria-label": { "required": true },
+        "aria-current": { "values": ["page"] },
+        "aria-disabled": { "values": ["true"] }
+      },
+      "sync": [
+        { "class": "on", "attr": "aria-current", "value": "page" },
+        { "class": "dis", "attr": "aria-disabled", "value": "true" },
+        { "class": "dis", "attr": "tabindex", "value": "-1" }
+      ]
+    },
+    { "name": "gap", "selector": ".pg > nav > .gap", "element": "span", "classes": { "gap": "省略的頁碼（…）" }, "attrs": { "aria-hidden": { "values": ["true"], "required": true } } }
+  ],
+  "keyboard": [{ "keys": "Enter、Space", "action": "換到該頁" }],
+  "example": "<div class=\"pg\"><nav aria-label=\"分頁\"><span role=\"button\" tabindex=\"-1\" aria-label=\"上一頁\" aria-disabled=\"true\" class=\"dis\">‹</span><span role=\"button\" tabindex=\"0\" aria-label=\"第 1 頁\" aria-current=\"page\" class=\"on\">1</span><span role=\"button\" tabindex=\"0\" aria-label=\"第 2 頁\">2</span><span role=\"button\" tabindex=\"0\" aria-label=\"下一頁\">›</span></nav></div>"
+}

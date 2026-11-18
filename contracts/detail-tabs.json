@@ -1,0 +1,37 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "detail-tabs",
+  "title": "詳情頁籤",
+  "tier": "logic",
+  "logic": "core/tabs.ts",
+  "description": "圖示＋名稱＋數量，選中時淡主色底、圖示填滿。",
+  "use": "專案、案件詳情頁的主要分區。",
+  "instead": [{ "when": "列表的篩選分類", "use": "tabs" }],
+  "parts": [
+    { "name": "root", "selector": ".dt", "element": "div", "classes": { "dt": "詳情頁籤列" }, "attrs": { "role": { "values": ["tablist"], "required": true }, "aria-label": {} } },
+    { "name": "separator", "selector": ".dt > .sep", "element": "i", "classes": { "sep": "分組分隔線" }, "attrs": { "aria-hidden": { "values": ["true"], "required": true } } },
+    {
+      "name": "tab",
+      "selector": ".dt > .dtab",
+      "element": "span",
+      "classes": { "dtab": "頁籤", "on": "選中" },
+      "attrs": {
+        "role": { "values": ["tab"], "required": true },
+        "aria-selected": { "values": ["true", "false"], "required": true },
+        "tabindex": { "values": ["0", "-1"], "required": true },
+        "aria-label": {}
+      },
+      "sync": [
+        { "class": "on", "attr": "aria-selected", "value": "true" },
+        { "class": "on", "attr": "tabindex", "value": "0" }
+      ]
+    },
+    { "name": "icon", "selector": ".dtab > svg", "element": "svg", "classes": { "ic": "圖示", "ln": "線條版（未選中）", "fl": "填滿版（選中）" } },
+    { "name": "count", "selector": ".dtab > b", "element": "b", "classes": {} }
+  ],
+  "keyboard": [
+    { "keys": "←、→", "action": "選上一個、下一個（循環）" },
+    { "keys": "Home、End", "action": "選第一個、最後一個" }
+  ],
+  "example": "<div class=\"dt\" role=\"tablist\" aria-label=\"專案內容\"><span class=\"dtab on\" role=\"tab\" aria-selected=\"true\" tabindex=\"0\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\" aria-hidden=\"true\">…</svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\" aria-hidden=\"true\">…</svg>概覽</span></div>"
+}

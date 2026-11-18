@@ -791,6 +791,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 @keyframes cell-ping { 0%, 40% { box-shadow: 0 0 0 4px var(--focus), var(--shadow-lift); } }
 
 .shell.on-detail > .wall { display: none; }
+/* 詳細頁有自己的播放／暫停（會連動整體），頂部列的整體播放鈕先隱藏，避免兩顆打架 */
+.shell.on-detail #toggle-play { display: none; }
 /* 進場動畫只播第一次：牆從詳細頁回來時 display 由 none 變回 grid，瀏覽器會把 rise 重播，排後面的卡片空白最久 2 秒多（2026-11-16 修正）。ping 是返回時的提示，要留著 */
 .wall.ready > .cell:not(.ping) { animation: none; }
 .cdp[hidden] { display: none; }

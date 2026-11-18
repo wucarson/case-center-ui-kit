@@ -818,9 +818,6 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .doc-code { display: flex; flex-wrap: wrap; gap: 6px; }
 .doc-code code { padding: 2px 8px; border-radius: var(--r-xs); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-subtle); color: var(--muted); font: 12.5px/20px ui-monospace, 'SF Mono', 'JetBrains Mono', Consolas, monospace; }
 .dt-stage { position: relative; display: grid; place-items: center; min-height: 320px; padding: 44px 24px 32px; border: 1px solid var(--line-subtle); border-radius: var(--r-2xl); background: radial-gradient(color-mix(in srgb, var(--line-strong) 45%, transparent) 1px, transparent 1.2px) 0 0 / 18px 18px, color-mix(in srgb, var(--soft) 55%, var(--line-subtle)); overflow: auto; }
-/* 示範框上方的控制列：左「互動示範」，右 狀態文字＋電腦／手機＋播放／暫停（同 uiarc 的工具列位置） */
-.dt-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: -6px; }
-.dt-stage-l { font-size: 13px; font-weight: 600; color: var(--label); }
 .dt-stage > .cell { flex: none; max-width: 100%; animation: none; cursor: default; }
 #wall > .cell[hidden] { display: none; }   /* .cell 的 display:flex 會蓋掉 hidden；分類篩選與自訂面板的隱藏都靠這條 */
 .dt-stage > .cell[hidden] { display: flex !important; }
@@ -952,12 +949,16 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .dt-panel { display: flex; flex-direction: column; gap: 16px; }
 .dt-panel[hidden] { display: none; }
 /* 互動示範：右上角播放／暫停（只控制這張）；暫停後可以直接操作 */
-.dt-play { display: flex; align-items: center; gap: 8px; }
-.dt-play button { width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--tile); box-shadow: var(--raise); color: var(--ink); cursor: pointer; transition: transform calc(.2s * var(--dur)) var(--spring), border-color calc(.2s * var(--dur)); }
+.dt-play { position: absolute; top: 12px; right: 12px; z-index: 2; }
+.dt-stage:has(> .dt-play) { padding-top: 72px; }   /* 按鈕佔上方空白，不壓到卡片標題 */
+.dt-play { opacity: 0; transition: opacity calc(.2s * var(--dur)) var(--ease); }
+.dt-stage:hover .dt-play, .dt-stage:focus-within .dt-play, .dt-play:has([aria-pressed="true"]) { opacity: 1; }
+@media (hover: none) { .dt-play { opacity: 1; } }
+.dt-play button { width: 48px; height: 48px; display: grid; place-items: center; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--tile); box-shadow: var(--raise); color: var(--ink); cursor: pointer; transition: transform calc(.2s * var(--dur)) var(--spring), border-color calc(.2s * var(--dur)); }
 .dt-play button:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
 .dt-play button:active { transform: scale(.92); }
 .dt-play button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
-.dt-play svg { width: 14px; height: 14px; fill: currentColor; }
+.dt-play svg { width: 20px; height: 20px; fill: currentColor; }
 .cell.held :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .cell.held.live .btn, .cell.held.live .b2 { cursor: pointer; transition: transform calc(.25s * var(--dur)) var(--spring), filter calc(.2s * var(--dur)), background calc(.2s * var(--dur)), border-color calc(.2s * var(--dur)); }
 .cell.held.live .btn:hover { filter: brightness(.92); }
@@ -1987,6 +1988,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     btn.querySelector('span').textContent = btn.title = paused ? '播放' : '暫停';
     btn.querySelector('path').setAttribute('d', paused ? 'M8 5v14l11-7z' : 'M7 5h4v14H7zM13 5h4v14h-4z');
     document.body.classList.toggle('paused', paused);
+    document.dispatchEvent(new Event('playchange'));   // 詳細頁的播放鈕跟著更新
   };
   btn.addEventListener('click', () => { paused = !paused; paintBtn(); });
   paintBtn();
@@ -5724,10 +5726,12 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
     }
     function paintPlay() {
       const box = $('.dt-play', dt); if (!box) return;
-      const on = held.has(dtId), b = $('.dt-pp', box);
+      const on = held.has(dtId) || paused, b = $('.dt-pp', box);   // 整個展示牆暫停時，這張也算停住
       b.innerHTML = on ? I_PLAY : I_PAUSE; b.setAttribute('aria-pressed', on);
       b.setAttribute('aria-label', on ? '播放示範' : '暫停示範'); b.title = on ? '播放' : '暫停';
     }
+    // 首頁（整體）的播放／暫停和詳細頁（這一張）共用同一個狀態：按首頁的「播放」會解除這張的暫停
+    document.addEventListener('playchange', () => { if (!paused && dtId && held.has(dtId)) setHold(false); else paintPlay(); });
     function putBack() {
       if (dtId && held.has(dtId)) setHold(false);
       if (!slot) return;
@@ -5748,8 +5752,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
           <p class="dt-def">${esc(d.d)}</p>
           <div class="doc-code">${d.r.split('・').map((x) => `<code>${esc(x)}</code>`).join('')}</div>
         </header>
-        <div class="dt-bar"><span class="dt-stage-l">互動示範</span>${STATIC.has(id) ? '' : '<div class="dt-play"><button type="button" class="dt-pp"></button></div>'}</div>
-        <section class="dt-stage" aria-label="互動示範"></section>
+        <section class="dt-stage" aria-label="互動示範">${STATIC.has(id) ? '' : '<div class="dt-play"><button type="button" class="dt-pp"></button></div>'}</section>
         </div>
         ${SPEC[id] ? `<div class="tabs dt-tabs" role="tablist" aria-label="內容"><i></i><button class="tab" type="button" role="tab" id="dt-tab-basic" aria-controls="dt-pn-basic" data-tab="basic">指南</button><button class="tab" type="button" role="tab" id="dt-tab-variants" aria-controls="dt-pn-variants" data-tab="variants">規格</button></div>` : ''}
         <div class="dt-panel" data-panel="basic" id="dt-pn-basic" role="tabpanel" aria-labelledby="dt-tab-basic">${basicHtml(id, d)}</div>
@@ -5809,7 +5812,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
       const sh = e.target.closest('.dt-share'); if (sh) return copyLink(sh);
       const cp = e.target.closest('.sp-copy'); if (cp) return copyCode(cp);
       const md = e.target.closest('.sp-seg [data-mode]'); if (md) return setSpMode(md.dataset.mode);
-      const pl = e.target.closest('.dt-pp'); if (pl) return setHold(!held.has(dtId));
+      const pl = e.target.closest('.dt-pp'); if (pl) { if (paused) { setHold(false); return btn.click(); } return setHold(!held.has(dtId)); }   // 整體暫停中按播放＝恢復整個展示牆
       const tb = e.target.closest('.dt-tabs [data-tab]'); if (tb) { history.replaceState(null, '', tabHash(dtId, tb.dataset.tab)); return setTab(tb.dataset.tab); }
       const go = e.target.closest('[data-go]'); if (go) goDetail(go.dataset.go);
     });

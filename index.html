@@ -156,16 +156,11 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 :root[data-theme="dark"] { --em-hi: color-mix(in srgb, var(--page) 86%, #ffffff); --em-lo: color-mix(in srgb, var(--page) 45%, #000000); }
 .cell.emerge, .cell.sink { position: relative; }
 .cell.emerge { background-clip: padding-box; transform-origin: 50% 100%; }   /* 外框底下不透出卡片色；以底邊為支點拉伸（底邊黏住） */
-.cell.emerge::before, .cell.emerge::after, .cell.sink::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; }
+.cell.emerge::after, .cell.sink::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; }
 .cell.emerge::after { z-index: 5; background: var(--page); animation: em-cover var(--em-t) linear var(--em-d) both; }
-/* 上緣透光縫：脫離瞬間，光從剛撕開的上緣透進來 */
-.cell.emerge::before { z-index: 6; box-shadow: inset 0 1px 0 var(--em-hi), inset 0 8px 10px -8px var(--em-hi); animation: em-seam var(--em-t) linear var(--em-d) both; }
 .cell.sink::after { z-index: 5; background: var(--page); animation: em-sink var(--em-t) ease-in both; }
-/* 接觸陰影：留在卡片原本的位置（不跟著浮起），被拉薄後斷開 */
-.em-foot { position: absolute; z-index: -1; pointer-events: none; box-shadow: 0 1px 2px var(--em-lo), 0 0 7px 1px color-mix(in srgb, var(--em-lo) 55%, transparent); }
-/* 蓋層：前 25% 完全是背景色，浮起時才淡化、透出卡片色 */
-@keyframes em-cover { 0%, 25% { opacity: 1; animation-timing-function: cubic-bezier(.45, 0, .55, 1); } 62%, 100% { opacity: 0; } }
-@keyframes em-seam { 0%, 42% { opacity: 0; } 48% { opacity: 1; animation-timing-function: ease-out; } 64%, 100% { opacity: 0; } }
+/* 蓋層：前 22% 完全是背景色，浮起時才淡化、透出卡片色（和卡片的位移用同一條緩動，才不會一層先一層後） */
+@keyframes em-cover { 0%, 22% { opacity: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); } 70%, 100% { opacity: 0; } }
 @keyframes em-sink { from { opacity: 0; } to { opacity: 1; } }
 
 .wf { scroll-margin-top: 16px; }   /* 切換分類時捲回這裡 */
@@ -4023,53 +4018,45 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         list.forEach(([c], i) => emergePlay(c.el, D(i * step)));
       }
     }
-    /* 進場（浮出）：卡片和背景完全同色，浮起時才淡化變色，像從黏著的表面撕起來（1.2 秒）
-       · 0–25%：完全是背景色（頁面色蓋層、外框透明、沒有陰影），下沉 4px
-       · 25–42%：底邊黏住、上緣先離開——以底邊為支點拉長到 1.016 倍；原位出現一圈接觸陰影（留在原地不跟著走）
-       · 42–55%：脫膠——底邊彈開，卡片往上衝到 -3px、略扁（1.006／0.994），接觸陰影斷開、上緣閃一道透光縫，投射陰影長出來
-       · 55–100%：落定回原位，內容淡入上移到位
-       離場（sinkPlay）：蓋回背景色、陰影收掉、下沉淡出 */
-    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); d.foot?.remove(); el.classList.remove('emerge', 'sink'); el._em = null; }
+    /* 進場（浮出）：卡片和背景完全同色，浮起時才淡化變色，邊緣像脫膠一樣鬆開（1.2 秒）
+       全部用卡片自己的屬性做（不另外疊會錯位的陰影層），一條連續的軌跡、不急轉，才不會有殘影：
+       · 0–22%：完全是背景色（頁面色蓋層、外框透明、沒有陰影），低 6px
+       · 22–60%：平滑上浮到 -2px，底邊黏著稍微拉長（高度 1.012 倍），貼地的接觸陰影（drop-shadow）先變深、再隨上浮變鬆變淡——這就是脫膠
+       · 60–100%：平滑落定；卡片原本的陰影從無慢慢長出來，內容淡入上移到位 */
+    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('emerge', 'sink'); el._em = null; }
     function emergePlay(el, delay = 0) {
       emergeStop(el);
       const T = D(1200);
       if (!(T > 0)) return;
-      // 接觸陰影：先量卡片原位（還沒加位移），放在頁面座標
-      const r = el.getBoundingClientRect(), foot = document.createElement('div');
-      foot.className = 'em-foot';
-      Object.assign(foot.style, { left: r.left + scrollX + 'px', top: r.top + scrollY + 'px', width: r.width + 'px', height: r.height + 'px', borderRadius: getComputedStyle(el).borderRadius });
-      document.body.append(foot);
       el.style.setProperty('--em-t', T + 'ms'); el.style.setProperty('--em-d', delay + 'ms');
       el.classList.add('emerge');
-      const io = 'cubic-bezier(.45, 0, .55, 1)';
+      const glue = getComputedStyle(el).getPropertyValue('--em-lo').trim() || 'rgba(0,0,0,.3)';
+      const smooth = 'cubic-bezier(.4, 0, .2, 1)', settle = 'cubic-bezier(.3, 0, .2, 1)';
       const anims = [
-        // 位置與形變：黏住拉長 → 彈開衝高（略扁）→ 落定
+        // 位置與拉伸：一上一落，兩段都是平滑的 S 曲線
         el.animate([
-          { transform: 'translateY(4px) scale(.99, .99)', easing: io },
-          { transform: 'translateY(4px) scale(.99, .99)', offset: 0.25, easing: 'cubic-bezier(.5, 0, .9, .6)' },
-          { transform: 'translateY(4px) scale(.995, 1.016)', offset: 0.42, easing: 'cubic-bezier(.2, .9, .3, 1)' },
-          { transform: 'translateY(-3px) scale(1.006, .994)', offset: 0.55, easing: io },
-          { transform: 'translateY(-1px) scale(1, 1.002)', offset: 0.72, easing: io },
+          { transform: 'translateY(6px) scaleY(1)', offset: 0, easing: smooth },
+          { transform: 'translateY(6px) scaleY(1)', offset: 0.22, easing: smooth },
+          { transform: 'translateY(-2px) scaleY(1.012)', offset: 0.6, easing: settle },
           { transform: 'none' },
         ], { duration: T, delay, fill: 'backwards' }),
-        // 外框與投射陰影：脫膠後才出現
+        // 脫膠：貼地的接觸陰影先收緊變深（黏住），隨上浮放鬆、變淡到消失
+        el.animate([
+          { filter: `drop-shadow(0 0 0 transparent)` },
+          { filter: `drop-shadow(0 0 0 transparent)`, offset: 0.2, easing: smooth },
+          { filter: `drop-shadow(0 1px 1.5px ${glue})`, offset: 0.36, easing: smooth },
+          { filter: `drop-shadow(0 6px 10px transparent)`, offset: 0.72 },
+          { filter: `drop-shadow(0 6px 10px transparent)` },
+        ], { duration: T, delay, fill: 'backwards' }),
+        // 外框與卡片原本的陰影：從 38% 起慢慢長出來（終點就是各風格自己的值）
         el.animate([
           { borderColor: 'transparent', boxShadow: 'none' },
-          { borderColor: 'transparent', boxShadow: 'none', offset: 0.44, easing: 'cubic-bezier(.22, 1, .36, 1)' },
+          { borderColor: 'transparent', boxShadow: 'none', offset: 0.38, easing: settle },
           {},
         ], { duration: T, delay, fill: 'backwards' }),
-        // 接觸陰影：浮起時出現、被拉薄，脫膠時斷開
-        foot.animate([
-          { opacity: 0 },
-          { opacity: 0, offset: 0.25 },
-          { opacity: 0.9, offset: 0.33 },
-          { opacity: 0.8, transform: 'scale(.997)', offset: 0.42, easing: 'cubic-bezier(.6, 0, .9, .5)' },
-          { opacity: 0, transform: 'scale(.985)', offset: 0.5 },
-          { opacity: 0 },
-        ], { duration: T, delay, fill: 'both' }),
       ];
-      [...el.children].forEach((k) => anims.push(k.animate([{ opacity: 0, transform: 'translateY(3px)' }, { opacity: 0, transform: 'translateY(3px)', offset: 0.5, easing: 'cubic-bezier(.22, 1, .36, 1)' }, { opacity: 1, transform: 'none' }], { duration: T, delay, fill: 'backwards' })));
-      el._em = { anims, foot, t: setTimeout(() => emergeStop(el), delay + T + 50) };
+      [...el.children].forEach((k) => anims.push(k.animate([{ opacity: 0, transform: 'translateY(3px)' }, { opacity: 0, transform: 'translateY(3px)', offset: 0.45, easing: settle }, { opacity: 1, transform: 'none' }], { duration: T, delay, fill: 'backwards' })));
+      el._em = { anims, t: setTimeout(() => emergeStop(el), delay + T + 50) };
     }
     function sinkPlay(el, T) {
       emergeStop(el);

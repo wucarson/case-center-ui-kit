@@ -150,6 +150,8 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 }
 .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
 @keyframes rise { from { transform: none; } }   /* 只用來計時：首次進場全部播完才標記 .ready */
+/* 進場：震波（quakeIn）——以底邊為支點擠壓拉伸 */
+.cell.quake { position: relative; transform-origin: 50% 100%; }
 
 .wf { scroll-margin-top: 16px; }   /* 切換分類時捲回這裡 */
 body.hush :is(.spin, .shim, .caret) { animation-play-state: paused; }
@@ -3390,7 +3392,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       color: { primary: '#1f6fff', darkPrimary: '', success: '#12b866', warn: '#f59e0b', danger: '#ef3340', info: '#1846c9', series: ['#1f6fff', '#00a3b8', '#8b5cf6', '#f59e0b'], neutral: 'cool' },
       shape: { card: 20, control: 10, pill: 'full' },
       depth: { shadow: 2, glow: 100, border: 'standard' },
-      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'digi' },
+      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'quake' },
       layout: { cols: 4, density: 'standard', hidden: [], order: [] },
     };
     const UI_KEYS = ['standard', 'flat', 'glass', 'contrast', 'neu', 'swiss', 'y2k'];
@@ -3978,7 +3980,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         const b = before.get(c), a = c.el.getBoundingClientRect();
         if (!b || Math.hypot(b.left - a.left, b.top - a.top) > 320) entering.push([c, a]);
       });
-      // 進場：只有畫面內的卡片（數位照閱讀順序、飛入由中心往外）
+      // 進場：只有畫面內的卡片（震波由中央往外、飛入由中心往外）
       const shift = wf.getBoundingClientRect().top - 16;   // 還在捲回途中的距離
       playEnter(inViewport(entering, Math.min(0, shift)), false);
     }
@@ -4004,7 +4006,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       document.body.animate([{ opacity: 0 }], { duration: D(800), easing: out, pseudoElement: '::before' });                                          // 只給起點：淡回各風格原本的透明度
       [$('.top'), wf].forEach((e) => e?.animate([{ opacity: 0, transform: 'translateY(-12px)' }, { opacity: 1, transform: 'none' }], { duration: D(500), delay: D(120), easing: out, fill: 'backwards' }));
     }
-    // 進場入口：依設定播數位或飛入；scene＝連動背景與標題列
+    // 進場入口：依設定播震波或飛入；scene＝連動背景與標題列
     function playEnter(list, scene) {
       if (!list.length || matchMedia('(prefers-reduced-motion: reduce)').matches || theme.motion.reduce) return;
       if (theme.motion.enter === 'fly') {
@@ -4012,49 +4014,34 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         list.forEach(([c, r]) => flyPlay(c.el, D(Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md * 140)));
         if (scene) flyScene();
       } else {
-        const step = stepOf(list.length); list.forEach(([c], i) => digiPlay(c.el, D(i * step)));   // 數位：依閱讀順序錯開
+        quakeIn(list);   // 震波：從中央往外一圈圈彈出
       }
     }
-    /* 進場（數位，像素解碼）：卡片底色與外框維持清楚，只有內容做馬賽克
-       · 內容從卡片中央以圓形往外擴散出來（0–65%），同時馬賽克由大分裂成小：24 → 12 → 6 → 3px → 清楚（跳格切換，數位解碼感）
-       · 像素化用共用的 SVG 濾鏡（每種方塊大小一個），動畫只切換濾鏡，不每幀重算方塊大小
-       · 約 0.8 秒；卡片依閱讀順序錯開（總錯開 ≤ 0.3 秒）
+    /* 進場（震波）：像彗星撞擊地面——卡片從撞擊點（畫面內元件牆的中央）往外，一圈圈從地面彈出來
+       · 延遲依距離（最遠約晚 0.38 秒），像震波往外推；越近彈得越高、晃得越多，越遠越輕（衰減）
+       · 卡通式擠壓與拉伸：從地面壓扁的薄片 → 拉長衝高 → 落地壓扁 → 回彈 → 小晃 → 停住（以底邊為支點）
+       · 地板掀起：彈起時 3D 傾斜、背向撞擊點翻起，隨回彈來回擺動後放平；也順著震波方向被推一下
+       · 約 1.1 秒；擠壓拉伸的幅度跟「彈跳感」設定走
        離場：原地淡出 */
-    const PX = [24, 12, 6, 3];
-    let pxReady = false;
-    function ensurePx() {
-      if (pxReady) return; pxReady = true;
-      // 每格只取中心 1 個像素（取 2×2 會讓 dilate 偏向最亮的顏色），鋪滿成格點，再用 dilate 把每點撐滿整格
-      const f = (s) => `<filter id="px-${s}" x="0" y="0" width="100%" height="100%"><feFlood x="${s / 2}" y="${s / 2}" width="1" height="1"/><feComposite width="${s}" height="${s}"/><feTile result="a"/><feComposite in="SourceGraphic" in2="a" operator="in"/><feMorphology operator="dilate" radius="${s / 2}"/></filter>`;
-      document.body.insertAdjacentHTML('beforeend', `<svg width="0" height="0" style="position:absolute" aria-hidden="true">${PX.map(f).join('')}</svg>`);
-    }
-    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el._em = null; }
-    function digiPlay(el, delay = 0, dur = D(800)) {
-      emergeStop(el);
-      if (!(dur > 0)) return;
-      ensurePx();
-      const cr = el.getBoundingClientRect(), cx = cr.left + cr.width / 2, cy = cr.top + cr.height / 2, R = (Math.hypot(cr.width, cr.height) / 2 + 2).toFixed(1);
-      const o = { duration: dur, delay, fill: 'backwards' }, anims = [];
-      [...el.children].forEach((k) => {
-        const kr = k.getBoundingClientRect(), x = (cx - kr.left).toFixed(1), y = (cy - kr.top).toFixed(1);
-        // 擴散＋淡入
-        anims.push(k.animate([
-          { clipPath: `circle(0px at ${x}px ${y}px)`, opacity: 0, easing: 'cubic-bezier(.25, .7, .35, 1)' },
-          { opacity: 1, offset: 0.15 },
-          { clipPath: `circle(${R}px at ${x}px ${y}px)`, opacity: 1, offset: 0.65 },
-          { clipPath: `circle(${R}px at ${x}px ${y}px)`, opacity: 1 },
-        ], o));
-        // 馬賽克跳格：大 → 小 → 清楚（step-end：停在每段的值，到下一個時間點才切換）
-        anims.push(k.animate([
-          { filter: `url(#px-${PX[0]})`, offset: 0, easing: 'step-end' },
-          { filter: `url(#px-${PX[1]})`, offset: 0.22, easing: 'step-end' },
-          { filter: `url(#px-${PX[2]})`, offset: 0.42, easing: 'step-end' },
-          { filter: `url(#px-${PX[3]})`, offset: 0.6, easing: 'step-end' },
-          { filter: 'none', offset: 0.78 },
-          { filter: 'none', offset: 1 },
-        ], o));
+    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('quake'); el._em = null; }
+    function quakeIn(list) {
+      const w = $('#wall').getBoundingClientRect(), ix = innerWidth / 2, iy = (Math.max(w.top, 0) + innerHeight) / 2;
+      const pts = list.map(([c, r]) => { const dx = r.left + r.width / 2 - ix, dy = r.top + r.height / 2 - iy; return [c, dx, dy, Math.hypot(dx, dy)]; });
+      const maxD = Math.max(1, ...pts.map((x) => x[3])), K = { none: 0.35, soft: 0.7, standard: 1, strong: 1.35 }[theme.motion.bounce] ?? 1, dur = D(1100);
+      const ease = 'cubic-bezier(.33, 0, .4, 1)';
+      pts.forEach(([c, dx, dy, d]) => {
+        const el = c.el; emergeStop(el);
+        const q = d / maxD, a = (1 - q * 0.55) * K, ux = d ? dx / d : 0, uy = d ? dy / d : 0;
+        // [時間點, 位移y, 往外推, 寬, 高, 傾斜]（偏移量 × a）
+        const S = [[0.18, -46, 14, -0.16, 0.3, 16], [0.36, 8, 4, 0.14, -0.16, -9], [0.52, -18, 0, -0.05, 0.08, 5], [0.68, 4, 0, 0.03, -0.035, -2.5], [0.84, -3, 0, -0.01, 0.012, 1]];
+        const T = (y, push, sx, sy, tilt) => `perspective(800px) translate(${(ux * push).toFixed(1)}px, ${(y + uy * push).toFixed(1)}px) rotateX(${(uy * tilt).toFixed(2)}deg) rotateY(${(-ux * tilt).toFixed(2)}deg) scale(${sx.toFixed(3)}, ${sy.toFixed(3)})`;
+        const kf = [{ offset: 0, opacity: 0, transform: T(18, -10, 0.6, 0.12, 0), easing: 'cubic-bezier(.2, .7, .3, 1)' }];
+        S.forEach(([o, y, p, sx, sy, t], i) => kf.push({ offset: o, ...(i === 0 ? { opacity: 1 } : {}), transform: T(y * a, p * a, 1 + sx * a, 1 + sy * a, t * a), easing: ease }));
+        kf.push({ offset: 1, transform: T(0, 0, 1, 1, 0) });
+        el.classList.add('quake');
+        const delay = D(380 * q);
+        el._em = { anims: [el.animate(kf, { duration: dur, delay, fill: 'backwards' })], t: setTimeout(() => emergeStop(el), delay + dur + 50) };
       });
-      el._em = { anims, t: setTimeout(() => emergeStop(el), delay + dur + 50) };
     }
     const replayEnter = () => { hushFor(D(1000)); playEnter(inViewport(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()])), true); };
     wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });
@@ -4124,7 +4111,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
             on: () => (m ? !theme.motion.reduce && theme.motion.speed === m.speed && theme.motion.bounce === m.bounce : theme.motion.reduce),
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
         })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['digi', '數位'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter === 'fly' ? 'fly' : 'digi') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; }))),
+          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['quake', '震波'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter === 'fly' ? 'fly' : 'quake') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; }))),
       )];
     }
     function catsEl() {

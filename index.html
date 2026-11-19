@@ -4034,7 +4034,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const smooth = 'cubic-bezier(.4, 0, .2, 1)', settle = 'cubic-bezier(.3, 0, .2, 1)', o = { duration: T, delay, fill: 'backwards' };
       const ui = theme.style.ui;
       const anims = [
-        // 位置與拉伸：線框階段不動，之後平滑上浮、落定
+        // 位置與拉伸：前 20% 不動，之後平滑上浮、落定
         el.animate([
           { transform: 'translateY(6px) scaleY(1)', easing: smooth },
           { transform: 'translateY(6px) scaleY(1)', offset: 0.2, easing: smooth },

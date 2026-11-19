@@ -150,8 +150,9 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 }
 .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
 @keyframes rise { from { transform: none; } }   /* 只用來計時：首次進場全部播完才標記 .ready */
-/* 進場：風捲（windIn／windOut）——動畫期間以卡片中心翻轉，z-index 由程式設定 */
-.cell.wind { position: relative; transform-origin: 50% 50%; backface-visibility: hidden; }
+/* 進場：數位（digiPlay）——卡片上暫時疊一張畫布，套 gooey 濾鏡做流體方塊 */
+.cell.digi { position: relative; }
+.digi-cv { position: absolute; z-index: 5; pointer-events: none; filter: url(#digi-goo); }
 
 .wf { scroll-margin-top: 16px; }   /* 切換分類時捲回這裡 */
 body.hush :is(.spin, .shim, .caret) { animation-play-state: paused; }
@@ -3383,7 +3384,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       color: { primary: '#1f6fff', darkPrimary: '', success: '#12b866', warn: '#f59e0b', danger: '#ef3340', info: '#1846c9', series: ['#1f6fff', '#00a3b8', '#8b5cf6', '#f59e0b'], neutral: 'cool' },
       shape: { card: 20, control: 10, pill: 'full' },
       depth: { shadow: 2, glow: 100, border: 'standard' },
-      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'wind' },
+      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'digi' },
       layout: { cols: 4, density: 'standard', hidden: [], order: [] },
     };
     const UI_KEYS = ['standard', 'flat', 'glass', 'contrast', 'neu', 'swiss', 'y2k'];
@@ -3954,8 +3955,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       if (!out.length) return relayout(still);
       hushFor(D(1000));   // 轉場期間暫停卡片內的示範動畫，讓出運算
       // 離場：原地淡出 0.22 秒；畫面內離開的卡片同時進行
-      // 飛入：原地淡出；風捲：收到中央繞一圈往右下吹走
-      const so = theme.motion.enter === 'fly' ? { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]), ms: D(220) } : windOut(out);
+      // 離場：原地淡出
+      const so = theme.motion.enter === 'fly' ? { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]), ms: D(220) } : { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]), ms: D(220) };
       pending = { out: so.out };
       pending.t = setTimeout(() => { const p = pending; pending = null; relayout(false); p.out.forEach(([c, a]) => { a.cancel(); emergeStop(c.el); }); }, so.ms);
     }
@@ -3971,7 +3972,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         const b = before.get(c), a = c.el.getBoundingClientRect();
         if (!b || Math.hypot(b.left - a.left, b.top - a.top) > 320) entering.push([c, a]);
       });
-      // 進場：只有畫面內的卡片（風捲照閱讀順序、飛入由中心往外）
+      // 進場：只有畫面內的卡片（數位照閱讀順序、飛入由中心往外）
       const shift = wf.getBoundingClientRect().top - 16;   // 還在捲回途中的距離
       playEnter(inViewport(entering, Math.min(0, shift)), false);
     }
@@ -3997,7 +3998,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       document.body.animate([{ opacity: 0 }], { duration: D(800), easing: out, pseudoElement: '::before' });                                          // 只給起點：淡回各風格原本的透明度
       [$('.top'), wf].forEach((e) => e?.animate([{ opacity: 0, transform: 'translateY(-12px)' }, { opacity: 1, transform: 'none' }], { duration: D(500), delay: D(120), easing: out, fill: 'backwards' }));
     }
-    // 進場入口：依設定播風捲或飛入；scene＝連動背景與標題列
+    // 進場入口：依設定播數位或飛入；scene＝連動背景與標題列
     function playEnter(list, scene) {
       if (!list.length || matchMedia('(prefers-reduced-motion: reduce)').matches || theme.motion.reduce) return;
       if (theme.motion.enter === 'fly') {
@@ -4005,73 +4006,61 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         list.forEach(([c, r]) => flyPlay(c.el, D(Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md * 140)));
         if (scene) flyScene();
       } else {
-        windIn(list);   // 風捲：從左上角外依閱讀順序飄進來
+        const step = stepOf(list.length); list.forEach(([c], i) => digiPlay(c.el, D(i * step)));   // 數位：依閱讀順序錯開
       }
     }
-    /* 進場（風捲）：像落葉被一陣風捲進來——整群繞一圈，再依序脫離、各自鋪平
-       · 每張卡只露出左上角固定大小的一塊（160×110，看得到標題），所有葉片一樣大、內容不變形；從螢幕左上角外依閱讀順序一張接一張被吹進來，排成一串沿同一條橢圓軌道繞畫面中央
-       · 每張至少繞約一圈，到了面向自己落點的方向就脫離軌道，順勢飄過去，裁切邊飄邊展開成整張卡片、鋪平
-       · 翻轉與移動以葉片中心為支點（transform-origin 設在裁切區中心），不同大小的卡片走同一條軌道
-       · 繞圈時葉片持續翻轉（3D），軌道下半圈離觀者近（較大、在前），上半圈遠（較小、在後）
-       · 每張間隔最多 55ms、飛行 1.4 秒，全部到位約 2 秒；落點的微幅衝過頭跟「彈跳感」走
-       離場（風捲走）：離開的卡片先收到畫面中央疊起來，再繞成一圈旋轉縮小，往右下角飛出畫面並淡出（約 0.6 秒） */
-    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('wind'); el.style.zIndex = ''; el.style.transformOrigin = ''; el._em = null; }
-    const f1 = (v) => v.toFixed(1);
-    function windIn(list) {
-      const n = list.length, step = n > 1 ? Math.min(55, 600 / (n - 1)) : 0, k = FLY_K[theme.motion.bounce] ?? 1, dur = D(1400);
-      const cx = innerWidth / 2, cy = innerHeight / 2, Rx = Math.min(innerWidth * 0.3, 420), Ry = Math.min(innerHeight * 0.26, 230), A0 = 225;
-      const orb = (deg) => { const t = deg * Math.PI / 180; return [cx + Math.cos(t) * Rx, cy + Math.sin(t) * Ry, Math.sin(t)]; };
-      list.forEach(([c, r], i) => {
-        const el = c.el; emergeStop(el);
-        el.classList.add('wind'); el.style.zIndex = 30;
-        const W0 = Math.min(160, r.width), H0 = Math.min(110, r.height), rad = getComputedStyle(el).borderTopLeftRadius || '0px';
-        el.style.transformOrigin = `${W0 / 2}px ${H0 / 2}px`;
-        const tx = r.left + W0 / 2, ty = r.top + H0 / 2, leaf = 0.9;   // 支點（葉片中心）在畫面上的落點
-        const clipLeaf = `inset(0px ${f1(r.width - W0)}px ${f1(r.height - H0)}px 0px round 12px)`;
-        // 脫離點：至少繞 300°，之後到面向落點的方向就脫離
-        let dir = Math.atan2((ty - cy) / Ry, (tx - cx) / Rx) * 180 / Math.PI; while (dir < A0 + 300) dir += 360;
-        const span = dir - A0, kf = [];
-        const T = (x, y, rz, rx, ry, sc, clip = clipLeaf) => ({ clipPath: clip, transform: `perspective(900px) translate(${f1(x - tx)}px, ${f1(y - ty)}px) rotateZ(${f1(rz)}deg) rotateX(${f1(rx)}deg) rotateY(${f1(ry)}deg) scale(${sc.toFixed(3)})` });
-        kf.push({ offset: 0, opacity: 0, zIndex: 30, ...T(-160, -140, -50, 60, -40, leaf * 0.7), easing: 'cubic-bezier(.3, .5, .6, 1)' });
-        // 軌道：每 30° 一個點，等速（linear）
-        const m = Math.ceil(span / 30);
-        for (let j = 0; j <= m; j++) {
-          const deg = A0 + span * j / m, [x, y, d] = orb(deg), o = 0.14 + 0.64 * j / m;
-          kf.push({ offset: o, ...(j === 0 ? { opacity: 1 } : {}), zIndex: Math.round(40 + d * 20), ...T(x, y, (deg - A0) * 0.12 + Math.sin(j * 1.1) * 18, Math.sin(j * 1.3) * 50, Math.cos(j * 0.9) * 38, leaf * (1 + d * 0.18)), easing: 'linear' });
-        }
-        // 脫離：順著切線方向飄出、再落到位置
-        const [ex, ey] = orb(dir), tg = (dir + 90) * Math.PI / 180, mx = (ex + Math.cos(tg) * Rx * 0.35 + tx) / 2, my = (ey + Math.sin(tg) * Ry * 0.35 + ty) / 2;
-        kf[kf.length - 1].easing = 'cubic-bezier(.35, 0, .55, 1)';
-        // 裁切展開：0.89 展開一半、0.95 整張卡片；最後放寬到卡片外，讓陰影漸漸出現（不會在結束時突然跳出）
-        const half = `inset(0px ${f1((r.width - W0) / 2)}px ${f1((r.height - H0) / 2)}px 0px round ${rad})`;
-        kf.push({ offset: 0.89, zIndex: 60, ...T(mx, my, 8, -16, 12, 0.96, half), easing: 'cubic-bezier(.25, .6, .35, 1)' });
-        kf.push({ offset: 0.95, zIndex: 60, ...T(tx, ty, 1.5 * k, -3 * k, 2 * k, 1 + 0.012 * k, `inset(0px 0px 0px 0px round ${rad})`), easing: 'cubic-bezier(.45, 0, .55, 1)' });
-        kf.push({ offset: 1, zIndex: 30, ...T(tx, ty, 0, 0, 0, 1, `inset(-60px -60px -60px -60px round ${rad})`) });
-        const delay = D(60) + D(i * step);
-        el._em = { anims: [el.animate(kf, { duration: dur, delay, fill: 'backwards' })], t: setTimeout(() => emergeStop(el), delay + dur + 50) };
-      });
+    /* 進場（數位）：卡片上暫時疊一張畫布，用卡片底色的圓塊蓋住內容，從左上角一顆起點往外擴散、每塊縮小消失
+       · 流體：畫布套 gooey 濾鏡（模糊＋透明度收緊），相鄰圓塊像水銀一樣黏在一起、拉絲再斷開，邊緣是平滑曲線
+       · 擴散前緣用平滑起伏（不用逐塊亂數），像流動的液面；淡出途中閃一下線條色（跟著深淺色）
+       · 約 0.7 秒；卡片依閱讀順序錯開（總錯開 ≤ 0.3 秒）；畫布比卡片大一圈再裁回卡片形狀，避免濾鏡把邊緣吃掉
+       離場：原地淡出 */
+    let gooReady = false;
+    function ensureGoo() {
+      if (gooReady) return; gooReady = true;
+      document.body.insertAdjacentHTML('beforeend', '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="digi-goo" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="6"/><feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -12"/></filter></svg>');
     }
-    // 回傳 [卡片, 動畫] 與全部結束的時間
-    function windOut(list) {
-      const n = list.length, dur = D(600), cx = innerWidth / 2, cy = innerHeight / 2, ex = innerWidth + 260, ey = innerHeight + 220;
-      const out = list.map(([c, r], i) => {
-        const el = c.el; emergeStop(el);
-        el.classList.add('wind'); el.style.zIndex = n - i + 1;
-        const ox = r.left + r.width / 2, oy = r.top + r.height / 2, sc = Math.min(0.5, 160 / r.width), a0 = (i / Math.max(n, 1)) * 360;
-        const T = (x, y, rz, s, o) => ({ transform: `translate(${f1(x - ox)}px, ${f1(y - oy)}px) rotate(${f1(rz)}deg) scale(${s.toFixed(3)})`, ...(o == null ? {} : { opacity: o }) });
-        const kf = [{ ...T(ox, oy, 0, 1, 1), offset: 0 }, { ...T(cx + i * 2, cy + i * 2, i * 3 - 6, sc, 1), offset: 0.3 }];
-        // 繞一圈：每 45° 一個點，半徑由 110 收到 60，整圈往右下偏移
-        for (let j = 0; j <= 8; j++) {
-          const a = (a0 + j * 45) * Math.PI / 180, R = 110 - j * 6, sh = j / 8 * 0.12;
-          kf.push({ ...T(cx + Math.cos(a) * R + (ex - cx) * sh, cy + Math.sin(a) * R + (ey - cy) * sh, a0 + 90 + j * 45, sc * (1 - j * 0.03)), offset: 0.38 + j * 0.05 });
+    function emergeStop(el) { if (el._digi) { cancelAnimationFrame(el._digi.raf); clearTimeout(el._digi.t); el._digi.cv.remove(); el._digi = null; } el.classList.remove('digi'); }
+    function digiPlay(el, delay = 0, dur = D(700)) {
+      emergeStop(el);
+      if (!(dur > 0)) return;
+      ensureGoo();
+      const P = 16, w = el.clientWidth + P * 2, h = el.clientHeight + P * 2, B = 14;   // P：畫布往外多出的邊
+      const cols = Math.ceil(w / B) + 1, rows = Math.ceil(h / B) + 1;
+      const cv = document.createElement('canvas'); cv.className = 'digi-cv'; cv.width = w; cv.height = h;
+      const bw = parseFloat(getComputedStyle(el).borderLeftWidth) || 0;
+      cv.style.cssText = `inset: ${-P - bw}px; width: ${w}px; height: ${h}px; clip-path: inset(${P}px round ${getComputedStyle(el).borderRadius});`;
+      const g = cv.getContext('2d');
+      const cs = getComputedStyle(el), rs = getComputedStyle(document.documentElement);
+      const bg = cs.backgroundColor, am = bg.match(/\/\s*([\d.]+)\s*\)$|rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)/), alpha = am ? +(am[1] ?? am[2]) : 1;   // 取卡片底色的透明度
+      const cover = alpha > 0.9 ? bg : rs.getPropertyValue('--surface').trim();   // 透明或半透明的卡片（Y2K、玻璃）改用卡片色
+      const lit = rs.getPropertyValue('--line-strong').trim();   // 閃色用線條色：淺色時比卡片深、深色時比卡片亮
+      const FW = 0.38, maxD = Math.hypot(cols - 1, rows - 1) || 1, ph = Math.random() * 6.28;
+      // 前緣：距離為主，加上平滑起伏（液面），少量亂數讓邊緣不死板
+      const t = Array.from({ length: cols * rows }, (_, i) => { const x = i % cols, y = Math.floor(i / cols), a = Math.atan2(y, x);
+        return Math.min(1, Math.max(0, Math.hypot(x, y) / maxD * 0.8 + (Math.sin(a * 7 + ph) + Math.sin(a * 3 - ph * 0.7)) * 0.035 + Math.random() * 0.04)); });
+      el.classList.add('digi'); el.append(cv);
+      const start = performance.now() + delay, R0 = B * 0.78;
+      const frame = (now) => {
+        const p = Math.min(1, Math.max(0, (now - start) / dur));
+        g.clearRect(0, 0, w, h);
+        g.fillStyle = cover; g.beginPath();
+        const flash = [];
+        for (let i = 0; i < t.length; i++) {
+          const k = (p - t[i] * (1 - FW)) / FW;   // 這塊的消失進度
+          if (k >= 1) continue;
+          const e = k <= 0 ? 0 : k * k * (3 - 2 * k), rr = R0 * (1 - e);
+          if (rr < 0.5) continue;
+          const x = (i % cols) * B + B / 2, y = Math.floor(i / cols) * B + B / 2;
+          g.moveTo(x + rr, y); g.arc(x, y, rr, 0, 6.2832);
+          if (k > 0 && k < 0.5) flash.push(x, y, rr, Math.sin(Math.PI * k * 2));   // 只在消失前半段閃一下
         }
-        kf.push({ ...T(ex, ey, a0 + 90 + 460, sc * 0.4, 0), offset: 1 });
-        kf[kf.length - 2].opacity = 1;
-        const a = el.animate(kf, { duration: dur, easing: 'linear', fill: 'both' });
-        el._em = { anims: [a], t: 0 };
-        return [c, a];
-      });
-      return { out, ms: dur };
+        g.fill();
+        g.fillStyle = lit;
+        for (let j = 0; j < flash.length; j += 4) { g.globalAlpha = flash[j + 3] * 0.3; g.beginPath(); g.arc(flash[j], flash[j + 1], flash[j + 2], 0, 6.2832); g.fill(); }
+        g.globalAlpha = 1;
+        if (p < 1) el._digi.raf = requestAnimationFrame(frame); else emergeStop(el);
+      };
+      el._digi = { cv, raf: requestAnimationFrame(frame), t: 0 };
     }
     const replayEnter = () => { hushFor(D(1000)); playEnter(inViewport(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()])), true); };
     wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });
@@ -4141,7 +4130,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
             on: () => (m ? !theme.motion.reduce && theme.motion.speed === m.speed && theme.motion.bounce === m.bounce : theme.motion.reduce),
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
         })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['wind', '風捲'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter === 'fly' ? 'fly' : 'wind') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; }))),
+          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['digi', '數位'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter === 'fly' ? 'fly' : 'digi') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; }))),
       )];
     }
     function catsEl() {

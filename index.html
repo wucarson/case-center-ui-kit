@@ -150,8 +150,8 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 }
 .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
 @keyframes rise { from { transform: none; } }   /* 只用來計時：首次進場全部播完才標記 .ready */
-/* 進場：堆疊（dealIn／stackOut）——動畫期間以左上角為支點縮放，z-index 由程式設定（第一張在最上面） */
-.cell.deal { position: relative; transform-origin: 0 0; }
+/* 進場：風捲（windIn／windOut）——動畫期間以卡片中心翻轉，z-index 由程式設定 */
+.cell.wind { position: relative; transform-origin: 50% 50%; backface-visibility: hidden; }
 
 .wf { scroll-margin-top: 16px; }   /* 切換分類時捲回這裡 */
 body.hush :is(.spin, .shim, .caret) { animation-play-state: paused; }
@@ -3383,7 +3383,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       color: { primary: '#1f6fff', darkPrimary: '', success: '#12b866', warn: '#f59e0b', danger: '#ef3340', info: '#1846c9', series: ['#1f6fff', '#00a3b8', '#8b5cf6', '#f59e0b'], neutral: 'cool' },
       shape: { card: 20, control: 10, pill: 'full' },
       depth: { shadow: 2, glow: 100, border: 'standard' },
-      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'stack' },
+      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'wind' },
       layout: { cols: 4, density: 'standard', hidden: [], order: [] },
     };
     const UI_KEYS = ['standard', 'flat', 'glass', 'contrast', 'neu', 'swiss', 'y2k'];
@@ -3954,8 +3954,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       if (!out.length) return relayout(still);
       hushFor(D(1000));   // 轉場期間暫停卡片內的示範動畫，讓出運算
       // 離場：原地淡出 0.22 秒；畫面內離開的卡片同時進行
-      // 飛入：原地淡出；堆疊：飛回左上角
-      const so = theme.motion.enter === 'fly' ? { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]), ms: D(220) } : stackOut(out);
+      // 飛入：原地淡出；風捲：收到中央繞一圈往右下吹走
+      const so = theme.motion.enter === 'fly' ? { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]), ms: D(220) } : windOut(out);
       pending = { out: so.out };
       pending.t = setTimeout(() => { const p = pending; pending = null; relayout(false); p.out.forEach(([c, a]) => { a.cancel(); emergeStop(c.el); }); }, so.ms);
     }
@@ -3971,7 +3971,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         const b = before.get(c), a = c.el.getBoundingClientRect();
         if (!b || Math.hypot(b.left - a.left, b.top - a.top) > 320) entering.push([c, a]);
       });
-      // 進場：只有畫面內的卡片（堆疊照閱讀順序發牌、飛入由中心往外）
+      // 進場：只有畫面內的卡片（風捲照閱讀順序、飛入由中心往外）
       const shift = wf.getBoundingClientRect().top - 16;   // 還在捲回途中的距離
       playEnter(inViewport(entering, Math.min(0, shift)), false);
     }
@@ -3997,7 +3997,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       document.body.animate([{ opacity: 0 }], { duration: D(800), easing: out, pseudoElement: '::before' });                                          // 只給起點：淡回各風格原本的透明度
       [$('.top'), wf].forEach((e) => e?.animate([{ opacity: 0, transform: 'translateY(-12px)' }, { opacity: 1, transform: 'none' }], { duration: D(500), delay: D(120), easing: out, fill: 'backwards' }));
     }
-    // 進場入口：依設定播堆疊或飛入；scene＝連動背景與標題列
+    // 進場入口：依設定播風捲或飛入；scene＝連動背景與標題列
     function playEnter(list, scene) {
       if (!list.length || matchMedia('(prefers-reduced-motion: reduce)').matches || theme.motion.reduce) return;
       if (theme.motion.enter === 'fly') {
@@ -4005,46 +4005,56 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         list.forEach(([c, r]) => flyPlay(c.el, D(Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md * 140)));
         if (scene) flyScene();
       } else {
-        dealIn(list);   // 堆疊：從左上角依閱讀順序發牌
+        windIn(list);   // 風捲：從左上角外依閱讀順序飄進來
       }
     }
-    /* 進場（堆疊發牌）：卡片先縮小疊在元件牆左上角（每張略微錯位、傾斜），停 0.15 秒後依閱讀順序一張張發到自己的位置
-       · 每張間隔最多 70ms、飛行 0.7 秒，全部到位約 1.6 秒；第一張在最上面、最先發
-       · 落定時順著飛行方向微微衝過頭再停住，幅度跟「彈跳感」設定走（無＝不衝過頭）
-       離場（飛出）：反過來，最後一張先飛回左上角，第一張最後回到最上面，邊飛邊淡出 */
-    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('deal'); el.style.zIndex = ''; el._em = null; }
-    // 疊在左上角時的 transform：縮到寬約 240px、往右下錯位、傾斜 ±2.4°
-    function stackAt(r, i) {
-      const w = $('#wall').getBoundingClientRect(), ox = w.left, oy = Math.max(w.top, 16), off = Math.min(i, 6) * 3;
-      const sc = Math.min(1, 240 / r.width), rot = (((i * 37) % 7) - 3) * 0.8;
-      return { dx: ox + off - r.left, dy: oy + off - r.top, t: `translate(${(ox + off - r.left).toFixed(1)}px, ${(oy + off - r.top).toFixed(1)}px) rotate(${rot}deg) scale(${sc.toFixed(3)})` };
-    }
-    function dealIn(list) {
-      const n = list.length, step = n > 1 ? Math.min(70, 900 / (n - 1)) : 0, k = FLY_K[theme.motion.bounce] ?? 1, dur = D(700);
+    /* 進場（風捲）：卡片從螢幕左上角外面，依閱讀順序一張張被風捲進來，像落葉
+       · 路徑：先順著風往右帶、再落下（二次貝茲曲線），途中左右擺盪，越接近落點擺得越小
+       · 姿態：3D 翻轉＋斜切模擬葉片捲起，越接近落點越平，最後鋪平停住；落點的微幅衝過頭跟「彈跳感」走
+       · 每張間隔最多 70ms、飛行 0.9 秒，全部到位約 1.6 秒
+       離場（風捲走）：離開的卡片先收到畫面中央疊起來，再繞成一圈旋轉縮小，往右下角飛出畫面並淡出（約 0.6 秒） */
+    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('wind'); el.style.zIndex = ''; el._em = null; }
+    const f1 = (v) => v.toFixed(1);
+    function windIn(list) {
+      const n = list.length, step = n > 1 ? Math.min(70, 700 / (n - 1)) : 0, k = FLY_K[theme.motion.bounce] ?? 1, dur = D(900);
+      // [時間點, 路徑進度, 擺盪, 縮放, rotateZ, rotateX, rotateY, skewX]
+      const P = [[0, 0, 0, 0.4, -60, 70, -40, 12], [0.3, 0.42, 46, 0.72, 24, -34, 30, -8], [0.6, 0.8, -22, 0.94, -10, 18, -14, 4], [0.82, 0.97, 8, 1 + 0.012 * k, 3 * k, -5 * k, 4 * k, 0], [1, 1, 0, 1, 0, 0, 0, 0]];
       list.forEach(([c, r], i) => {
         const el = c.el; emergeStop(el);
-        el.classList.add('deal'); el.style.zIndex = n - i + 1;
-        const { dx, dy, t } = stackAt(r, i), ov = Math.min(1, 8 / (Math.hypot(dx, dy) * 0.012 || 1)) * 0.012 * k;   // 衝過頭最多 8px
-        const kf = k > 0
-          ? [{ transform: t, easing: 'cubic-bezier(.3, .7, .3, 1)' },
-             { transform: `translate(${(-dx * ov).toFixed(1)}px, ${(-dy * ov).toFixed(1)}px)`, offset: 0.72, easing: 'cubic-bezier(.45, 0, .55, 1)' },
-             { transform: 'none' }]
-          : [{ transform: t, easing: 'cubic-bezier(.22, 1, .36, 1)' }, { transform: 'none' }];
-        const delay = D(150) + D(i * step);
+        el.classList.add('wind'); el.style.zIndex = i + 2;   // 後到的疊在先落下的上面
+        const tx = r.left + r.width / 2, ty = r.top + r.height / 2;
+        const p0 = [-120 - r.width * 0.3, -100 - r.height * 0.3], cp = [tx * 0.9 + 80, p0[1] + 40];   // 起點在左上角外；控制點：先往右帶
+        const len = Math.hypot(tx - p0[0], ty - p0[1]) || 1, nx = -(ty - p0[1]) / len, ny = (tx - p0[0]) / len;   // 擺盪方向：垂直於起點到落點
+        const kf = P.map(([o, t, sw, sc, rz, rx, ry, sk]) => {
+          const u = 1 - t, x = u * u * p0[0] + 2 * u * t * cp[0] + t * t * tx + nx * sw, y = u * u * p0[1] + 2 * u * t * cp[1] + t * t * ty + ny * sw;
+          return { offset: o, transform: `perspective(900px) translate(${f1(x - tx)}px, ${f1(y - ty)}px) rotateZ(${rz}deg) rotateX(${rx}deg) rotateY(${ry}deg) skewX(${sk}deg) scale(${sc})`, easing: 'cubic-bezier(.42, 0, .58, 1)' };
+        });
+        kf[0].opacity = 0; kf[1].opacity = 1; kf[0].easing = 'cubic-bezier(.3, .6, .5, 1)';
+        const delay = D(80) + D(i * step);
         el._em = { anims: [el.animate(kf, { duration: dur, delay, fill: 'backwards' })], t: setTimeout(() => emergeStop(el), delay + dur + 50) };
       });
     }
     // 回傳 [卡片, 動畫] 與全部結束的時間
-    function stackOut(list) {
-      const n = list.length, step = n > 1 ? Math.min(25, 150 / (n - 1)) : 0, dur = D(300);
+    function windOut(list) {
+      const n = list.length, dur = D(600), cx = innerWidth / 2, cy = innerHeight / 2, ex = innerWidth + 260, ey = innerHeight + 220;
       const out = list.map(([c, r], i) => {
         const el = c.el; emergeStop(el);
-        el.classList.add('deal'); el.style.zIndex = n - i + 1;
-        const a = el.animate([{ transform: 'none', opacity: 1 }, { opacity: 1, offset: 0.55 }, { transform: stackAt(r, i).t, opacity: 0 }], { duration: dur, delay: D((n - 1 - i) * step), easing: 'cubic-bezier(.55, 0, .7, .25)', fill: 'both' });
+        el.classList.add('wind'); el.style.zIndex = n - i + 1;
+        const ox = r.left + r.width / 2, oy = r.top + r.height / 2, sc = Math.min(0.5, 160 / r.width), a0 = (i / Math.max(n, 1)) * 360;
+        const T = (x, y, rz, s, o) => ({ transform: `translate(${f1(x - ox)}px, ${f1(y - oy)}px) rotate(${f1(rz)}deg) scale(${s.toFixed(3)})`, ...(o == null ? {} : { opacity: o }) });
+        const kf = [{ ...T(ox, oy, 0, 1, 1), offset: 0 }, { ...T(cx + i * 2, cy + i * 2, i * 3 - 6, sc, 1), offset: 0.3 }];
+        // 繞一圈：每 45° 一個點，半徑由 110 收到 60，整圈往右下偏移
+        for (let j = 0; j <= 8; j++) {
+          const a = (a0 + j * 45) * Math.PI / 180, R = 110 - j * 6, sh = j / 8 * 0.12;
+          kf.push({ ...T(cx + Math.cos(a) * R + (ex - cx) * sh, cy + Math.sin(a) * R + (ey - cy) * sh, a0 + 90 + j * 45, sc * (1 - j * 0.03)), offset: 0.38 + j * 0.05 });
+        }
+        kf.push({ ...T(ex, ey, a0 + 90 + 460, sc * 0.4, 0), offset: 1 });
+        kf[kf.length - 2].opacity = 1;
+        const a = el.animate(kf, { duration: dur, easing: 'linear', fill: 'both' });
         el._em = { anims: [a], t: 0 };
         return [c, a];
       });
-      return { out, ms: dur + D((n - 1) * step) };
+      return { out, ms: dur };
     }
     const replayEnter = () => { hushFor(D(1000)); playEnter(inViewport(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()])), true); };
     wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });
@@ -4114,7 +4124,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
             on: () => (m ? !theme.motion.reduce && theme.motion.speed === m.speed && theme.motion.bounce === m.bounce : theme.motion.reduce),
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
         })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['stack', '堆疊'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter === 'fly' ? 'fly' : 'stack') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; }))),
+          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['wind', '風捲'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter === 'fly' ? 'fly' : 'wind') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; }))),
       )];
     }
     function catsEl() {

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
-import { PERIODS, fmtRange, periodRange, todayISO, type PeriodKey } from '../../../shared/dates';
+import { focusNth } from '../../../core/choice';
+import { periodIndex, periodKey, periodText, placePeriodPill } from '../../../core/date';
+import { PERIODS, todayISO, type PeriodKey } from '../../../shared/dates';
 import Icon from './Icon.vue';
 import type { StyleProp } from './util';
 
-/** 期間選擇：本月、近 30 天、近 90 天或自訂；範圍以文字寫出。選中片滑動，左右鍵切換。v-model:value */
+/** 期間選擇：本月、近 30 天、近 90 天或自訂；範圍以文字寫出。選中片滑動，左右鍵切換。v-model:value。規則在 core/date.ts。 */
 const props = defineProps<{
   value: PeriodKey;
   /** 「自訂」的起訖 'YYYY-MM-DD' */
@@ -16,21 +18,15 @@ const props = defineProps<{
 const emit = defineEmits<{ 'update:value': [PeriodKey] }>();
 const ps = ref<HTMLElement>();
 const pill = ref<HTMLElement>();
-const cur = computed(() => PERIODS.findIndex((p) => p.key === props.value));
-const range = computed(() => fmtRange(periodRange(props.value, props.today ?? todayISO(), props.custom)));
-// 選中片：量選中項目的位置（量法同展示牆）
-watch(() => props.value, async () => {
-  await nextTick();
-  const on = ps.value?.querySelector<HTMLElement>(':scope > span.on');
-  if (on && pill.value) { pill.value.style.width = `${on.offsetWidth}px`; pill.value.style.transform = `translateX(${on.offsetLeft}px)`; }
-}, { immediate: true });
+const cur = computed(() => periodIndex(props.value));
+const range = computed(() => periodText(props.value, props.today ?? todayISO(), props.custom));
+watch(() => props.value, async () => { await nextTick(); placePeriodPill(ps.value, pill.value); }, { immediate: true });
 const onKey = (e: KeyboardEvent) => {
-  const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-  if (!d) return;
+  const n = periodKey(cur.value, e.key);
+  if (n === null) return;
   e.preventDefault();
-  const n = (cur.value + d + PERIODS.length) % PERIODS.length;
   emit('update:value', PERIODS[n].key);
-  ps.value?.querySelectorAll<HTMLElement>('[role="radio"]')[n]?.focus();
+  if (ps.value) focusNth(ps.value, '[role="radio"]', n);
 };
 </script>
 

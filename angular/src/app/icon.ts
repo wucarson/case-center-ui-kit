@@ -16,3 +16,15 @@ export class Icon {
     this.sanitizer.bypassSecurityTrustHtml(this.fill() ? ICONS_FILL[this.name() as FillIconName] : ICONS[this.name()]),
   );
 }
+
+/**
+ * <svg ccPath="…"></svg>：放固定的 SVG 路徑（core/ 裡的常數），不加 class 與 aria-hidden。
+ * 給本身可以按的 svg（月曆的換月鈕）或自訂線寬的箭頭用。
+ */
+@Directive({ selector: 'svg[ccPath]', host: { '[innerHTML]': 'html()' } })
+export class SvgPath {
+  readonly path = input.required<string>({ alias: 'ccPath' });
+  private readonly sanitizer = inject(DomSanitizer);
+  // 路徑來自 core/ 的常數（不是使用者輸入），可以略過消毒
+  protected readonly html = computed(() => this.sanitizer.bypassSecurityTrustHtml(this.path()));
+}

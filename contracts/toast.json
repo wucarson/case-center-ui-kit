@@ -1,0 +1,17 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "toast",
+  "title": "提示",
+  "tier": "logic",
+  "logic": "core/toast.ts",
+  "description": "操作後的結果，右下角短暫出現：沒有動作 3.2 秒、有動作 5 秒；同 id 就地更新。",
+  "use": "儲存、送出、移除之後告知結果；可附「復原」。",
+  "instead": [{ "when": "要使用者先確認才繼續", "use": "dialog" }],
+  "parts": [
+    { "name": "root", "selector": ".toast", "element": "div", "classes": { "toast": "提示", "ok": "成功", "info": "資訊", "warn": "警告" }, "attrs": { "role": { "values": ["status"], "required": true } } },
+    { "name": "text", "selector": ".toast > div", "element": "div", "classes": {} },
+    { "name": "action", "selector": ".toast > em", "element": "em", "classes": {}, "attrs": { "role": { "values": ["button"], "required": true }, "tabindex": { "values": ["0"], "required": true } }, "label": "動作名稱" }
+  ],
+  "keyboard": [{ "keys": "Enter", "action": "在動作上執行（例：復原）" }],
+  "example": "<div class=\"toast ok\" role=\"status\"><svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\">…</svg><div><b>已移除成員</b><small>王小明</small></div><em role=\"button\" tabindex=\"0\">復原</em></div>"
+}

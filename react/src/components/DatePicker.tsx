@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
-import { PRESETS, WEEK, addDays, fmtDay, fromISO, monthCells, todayISO } from '../../../shared/dates';
+import { MONTH_NEXT, MONTH_PREV, canPickDay, dateFieldLabel, dateGridKey, dayClass, isDateOpenKey, monthTitle, placeDaySel, shiftView, viewOf } from '../../../core/date';
+import { onOutsidePointer } from '../../../core/dom';
+import { PRESETS, WEEK, fmtDay, fromISO, monthCells, todayISO } from '../../../shared/dates';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
 
@@ -20,40 +22,29 @@ export interface DatePickerProps {
   style?: string | CSSProperties;
 }
 
-/** 日期選擇：左側快捷（今天、明天、一週後、月底）、右側月曆；選了就生效。方向鍵移動、Enter 選取、Esc 關閉。 */
+/** 日期選擇：左側快捷（今天、明天、一週後、月底）、右側月曆；選了就生效。方向鍵移動、Enter 選取、Esc 關閉。規則在 core/date.ts。 */
 export function DatePicker({ value, onChange, label, help, min, today = todayISO(), defaultOpen, className, style }: DatePickerProps) {
   const [open, setOpen] = useState(!!defaultOpen);
-  const [view, setView] = useState(() => { const d = fromISO(value || today); return [d.getFullYear(), d.getMonth()] as [number, number]; });
+  const [view, setView] = useState(() => viewOf(value || today));
   const [cursor, setCursor] = useState(value || today);
   const root = useRef<HTMLDivElement>(null);
   const grid = useRef<HTMLDivElement>(null);
   const sel = useRef<HTMLElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const off = (e: MouseEvent) => { if (!root.current?.contains(e.target as Node)) setOpen(false); };
-    document.addEventListener('mousedown', off);
-    return () => document.removeEventListener('mousedown', off);
-  }, [open]);
-  // 選中的圓：量選中日期格的位置（量法同展示牆）
-  useLayoutEffect(() => {
-    const on = grid.current?.querySelector<HTMLElement>('span.on');
-    if (sel.current) {
-      sel.current.style.display = on ? '' : 'none';
-      if (on) sel.current.style.transform = `translate(${on.offsetLeft + (on.offsetWidth - 32) / 2}px, ${on.offsetTop + (on.offsetHeight - 32) / 2}px)`;
-    }
-  }, [open, value, view]);
-  const pick = (d: string) => { if (min && d < min) return; onChange?.(d); setOpen(false); };
-  const shift = (n: number) => setView(([y, m]) => { const d = new Date(y, m + n, 1); return [d.getFullYear(), d.getMonth()]; });
+  useEffect(() => (open && root.current ? onOutsidePointer(root.current, () => setOpen(false)) : undefined), [open]);
+  useLayoutEffect(() => placeDaySel(grid.current, sel.current), [open, value, view]);
+  const pick = (d: string) => { if (!canPickDay(d, min)) return; onChange?.(d); setOpen(false); };
   const onGridKey = (e: KeyboardEvent) => {
-    const step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[e.key as string];
-    if (step) { e.preventDefault(); const c = addDays(cursor, step); setCursor(c); const d = fromISO(c); setView([d.getFullYear(), d.getMonth()]); }
-    if (e.key === 'Enter') { e.preventDefault(); pick(cursor); }
-    if (e.key === 'Escape') { e.preventDefault(); setOpen(false); }
+    const r = dateGridKey(cursor, e.key);
+    if (!r) return;
+    e.preventDefault();
+    if (r.type === 'move') { setCursor(r.cursor); setView(r.view); }
+    else if (r.type === 'pick') pick(cursor);
+    else setOpen(false);
   };
   const [y, m] = view;
   return (
     <div ref={root} className={cx('dp', open && 'open', className)} style={styleOf(style)}>
-      <div className="dp-f" role="button" tabIndex={0} aria-label={`${label}：${fmtDay(value)}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen((o) => !o)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); setOpen(true); } }}>
+      <div className="dp-f" role="button" tabIndex={0} aria-label={dateFieldLabel(label, value)} aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen((o) => !o)} onKeyDown={(e) => { if (isDateOpenKey(e.key)) { e.preventDefault(); setOpen(true); } }}>
         <span className="roll"><span>{fmtDay(value)}</span></span><Icon name="calendar" />
       </div>
       {help && <div className="dp-h">{help}</div>}
@@ -66,23 +57,17 @@ export function DatePicker({ value, onChange, label, help, min, today = todayISO
           </div>
           <div className="dp-c">
             <div className="dp-m">
-              <span>{y} 年 {m + 1} 月</span>
+              <span>{monthTitle(view)}</span>
               <span>
-                <svg className="ic" viewBox="0 0 24 24" role="button" tabIndex={-1} aria-label="上個月" onClick={() => shift(-1)} dangerouslySetInnerHTML={{ __html: '<path d="M15 6l-6 6 6 6"/>' }} />
-                <svg className="ic" viewBox="0 0 24 24" role="button" tabIndex={-1} aria-label="下個月" onClick={() => shift(1)} dangerouslySetInnerHTML={{ __html: '<path d="M9 6l6 6-6 6"/>' }} />
+                <svg className="ic" viewBox="0 0 24 24" role="button" tabIndex={-1} aria-label="上個月" onClick={() => setView((v) => shiftView(v, -1))} dangerouslySetInnerHTML={{ __html: MONTH_PREV }} />
+                <svg className="ic" viewBox="0 0 24 24" role="button" tabIndex={-1} aria-label="下個月" onClick={() => setView((v) => shiftView(v, 1))} dangerouslySetInnerHTML={{ __html: MONTH_NEXT }} />
               </span>
             </div>
-            <div ref={grid} className="dp-g" role="grid" tabIndex={0} aria-label={`${y} 年 ${m + 1} 月`} onKeyDown={onGridKey}>
+            <div ref={grid} className="dp-g" role="grid" tabIndex={0} aria-label={monthTitle(view)} onKeyDown={onGridKey}>
               <i ref={sel} className="dp-sel" />
               {WEEK.split('').map((w) => <b key={w}>{w}</b>)}
               {monthCells(y, m).map((d, i) => d === null ? <span key={'x' + i} aria-hidden="true" /> : (
-                <span
-                  key={d}
-                  role="gridcell"
-                  aria-selected={d === value}
-                  className={cx(min !== undefined && d < min && 'off', d === today && 'today', d === value && 'on') || undefined}
-                  onClick={() => pick(d)}
-                >
+                <span key={d} role="gridcell" aria-selected={d === value} className={dayClass(d, value, today, min)} onClick={() => pick(d)}>
                   {fromISO(d).getDate()}
                 </span>
               ))}

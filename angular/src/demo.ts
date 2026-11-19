@@ -9,6 +9,14 @@ import { Pagination } from './app/pagination';
 import { Switch } from './app/switch';
 import { DetailTabs, Tabs } from './app/tabs';
 import { TimePicker } from './app/time';
+import { DatePicker, PeriodPicker } from './app/date';
+import { AvatarGroup } from './app/display';
+import { FieldControl, FormField } from './app/field';
+import { Combo, MultiSelect } from './app/listbox';
+import { ConfirmDialog, InfoPopover, Toast } from './app/overlay';
+import { Sidebar } from './app/sidebar';
+import { fieldCount } from '../../core/field';
+import { Icon } from './app/icon';
 
 const only = new URLSearchParams(location.search).get('c');
 
@@ -21,9 +29,10 @@ const only = new URLSearchParams(location.search).get('c');
   imports: [
     NgTemplateOutlet, Button, Callout, Checkbox, CheckboxList, DetailTabs, EmptyState, Menu, MenuPanel, Pagination, RadioGroup, Segmented,
     Skeleton, StarToggle, StatusBadge, Stepper, Switch, Tabs, TimePicker, Timeline,
+    AvatarGroup, Combo, ConfirmDialog, DatePicker, FieldControl, FormField, Icon, InfoPopover, MultiSelect, PeriodPicker, Sidebar, Toast,
   ],
   host: { style: 'display: block' },
-  template: `@let refs = { switch: tSwitch, menu: tMenu, button: tButton, 'status-badge': tBadge, callout: tCallout, 'empty-state': tEmpty, timeline: tTimeline, skeleton: tSkeleton, stepper: tStepper, checkbox: tCheckbox, 'radio-group': tRadio, segmented: tSegmented, tabs: tTabs, 'detail-tabs': tDetailTabs, 'star-toggle': tStar, pagination: tPagination, 'time-picker': tTime };
+  template: `@let refs = { switch: tSwitch, menu: tMenu, button: tButton, 'status-badge': tBadge, callout: tCallout, 'empty-state': tEmpty, timeline: tTimeline, skeleton: tSkeleton, stepper: tStepper, checkbox: tCheckbox, 'radio-group': tRadio, segmented: tSegmented, tabs: tTabs, 'detail-tabs': tDetailTabs, 'star-toggle': tStar, pagination: tPagination, 'time-picker': tTime, 'form-field': tField, combo: tCombo, 'multi-select': tMulti, dialog: tDialog, toast: tToast, 'info-popover': tPopover, 'date-picker': tDate, 'period-picker': tPeriod, sidebar: tSidebar, 'avatar-group': tAvatar };
   <main class="cases">
     @for (e of list; track e.name) {
       @for (c of e.cases; track c.id) {
@@ -73,11 +82,31 @@ const only = new URLSearchParams(location.search).get('c');
   <ng-template #tDetailTabs let-p><div ccDetailTabs [tabs]="p.tabs" [value]="p.value" [groupStarts]="p.groupStarts ?? []" [label]="p.label" [style]="p.style ?? null"></div></ng-template>
   <ng-template #tStar let-p><span ccStarToggle [on]="p.on" [label]="p.label"></span></ng-template>
   <ng-template #tPagination let-p><div ccPagination [total]="p.total" [page]="p.page" [pageSize]="p.pageSize" [showSize]="p.showSize ?? true" [style]="p.style ?? null"></div></ng-template>
-  <ng-template #tTime let-p><div ccTimePicker [value]="p.value" [label]="p.label"></div></ng-template>`,
+  <ng-template #tTime let-p><div ccTimePicker [value]="p.value" [label]="p.label"></div></ng-template>
+  <ng-template #tField let-p>@let fid = fieldId(p);<div ccFormField [label]="p.label" [required]="!!p.required" [optional]="!!p.optional" [readOnly]="!!p.readOnly" [disabled]="!!p.disabled" [empty]="!!p.empty" [help]="p.help" [error]="p.error" [multiline]="!!p.multiline" [counter]="count(p)" [htmlFor]="fid">@if (p.prefix) {<svg [ccIcon]="p.prefix"></svg>}@if (p.multiline) {<textarea ccFieldControl [id]="fid" [value]="p.value" [attr.placeholder]="p.placeholder ?? null" [attr.maxlength]="p.maxLength ?? null"></textarea>} @else {<input ccFieldControl [id]="fid" [value]="p.value" [attr.placeholder]="p.placeholder ?? null" [attr.maxlength]="p.maxLength ?? null" />}@if (p.suffix) {<span class="unit">{{ p.suffix }}</span>}@if (p.readOnly) {<svg ccIcon="lock"></svg>}</div></ng-template>
+  <ng-template #tCombo let-p>
+    @if (p.field) {<div ccFormField [label]="p.field.label" [required]="!!p.field.required" [error]="p.field.error"><div ccCombo [items]="p.items" [value]="p.value ?? ''" [label]="p.label" [placeholder]="p.placeholder" [invalid]="!!p.invalid"></div></div>}
+    @else {<div ccCombo [items]="p.items" [value]="p.value ?? ''" [label]="p.label" [placeholder]="p.placeholder" [selfLabelled]="!!p.selfLabelled" [invalid]="!!p.invalid" [inlineMenu]="!!p.inlineMenu" [open]="!!p.defaultOpen" [defaultQuery]="p.defaultQuery"></div>}
+  </ng-template>
+  <ng-template #tMulti let-p>
+    @if (p.field) {<div ccFormField [label]="p.field.label"><div ccMultiSelect [options]="p.options" [value]="p.value" [noun]="p.noun"></div></div>}
+    @else {<div ccMultiSelect [options]="p.options" [value]="p.value" [noun]="p.noun" [single]="!!p.single" [inlineMenu]="!!p.inlineMenu" [open]="!!p.defaultOpen" [defaultQuery]="p.defaultQuery"></div>}
+  </ng-template>
+  <ng-template #tDialog let-p><div ccConfirmDialog [open]="p.open" [inline]="!!p.inline" [title]="p.title" [body]="p.body" [note]="p.note" [destructive]="!!p.destructive"></div></ng-template>
+  <ng-template #tToast let-p><div ccToast [title]="p.title" [detail]="p.detail" [tone]="p.tone ?? 'ok'" [action]="p.action"></div></ng-template>
+  <ng-template #tPopover let-p><div ccInfoPopover [label]="p.label" [value]="p.value" [valueNote]="p.valueNote" [defaultOpen]="!!p.defaultOpen" [openDelay]="p.openDelay ?? 150">{{ p.children }}</div></ng-template>
+  <ng-template #tDate let-p><div ccDatePicker [value]="p.value" [label]="p.label" [help]="p.help" [min]="p.min" [today]="p.today" [open]="!!p.defaultOpen"></div></ng-template>
+  <ng-template #tPeriod let-p><div ccPeriodPicker [value]="p.value" [today]="p.today" [custom]="p.custom" [style]="p.style ?? null"></div></ng-template>
+  <ng-template #tSidebar let-p><div ccSidebar [groups]="p.groups" [value]="p.value" [collapsed]="!!p.collapsed" [brand]="p.brand" [user]="p.user"></div></ng-template>
+  <ng-template #tAvatar let-p><div ccAvatarGroup [people]="p.people"></div></ng-template>`,
 })
 export class Demo {
   /** 有 Angular 外殼的元件（名稱＝shared/cases.ts 的 key；樣板對照在 template 的 refs） */
-  private static readonly NAMES = ['switch', 'menu', 'button', 'status-badge', 'callout', 'empty-state', 'timeline', 'skeleton', 'stepper', 'checkbox', 'radio-group', 'segmented', 'tabs', 'detail-tabs', 'star-toggle', 'pagination', 'time-picker'];
+  private static readonly NAMES = ['switch', 'menu', 'button', 'status-badge', 'callout', 'empty-state', 'timeline', 'skeleton', 'stepper', 'checkbox', 'radio-group', 'segmented', 'tabs', 'detail-tabs', 'star-toggle', 'pagination', 'time-picker', 'form-field', 'combo', 'multi-select', 'dialog', 'toast', 'info-popover', 'date-picker', 'period-picker', 'sidebar', 'avatar-group'];
   protected readonly list = Demo.NAMES.filter((n) => !only || n === only).map((name) => ({ name, cases: CASES[name] ?? [] }));
   protected interact(c: Case) { return c.interact ? JSON.stringify(c.interact) : null; }
+  /** 文字欄位：每個案例一個固定的輸入框 id */
+  private readonly ids = new WeakMap<object, string>();
+  protected fieldId(p: object) { if (!this.ids.has(p)) this.ids.set(p, `f-${Math.random().toString(36).slice(2, 8)}`); return this.ids.get(p)!; }
+  protected count(p: any) { return fieldCount(p.value, p.maxLength, p.showCount, p.counter); }
 }

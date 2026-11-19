@@ -1,6 +1,6 @@
 # 案管中心元件（Angular）
 
-「共用邏輯＋JSON 契約＋框架外殼」的 Angular 版。目前有：按鈕、提示訊息、空狀態、骨架、狀態徽章、流程步驟、歷程、圖示、開關、操作選單、核取方塊、單選、分段切換、頁籤、詳情頁籤、追蹤星號、分頁、時間選擇。
+「共用邏輯＋JSON 契約＋框架外殼」的 Angular 版。目前有：按鈕、提示訊息、空狀態、骨架、狀態徽章、流程步驟、歷程、圖示、開關、操作選單、核取方塊、單選、分段切換、頁籤、詳情頁籤、追蹤星號、分頁、時間選擇、表單欄位、下拉、多選、日期選擇、期間選擇、確認對話框、資訊提示、提示（Toast）、側邊選單、頭像群組（共 28 個）。
 
 | 目錄 | 內容 |
 |---|---|
@@ -18,7 +18,22 @@
 <div ccSwitch [(checked)]="remind" label="到期前提醒"></div>
 <div ccSwitch [(checked)]="on" aria-label="顯示負責人"></div>
 <div ccMenu [items]="actions" label="更多操作：現場設備異常排查"></div>
+<div ccDatePicker [(value)]="due" label="結束日期" [min]="today"></div>
+<div ccSidebar [groups]="nav" [(value)]="page" [(collapsed)]="mini" [collapsible]="true"></div>
 ```
+
+表單欄位：文字輸入加 `ccFieldControl`，必填、錯誤、唯讀、停用會從外框帶到輸入框；下拉、多選直接放進去，會自己變成輸入框區。
+
+```html
+<div ccFormField label="工單名稱" [required]="true" [counter]="count" htmlFor="name">
+  <input ccFieldControl id="name" [(ngModel)]="name" maxlength="50">
+</div>
+<div ccFormField label="所屬專案" [required]="true">
+  <div ccCombo [items]="projects" [(value)]="project" label="所屬專案"></div>
+</div>
+```
+
+浮起的確認對話框會移到 `<body>` 底下；全站提示用 `toast({ title: '已儲存' })`，`<div ccToaster></div>` 放在 App 最外層一次（佇列在 `core/toast.ts`，三個框架共用）。
 
 ## 驗證
 

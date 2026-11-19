@@ -1,0 +1,45 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "combo",
+  "title": "下拉選單",
+  "tier": "logic",
+  "logic": "core/listbox.ts",
+  "description": "從固定清單選一個值；打字可篩選。可單獨使用，也可放進表單欄位外框。",
+  "use": "選項超過 5 個、或要能打字找的單選。",
+  "instead": [
+    { "when": "選項 2–5 個且都要看得到", "use": "radio-group" },
+    { "when": "要選多個", "use": "multi-select" }
+  ],
+  "parts": [
+    { "name": "root", "selector": ".dd", "element": "div", "classes": { "dd": "下拉", "open": "清單打開中", "pin": "清單跟在欄位下方、不浮起", "bad": "有錯誤" } },
+    { "name": "field", "selector": ".dd > .dd-t", "element": "div", "classes": { "dd-t": "欄位" } },
+    {
+      "name": "input",
+      "selector": "input[role=\"combobox\"]",
+      "element": "input",
+      "classes": {},
+      "attrs": {
+        "aria-expanded": { "values": ["true", "false"], "required": true },
+        "aria-autocomplete": { "values": ["list"], "required": true },
+        "aria-controls": { "required": true },
+        "aria-invalid": { "values": ["true"] }
+      }
+    },
+    { "name": "list", "selector": ".dd-m", "element": "div", "classes": { "dd-m": "清單" }, "attrs": { "role": { "values": ["listbox"], "required": true }, "aria-label": { "required": true } } },
+    {
+      "name": "option",
+      "selector": ".dd-m > [role=\"option\"]",
+      "element": "div",
+      "classes": { "sel": "目前值（右側打勾）", "hl": "滑過或鍵盤停留" },
+      "attrs": { "aria-selected": { "values": ["true", "false"], "required": true } },
+      "sync": [{ "class": "sel", "attr": "aria-selected", "value": "true" }]
+    },
+    { "name": "none", "selector": ".dd-m > .none", "element": "div", "classes": { "none": "沒有符合的選項" } }
+  ],
+  "keyboard": [
+    { "keys": "↑、↓", "action": "關閉時打開；打開時移動（頭尾相接）" },
+    { "keys": "Enter", "action": "選取並關閉" },
+    { "keys": "Esc", "action": "關閉並清掉輸入字" }
+  ],
+  "example": "<div class=\"dd\"><div class=\"dd-t\"><input role=\"combobox\" aria-expanded=\"false\" aria-controls=\"p-list\" aria-autocomplete=\"list\" aria-label=\"工作類型\"><svg class=\"ic\" viewBox=\"0 0 24 24\" aria-hidden=\"true\">…</svg></div></div>"
+}

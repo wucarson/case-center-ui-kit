@@ -1,4 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
+import { onOutsidePointer } from '../../../core/dom';
+import { COMBO_EMPTY, comboClass, comboIcon, comboKey, comboListId, comboOptionClass, comboOptionId, filterItems } from '../../../core/listbox';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
 
@@ -23,32 +25,27 @@ export interface ComboProps {
   style?: string | CSSProperties;
 }
 
-/** 下拉選單：從固定清單選一個值；打字可篩選。↑↓ 移動、Enter 選取、Esc 關閉。 */
+/** 下拉選單：從固定清單選一個值；打字可篩選。↑↓ 移動、Enter 選取、Esc 關閉。規則在 core/listbox.ts。 */
 export function Combo({ items, value = '', onChange, placeholder, label, selfLabelled, invalid, inField, inlineMenu, defaultOpen, defaultQuery, id, className, style }: ComboProps) {
   const auto = useId();
   const inputId = id ?? auto;
-  const listId = inputId + '-list';
+  const listId = comboListId(inputId);
   const root = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(!!defaultOpen);
   const [query, setQuery] = useState<string | null>(defaultQuery ?? null);
   const [cursor, setCursor] = useState(defaultQuery ? 0 : -1);
-  const shown = useMemo(() => (query ? items.filter((t) => t.includes(query)) : items), [items, query]);
-  useEffect(() => {
-    if (!open) return;
-    const off = (e: MouseEvent) => { if (!root.current?.contains(e.target as Node)) close(); };
-    document.addEventListener('mousedown', off);
-    return () => document.removeEventListener('mousedown', off);
-  }, [open]);
+  const shown = useMemo(() => filterItems(items, query), [items, query]);
   const close = () => { setOpen(false); setQuery(null); setCursor(-1); };
+  useEffect(() => (open && root.current ? onOutsidePointer(root.current, close) : undefined), [open]);
   const pick = (t: string) => { onChange?.(t); close(); };
   const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      if (!open) { setOpen(true); return; }
-      const d = e.key === 'ArrowDown' ? 1 : -1;
-      setCursor((c) => (shown.length ? (c + d + shown.length) % shown.length : -1));
-    } else if (e.key === 'Enter' && open && shown[cursor]) { e.preventDefault(); pick(shown[cursor]); }
-    else if (e.key === 'Escape' && open) { e.preventDefault(); close(); }
+    const r = comboKey(open, cursor, shown.length, e.key);
+    if (!r) return;
+    e.preventDefault();
+    if (r.type === 'open') setOpen(true);
+    else if (r.type === 'move') setCursor(r.index);
+    else if (r.type === 'pick') pick(shown[r.index]);
+    else close();
   };
   const input = (
     <input
@@ -56,7 +53,7 @@ export function Combo({ items, value = '', onChange, placeholder, label, selfLab
       role="combobox"
       aria-expanded={open}
       aria-controls={listId}
-      aria-activedescendant={open && cursor >= 0 ? `${inputId}-opt-${cursor}` : undefined}
+      aria-activedescendant={open && cursor >= 0 ? comboOptionId(inputId, cursor) : undefined}
       aria-autocomplete="list"
       aria-invalid={invalid || undefined}
       aria-label={selfLabelled ? label : undefined}
@@ -71,10 +68,10 @@ export function Combo({ items, value = '', onChange, placeholder, label, selfLab
   const menu = open && (
     <div className="dd-m" id={listId} role="listbox" aria-label={label}>
       {shown.length ? shown.map((t, i) => (
-        <div key={t} id={`${inputId}-opt-${i}`} role="option" aria-selected={t === value} className={cx(t === value && 'sel', i === cursor && 'hl')} onMouseDown={(e) => { e.preventDefault(); pick(t); }} onMouseMove={() => setCursor(i)}>
+        <div key={t} id={comboOptionId(inputId, i)} role="option" aria-selected={t === value} className={comboOptionClass(t === value, i === cursor) || undefined} onMouseDown={(e) => { e.preventDefault(); pick(t); }} onMouseMove={() => setCursor(i)}>
           {t}<Icon name="check" />
         </div>
-      )) : <div className="none">沒有符合的選項</div>}
+      )) : <div className="none">{COMBO_EMPTY}</div>}
     </div>
   );
   if (inField) {
@@ -87,8 +84,8 @@ export function Combo({ items, value = '', onChange, placeholder, label, selfLab
     );
   }
   return (
-    <div ref={root} className={cx('dd', open && 'open', open && inlineMenu && 'pin', invalid && 'bad', className)} style={styleOf(style)}>
-      <div className="dd-t">{input}<Icon name={open ? 'search' : 'chevronDown'} /></div>
+    <div ref={root} className={cx(comboClass({ open, inlineMenu, invalid }), className)} style={styleOf(style)}>
+      <div className="dd-t">{input}<Icon name={comboIcon(open)} /></div>
       {menu}
     </div>
   );

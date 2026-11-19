@@ -1,0 +1,23 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "form-field",
+  "title": "表單欄位",
+  "tier": "logic",
+  "logic": "core/field.ts",
+  "description": "標籤＋輸入框＋說明／錯誤；輸入框聚焦時整框換主色並加光圈。錯誤訊息位置先留好，出現時欄位不跳動。",
+  "use": "表單裡的文字輸入；下拉、多選放進來時也用同一個外框。",
+  "parts": [
+    { "name": "root", "selector": ".ff", "element": "div", "classes": { "ff": "欄位", "ro": "唯讀（系統帶入）", "bad": "有錯誤", "dis": "停用", "focus": "輸入框聚焦中" } },
+    { "name": "label", "selector": ".ff > .ff-l", "element": "label", "classes": { "ff-l": "標籤" } },
+    { "name": "required", "selector": ".ff-l > .req", "element": "span", "classes": { "req": "必填星號" }, "attrs": { "aria-hidden": { "values": ["true"], "required": true } } },
+    { "name": "optional", "selector": ".ff-l > .opt", "element": "span", "classes": { "opt": "（選填）" } },
+    { "name": "sr-required", "selector": ".ff-l > .sr-only", "element": "span", "classes": { "sr-only": "讀屏才念的「必填」" } },
+    { "name": "empty", "selector": ".ff-l > .ff-e", "element": "span", "classes": { "ff-e": "尚未填寫" } },
+    { "name": "box", "selector": ".ff > .ff-i", "element": "div", "classes": { "ff-i": "輸入框區", "ta": "多行" } },
+    { "name": "unit", "selector": ".ff-i > .unit", "element": "span", "classes": { "unit": "單位或箭頭（框內右側）" } },
+    { "name": "help", "selector": ".ff > .ff-h", "element": "div", "classes": { "ff-h": "說明列" } },
+    { "name": "counter", "selector": ".ff-h > .cnt", "element": "span", "classes": { "cnt": "字數" }, "attrs": { "aria-live": { "values": ["polite"], "required": true } } },
+    { "name": "error", "selector": ".ff > .ff-x", "element": "div", "classes": { "ff-x": "錯誤訊息（位置先留好）" }, "attrs": { "role": { "values": ["alert"] } } }
+  ],
+  "example": "<div class=\"ff\"><label class=\"ff-l\" for=\"name\">工單名稱<span class=\"req\" aria-hidden=\"true\">*</span></label><div class=\"ff-i\"><input id=\"name\" aria-required=\"true\"></div><div class=\"ff-h\"><span>顯示在工單列表與通知</span></div><div class=\"ff-x\"></div></div>"
+}

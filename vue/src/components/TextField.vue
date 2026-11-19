@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, useId } from 'vue';
+import { fieldCount } from '../../../core/field';
 import type { IconName } from '../../../shared/icons';
 import FormField from './FormField.vue';
 import Icon from './Icon.vue';
@@ -36,7 +37,7 @@ const props = defineProps<{
 const emit = defineEmits<{ 'update:value': [string] }>();
 const auto = useId();
 const fid = computed(() => props.id ?? auto);
-const count = computed(() => props.counter ?? (props.showCount && props.maxLength ? `${(props.value ?? '').length} / ${props.maxLength}` : undefined));
+const count = computed(() => fieldCount(props.value, props.maxLength, props.showCount, props.counter));
 const onInput = (e: Event) => emit('update:value', (e.target as HTMLInputElement).value);
 </script>
 

@@ -14,3 +14,6 @@ export function onOutsidePointer(root: Element, cb: () => void): () => void {
   document.addEventListener('mousedown', off);
   return () => document.removeEventListener('mousedown', off);
 }
+
+/** 自訂按鈕（role="button" 的 span 等）的啟動鍵：Enter、Space */
+export const isActivateKey = (key: string) => key === 'Enter' || key === ' ';

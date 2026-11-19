@@ -1,4 +1,5 @@
 import { useId, useState, type CSSProperties, type InputHTMLAttributes, type ReactNode } from 'react';
+import { SR_ONLY_STYLE, fieldClass, fieldCount, fieldInputClass, fieldMark, leftField } from '../../../core/field';
 import type { IconName } from '../../../shared/icons';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
@@ -30,29 +31,29 @@ export interface FormFieldProps {
   children: ReactNode;
 }
 
-/** 表單欄位外框：標籤＋輸入框＋說明／錯誤。輸入框聚焦時整框換主色並加光圈。 */
+/** 表單欄位外框：標籤＋輸入框＋說明／錯誤。輸入框聚焦時整框換主色並加光圈。規則在 core/field.ts。 */
 export function FormField({ label, required, optional, readOnly, disabled, empty, emptyLabel = '尚未填寫', help, counter, error, multiline, htmlFor, className, style, children }: FormFieldProps) {
   const [focus, setFocus] = useState(false);
+  const mark = fieldMark({ readOnly, required, optional });
   return (
     <div
-      className={cx('ff', readOnly && 'ro', error && 'bad', disabled && 'dis', focus && !readOnly && !disabled && !error && 'focus', className)}
+      className={cx(fieldClass({ readOnly, disabled, error, focus }), className)}
       style={styleOf(style)}
       onFocus={() => setFocus(true)}
-      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setFocus(false); }}
+      onBlur={(e) => { if (leftField(e.currentTarget, e.relatedTarget)) setFocus(false); }}
     >
       <label className="ff-l" htmlFor={htmlFor}>
         {label}
-        {readOnly ? null : required ? <span className="req" aria-hidden="true">*</span> : optional ? <span className="opt">（選填）</span> : null}
-        {required && <span className="sr-only" style={SR}>必填</span>}
+        {mark === 'req' ? <span className="req" aria-hidden="true">*</span> : mark === 'opt' ? <span className="opt">（選填）</span> : null}
+        {required && <span className="sr-only" style={SR_ONLY_STYLE as CSSProperties}>必填</span>}
         {empty && <span className="ff-e">{emptyLabel}</span>}
       </label>
-      <div className={cx('ff-i', multiline && 'ta')}>{children}</div>
+      <div className={fieldInputClass(multiline)}>{children}</div>
       {!error && <div className="ff-h"><span>{help}</span>{counter && <span className="cnt" aria-live="polite">{counter}</span>}</div>}
       <div className="ff-x" role={error ? 'alert' : undefined}>{error}</div>
     </div>
   );
 }
-const SR: CSSProperties = { position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' };
 
 export interface TextFieldProps extends Omit<FormFieldProps, 'children' | 'htmlFor'>, Omit<InputHTMLAttributes<HTMLInputElement & HTMLTextAreaElement>, 'style' | 'className' | 'children'> {
   /** 前面的圖示（只給有固定意義的，例如搜尋） */
@@ -70,8 +71,7 @@ export interface TextFieldProps extends Omit<FormFieldProps, 'children' | 'htmlF
 export function TextField({ label, required, optional, readOnly, disabled, empty, emptyLabel, help, counter, error, multiline, prefix, suffix, showCount, className, style, id, ...input }: TextFieldProps) {
   const auto = useId();
   const fid = id ?? auto;
-  const value = String(input.value ?? input.defaultValue ?? '');
-  const count = counter ?? (showCount && input.maxLength ? `${value.length} / ${input.maxLength}` : undefined);
+  const count = fieldCount(String(input.value ?? input.defaultValue ?? ''), input.maxLength, showCount, counter);
   const common = { id: fid, readOnly, disabled, 'aria-invalid': error ? true : undefined, 'aria-required': required || undefined, ...input };
   return (
     <FormField {...{ label, required, optional, readOnly, disabled, empty, emptyLabel, help, error, multiline, className, style }} counter={count} htmlFor={fid}>

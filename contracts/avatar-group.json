@@ -1,0 +1,16 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "avatar-group",
+  "title": "頭像群組",
+  "tier": "class",
+  "logic": "core/display.ts",
+  "description": "重疊排列，滑過時展開；超過 max 收成 +N，右邊寫總人數。",
+  "use": "列表、卡片上的負責人、成員。",
+  "parts": [
+    { "name": "root", "selector": ".ppl-r", "element": "div", "classes": { "ppl-r": "頭像群組" } },
+    { "name": "stack", "selector": ".ppl-r > .stack", "element": "div", "classes": { "stack": "頭像（重疊）", "spread": "滑過展開" }, "attrs": { "role": { "values": ["list"], "required": true }, "aria-label": { "required": true } } },
+    { "name": "avatar", "selector": ".stack > .av", "element": "span", "classes": { "av": "頭像", "more": "其餘人數 +N" }, "attrs": { "role": { "values": ["listitem"], "required": true } } },
+    { "name": "total", "selector": ".ppl-r > .ppl-c", "element": "span", "classes": { "ppl-c": "總人數" } }
+  ],
+  "example": "<div class=\"ppl-r\"><div class=\"stack\" role=\"list\" aria-label=\"陳大文、林小華\"><span class=\"av\" role=\"listitem\" title=\"陳大文\" style=\"--a:var(--cat2)\">陳</span>…</div><span class=\"ppl-c\">共 2 位</span></div>"
+}

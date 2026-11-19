@@ -1,5 +1,7 @@
 import { useLayoutEffect, useRef, type CSSProperties, type KeyboardEvent } from 'react';
-import { PERIODS, fmtRange, periodRange, todayISO, type PeriodKey } from '../../../shared/dates';
+import { focusNth } from '../../../core/choice';
+import { periodIndex, periodKey, periodText, placePeriodPill } from '../../../core/date';
+import { PERIODS, todayISO, type PeriodKey } from '../../../shared/dates';
 import { Icon } from './Icon';
 import { styleOf } from './util';
 
@@ -14,23 +16,18 @@ export interface PeriodPickerProps {
   style?: string | CSSProperties;
 }
 
-/** 期間選擇：本月、近 30 天、近 90 天或自訂；範圍以文字寫出。選中片滑動，左右鍵切換。 */
+/** 期間選擇：本月、近 30 天、近 90 天或自訂；範圍以文字寫出。選中片滑動，左右鍵切換。規則在 core/date.ts。 */
 export function PeriodPicker({ value, onChange, custom, today = todayISO(), className, style }: PeriodPickerProps) {
   const ps = useRef<HTMLDivElement>(null);
   const pill = useRef<HTMLElement>(null);
-  const cur = PERIODS.findIndex((p) => p.key === value);
-  // 選中片：量選中項目的位置（量法同展示牆）
-  useLayoutEffect(() => {
-    const on = ps.current?.querySelector<HTMLElement>(':scope > span.on');
-    if (on && pill.current) { pill.current.style.width = `${on.offsetWidth}px`; pill.current.style.transform = `translateX(${on.offsetLeft}px)`; }
-  }, [value]);
+  const cur = periodIndex(value);
+  useLayoutEffect(() => placePeriodPill(ps.current, pill.current), [value]);
   const onKeyDown = (e: KeyboardEvent) => {
-    const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-    if (!d) return;
+    const n = periodKey(cur, e.key);
+    if (n === null) return;
     e.preventDefault();
-    const n = (cur + d + PERIODS.length) % PERIODS.length;
     onChange?.(PERIODS[n].key);
-    ps.current?.querySelectorAll<HTMLElement>('[role="radio"]')[n]?.focus();
+    if (ps.current) focusNth(ps.current, '[role="radio"]', n);
   };
   return (
     <div className={className} style={styleOf(style)}>
@@ -42,7 +39,7 @@ export function PeriodPicker({ value, onChange, custom, today = todayISO(), clas
           </span>
         ))}
       </div>
-      <div className="ps-r">{fmtRange(periodRange(value, today, custom))}</div>
+      <div className="ps-r">{periodText(value, today, custom)}</div>
     </div>
   );
 }

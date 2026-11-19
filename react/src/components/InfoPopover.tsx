@@ -1,4 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { onOutsidePointer } from '../../../core/dom';
+import { POPOVER_DELAY, PopoverControl, placePopoverArrow, popoverButtonLabel, popoverId, popoverKey } from '../../../core/overlay';
 import { Icon } from './Icon';
 import { cx, styleOf, useFocusVisible } from './util';
 
@@ -17,30 +19,21 @@ export interface InfoPopoverProps {
   style?: string | CSSProperties;
 }
 
-/** 資訊提示：滑過 150ms 打開、點擊釘住、Esc 關閉。氣泡箭頭對準 ⓘ。 */
-export function InfoPopover({ label, children, value, valueNote, defaultOpen, openDelay = 150, className, style }: InfoPopoverProps) {
-  const [open, setOpen] = useState(!!defaultOpen);
-  const [pinned, setPinned] = useState(false);
+/** 資訊提示：滑過 150ms 打開、點擊釘住、Esc 關閉。氣泡箭頭對準 ⓘ。規則在 core/overlay.ts。 */
+export function InfoPopover({ label, children, value, valueNote, defaultOpen, openDelay = POPOVER_DELAY, className, style }: InfoPopoverProps) {
+  const [{ open, pinned }, setState] = useState({ open: !!defaultOpen, pinned: false });
+  const ctl = useRef<PopoverControl>();
+  ctl.current ??= new PopoverControl((o, p) => setState({ open: o, pinned: p }), !!defaultOpen, openDelay);
+  ctl.current.delay = openDelay;
   const { focusVisible, focusProps } = useFocusVisible();
   const root = useRef<HTMLDivElement>(null);
   const btn = useRef<HTMLSpanElement>(null);
   const pop = useRef<HTMLDivElement>(null);
-  const timer = useRef<number>();
-  // 箭頭位置：ⓘ 的中心（相對氣泡左緣），量法同展示牆
-  useLayoutEffect(() => {
-    if (open && btn.current && pop.current) pop.current.style.setProperty('--ax', `${btn.current.offsetLeft + btn.current.offsetWidth / 2 - pop.current.offsetLeft}px`);
-  }, [open]);
-  useEffect(() => {
-    if (!pinned) return;
-    const off = (e: MouseEvent) => { if (!root.current?.contains(e.target as Node)) { setPinned(false); setOpen(false); } };
-    document.addEventListener('mousedown', off);
-    return () => document.removeEventListener('mousedown', off);
-  }, [pinned]);
-  useEffect(() => () => window.clearTimeout(timer.current), []);
-  const enter = () => { window.clearTimeout(timer.current); timer.current = window.setTimeout(() => setOpen(true), openDelay); };
-  const leave = () => { window.clearTimeout(timer.current); if (!pinned) setOpen(false); };
-  const toggle = () => { const p = !pinned; setPinned(p); setOpen(p); };
-  const id = useRef(`ip-${Math.random().toString(36).slice(2)}`).current;
+  const [id] = useState(popoverId);
+  useLayoutEffect(() => { if (open) placePopoverArrow(btn.current, pop.current); }, [open]);
+  useEffect(() => (pinned && root.current ? onOutsidePointer(root.current, () => ctl.current!.close()) : undefined), [pinned]);
+  useEffect(() => () => ctl.current?.dispose(), []);
+  const c = ctl.current;
   return (
     <div ref={root} className={cx('ip', className)} style={styleOf(style)}>
       <div className="ip-l">
@@ -50,15 +43,16 @@ export function InfoPopover({ label, children, value, valueNote, defaultOpen, op
           className={cx('ip-b', focusVisible && 'fc')}
           role="button"
           tabIndex={0}
-          aria-label={`${label}：說明`}
+          aria-label={popoverButtonLabel(label)}
           aria-expanded={open}
           aria-describedby={open ? id : undefined}
-          onMouseEnter={enter}
-          onMouseLeave={leave}
-          onClick={toggle}
+          onMouseEnter={() => c.enter()}
+          onMouseLeave={() => c.leave()}
+          onClick={() => c.toggle()}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
-            if (e.key === 'Escape') { setPinned(false); setOpen(false); }
+            const r = popoverKey(e.key);
+            if (r === 'toggle') { e.preventDefault(); c.toggle(); }
+            else if (r === 'close') c.close();
           }}
           {...focusProps}
         >

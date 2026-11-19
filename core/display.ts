@@ -46,3 +46,18 @@ export const TIMELINE_ICON: Record<TimelineType, IconName> = { edit: 'edit', don
 export const skeletonClass = (loading: boolean) => cx('sk', !loading && 'loaded');
 /** 頭像底色：分類色 1–4 */
 export const avatarBg = (color: 1 | 2 | 3 | 4) => `var(--cat${color})`;
+
+/* ---- 頭像群組 avatar-group：重疊排列，滑過時展開；超過 max 收成 +N，右邊寫總人數。 ---- */
+export interface AvatarPerson {
+  name: string;
+  /** 頭像上的字，通常是姓 */
+  initial: string;
+  /** 分類色 1–4（--cat1…--cat4） */
+  color: 1 | 2 | 3 | 4;
+}
+export const avatarStackClass = (spread: boolean) => cx('stack', spread && 'spread');
+export const avatarShown = (people: AvatarPerson[], max = 3) => people.slice(0, max);
+export const avatarRest = (people: AvatarPerson[], max = 3) => Math.max(0, people.length - max);
+export const avatarNames = (people: AvatarPerson[]) => people.map((p) => p.name).join('、');
+export const avatarStyle = (p: AvatarPerson) => ({ '--a': `var(--cat${p.color})` });
+export const avatarTotal = (people: AvatarPerson[]) => `共 ${people.length} 位`;

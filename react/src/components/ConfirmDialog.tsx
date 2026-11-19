@@ -1,6 +1,10 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type FocusEvent, type KeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { cx } from './util';
+import { isActivateKey } from '../../../core/dom';
+import {
+  DIALOG_OVERLAY_STYLE, dialogCancelClass, dialogClass, dialogFocusKey, dialogKey, dialogOkClass, dialogTitleId, focusDialogButton,
+  type DialogButton, type DialogFocus,
+} from '../../../core/overlay';
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -19,50 +23,44 @@ export interface ConfirmDialogProps {
   /** 只畫對話框本體、不浮起（展示、文件用） */
   inline?: boolean;
   /** 一開始聚焦的按鈕（預設：破壞性＝取消，其他＝確認） */
-  initialFocus?: 'confirm' | 'cancel' | 'none';
+  initialFocus?: DialogFocus;
 }
 
-/** 確認對話框：需要確認才繼續。Esc＝取消；Tab 只在兩顆按鈕間移動。 */
+/** 確認對話框：需要確認才繼續。Esc＝取消；Tab 只在兩顆按鈕間移動。規則在 core/overlay.ts。 */
 export function ConfirmDialog({ open, title, body, note, confirmLabel = title, cancelLabel = '取消', destructive, onConfirm, onCancel, inline, initialFocus }: ConfirmDialogProps) {
   const card = useRef<HTMLDivElement>(null);
-  const [fv, setFv] = useState<'ok' | 'cancel' | null>(null);
-  const focusKey = initialFocus ?? (destructive ? 'cancel' : 'confirm');
+  const [titleId] = useState(dialogTitleId);
+  const [fv, setFv] = useState<DialogButton | null>(null);
+  const focusKey = dialogFocusKey(initialFocus, destructive);
   useEffect(() => {
     if (!open || inline || focusKey === 'none') return;
     const prev = document.activeElement as HTMLElement | null;
-    card.current?.querySelector<HTMLElement>(focusKey === 'cancel' ? '.cancel' : '.ok')?.focus();
+    focusDialogButton(card.current, focusKey);
     return () => prev?.focus?.();
   }, [open, inline, focusKey]);
   if (!open) return null;
-  const btnProps = (k: 'ok' | 'cancel', act?: () => void) => ({
+  const btnProps = (k: DialogButton, act?: () => void) => ({
     role: 'button',
     tabIndex: 0,
     onClick: act,
-    onKeyDown: (e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act?.(); } },
-    onFocus: (e: React.FocusEvent<HTMLElement>) => setFv(e.currentTarget.matches(':focus-visible') ? k : null),
+    onKeyDown: (e: KeyboardEvent) => { if (isActivateKey(e.key)) { e.preventDefault(); act?.(); } },
+    onFocus: (e: FocusEvent<HTMLElement>) => setFv(e.currentTarget.matches(':focus-visible') ? k : null),
     onBlur: () => setFv(null),
   });
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') { e.preventDefault(); onCancel?.(); }
-    if (e.key === 'Tab') { // 焦點留在對話框裡
-      const f = [...(card.current?.querySelectorAll<HTMLElement>('[role="button"]') ?? [])];
-      const i = f.indexOf(document.activeElement as HTMLElement);
-      e.preventDefault(); f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length]?.focus();
-    }
-  };
+  const onKeyDown = (e: KeyboardEvent) => { if (dialogKey(card.current, e, () => onCancel?.())) e.preventDefault(); };
   const d = (
-    <div ref={card} className={cx('dl-d', inline && 'pin')} role="dialog" aria-modal={!inline || undefined} aria-labelledby="cc-dl-t" onKeyDown={onKeyDown}>
-      <b id="cc-dl-t">{title}</b>
+    <div ref={card} className={dialogClass(inline)} role="dialog" aria-modal={!inline || undefined} aria-labelledby={titleId} onKeyDown={onKeyDown}>
+      <b id={titleId}>{title}</b>
       <p><span>{body}</span>{note && <small>{note}</small>}</p>
       <div className="dl-a">
-        <span className={cx('cancel', fv === 'cancel' && 'fc')} {...btnProps('cancel', onCancel)}>{cancelLabel}</span>
-        <span className={cx('ok', destructive && 'dng', fv === 'ok' && 'is-focus')} {...btnProps('ok', onConfirm)}>{confirmLabel}</span>
+        <span className={dialogCancelClass(fv)} {...btnProps('cancel', onCancel)}>{cancelLabel}</span>
+        <span className={dialogOkClass(fv, destructive)} {...btnProps('ok', onConfirm)}>{confirmLabel}</span>
       </div>
     </div>
   );
   if (inline) return d;
   return createPortal(
-    <div className="dl open" style={{ position: 'fixed', inset: 0, zIndex: 1000, borderRadius: 0 }}>
+    <div className="dl open" style={DIALOG_OVERLAY_STYLE as CSSProperties}>
       <i className="dl-bd" onClick={onCancel} />
       {d}
     </div>,

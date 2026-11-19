@@ -1,8 +1,8 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import {
   CALLOUT_ICON, EMPTY_ICON, TIMELINE_CLS, TIMELINE_ICON, avatarBg, badgeClass, badgeDot, calloutClass, calloutRole, emptyClass, emptyRole,
-  skeletonClass, stepNote, stepState,
-  type BadgeAppearance, type BadgeTone, type CalloutTone, type EmptyTone, type TimelineType,
+  avatarNames, avatarRest, avatarShown, avatarStackClass, avatarTotal, skeletonClass, stepNote, stepState,
+  type AvatarPerson, type BadgeAppearance, type BadgeTone, type CalloutTone, type EmptyTone, type TimelineType,
 } from '../../../core/display';
 import { Button } from './button';
 import { Icon } from './icon';
@@ -153,4 +153,28 @@ export class Skeleton {
 
   protected readonly cls = computed(() => skeletonClass(this.loading()));
   protected readonly bg = computed(() => avatarBg(this.avatar().color));
+}
+
+export type { AvatarPerson };
+
+/**
+ * 成員頭像群組：重疊排列，滑過時展開；超過 max 收成 +N，右邊寫總人數。
+ *   <div ccAvatarGroup [people]="members"></div>
+ */
+@Component({
+  selector: '[ccAvatarGroup]',
+  host: { class: 'ppl-r' },
+  template: `<div [class]="stackCls()" role="list" [attr.aria-label]="names(people())" (mouseenter)="spread.set(true)" (mouseleave)="spread.set(false)">@for (p of shown(); track p.name) {<span class="av" [attr.style]="'--a: var(--cat' + p.color + ')'" role="listitem" [attr.title]="p.name">{{ p.initial }}</span>}@if (rest() > 0) {<span class="av more" role="listitem" [attr.title]="names(people().slice(max()))">+{{ rest() }}</span>}</div><span class="ppl-c">{{ total() }}</span>`,
+})
+export class AvatarGroup {
+  readonly people = input.required<AvatarPerson[]>();
+  /** 最多顯示幾位，其餘收成 +N（預設 3） */
+  readonly max = input(3);
+
+  protected readonly spread = signal(false);
+  protected readonly stackCls = computed(() => avatarStackClass(this.spread()));
+  protected readonly shown = computed(() => avatarShown(this.people(), this.max()));
+  protected readonly rest = computed(() => avatarRest(this.people(), this.max()));
+  protected readonly total = computed(() => avatarTotal(this.people()));
+  protected readonly names = avatarNames;
 }

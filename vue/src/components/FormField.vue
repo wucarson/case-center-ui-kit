@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { cx, type StyleProp } from './util';
+import { computed, ref } from 'vue';
+import { SR_ONLY_STYLE, fieldClass, fieldInputClass, fieldMark, leftField } from '../../../core/field';
+import type { StyleProp } from './util';
 
-/** 表單欄位外框：標籤＋輸入框＋說明／錯誤。輸入框聚焦時整框換主色並加光圈。輸入框區用預設插槽。 */
-withDefaults(defineProps<{
+/** 表單欄位外框：標籤＋輸入框＋說明／錯誤。輸入框聚焦時整框換主色並加光圈。輸入框區用預設插槽。規則在 core/field.ts。 */
+const props = withDefaults(defineProps<{
   label: string;
   /** 必填：標籤後加紅色星號 */
   required?: boolean;
@@ -26,10 +27,10 @@ withDefaults(defineProps<{
   style?: StyleProp;
 }>(), { emptyLabel: '尚未填寫' });
 const focus = ref(false);
-const onFocusOut = (e: FocusEvent) => { if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) focus.value = false; };
-const SR = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap';
+const mark = computed(() => fieldMark(props));
+const onFocusOut = (e: FocusEvent) => { if (leftField(e.currentTarget as HTMLElement, e.relatedTarget)) focus.value = false; };
 </script>
 
 <template>
-  <div :class="cx('ff', readOnly && 'ro', !!error && 'bad', disabled && 'dis', focus && !readOnly && !disabled && !error && 'focus')" :style="style" @focusin="focus = true" @focusout="onFocusOut"><label class="ff-l" :for="htmlFor">{{ label }}<template v-if="!readOnly"><span v-if="required" class="req" aria-hidden="true">*</span><span v-else-if="optional" class="opt">（選填）</span></template><span v-if="required" :style="SR">必填</span><span v-if="empty" class="ff-e">{{ emptyLabel }}</span></label><div :class="cx('ff-i', multiline && 'ta')"><slot /></div><div v-if="!error" class="ff-h"><span>{{ help }}</span><span v-if="counter" class="cnt" aria-live="polite">{{ counter }}</span></div><div class="ff-x" :role="error ? 'alert' : undefined">{{ error }}</div></div>
+  <div :class="fieldClass({ readOnly, disabled, error, focus })" :style="style" @focusin="focus = true" @focusout="onFocusOut"><label class="ff-l" :for="htmlFor">{{ label }}<span v-if="mark === 'req'" class="req" aria-hidden="true">*</span><span v-else-if="mark === 'opt'" class="opt">（選填）</span><span v-if="required" class="sr-only" :style="SR_ONLY_STYLE">必填</span><span v-if="empty" class="ff-e">{{ emptyLabel }}</span></label><div :class="fieldInputClass(multiline)"><slot /></div><div v-if="!error" class="ff-h"><span>{{ help }}</span><span v-if="counter" class="cnt" aria-live="polite">{{ counter }}</span></div><div class="ff-x" :role="error ? 'alert' : undefined">{{ error }}</div></div>
 </template>

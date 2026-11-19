@@ -177,7 +177,7 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 /* ==== 進場效果「科技」（data-enter="hud"）：描框由 JS 在卡片位置疊畫布處理（digiPlay），卡片的掃描偽元素在這個模式關掉 ==== */
 :root[data-enter="hud"] :is(.wall:not(.ready) > .cell:not(.norise), .cell.curtain-in)::before,
 :root[data-enter="hud"] :is(.wall:not(.ready) > .cell:not(.norise), .cell.curtain-in)::after { display: none; }
-.digi-cv { position: absolute; z-index: 20; pointer-events: none; }
+.digi-cv { position: fixed; left: 0; top: 0; z-index: 20; pointer-events: none; will-change: transform; }
 
 .wf { scroll-margin-top: 16px; }   /* 切換分類時捲回這裡 */
 body.hush :is(.spin, .shim, .caret) { animation-play-state: paused; }
@@ -4013,32 +4013,39 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       });
     }
     /* 科技進場（描框）：卡片先隱藏，在它的位置疊一張畫布，從左上角逆時針描出外框（左邊往下 → 底邊往右 → 右邊往上 → 頂邊往左），
-       描完後卡片淡入、外框同時淡出。畫布放在頁面座標（document.body），捲動時跟著卡片走 */
+       描完後卡片淡入、外框同時淡出。畫布固定在視窗上，每一幀重新量卡片位置與大小（設定面板開關、捲動、卡片滑過浮起都跟得上，不會錯位留下殘影） */
     function digiStop(el) { const d = el._digi; if (!d) return; cancelAnimationFrame(d.raf); d.cv.remove(); d.fade.cancel(); el._digi = null; }
     function digiPlay(el, delay = 0) {
       digiStop(el);
       const STROKE = D(450), FADE = D(320), total = STROKE + FADE;
       if (!(total > 0)) return;
-      const r = el.getBoundingClientRect(), w = r.width, h = r.height, dpr = Math.min(2, devicePixelRatio || 1);
-      const rad = Math.min(parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0, w / 2, h / 2);
+      const dpr = Math.min(2, devicePixelRatio || 1), lw = 1.5, o = lw / 2;
       const cv = document.createElement('canvas'); cv.className = 'digi-cv';
-      cv.width = Math.ceil(w * dpr); cv.height = Math.ceil(h * dpr);
-      Object.assign(cv.style, { left: r.left + scrollX + 'px', top: r.top + scrollY + 'px', width: w + 'px', height: h + 'px' });
       document.body.append(cv);
-      const g = cv.getContext('2d'); g.scale(dpr, dpr);
+      const g = cv.getContext('2d');
       const line = getComputedStyle(document.documentElement).getPropertyValue('--line-strong').trim();   // 線條色：跟著深淺色、底色走
-      const lw = 1.5, o = lw / 2, W = w - lw, H = h - lw, R = Math.max(0, rad - o);
-      const path = new Path2D();
-      path.moveTo(o, o + R); path.lineTo(o, o + H - R); path.arcTo(o, o + H, o + R, o + H, R);
-      path.lineTo(o + W - R, o + H); path.arcTo(o + W, o + H, o + W, o + H - R, R);
-      path.lineTo(o + W, o + R); path.arcTo(o + W, o, o + W - R, o, R);
-      path.lineTo(o + R, o); path.arcTo(o, o, o, o + R, R);
-      const L = 2 * (W - 2 * R) + 2 * (H - 2 * R) + 2 * Math.PI * R;
+      let w = 0, h = 0, path = null, L = 0;
+      const build = (nw, nh) => {   // 卡片大小變了才重建畫布與路徑
+        w = nw; h = nh;
+        cv.width = Math.ceil(w * dpr); cv.height = Math.ceil(h * dpr); cv.style.width = w + 'px'; cv.style.height = h + 'px';
+        g.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const rad = Math.min(parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0, w / 2, h / 2);
+        const W = w - lw, H = h - lw, R = Math.max(0, rad - o);
+        path = new Path2D();
+        path.moveTo(o, o + R); path.lineTo(o, o + H - R); path.arcTo(o, o + H, o + R, o + H, R);
+        path.lineTo(o + W - R, o + H); path.arcTo(o + W, o + H, o + W, o + H - R, R);
+        path.lineTo(o + W, o + R); path.arcTo(o + W, o, o + W - R, o, R);
+        path.lineTo(o + R, o); path.arcTo(o, o, o, o + R, R);
+        L = 2 * (W - 2 * R) + 2 * (H - 2 * R) + 2 * Math.PI * R;
+      };
       // 卡片本體：描框期間隱藏（含延遲等待），描完淡入
       const fade = el.animate([{ opacity: 0 }, { opacity: 0, offset: STROKE / total, easing: 'cubic-bezier(.22, 1, .36, 1)' }, { opacity: 1 }], { duration: total, delay, fill: 'backwards' });
       const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
       const start = performance.now() + delay;
       const frame = (now) => {
+        const r = el.getBoundingClientRect();
+        if (Math.abs(r.width - w) > 0.5 || Math.abs(r.height - h) > 0.5) build(r.width, r.height);
+        cv.style.transform = `translate(${r.left}px, ${r.top}px)`;
         const e = now - start;
         g.clearRect(0, 0, w, h);
         if (e >= 0) {

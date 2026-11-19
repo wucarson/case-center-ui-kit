@@ -3976,7 +3976,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     /* 進場（描框）：卡片先隱藏，在它的位置疊一張畫布，從左上角逆時針描出外框（左邊往下 → 底邊往右 → 右邊往上 → 頂邊往左），
        描完後卡片淡入、外框同時淡出。畫布固定在視窗上，每一幀重新量卡片位置與大小（設定面板開關、捲動、卡片滑過浮起都跟得上，不會錯位留下殘影） */
     /* 進場（飛入，仿 iOS 解鎖）：卡片從「畫面中心 → 卡片中心」方向再往外推 32% 的位置、放大 1.5 倍收攏，
-       衝過頭（縮到 0.95、位置越過原位 3%）再彈回 1.02、停在 1。回彈幅度跟「彈跳感」設定走（無＝只收攏不回彈）。
+       微幅衝過頭（縮到 0.985、位置越過原位 0.5%）就停在 1。回彈幅度跟「彈跳感」設定走（無＝只收攏不回彈）。
        透明度在前 30% 就到位；離畫面中心越遠越晚到（0～140ms） */
     const FLY_K = { none: 0, soft: 0.6, standard: 1, strong: 1.6 };
     function flyPlay(el, delay = 0) {
@@ -3985,8 +3985,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const kf = k > 0
         ? [{ transform: T(0.32, 1.5), opacity: 0, easing: 'cubic-bezier(.2, .75, .3, 1)' },
            { opacity: 1, offset: 0.3 },
-           { transform: T(-0.03 * k, 1 - 0.05 * k), offset: 0.55, easing: 'cubic-bezier(.45, 0, .55, 1)' },
-           { transform: T(0.01 * k, 1 + 0.02 * k), offset: 0.78, easing: 'cubic-bezier(.45, 0, .55, 1)' },
+           { transform: T(-0.005 * k, 1 - 0.015 * k), offset: 0.62, easing: 'cubic-bezier(.45, 0, .55, 1)' },
            { transform: 'none', opacity: 1 }]
         : [{ transform: T(0.32, 1.5), opacity: 0, easing: 'cubic-bezier(.22, 1, .36, 1)' }, { opacity: 1, offset: 0.3 }, { transform: 'none', opacity: 1 }];
       return el.animate(kf, { duration: D(750), delay, fill: 'backwards' });

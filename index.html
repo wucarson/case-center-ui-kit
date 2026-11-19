@@ -1699,6 +1699,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .shades { view-transition-name: shades; }
 .shades-speed { inset: 0; view-transition-name: speed; }
 .shades svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 14px 18px rgb(0 0 0 / .3)) drop-shadow(0 3px 4px rgb(0 0 0 / .22)); }
+.shades .sf { fill: none; stroke: var(--sh-edge, #0b1020); stroke-width: 7; stroke-linejoin: round; }   /* 深色柔邊：模糊時蓋住裁切的硬邊 */
 .shades .ed { fill: none; stroke: url(#sh-ed); stroke-width: 1.4; stroke-linejoin: round; }
 .shades .rf { animation: sh-rf 1.2s cubic-bezier(.4, 0, .2, 1) both; }
 @keyframes sh-rf { from { transform: skewX(-22deg) translateX(0); } to { transform: skewX(-22deg) translateX(380px); } }
@@ -2238,9 +2239,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const paint = () => { const d = isDark(); tb.querySelector('span').textContent = tb.title = d ? '淺色模式' : '深色模式'; tb.querySelector('path').setAttribute('d', d ? SUN : MOON); };
     try { const saved = localStorage.getItem('wall-theme'); if (saved === 'light' || saved === 'dark') root.dataset.theme = saved; } catch (e) {}
     /* 深淺色切換的墨鏡動畫（View Transitions，約 1.2 秒）：只有兩片駭客任務款鏡片（窄長、深黑亮面、細銀邊、一道反光），位在畫面正中央
-       · 戴上（→ 深色）：鏡片在正中央出現——一開始 2 倍大、模糊（離眼睛很近），往後退、對焦、落定；
-         接著加速放大，兩片鏡片往中間靠攏合成一片、蓋滿畫面，同時從中央射出白色半透明的速度線
-       · 拿掉（→ 淺色）：深色縮回正中央、分開成兩片鏡片，接著往前靠近、放大、模糊淡出，露出淺色畫面（沒有速度線）
+       · 戴上（→ 深色）：鏡片在正中央由小出現（小 → 大），接著加速往兩側放大——兩片各自變大、往左右分開、不交錯，鏡片裡的深色蓋滿畫面；
+         鏡片邊緣由清晰變模糊（越靠近眼睛越失焦）；同時從中央射出白色半透明的速度線
+       · 拿掉（→ 淺色）：深色從兩側往畫面中央縮小成兩片鏡片（大 → 小），邊緣由模糊變清晰，再繼續縮小、淡出，露出淺色畫面（沒有速度線）
+       · 邊緣模糊：鏡片外觀沿邊緣有一圈深色柔邊，整組加模糊，蓋在裁切的硬邊上，看起來就是邊緣失焦
        · 鏡片＝畫面快照的 clip-path（戴上裁新畫面、拿掉裁舊畫面）；鏡片外觀與速度線各是一個暫時元素，有自己的 view-transition-name
        · 不支援 View Transitions 或減少動態效果時直接切換 */
     const SH_PTS = [['M', 18, 40], ['Q', 18, 31, 29, 31], ['L', 127, 33], ['Q', 140, 34, 138, 46], ['L', 134, 64], ['Q', 130, 80, 111, 80], ['L', 41, 80], ['Q', 20, 80, 18, 64]];   // 左鏡片（viewBox 300×108）
@@ -2253,21 +2255,24 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (!document.startViewTransition || reduce) { apply(); return; }
       const W = Math.min(innerWidth * 0.56, 760), H = W * 108 / 300, left = (innerWidth - W) / 2, top = innerHeight / 2 - H * 55.5 / 108;
-      const C = [innerWidth / 2, innerHeight / 2], MG = 30;   // MG：合成一片時每片往中間移的距離（viewBox 單位）
-      const S = 1.7 * Math.max((innerWidth / 2) / (0.3 * W), (innerHeight / 2) / (0.19 * H));   // 放到四個角也蓋滿（鏡片角是圓的）
+      const C = [innerWidth / 2, innerHeight / 2], G = 1.8;   // G：放到最大時每片鏡片相對自己中心的額外放大（讓中間的縫被蓋住）
+      // 放到最大：上下蓋滿（鏡片半高 24.5）、左右蓋到邊（鏡片中心離中央 72＋半寬 61×G），角是圓的再多留一些
+      const S = Math.max(1.45 * (innerHeight / 2) / (G * 24.5 / 108 * H), 1.35 * (innerWidth / 2) / ((72 + 61 * G) / 300 * W));
       const on = next === 'dark';
-      // [時間點, 縮放, 靠攏, 鏡片內容透明度, 鏡片外觀透明度, 模糊px, easing]
+      // [時間點, 整組縮放（以畫面中央）, 每片額外放大（以各自中心）, 鏡片內容透明度, 模糊px, easing]
       const K = on
-        ? [[0, 2, 0, 0, 0, 10, 'cubic-bezier(.2, .7, .3, 1)'], [0.14, 1.45, 0, 1, 1, 4, 'cubic-bezier(.25, .6, .35, 1)'], [0.4, 1, 0, 1, 1, 0, 'cubic-bezier(.55, 0, .85, .35)'], [0.62, 1.55, MG, 1, 1, 0, 'cubic-bezier(.35, .2, .8, .6)'], [1, S, MG, 1, 0, 0, 'linear']]
-        : [[0, S, MG, 1, 0, 0, 'cubic-bezier(.2, .4, .3, 1)'], [0.38, 1.55, MG, 1, 1, 0, 'cubic-bezier(.3, .3, .4, 1)'], [0.58, 1, 0, 1, 1, 0, 'cubic-bezier(.5, 0, .8, .5)'], [0.82, 1.3, 0, 1, 1, 3, 'cubic-bezier(.4, 0, .8, .6)'], [1, 1.9, 0, 0, 0, 10, 'linear']];
-      const P = (px, py, s) => `${(C[0] + s * (left + px / 300 * W - C[0])).toFixed(1)} ${(C[1] + s * (top + py / 108 * H - C[1])).toFixed(1)}`;
-      const lensPath = (pts, dx, s) => pts.map(([c, ...v]) => c + ' ' + v.reduce((a, q, i) => (i % 2 ? (a.push(P(v[i - 1] + dx, q, s)), a) : a), []).join(' ')).join(' ') + ' Z';
-      const clip = (s, m) => `path("${lensPath(SH_PTS, m, s)} ${lensPath(SH_R, -m, s)}")`;
+        ? [[0, 0.55, 1, 0, 0, 'cubic-bezier(.2, .7, .35, 1)'], [0.12, 0.8, 1, 1, 0, 'cubic-bezier(.3, .6, .4, 1)'], [0.36, 1, 1, 1, 0, 'cubic-bezier(.5, 0, .7, .3)'], [0.62, 1.9, 1.12, 1, 2.5, 'cubic-bezier(.3, .2, .75, .7)'], [1, S, G, 1, 9, 'linear']]
+        : [[0, S, G, 1, 9, 'cubic-bezier(.25, .55, .35, 1)'], [0.45, 1.08, 1, 1, 1, 'cubic-bezier(.3, .4, .45, 1)'], [0.6, 1, 1, 1, 0, 'cubic-bezier(.5, 0, .75, .5)'], [1, 0.5, 1, 0, 0, 'linear']];
+      const LC = [78, 222], LY = 55.5;   // 左右鏡片中心（viewBox）
+      const P = (px, py, s, g, k) => { const vx = LC[k] + g * (px - LC[k]), vy = LY + g * (py - LY);
+        return `${(C[0] + s * (left + vx / 300 * W - C[0])).toFixed(1)} ${(C[1] + s * (top + vy / 108 * H - C[1])).toFixed(1)}`; };
+      const lensPath = (pts, k, s, g) => pts.map(([c, ...v]) => c + ' ' + v.reduce((a, q, i) => (i % 2 ? (a.push(P(v[i - 1], q, s, g, k)), a) : a), []).join(' ')).join(' ') + ' Z';
+      const clip = (s, g) => `path("${lensPath(SH_PTS, 0, s, g)} ${lensPath(SH_R, 1, s, g)}")`;
       // 鏡片外觀
       const frame = document.createElement('div');
       frame.className = 'shades';
       frame.style.cssText = `left:${left}px;top:${top}px;width:${W}px;height:${H}px`;
-      const lens = (k, d) => `<g class="mv-${k}"><clipPath id="sh-c${k}"><path d="${d}"/></clipPath><g clip-path="url(#sh-c${k})"><rect width="300" height="108" fill="url(#sh-tint)"/><rect class="rf" x="-60" y="-20" width="40" height="150" fill="url(#sh-rf)" transform="skewX(-22)"/></g><path class="ed" d="${d}"/></g>`;
+      const lens = (k, d) => `<g class="mv-${k}"><clipPath id="sh-c${k}"><path d="${d}"/></clipPath><g clip-path="url(#sh-c${k})"><rect width="300" height="108" fill="url(#sh-tint)"/><rect class="rf" x="-60" y="-20" width="40" height="150" fill="url(#sh-rf)" transform="skewX(-22)"/></g><path class="sf" d="${d}"/><path class="ed" d="${d}"/></g>`;
       frame.innerHTML = `<svg viewBox="0 0 300 108" aria-hidden="true"><defs>
         <linearGradient id="sh-tint" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#020306" stop-opacity=".62"/><stop offset=".6" stop-color="#020306" stop-opacity=".22"/><stop offset="1" stop-color="#020306" stop-opacity=".06"/></linearGradient>
         <linearGradient id="sh-rf" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
@@ -2283,17 +2288,20 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       }
       const de = document.documentElement, cls = on ? 'vt-shades-on' : 'vt-shades-off';
       de.classList.add(cls);   // 先加 class：關掉預設的交叉淡入淡出與元件自己的顏色過渡
-      const vt = document.startViewTransition(() => { apply(); document.body.append(frame); if (speed) document.body.append(speed); });
+      const edgeOf = () => getComputedStyle(document.documentElement).getPropertyValue('--page').trim();
+      if (!on) frame.style.setProperty('--sh-edge', edgeOf());
+      const vt = document.startViewTransition(() => { apply(); if (on) frame.style.setProperty('--sh-edge', edgeOf()); document.body.append(frame); if (speed) document.body.append(speed); });
       vt.ready.then(() => {
         const o = { duration: 1200, fill: 'both' };
         // 鏡片內的畫面：戴上裁新畫面（深色）、拿掉裁舊畫面（深色）
-        de.animate(K.map(([t, s, m, op, , , e]) => ({ offset: t, easing: e, opacity: op, clipPath: clip(s, m) })), { ...o, pseudoElement: on ? '::view-transition-new(root)' : '::view-transition-old(root)' });
-        // 鏡片外觀：整組縮放；兩片各自往中間靠攏
-        de.animate(K.map(([t, s, , , , bl, e]) => ({ offset: t, easing: e, filter: bl ? `blur(${bl}px)` : 'none', transformOrigin: `${(C[0] - left).toFixed(1)}px ${(C[1] - top).toFixed(1)}px`, transform: `translate(${left.toFixed(1)}px, ${top.toFixed(1)}px) scale(${s})` })), { ...o, pseudoElement: '::view-transition-group(shades)' });
+        de.animate(K.map(([t, s, g, op, , e]) => ({ offset: t, easing: e, opacity: op, clipPath: clip(s, g) })), { ...o, pseudoElement: on ? '::view-transition-new(root)' : '::view-transition-old(root)' });
+        // 鏡片外觀：整組以畫面中央縮放
+        de.animate(K.map(([t, s, , , bl, e]) => ({ offset: t, easing: e, filter: bl ? `blur(${bl}px)` : 'none', transformOrigin: `${(C[0] - left).toFixed(1)}px ${(C[1] - top).toFixed(1)}px`, transform: `translate(${left.toFixed(1)}px, ${top.toFixed(1)}px) scale(${s})` })), { ...o, pseudoElement: '::view-transition-group(shades)' });
         // 鏡片外觀的透明度另外排：放大到很大之前就淡掉（避免巨大的鏡片外觀拖慢畫面）
-        de.animate((on ? [[0, 0], [0.14, 1], [0.6, 1], [0.76, 0], [1, 0]] : [[0, 0], [0.24, 0], [0.42, 1], [0.82, 1], [1, 0]]).map(([t, v]) => ({ offset: t, opacity: v })), { ...o, pseudoElement: '::view-transition-group(shades)', composite: 'replace' });
-        ['l', 'r'].forEach((k) => frame.querySelector('.mv-' + k).animate(K.map(([t, , m, , , , e]) => ({ offset: t, easing: e, transform: `translateX(${k === 'l' ? m : -m}px)` })), o));
-        // 速度線：0.5 秒起射出，每條略為錯開，往外飛、拉長後淡掉
+        de.animate((on ? [[0, 0], [0.12, 1], [0.64, 1], [0.76, 0], [1, 0]] : [[0, 0], [0.24, 0], [0.36, 1], [0.8, 1], [1, 0]])   /* 兩片碰到前就淡掉，不交錯 */.map(([t, v]) => ({ offset: t, opacity: v })), { ...o, pseudoElement: '::view-transition-group(shades)', composite: 'replace' });
+        // 每片鏡片以自己的中心額外放大（和裁切的計算一致）
+        ['l', 'r'].forEach((k, i) => { const g = frame.querySelector('.mv-' + k); g.style.transformBox = 'view-box'; g.style.transformOrigin = `${LC[i]}px ${LY}px`; g.animate(K.map(([t, , gg, , , e]) => ({ offset: t, easing: e, transform: `scale(${gg})` })), o); });
+        // 速度線：約 0.56 秒起射出，每條略為錯開，往外飛、拉長後淡掉
         if (speed) speed.querySelectorAll('line').forEach((ln, i) => ln.animate([{ opacity: 0, transform: 'translate(0, 0)' }, { opacity: 0.75, offset: 0.25 }, { opacity: 0, transform: `translate(${ln.dataset.dx}px, ${ln.dataset.dy}px)` }], { duration: 420, delay: 560 + (i % 7) * 14, easing: 'cubic-bezier(.3, .2, .7, 1)', fill: 'both' }));
       }).catch(() => {});
       vt.finished.finally(() => { frame.remove(); speed?.remove(); de.classList.remove('vt-shades-on', 'vt-shades-off'); });

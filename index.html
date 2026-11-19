@@ -150,8 +150,18 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 }
 .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
 @keyframes rise { from { transform: none; } }   /* 只用來計時：首次進場全部播完才標記 .ready */
-/* 進場：描框（digiPlay）——卡片先隱藏，從左上角逆時針描出外框，描完內容淡入；外框畫在固定於視窗的畫布上，每幀跟著卡片位置 */
-.digi-cv { position: fixed; left: 0; top: 0; z-index: 20; pointer-events: none; will-change: transform; }
+/* 進場：浮出（emergePlay）——::after 頁面色蓋層讓卡片和背景融合，::before 內凹壓痕像模具；離場 .sink 蓋層回到頁面色 */
+:root { --em-hi: color-mix(in srgb, var(--page) 15%, #ffffff); --em-lo: color-mix(in srgb, var(--page) 80%, var(--ink)); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --em-hi: color-mix(in srgb, var(--page) 86%, #ffffff); --em-lo: color-mix(in srgb, var(--page) 45%, #000000); } }
+:root[data-theme="dark"] { --em-hi: color-mix(in srgb, var(--page) 86%, #ffffff); --em-lo: color-mix(in srgb, var(--page) 45%, #000000); }
+.cell.emerge, .cell.sink { position: relative; }
+.cell.emerge::before, .cell.emerge::after, .cell.sink::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; }
+.cell.emerge::after { z-index: 5; background: var(--page); animation: em-cover var(--em-t) linear var(--em-d) both; }
+.cell.emerge::before { z-index: 6; box-shadow: inset 3px 3px 6px var(--em-lo), inset -3px -3px 6px var(--em-hi); animation: em-mold var(--em-t) linear var(--em-d) both; }
+.cell.sink::after { z-index: 5; background: var(--page); animation: em-sink var(--em-t) ease-in both; }
+@keyframes em-cover { 0% { opacity: 1; } 40% { opacity: .55; animation-timing-function: cubic-bezier(.4, 0, .2, 1); } 62%, 100% { opacity: 0; } }
+@keyframes em-mold { 0%, 40% { opacity: .9; animation-timing-function: cubic-bezier(.4, 0, .2, 1); } 55%, 100% { opacity: 0; } }
+@keyframes em-sink { from { opacity: 0; } to { opacity: 1; } }
 
 .wf { scroll-margin-top: 16px; }   /* 切換分類時捲回這裡 */
 body.hush :is(.spin, .shim, .caret) { animation-play-state: paused; }
@@ -3383,7 +3393,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       color: { primary: '#1f6fff', darkPrimary: '', success: '#12b866', warn: '#f59e0b', danger: '#ef3340', info: '#1846c9', series: ['#1f6fff', '#00a3b8', '#8b5cf6', '#f59e0b'], neutral: 'cool' },
       shape: { card: 20, control: 10, pill: 'full' },
       depth: { shadow: 2, glow: 100, border: 'standard' },
-      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'outline' },
+      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'emerge' },
       layout: { cols: 4, density: 'standard', hidden: [], order: [] },
     };
     const UI_KEYS = ['standard', 'flat', 'glass', 'contrast', 'neu', 'swiss', 'y2k'];
@@ -3939,7 +3949,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const stepOf = (n) => n > 1 ? Math.min(55, 300 / (n - 1)) : 0;   // 依序出現：每張最多隔 55ms，錯開總長不超過 0.3 秒
     // shift：畫面正在平滑捲動時，用捲完後的位置判斷是否在畫面內
     const inViewport = (list, shift = 0) => list.filter(([, r]) => r.top - shift < innerHeight && r.bottom - shift > 0).sort((a, b) => Math.round(a[1].top - b[1].top) || a[1].left - b[1].left);
-    const clearPending = () => { if (!pending) return; clearTimeout(pending.t); pending.out.forEach(([c, a]) => { a.cancel(); digiStop(c.el); }); pending = null; };
+    const clearPending = () => { if (!pending) return; clearTimeout(pending.t); pending.out.forEach(([c, a]) => { a.cancel(); emergeStop(c.el); }); pending = null; };
     function setCat(k) {
       if (k === wallCat) return;
       clearPending();   // 連續點擊：上一次還沒收完的直接停掉，以最後一次為準
@@ -3954,8 +3964,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       if (!out.length) return relayout(still);
       hushFor(D(1000));   // 轉場期間暫停卡片內的示範動畫，讓出運算
       // 離場：原地淡出 0.22 秒；畫面內離開的卡片同時進行
-      pending = { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]) };
-      pending.t = setTimeout(() => { const p = pending; pending = null; relayout(false); p.out.forEach(([c, a]) => { a.cancel(); digiStop(c.el); }); }, D(220));
+      const fly = theme.motion.enter === 'fly';   // 飛入：淡出；浮出：沉回水面
+      pending = { out: out.map(([c]) => [c, fly ? c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' }) : sinkPlay(c.el, D(220))]) };
+      pending.t = setTimeout(() => { const p = pending; pending = null; relayout(false); p.out.forEach(([c, a]) => { a.cancel(); emergeStop(c.el); }); }, D(220));
     }
     function relayout(still) {
       const before = new Map(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()]));
@@ -3969,12 +3980,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         const b = before.get(c), a = c.el.getBoundingClientRect();
         if (!b || Math.hypot(b.left - a.left, b.top - a.top) > 320) entering.push([c, a]);
       });
-      // 進場：只有畫面內的卡片（描框照閱讀順序、飛入由中心往外）
+      // 進場：只有畫面內的卡片（浮出照閱讀順序、飛入由中心往外）
       const shift = wf.getBoundingClientRect().top - 16;   // 還在捲回途中的距離
       playEnter(inViewport(entering, Math.min(0, shift)), false);
     }
-    /* 進場（描框）：卡片先隱藏，在它的位置疊一張畫布，從左上角逆時針描出外框（左邊往下 → 底邊往右 → 右邊往上 → 頂邊往左），
-       描完後卡片淡入、外框同時淡出。畫布固定在視窗上，每一幀重新量卡片位置與大小（設定面板開關、捲動、卡片滑過浮起都跟得上，不會錯位留下殘影） */
     /* 進場（飛入，仿 iOS 解鎖）：卡片從「畫面中心 → 卡片中心」方向再往外推 32% 的位置、放大 1.5 倍收攏，
        微幅衝過頭（縮到 0.982、位置越過原位 0.6%）就停在 1。回彈幅度跟「彈跳感」設定走（無＝只收攏不回彈）。
        透明度在前 30% 就到位；離畫面中心越遠越晚到（0～140ms） */
@@ -3997,7 +4006,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       document.body.animate([{ opacity: 0 }], { duration: D(800), easing: out, pseudoElement: '::before' });                                          // 只給起點：淡回各風格原本的透明度
       [$('.top'), wf].forEach((e) => e?.animate([{ opacity: 0, transform: 'translateY(-12px)' }, { opacity: 1, transform: 'none' }], { duration: D(500), delay: D(120), easing: out, fill: 'backwards' }));
     }
-    // 進場入口：依設定播描框或飛入；scene＝連動背景與標題列
+    // 進場入口：依設定播浮出或飛入；scene＝連動背景與標題列
     function playEnter(list, scene) {
       if (!list.length || matchMedia('(prefers-reduced-motion: reduce)').matches || theme.motion.reduce) return;
       if (theme.motion.enter === 'fly') {
@@ -4006,66 +4015,37 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         if (scene) flyScene();
       } else {
         const step = stepOf(list.length);
-        list.forEach(([c], i) => digiPlay(c.el, D(i * step)));
+        list.forEach(([c], i) => emergePlay(c.el, D(i * step)));
       }
     }
-    /* 描框（精緻版）：
-       1. 線條對齊卡片外框（1px、圓角相同、位於外框中線），描完後跟卡片交疊淡換，不會疊出雙線
-       2. 時長依外框周長（約 2.6px／ms，0.35～0.6 秒），大小卡片描線速度一致
-       3. 描到 75% 就開始分層進場：卡片底色 → 內容（上移 4px 到位）→ 陰影
-       4. 首尾接上時，起點亮一下當句點 */
-    function digiStop(el) { const d = el._digi; if (!d) return; cancelAnimationFrame(d.raf); d.cv.remove(); d.anims.forEach((a) => a.cancel()); el._digi = null; }
-    function digiPlay(el, delay = 0) {
-      digiStop(el);
-      if (!(D(1) > 0)) return;
-      const dpr = Math.min(2, devicePixelRatio || 1), lw = 1, o = lw / 2;
-      const cv = document.createElement('canvas'); cv.className = 'digi-cv';
-      document.body.append(cv);
-      const g = cv.getContext('2d');
-      const rs = getComputedStyle(document.documentElement);
-      const line = rs.getPropertyValue('--line-strong').trim(), head = rs.getPropertyValue('--ink').trim();
-      let w = 0, h = 0, path = null, L = 0, sx = 0, sy = 0;
-      const build = (nw, nh) => {
-        w = nw; h = nh;
-        cv.width = Math.ceil(w * dpr); cv.height = Math.ceil(h * dpr); cv.style.width = w + 'px'; cv.style.height = h + 'px';
-        g.setTransform(dpr, 0, 0, dpr, 0, 0);
-        const rad = Math.min(parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0, w / 2, h / 2);
-        const W = w - lw, H = h - lw, R = Math.max(0, rad - o);
-        path = new Path2D();
-        path.moveTo(o, o + R); path.lineTo(o, o + H - R); path.arcTo(o, o + H, o + R, o + H, R);
-        path.lineTo(o + W - R, o + H); path.arcTo(o + W, o + H, o + W, o + H - R, R);
-        path.lineTo(o + W, o + R); path.arcTo(o + W, o, o + W - R, o, R);
-        path.lineTo(o + R, o); path.arcTo(o, o, o, o + R, R);
-        L = 2 * (W - 2 * R) + 2 * (H - 2 * R) + 2 * Math.PI * R; sx = o; sy = o + R;
-      };
-      const r0 = el.getBoundingClientRect(); build(r0.width, r0.height);
-      const STROKE = D(Math.min(600, Math.max(350, L / 2.6))), FADE = D(340), FLASH = D(220), total = STROKE + FADE;
-      const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-      // 分層進場：描到 75% 開始。底色（整張卡片）→ 內容 → 陰影
-      const t0 = STROKE * 0.75, out = 'cubic-bezier(.22, 1, .36, 1)';
-      const anims = [el.animate([{ opacity: 0 }, { opacity: 0, offset: t0 / total, easing: out }, { opacity: 1 }], { duration: total, delay, fill: 'backwards' })];
-      [...el.children].forEach((k) => anims.push(k.animate([{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: FADE, delay: delay + t0 + D(60), easing: out, fill: 'backwards' })));
-      anims.push(el.animate([{ boxShadow: 'none' }], { duration: FADE, delay: delay + t0 + D(120), easing: out, fill: 'backwards' }));
-      const start = performance.now() + delay;
-      const frame = (now) => {
-        const r = el.getBoundingClientRect();
-        if (Math.abs(r.width - w) > 0.5 || Math.abs(r.height - h) > 0.5) build(r.width, r.height);
-        cv.style.transform = `translate(${r.left}px, ${r.top}px)`;
-        const e = now - start;
-        g.clearRect(0, 0, w, h);
-        if (e >= 0) {
-          const len = L * ease(Math.min(1, e / STROKE)), fadeOut = 1 - Math.min(1, Math.max(0, (e - STROKE) / FADE));
-          g.lineWidth = lw; g.lineCap = 'round';
-          // 畫過的線
-          g.globalAlpha = fadeOut; g.shadowBlur = 0; g.strokeStyle = line; g.setLineDash([len, L]); g.stroke(path);
-          // 句點：首尾接上時起點亮一下
-          const fe = (e - STROKE) / FLASH;
-          if (fe > 0 && fe < 1) { g.setLineDash([]); g.globalAlpha = Math.sin(Math.PI * fe) * 0.55; g.fillStyle = head; g.shadowColor = head; g.shadowBlur = 8; g.beginPath(); g.arc(sx, sy, 1.8, 0, Math.PI * 2); g.fill(); }
-          g.shadowBlur = 0; g.globalAlpha = 1;
-        }
-        if (e < total) el._digi.raf = requestAnimationFrame(frame); else digiStop(el);
-      };
-      el._digi = { cv, anims, raf: requestAnimationFrame(frame) };
+    /* 進場（浮出）：卡片和背景融為一體，慢慢浮出並「脫模」（1.2 秒）
+       · 0–40%：頁面色蓋層（::after）慢慢透出卡片色；淡淡的內凹壓痕（::before）看得出卡片形狀；卡片下沉 6px、0.985 倍、沒有陰影
+       · 40–62%：脫模——蓋層與壓痕快速退掉，卡片往上衝到 -3px、1.008 倍，陰影長出來，內容開始淡入
+       · 62–100%：落定回原位，內容上移 3px 到位
+       離場（sinkPlay）：陰影收回、蓋層回到頁面色、下沉淡出 */
+    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((a) => a.cancel()); el.classList.remove('emerge', 'sink'); el._em = null; }
+    function emergePlay(el, delay = 0) {
+      emergeStop(el);
+      const T = D(1200);
+      if (!(T > 0)) return;
+      el.style.setProperty('--em-t', T + 'ms'); el.style.setProperty('--em-d', delay + 'ms');
+      el.classList.add('emerge');
+      const anims = [el.animate([
+        { transform: 'translateY(6px) scale(.985)', boxShadow: 'none', easing: 'cubic-bezier(.4, 0, .6, 1)' },
+        { transform: 'translateY(4px) scale(.988)', boxShadow: 'none', offset: 0.4, easing: 'cubic-bezier(.2, .8, .3, 1)' },
+        { transform: 'translateY(-3px) scale(1.008)', offset: 0.62, easing: 'cubic-bezier(.4, 0, .2, 1)' },
+        { transform: 'none' },
+      ], { duration: T, delay, fill: 'backwards' })];
+      [...el.children].forEach((k) => anims.push(k.animate([{ opacity: 0, transform: 'translateY(3px)' }, { opacity: 0, transform: 'translateY(3px)', offset: 0.45, easing: 'cubic-bezier(.22, 1, .36, 1)' }, { opacity: 1, transform: 'none' }], { duration: T, delay, fill: 'backwards' })));
+      el._em = { anims, t: setTimeout(() => emergeStop(el), delay + T + 50) };
+    }
+    function sinkPlay(el, T) {
+      emergeStop(el);
+      el.style.setProperty('--em-t', T + 'ms'); el.style.setProperty('--em-d', '0ms');
+      el.classList.add('sink');
+      const a = el.animate([{ transform: 'none', opacity: 1 }, { boxShadow: 'none', transform: 'translateY(4px) scale(.99)', opacity: 0 }], { duration: T, easing: 'cubic-bezier(.4, 0, 1, 1)', fill: 'forwards' });
+      el._em = { anims: [a], t: 0 };
+      return a;
     }
     const replayEnter = () => { hushFor(D(1000)); playEnter(inViewport(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()])), true); };
     wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });
@@ -4135,7 +4115,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
             on: () => (m ? !theme.motion.reduce && theme.motion.speed === m.speed && theme.motion.bounce === m.bounce : theme.motion.reduce),
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
         })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['outline', '描框'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter || 'outline') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; }))),
+          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['emerge', '浮出'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter === 'fly' ? 'fly' : 'emerge') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; }))),
       )];
     }
     function catsEl() {

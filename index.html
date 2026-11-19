@@ -156,12 +156,15 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 :root[data-theme="dark"] { --em-hi: color-mix(in srgb, var(--page) 86%, #ffffff); --em-lo: color-mix(in srgb, var(--page) 45%, #000000); }
 .cell.emerge, .cell.sink { position: relative; }
 .cell.emerge { background-clip: padding-box; transform-origin: 50% 100%; }   /* 外框底下不透出卡片色；以底邊為支點拉伸（底邊黏住） */
-.cell.emerge::after, .cell.sink::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; }
+.cell.emerge::before, .cell.emerge::after, .cell.sink::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; }
+/* 線框：先畫出卡片的位置（線條色），浮出後淡掉、換成各風格自己的外框 */
+.cell.emerge::before { z-index: 6; box-shadow: inset 0 0 0 1px var(--line-strong); animation: em-frame var(--em-t) linear var(--em-d) both; }
+@keyframes em-frame { 0% { opacity: 0; animation-timing-function: cubic-bezier(.4, 0, .2, 1); } 14%, 42% { opacity: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); } 70%, 100% { opacity: 0; } }
 .cell.emerge::after { z-index: 5; background: var(--page); animation: em-cover var(--em-t) linear var(--em-d) both; }
 .cell.sink::after { z-index: 5; background: var(--page); animation: em-sink var(--em-t) ease-in both; }
 :root[data-ui="glass"] .cell.emerge::after { display: none; }   /* 玻璃改由卡片底色與毛玻璃從無到有，頁面色蓋不住彩色背景 */
-/* 蓋層：前 22% 完全是背景色，浮起時才淡化、透出卡片色（和卡片的位移用同一條緩動，才不會一層先一層後） */
-@keyframes em-cover { 0%, 22% { opacity: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); } 70%, 100% { opacity: 0; } }
+/* 蓋層：線框階段（前 20%）卡片內部仍是背景色，浮出時才透出卡片色 */
+@keyframes em-cover { 0%, 20% { opacity: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); } 60%, 100% { opacity: 0; } }
 @keyframes em-sink { from { opacity: 0; } to { opacity: 1; } }
 
 .wf { scroll-margin-top: 16px; }   /* 切換分類時捲回這裡 */
@@ -4018,11 +4021,12 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         list.forEach(([c]) => emergePlay(c.el, 0));   // 浮出：所有卡片同時升起
       }
     }
-    /* 進場（浮出）：卡片和背景完全同色，浮起時才淡化變色，邊緣像脫膠一樣鬆開（1.2 秒）
-       全部用卡片自己的屬性做（不另外疊會錯位的陰影層），一條連續的軌跡、不急轉，才不會有殘影：
-       · 0–22%：完全是背景色（頁面色蓋層、外框透明、沒有陰影），低 6px
-       · 22–60%：平滑上浮到 -2px，底邊黏著稍微拉長（高度 1.012 倍），卡片色透出，沒有陰影
-       · 60–100%：平滑落定；快停住時陰影才落下（Neumorphism 例外，陰影跟著浮起），內容淡入上移到位 */
+    /* 進場（浮出）：先有線框 → 卡片浮出 → 內容由模糊變清楚（1.2 秒，所有卡片同時）
+       · 0–20%：線框：只有 1px 線框淡入（::before），內部仍是背景色（::after 頁面色蓋層），低 6px
+       · 20–60%：浮出：卡片色透出，平滑上浮到 -2px、底邊稍微拉長（1.012 倍）再落定；線框淡掉、換成各風格自己的外框
+       · 60–100%：落地：陰影落下（Neumorphism 例外：形狀靠陰影，跟著浮出就出現）
+       · 55–100%：內容：模糊 6px → 清楚，淡入、0.98 → 1 倍
+       液態玻璃不用頁面色蓋層，改由卡片底色與毛玻璃從無到有 */
     function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('emerge', 'sink'); el._em = null; }
     function emergePlay(el, delay = 0) {
       emergeStop(el);
@@ -4030,23 +4034,28 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       if (!(T > 0)) return;
       el.style.setProperty('--em-t', T + 'ms'); el.style.setProperty('--em-d', delay + 'ms');
       el.classList.add('emerge');
-      const smooth = 'cubic-bezier(.4, 0, .2, 1)', settle = 'cubic-bezier(.3, 0, .2, 1)';
+      const smooth = 'cubic-bezier(.4, 0, .2, 1)', settle = 'cubic-bezier(.3, 0, .2, 1)', o = { duration: T, delay, fill: 'backwards' };
+      const ui = theme.style.ui;
       const anims = [
-        // 位置與拉伸：一上一落，兩段都是平滑的 S 曲線
+        // 位置與拉伸：線框階段不動，之後平滑上浮、落定
         el.animate([
-          { transform: 'translateY(6px) scaleY(1)', offset: 0, easing: smooth },
-          { transform: 'translateY(6px) scaleY(1)', offset: 0.22, easing: smooth },
-          { transform: 'translateY(-2px) scaleY(1.012)', offset: 0.6, easing: settle },
+          { transform: 'translateY(6px) scaleY(1)', easing: smooth },
+          { transform: 'translateY(6px) scaleY(1)', offset: 0.2, easing: smooth },
+          { transform: 'translateY(-2px) scaleY(1.012)', offset: 0.55, easing: settle },
           { transform: 'none' },
-        ], { duration: T, delay, fill: 'backwards' }),
-        // 外框：浮起時慢慢出現
-        el.animate([{ borderColor: 'transparent' }, { borderColor: 'transparent', offset: 0.38, easing: settle }, {}], { duration: T, delay, fill: 'backwards' }),
-        // 卡片陰影：浮起過程不要陰影，快落定（70%）才落下；Neumorphism 的形狀靠陰影，跟著浮起（38%）就出現
-        el.animate([{ boxShadow: 'none' }, { boxShadow: 'none', offset: theme.style.ui === 'neu' ? 0.38 : 0.7, easing: settle }, {}], { duration: T, delay, fill: 'backwards' }),
-        // 液態玻璃：不用頁面色蓋層（蓋不住彩色背景），改成卡片本身的底色與毛玻璃從無到有
-        ...(theme.style.ui === 'glass' ? [el.animate([{ backgroundColor: 'transparent', backdropFilter: 'blur(0px) saturate(100%)' }, { backgroundColor: 'transparent', backdropFilter: 'blur(0px) saturate(100%)', offset: 0.22, easing: smooth }, { offset: 0.7 }, {}], { duration: T, delay, fill: 'backwards' })] : []),
+        ], o),
+        // 各風格自己的外框：線框淡掉時接手
+        el.animate([{ borderColor: 'transparent' }, { borderColor: 'transparent', offset: 0.4, easing: settle }, { offset: 0.72 }, {}], o),
+        // 陰影：落地才出現；Neumorphism 跟著浮出
+        el.animate([{ boxShadow: 'none' }, { boxShadow: 'none', offset: ui === 'neu' ? 0.3 : 0.6, easing: settle }, {}], o),
+        ...(ui === 'glass' ? [el.animate([{ backgroundColor: 'transparent', backdropFilter: 'blur(0px) saturate(100%)' }, { backgroundColor: 'transparent', backdropFilter: 'blur(0px) saturate(100%)', offset: 0.2, easing: smooth }, { offset: 0.6 }, {}], o)] : []),
       ];
-      [...el.children].forEach((k) => anims.push(k.animate([{ opacity: 0, transform: 'translateY(3px)' }, { opacity: 0, transform: 'translateY(3px)', offset: 0.45, easing: settle }, { opacity: 1, transform: 'none' }], { duration: T, delay, fill: 'backwards' })));
+      // 內容：模糊 → 清楚
+      [...el.children].forEach((k) => anims.push(k.animate([
+        { opacity: 0, filter: 'blur(6px)', transform: 'scale(.98)' },
+        { opacity: 0, filter: 'blur(6px)', transform: 'scale(.98)', offset: 0.55, easing: settle },
+        { opacity: 1, filter: 'blur(0px)', transform: 'none' },
+      ], o)));
       el._em = { anims, t: setTimeout(() => emergeStop(el), delay + T + 50) };
     }
     function sinkPlay(el, T) {

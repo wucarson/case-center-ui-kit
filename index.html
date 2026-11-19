@@ -208,6 +208,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .b2.dng.hv { background: var(--danger-bg); border-color: var(--danger-fg); }
 
 /* 按住確認 */
+.hold-c { display: flex; flex-direction: column; align-items: stretch; }
 .hold .fill { position: absolute; inset: 0; background: var(--hold); transform: scaleX(0); transform-origin: 0 50%; z-index: 1; }
 .hold .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: currentColor; transform: scaleX(0); transform-origin: 0 50%; z-index: 1; }
 
@@ -218,7 +219,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .search .ph { color: var(--label); margin-left: -8px; }
 .results { margin-top: 6px; display: flex; flex-direction: column; gap: 2px; }
 .res { height: 34px; padding: 0 10px; border-radius: var(--r-sm); display: flex; align-items: center; gap: 8px; font-size: calc(13px * var(--fs-k) * var(--rk, 1)); opacity: 0; transform: translateY(8px) scale(.98); transition: opacity calc(.3s * var(--dur)) var(--ease), transform calc(.5s * var(--dur)) var(--spring-soft); }
-.res:first-child { background: var(--tint); }
+.res.hl { background: var(--tint); }
+.tsr { min-width: 0; }
 .res em { margin-left: auto; font-style: normal; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); color: var(--weak); font-variant-numeric: tabular-nums; }
 .results.show .res { opacity: 1; transform: none; }
 .results.show .res:nth-child(2) { transition-delay: 80ms; }
@@ -283,11 +285,14 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .rad.on i::after { transform: scale(1); }
 
 /* 篩選標籤（可移除） */
-.chips { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; min-height: 106px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; }
+#c-chips .chips { min-height: 106px; }
 .chip { height: 30px; padding: 0 6px 0 12px; border-radius: var(--r-pill); background: var(--tint); color: var(--selected-fg); font-size: calc(13px * var(--fs-k) * var(--rk, 1)); font-weight: 500; display: inline-flex; align-items: center; gap: 4px; box-shadow: inset 0 1px 0 var(--hi), 0 2px 6px -2px var(--glow); }
 .chip u { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: background calc(.2s * var(--dur)); }
 .chip u svg { width: 11px; height: 11px; stroke-width: 2.6; }
 .chip.kill u { background: var(--danger-bg); color: var(--danger-fg); }
+@media (hover: hover) and (pointer: fine) { .chip u:hover { background: var(--danger-bg); color: var(--danger-fg); } }
+.chip u:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
 
 /* 提示訊息 callout */
 .co { align-self: stretch; display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: var(--r-lg); border: 1px solid; transition: background calc(.45s * var(--dur)) var(--ease), color calc(.45s * var(--dur)) var(--ease), border-color calc(.45s * var(--dur)) var(--ease); }
@@ -301,7 +306,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .co > div { min-width: 0; flex: 1; }
 
 /* 統計卡 stat-row */
-.stats { align-self: stretch; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.stats { align-self: stretch; display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: 10px; }
 .stat { background: var(--tile); border: 1px solid var(--line-subtle); border-radius: var(--r-lg); box-shadow: var(--raise); padding: 12px 14px; min-width: 0; }
 .stat span { display: block; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); line-height: calc(18px * var(--fs-k) * var(--rk, 1)); font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .stat b { font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height: calc(36px * var(--fs-k) * var(--rk, 1)); font-weight: 600; letter-spacing: -.02em; }
@@ -414,6 +419,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .up-b i { display: block; height: 100%; width: 0; border-radius: 4px; background: var(--grad-v); }
 .up.done .up-b i { background: var(--ok-grad); }
 .up.done .st { color: var(--ok-fg); font-weight: 600; }
+.up.fail .up-b i { background: var(--danger); }
+.up.fail .st { color: var(--danger-fg); font-weight: 600; }
 
 /* 骨架載入 */
 .sk { align-self: stretch; display: grid; }
@@ -835,6 +842,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sp-pv > .ff { width: 100%; align-self: start; }
 .sp-pv > .ip { width: 100%; align-self: start; }
 .sp-pv > .dp { align-self: start; }
+.sp-pv > :is(.tsr, .hold-c, .drg, .up, .chips, .stats, .sb) { width: 100%; }
+.sp-pv > :is(.tsr, .drg, .chips) { align-self: start; }
 .sp-cap { display: flex; flex-direction: column; gap: 1px; padding: 0 2px; }
 .sp-cap b { font-size: 13px; line-height: 20px; font-weight: 600; color: var(--ink); }
 .sp-cap small { font-size: 12px; line-height: 18px; color: var(--weak); }
@@ -1708,7 +1717,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       <header>搜尋與標籤建議<em>tag-search</em></header>
       <div class="body">
         <div class="search"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><span class="q"></span><i class="caret" hidden></i><span class="ph">搜尋公告標題或標籤</span></div>
-        <div class="results"><div class="res"><span></span><em></em></div><div class="res"><span></span><em></em></div></div>
+        <div class="results"><div class="res hl"><span></span><em></em></div><div class="res"><span></span><em></em></div></div>
       </div>
     </section>
 
@@ -5334,6 +5343,21 @@ ${stamp()}
     const AVG = (n, cls = '') => '<div class="ppl-r"><div class="stack' + (cls ? ' ' + cls : '') + '">' + AV_M.slice(0, Math.min(n, 3)).map(([a, c]) => '<span class="av" style="--a:var(--cat' + c + ')">' + a + '</span>').join('') + (n > 3 ? '<span class="av more">+' + (n - 3) + '</span>' : '') + '</div><span class="ppl-c">共 ' + n + ' 位</span></div>';
     const SKL = (loaded) => '<div class="sk' + (loaded ? ' loaded' : '') + '" style="width:100%"><div class="ghost"><span class="av shim"></span><span class="ls"><b class="shim"></b><b class="shim"></b></span></div><div class="real"><span class="av" style="background:var(--cat1)">王</span><div><p>李小美</p><small>設計師</small></div></div></div>';
     const STAR = (cls = '') => '<span class="starb' + (cls ? ' ' + cls : '') + '"><svg viewBox="0 0 24 24"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z"/></svg></span>';
+    // 搜尋與標籤建議、按住確認、拖移排序、檔案上傳、篩選標籤、統計卡、分段統計條（規格頁與匯出樣本用）
+    const I_SRCH = '<svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>';
+    const TSR = (q, rs, cls = '') => '<div class="tsr"><div class="search' + (cls ? ' ' + cls : '') + '">' + I_SRCH + '<input class="ff-real" placeholder="搜尋公告標題或標籤"' + (q ? ' value="' + q + '"' : '') + '></div>' + (rs ? '<div class="results show">' + rs.map(([a, b], k) => '<div class="res' + (k ? '' : ' hl') + '"><span>' + a + '</span><em>' + b + '</em></div>').join('') + '</div>' : '') + '</div>';
+    const I_CHK = '<svg class="ic draw" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+    const HOLDB = (txt, cls = '', p = 0) => { const st = p ? ' style="transform:scaleX(' + p + ')"' : ''; return '<div class="hold-c"><span class="btn hold' + (cls ? ' ' + cls : '') + '"><i class="fill"' + st + '></i><i class="bar"' + st + '></i><span class="roll"><span>' + txt + '</span></span></span><div class="sub">按住 1.5 秒才會送出</div></div>'; };
+    const I_GRIP = '<svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg>';
+    const DRG_ITEMS = [['名稱', 1, 1], ['狀態', 0, 1], ['負責人', 0, 1], ['到期日', 0, 0]];
+    const DRG = (lift = -1, hv = -1) => '<div class="drg"><i class="drg-ph' + (lift >= 0 ? ' show' : '') + '"' + (lift >= 0 ? ' style="transform:translateY(' + lift * 32 + 'px)"' : '') + '></i>' + DRG_ITEMS.map(([n, lk, vis], k) => '<div class="drg-r' + (vis ? ' vis' : '') + (k === lift ? ' lift' : '') + '" style="transform:translateY(' + k * 32 + 'px)">' + (lk ? '<span class="drg-h lk">' + I_LOCK + '</span>' : '<button class="drg-h' + (k === hv ? ' hv' : '') + '" type="button">' + I_GRIP + '</button>') + '<span class="drg-n">' + n + '</span><button class="drg-s" type="button"' + (lk ? ' disabled' : '') + '><span class="tg"><i></i></span></button></div>').join('') + '</div>';
+    const I_FILE = '<svg class="ic" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg>';
+    const UPL = (nm, st, pct, tone, cls = '') => '<div class="up' + (cls ? ' ' + cls : '') + '"><span class="up-i" style="--tone:' + tone + '">' + I_FILE + '</span><div class="up-m"><div class="up-r"><span class="roll nm"><span>' + nm + '</span></span><span class="st num">' + st + '</span></div><div class="up-b"><i style="width:' + pct + '%"></i></div></div></div>';
+    const I_X = '<svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    const CHIPS = (a, kill = -1) => '<div class="chips">' + a.map((t, k) => '<span class="chip' + (k === kill ? ' kill' : '') + '">' + t + '<u>' + I_X + '</u></span>').join('') + '</div>';
+    const STATS = (a) => '<div class="stats" style="--n:' + a.length + '">' + a.map(([l, n, u, hot]) => '<div class="stat' + (hot ? ' hot' : '') + '"><span>' + l + '</span><b class="num">' + n + '</b><small>' + u + '</small></div>').join('') + '</div>';
+    const SBAR = (unit, segs) => '<div class="sb"><div class="sb-h"><b class="num">' + segs.reduce((a, [, v]) => a + v, 0) + '</b><span>' + unit + '</span></div><div class="sb-b">' + segs.map(([, v, c]) => '<i style="--c:' + c + ';--f:' + v + '"></i>').join('') + '</div><div class="sb-l">' + segs.map(([l, v, c]) => '<span><i style="--c:' + c + '"></i>' + l + '<b class="num">' + v + '</b></span>').join('') + '</div></div>';
+    const SB4 = [['進行中', 43, 'var(--g2)'], ['待審核', 18, 'var(--warn)'], ['已完成', 55, 'var(--success)'], ['未開始', 12, 'var(--line-strong)']];
     // 選中片、日期圓、氣泡箭頭：照實際排版量位置（規格頁、匯出樣本、React／Vue 元件用同一套量法）
     function settleIndicators(r) {
       r.querySelectorAll('.ps').forEach((ps) => { const i = ps.querySelector(':scope > i'), on = ps.querySelector(':scope > span.on'); if (!i || !on) return; i.style.width = on.offsetWidth + 'px'; i.style.transform = 'translateX(' + on.offsetLeft + 'px)'; });
@@ -5919,6 +5943,84 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
           ['本月', PS(0, '2026-11-01 ～ 2026-11-13・共 13 天')],
           ['近 30 天', PS(1, '2026-10-15 ～ 2026-11-13・共 30 天')],
           ['自訂', PS(3, '2026-11-03 ～ 2026-11-12・共 10 天')],
+        ],
+      },
+      'c-search': {
+        wide: true,
+        v: [
+          ['標準 Default', '邊打字邊列出相符的標籤；方向鍵瀏覽、Enter 選取', TSR('系統', [['系統維護', '8 篇'], ['系統升級', '3 篇']], 'focus'), `<app-tag-search inputId="q" label="搜尋公告"
+                placeholder="搜尋公告標題或標籤"
+                [options]="tags" [(value)]="q"
+                (tagPicked)="pick($event)" />`],
+        ],
+        s: [
+          ['Empty', TSR('')],
+          ['Hover', TSR('', null, 'hv')],
+          ['Focus', TSR('', null, 'focus')],
+          ['Suggestions', TSR('系統', [['系統維護', '8 篇'], ['系統升級', '3 篇']], 'focus')],
+          ['No results', TSR('空調', null, 'focus')],
+        ],
+      },
+      'c-hold': {
+        v: [
+          ['標準 Default', '不可逆、但不需要輸入資訊的動作；下方寫出要按多久', HOLDB('按住結案'), `<app-hold-to-confirm label="結案"
+                     consequence="按住 1.5 秒才會送出"
+                     (confirmed)="close()" />`],
+        ],
+        s: [
+          ['Default', HOLDB('按住結案')],
+          ['Hover', HOLDB('按住結案', 'hv')],
+          ['Holding', HOLDB('持續按住…', '', 0.5)],
+          ['Complete', HOLDB(I_CHK + '已結案', 'done')],
+          ['Disabled', HOLDB('按住結案', 'is-off')],
+        ],
+      },
+      'c-drag': {
+        v: [
+          ['欄位面板', '第一列固定（鎖頭）；其餘拖握把調整順序，開關控制顯示', DRG()],
+        ],
+        s: [
+          ['Default', DRG()],
+          ['Handle hover', DRG(-1, 1)],
+          ['Lifted', DRG(1, 1)],
+        ],
+      },
+      'c-up': {
+        wide: true, xl: true,
+        v: [
+          ['PDF', '圖示顏色依檔案類型', UPL('設計規範_v3.pdf', '上傳完成', 100, 'var(--danger)', 'done')],
+          ['Figma', '', UPL('首頁視覺稿.fig', '上傳完成', 100, 'var(--g3)', 'done')],
+          ['Word', '', UPL('訪談紀錄_1112.docx', '上傳完成', 100, 'var(--g2)', 'done')],
+          ['Excel', '', UPL('工時統計_11月.xlsx', '上傳完成', 100, 'var(--success)', 'done')],
+        ],
+        s: [
+          ['Uploading', UPL('設計規範_v3.pdf', '1.1 / 2.4 MB・45%', 45, 'var(--danger)')],
+          ['Complete', UPL('設計規範_v3.pdf', '上傳完成', 100, 'var(--danger)', 'done')],
+          ['Failed', UPL('設計規範_v3.pdf', '上傳失敗', 45, 'var(--danger)', 'fail')],
+        ],
+      },
+      'c-chips': {
+        v: [
+          ['多個條件', '目前套用的篩選，逐一移除', CHIPS(['狀態：進行中', '設計部', '本月到期']), '<app-dept-chips [depts]="depts()" (changed)="depts.set($event)" />'],
+          ['一個條件', '', CHIPS(['設計部'])],
+        ],
+        s: [
+          ['Default', CHIPS(['狀態：進行中', '設計部'])],
+          ['Remove hover', CHIPS(['狀態：進行中', '設計部'], 0)],
+        ],
+      },
+      'c-stat': {
+        wide: true,
+        v: [
+          ['三個指標', '第一個是重點數字（主色）', STATS([['進行中案件', 42, '件', 1], ['本週工時', 316, '小時'], ['逾期工單', 7, '件']]), '<app-stat-row [items]="stats" />'],
+          ['兩個指標', '', STATS([['本週工時', 316, '小時'], ['逾期工單', 7, '件']])],
+        ],
+      },
+      'c-sb': {
+        wide: true,
+        v: [
+          ['四個狀態', '總數＋比例條＋圖例數字', SBAR('件工單', SB4), '<app-segmented-bar [segments]="segments" unit="件工單" />'],
+          ['兩個狀態', '', SBAR('件工單', [['已完成', 32, 'var(--success)'], ['未開始', 8, 'var(--line-strong)']])],
         ],
       },
     };

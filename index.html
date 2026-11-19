@@ -1698,7 +1698,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .shades, .shades-speed { position: fixed; z-index: 100; pointer-events: none; }
 .shades { view-transition-name: shades; }
 .shades-speed { inset: 0; view-transition-name: speed; }
-.shades svg { display: block; width: 100%; height: 100%; overflow: visible; }   /* 不加投影：放大後會在鏡片外暈出一圈深色 */
+.shades svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 12px 16px rgb(0 0 0 / .28)); }
 .shades .sf { fill: none; stroke: var(--sh-edge, #0b1020); stroke-width: 12; }   /* 深色柔邊：模糊時蓋住裁切的硬邊 */
 .shades .rf { animation: sh-rf 1.2s cubic-bezier(.4, 0, .2, 1) both; }
 @keyframes sh-rf { from { transform: skewX(-22deg) translateX(0); } to { transform: skewX(-22deg) translateX(380px); } }
@@ -2288,10 +2288,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       }
       const de = document.documentElement, cls = on ? 'vt-shades-on' : 'vt-shades-off';
       de.classList.add(cls);   // 先加 class：關掉預設的交叉淡入淡出與元件自己的顏色過渡
-      // 柔邊顏色＝淺色模式的頁面底色（鏡片外永遠是淺色，柔邊往外暈開也不會變暗）：戴上時現在是淺色，先讀；拿掉時切換後再讀
+      // 柔邊顏色＝深色模式的頁面底色：拿掉時現在就是深色，先讀；戴上時切換後再讀
       const edgeOf = () => getComputedStyle(de).getPropertyValue('--page').trim();
-      if (on) frame.style.setProperty('--sh-edge', edgeOf());
-      const vt = document.startViewTransition(() => { apply(); if (!on) frame.style.setProperty('--sh-edge', edgeOf()); document.body.append(frame); if (speed) document.body.append(speed); });
+      if (!on) frame.style.setProperty('--sh-edge', edgeOf());
+      const vt = document.startViewTransition(() => { apply(); if (on) frame.style.setProperty('--sh-edge', edgeOf()); document.body.append(frame); if (speed) document.body.append(speed); });
       vt.ready.then(() => {
         const o = { duration: 1200, fill: 'both' };
         // 鏡片內的畫面：戴上裁新畫面（深色）、拿掉裁舊畫面（深色）

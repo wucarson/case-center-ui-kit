@@ -211,6 +211,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 
 /* 按住確認 */
 .hold-c { display: flex; flex-direction: column; align-items: stretch; }
+.hold-h { font-size: calc(12px * var(--fs-k) * var(--rk, 1)); line-height: calc(18px * var(--fs-k) * var(--rk, 1)); color: var(--weak); margin-top: 8px; }
 .hold .fill { position: absolute; inset: 0; background: var(--hold); transform: scaleX(0); transform-origin: 0 50%; z-index: 1; }
 .hold .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: currentColor; transform: scaleX(0); transform-origin: 0 50%; z-index: 1; }
 
@@ -1680,8 +1681,8 @@ h1 { --rk: var(--k-display); font-weight: var(--t-display-w); line-height: var(-
 .cell > header { --rk: var(--k-title); font-weight: var(--t-title-w); line-height: var(--t-title-lh); letter-spacing: var(--t-title-ls); }
 :is(.tab, .dtab, .b2, .btn, .ctl, .chip, .seg span, .rad, .pg, .sd-it, .ps span, .bdg, .tagx) { --rk: var(--k-label); letter-spacing: var(--t-label-ls); }
 :is(.bdg, .tagx, .tab b, .dtab b, .sd-it b, .cell > header em.prop) { --rk: var(--k-label); font-weight: var(--t-label-w); }
-:is(small, .sub, .dp-h, .ppl-c, .pg-s, .ps-l, .res em, .stat span, .stk-c, .pie-r em, .tr.hd, .sd-g, .cell > header em:not(.prop)) { --rk: var(--k-caption); letter-spacing: var(--t-caption-ls); }
-:is(small, .sub, .dp-h) { font-weight: var(--t-caption-w); }
+:is(small, .sub, .hold-h, .dp-h, .ppl-c, .pg-s, .ps-l, .res em, .stat span, .stk-c, .pie-r em, .tr.hd, .sd-g, .cell > header em:not(.prop)) { --rk: var(--k-caption); letter-spacing: var(--t-caption-ls); }
+:is(small, .sub, .hold-h, .dp-h) { font-weight: var(--t-caption-w); }
 :is(.stat b, .sb-h b, .seg-p b, .pie-m b, .tp-col .v, .num) { --rk: var(--k-numeric); font-weight: var(--t-numeric-w); letter-spacing: var(--t-numeric-ls); font-variant-numeric: tabular-nums; }
 .cz { font-size: 14px; line-height: 22px; font-weight: 400; }
 body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration: 0s !important; animation-iteration-count: 1 !important; transition-duration: 0s !important; }
@@ -5334,7 +5335,7 @@ ${stamp()}
     const I_SRCH = '<svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>';
     const TSR = (q, rs, cls = '') => '<div class="tsr"><div class="search' + (cls ? ' ' + cls : '') + '">' + I_SRCH + '<input class="ff-real" placeholder="搜尋公告標題或標籤"' + (q ? ' value="' + q + '"' : '') + '></div>' + (rs ? '<div class="results show">' + rs.map(([a, b], k) => '<div class="res' + (k ? '' : ' hl') + '"><span>' + a + '</span><em>' + b + '</em></div>').join('') + '</div>' : '') + '</div>';
     const I_CHK = '<svg class="ic draw" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-    const HOLDB = (txt, cls = '', p = 0) => { const st = p ? ' style="transform:scaleX(' + p + ')"' : ''; return '<div class="hold-c"><span class="btn hold' + (cls ? ' ' + cls : '') + '"><i class="fill"' + st + '></i><i class="bar"' + st + '></i><span class="roll"><span>' + txt + '</span></span></span><div class="sub">按住 1.5 秒才會送出</div></div>'; };
+    const HOLDB = (txt, cls = '', p = 0) => { const st = p ? ' style="transform:scaleX(' + p + ')"' : ''; return '<div class="hold-c"><span class="btn hold' + (cls ? ' ' + cls : '') + '"><i class="fill"' + st + '></i><i class="bar"' + st + '></i><span class="roll"><span>' + txt + '</span></span></span><div class="hold-h">按住 1.5 秒才會送出</div></div>'; };
     const I_GRIP = '<svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></svg>';
     const DRG_ITEMS = [['名稱', 1, 1], ['狀態', 0, 1], ['負責人', 0, 1], ['到期日', 0, 0]];
     const DRG = (lift = -1, hv = -1) => '<div class="drg"><i class="drg-ph' + (lift >= 0 ? ' show' : '') + '"' + (lift >= 0 ? ' style="transform:translateY(' + lift * 32 + 'px)"' : '') + '></i>' + DRG_ITEMS.map(([n, lk, vis], k) => '<div class="drg-r' + (vis ? ' vis' : '') + (k === lift ? ' lift' : '') + '" style="transform:translateY(' + k * 32 + 'px)">' + (lk ? '<span class="drg-h lk">' + I_LOCK + '</span>' : '<button class="drg-h' + (k === hv ? ' hv' : '') + '" type="button">' + I_GRIP + '</button>') + '<span class="drg-n">' + n + '</span><button class="drg-s" type="button"' + (lk ? ' disabled' : '') + '><span class="tg"><i></i></span></button></div>').join('') + '</div>';

@@ -150,9 +150,6 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 }
 .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
 @keyframes rise { from { transform: none; } }   /* 只用來計時：首次進場全部播完才標記 .ready */
-/* 進場：數位（digiPlay）——卡片上暫時疊一張畫布，套 gooey 濾鏡做流體方塊 */
-.cell.digi { position: relative; }
-.digi-cv { position: absolute; z-index: 5; pointer-events: none; filter: url(#digi-goo); }
 
 .wf { scroll-margin-top: 16px; }   /* 切換分類時捲回這裡 */
 body.hush :is(.spin, .shim, .caret) { animation-play-state: paused; }
@@ -4009,58 +4006,46 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         const step = stepOf(list.length); list.forEach(([c], i) => digiPlay(c.el, D(i * step)));   // 數位：依閱讀順序錯開
       }
     }
-    /* 進場（數位）：卡片上暫時疊一張畫布，用卡片底色的圓塊蓋住內容，從左上角一顆起點往外擴散、每塊縮小消失
-       · 流體：畫布套 gooey 濾鏡（模糊＋透明度收緊），相鄰圓塊像水銀一樣黏在一起、拉絲再斷開，邊緣是平滑曲線
-       · 擴散前緣用平滑起伏（不用逐塊亂數），像流動的液面；淡出途中閃一下線條色（跟著深淺色）
-       · 約 0.7 秒；卡片依閱讀順序錯開（總錯開 ≤ 0.3 秒）；畫布比卡片大一圈再裁回卡片形狀，避免濾鏡把邊緣吃掉
+    /* 進場（數位，像素解碼）：卡片底色與外框維持清楚，只有內容做馬賽克
+       · 內容從卡片中央以圓形往外擴散出來（0–65%），同時馬賽克由大分裂成小：24 → 12 → 6 → 3px → 清楚（跳格切換，數位解碼感）
+       · 像素化用共用的 SVG 濾鏡（每種方塊大小一個），動畫只切換濾鏡，不每幀重算方塊大小
+       · 約 0.8 秒；卡片依閱讀順序錯開（總錯開 ≤ 0.3 秒）
        離場：原地淡出 */
-    let gooReady = false;
-    function ensureGoo() {
-      if (gooReady) return; gooReady = true;
-      document.body.insertAdjacentHTML('beforeend', '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="digi-goo" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="6"/><feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -12"/></filter></svg>');
+    const PX = [24, 12, 6, 3];
+    let pxReady = false;
+    function ensurePx() {
+      if (pxReady) return; pxReady = true;
+      // 每格只取中心 1 個像素（取 2×2 會讓 dilate 偏向最亮的顏色），鋪滿成格點，再用 dilate 把每點撐滿整格
+      const f = (s) => `<filter id="px-${s}" x="0" y="0" width="100%" height="100%"><feFlood x="${s / 2}" y="${s / 2}" width="1" height="1"/><feComposite width="${s}" height="${s}"/><feTile result="a"/><feComposite in="SourceGraphic" in2="a" operator="in"/><feMorphology operator="dilate" radius="${s / 2}"/></filter>`;
+      document.body.insertAdjacentHTML('beforeend', `<svg width="0" height="0" style="position:absolute" aria-hidden="true">${PX.map(f).join('')}</svg>`);
     }
-    function emergeStop(el) { if (el._digi) { cancelAnimationFrame(el._digi.raf); clearTimeout(el._digi.t); el._digi.cv.remove(); el._digi = null; } el.classList.remove('digi'); }
-    function digiPlay(el, delay = 0, dur = D(700)) {
+    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el._em = null; }
+    function digiPlay(el, delay = 0, dur = D(800)) {
       emergeStop(el);
       if (!(dur > 0)) return;
-      ensureGoo();
-      const P = 16, w = el.clientWidth + P * 2, h = el.clientHeight + P * 2, B = 14;   // P：畫布往外多出的邊
-      const cols = Math.ceil(w / B) + 1, rows = Math.ceil(h / B) + 1;
-      const cv = document.createElement('canvas'); cv.className = 'digi-cv'; cv.width = w; cv.height = h;
-      const bw = parseFloat(getComputedStyle(el).borderLeftWidth) || 0;
-      cv.style.cssText = `inset: ${-P - bw}px; width: ${w}px; height: ${h}px; clip-path: inset(${P}px round ${getComputedStyle(el).borderRadius});`;
-      const g = cv.getContext('2d');
-      const cs = getComputedStyle(el), rs = getComputedStyle(document.documentElement);
-      const bg = cs.backgroundColor, am = bg.match(/\/\s*([\d.]+)\s*\)$|rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)/), alpha = am ? +(am[1] ?? am[2]) : 1;   // 取卡片底色的透明度
-      const cover = alpha > 0.9 ? bg : rs.getPropertyValue('--surface').trim();   // 透明或半透明的卡片（Y2K、玻璃）改用卡片色
-      const lit = rs.getPropertyValue('--line-strong').trim();   // 閃色用線條色：淺色時比卡片深、深色時比卡片亮
-      const FW = 0.38, maxD = Math.hypot(cols - 1, rows - 1) || 1, ph = Math.random() * 6.28;
-      // 前緣：距離為主，加上平滑起伏（液面），少量亂數讓邊緣不死板
-      const t = Array.from({ length: cols * rows }, (_, i) => { const x = i % cols, y = Math.floor(i / cols), a = Math.atan2(y, x);
-        return Math.min(1, Math.max(0, Math.hypot(x, y) / maxD * 0.8 + (Math.sin(a * 7 + ph) + Math.sin(a * 3 - ph * 0.7)) * 0.035 + Math.random() * 0.04)); });
-      el.classList.add('digi'); el.append(cv);
-      const start = performance.now() + delay, R0 = B * 0.78;
-      const frame = (now) => {
-        const p = Math.min(1, Math.max(0, (now - start) / dur));
-        g.clearRect(0, 0, w, h);
-        g.fillStyle = cover; g.beginPath();
-        const flash = [];
-        for (let i = 0; i < t.length; i++) {
-          const k = (p - t[i] * (1 - FW)) / FW;   // 這塊的消失進度
-          if (k >= 1) continue;
-          const e = k <= 0 ? 0 : k * k * (3 - 2 * k), rr = R0 * (1 - e);
-          if (rr < 0.5) continue;
-          const x = (i % cols) * B + B / 2, y = Math.floor(i / cols) * B + B / 2;
-          g.moveTo(x + rr, y); g.arc(x, y, rr, 0, 6.2832);
-          if (k > 0 && k < 0.5) flash.push(x, y, rr, Math.sin(Math.PI * k * 2));   // 只在消失前半段閃一下
-        }
-        g.fill();
-        g.fillStyle = lit;
-        for (let j = 0; j < flash.length; j += 4) { g.globalAlpha = flash[j + 3] * 0.3; g.beginPath(); g.arc(flash[j], flash[j + 1], flash[j + 2], 0, 6.2832); g.fill(); }
-        g.globalAlpha = 1;
-        if (p < 1) el._digi.raf = requestAnimationFrame(frame); else emergeStop(el);
-      };
-      el._digi = { cv, raf: requestAnimationFrame(frame), t: 0 };
+      ensurePx();
+      const cr = el.getBoundingClientRect(), cx = cr.left + cr.width / 2, cy = cr.top + cr.height / 2, R = (Math.hypot(cr.width, cr.height) / 2 + 2).toFixed(1);
+      const o = { duration: dur, delay, fill: 'backwards' }, anims = [];
+      [...el.children].forEach((k) => {
+        const kr = k.getBoundingClientRect(), x = (cx - kr.left).toFixed(1), y = (cy - kr.top).toFixed(1);
+        // 擴散＋淡入
+        anims.push(k.animate([
+          { clipPath: `circle(0px at ${x}px ${y}px)`, opacity: 0, easing: 'cubic-bezier(.25, .7, .35, 1)' },
+          { opacity: 1, offset: 0.15 },
+          { clipPath: `circle(${R}px at ${x}px ${y}px)`, opacity: 1, offset: 0.65 },
+          { clipPath: `circle(${R}px at ${x}px ${y}px)`, opacity: 1 },
+        ], o));
+        // 馬賽克跳格：大 → 小 → 清楚（step-end：停在每段的值，到下一個時間點才切換）
+        anims.push(k.animate([
+          { filter: `url(#px-${PX[0]})`, offset: 0, easing: 'step-end' },
+          { filter: `url(#px-${PX[1]})`, offset: 0.22, easing: 'step-end' },
+          { filter: `url(#px-${PX[2]})`, offset: 0.42, easing: 'step-end' },
+          { filter: `url(#px-${PX[3]})`, offset: 0.6, easing: 'step-end' },
+          { filter: 'none', offset: 0.78 },
+          { filter: 'none', offset: 1 },
+        ], o));
+      });
+      el._em = { anims, t: setTimeout(() => emergeStop(el), delay + dur + 50) };
     }
     const replayEnter = () => { hushFor(D(1000)); playEnter(inViewport(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()])), true); };
     wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });

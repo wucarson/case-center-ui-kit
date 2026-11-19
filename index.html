@@ -1687,6 +1687,16 @@ h1 { --rk: var(--k-display); font-weight: var(--t-display-w); line-height: var(-
 :is(.stat b, .sb-h b, .seg-p b, .pie-m b, .tp-col .v, .num) { --rk: var(--k-numeric); font-weight: var(--t-numeric-w); letter-spacing: var(--t-numeric-ls); font-variant-numeric: tabular-nums; }
 .cz { font-size: 14px; line-height: 22px; font-weight: 400; }
 body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration: 0s !important; animation-iteration-count: 1 !important; transition-duration: 0s !important; }
+/* 深淺色切換的墨鏡（shadesSwap）：關掉預設交叉淡入淡出，鏡片＝畫面快照的遮罩，鏡框是暫時元素 */
+.vt-shades-on::view-transition-old(root), .vt-shades-on::view-transition-new(root), .vt-shades-off::view-transition-old(root), .vt-shades-off::view-transition-new(root),
+::view-transition-group(shades), ::view-transition-new(shades), ::view-transition-old(shades) { animation: none; mix-blend-mode: normal; }
+.vt-shades-on::view-transition-old(root), .vt-shades-off::view-transition-old(root) { z-index: 2; }
+.vt-shades-on *, .vt-shades-off * { transition: none !important; }   /* 切換期間停掉元件自己的顏色過渡，新畫面一次到位 */
+::view-transition-group(shades) { z-index: 3; }
+.shades { position: fixed; z-index: 100; pointer-events: none; view-transition-name: shades; }
+.shades svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.shades path { fill: none; stroke: #16181d; stroke-width: 7; stroke-linejoin: round; stroke-linecap: round; }
+.shades path.gl { stroke: rgb(255 255 255 / .5); stroke-width: 3; }
 </style>
 
 <div class="shell">
@@ -2220,7 +2230,47 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const isDark = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
     const paint = () => { const d = isDark(); tb.querySelector('span').textContent = tb.title = d ? '淺色模式' : '深色模式'; tb.querySelector('path').setAttribute('d', d ? SUN : MOON); };
     try { const saved = localStorage.getItem('wall-theme'); if (saved === 'light' || saved === 'dark') root.dataset.theme = saved; } catch (e) {}
-    tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); });
+    /* 深淺色切換的墨鏡動畫（View Transitions）：
+       · 戴上（→ 深色）：一副墨鏡從畫面上方滑下、微微彈一下停在中央，鏡片裡已是深色畫面；接著鏡頭鑽進左鏡片，鏡片放大蓋滿螢幕，鏡框淡出
+       · 拿掉（→ 淺色）：反過來，深色畫面縮回左鏡片成為墨鏡，墨鏡往上滑走，露出淺色畫面
+       · 鏡片＝舊畫面快照的 clip-path（戴上時挖洞露出底下的深色、拿掉時只留鏡片內的深色）；鏡框是一個暫時的元素，給它自己的 view-transition-name，用同一組位移縮放動畫
+       · 約 1.2 秒；不支援 View Transitions 或減少動態效果時直接切換 */
+    const SH_LENS = 'M14 18Q14 10 24 10H130Q140 10 139 22L134 70Q130 100 100 100H52Q22 100 17 72Z';
+    const SH_VB = [300, 108], SH_LC = [77 / 300, 55 / 108];   // 左鏡片中心（比例）
+    // 鏡片的 clip-path：把左右鏡片（右鏡片是左鏡片的鏡像）換算到畫面上的像素座標；只用 M／Q／L／Z，路徑才能內插
+    const SH_PTS = [['M', 14, 18], ['Q', 14, 10, 24, 10], ['L', 130, 10], ['Q', 140, 10, 139, 22], ['L', 134, 70], ['Q', 130, 100, 100, 100], ['L', 52, 100], ['Q', 22, 100, 17, 72]];
+    const shadesClip = (x, y, w, h, hole) => { const P = (px, py) => `${(x + px / 300 * w).toFixed(1)} ${(y + py / 108 * h).toFixed(1)}`;
+      const lens = (m) => SH_PTS.map(([c, ...n]) => c + ' ' + n.reduce((a, v, i) => (i % 2 ? (a.push(P(m ? 300 - n[i - 1] : n[i - 1], v)), a) : a), []).join(' ')).join(' ') + ' Z';
+      // hole：整個畫面挖掉鏡片（evenodd），用在戴上時的舊畫面
+      return hole ? `path(evenodd, "M-20 -20 L${innerWidth + 20} -20 L${innerWidth + 20} ${innerHeight + 20} L-20 ${innerHeight + 20} Z ${lens(false)} ${lens(true)}")` : `path("${lens(false)} ${lens(true)}")`; };
+    function shadesSwap(next, apply) {
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!document.startViewTransition || reduce) { apply(); return; }
+      const W = Math.min(innerWidth * 0.7, 900), H = W * SH_VB[1] / SH_VB[0], left = (innerWidth - W) / 2, top = (innerHeight - H) / 2;
+      const L = [left + W * SH_LC[0], top + H * SH_LC[1]];
+      // 放大到左鏡片蓋滿整個螢幕
+      const dx = Math.max(L[0], innerWidth - L[0]), dy = Math.max(L[1], innerHeight - L[1]), S = 1.35 * Math.max(dx / (0.2 * W), dy / (0.38 * H));
+      // [時間點, 垂直位移, 縮放, 鏡框透明度, easing]
+      const on = [[0, -(innerHeight / 2 + H), 1, 1, 'cubic-bezier(.3, .7, .4, 1)'], [0.32, 14, 1, 1, 'cubic-bezier(.45, 0, .55, 1)'], [0.42, 0, 1, 1, 'linear'], [0.52, 0, 1, 1, 'cubic-bezier(.6, 0, .85, .4)'], [0.78, 0, S * 0.35, 1, 'cubic-bezier(.3, 0, .6, 1)'], [1, 0, S, 0, 'linear']];
+      // 拿掉：時間倒轉，每段的 easing 也要鏡像（cubic-bezier(a,b,c,d) → (1-c,1-d,1-a,1-b)）
+      const rev = (e) => { const m = e.match(/cubic-bezier\(([^)]+)\)/); if (!m) return e; const [a, b, c, d] = m[1].split(',').map(Number); return `cubic-bezier(${1 - c}, ${1 - d}, ${1 - a}, ${1 - b})`; };
+      const steps = next === 'dark' ? on : on.slice().reverse().map(([o, ty, s, op], i, a) => [1 - o, ty, s, op, a[i + 1] ? rev(a[i + 1][4]) : 'linear']);
+      const frame = document.createElement('div');
+      frame.className = 'shades';
+      frame.style.cssText = `left:${left}px;top:${top}px;width:${W}px;height:${H}px`;
+      frame.innerHTML = `<svg viewBox="0 0 300 108" aria-hidden="true"><path d="${SH_LENS}"/><path transform="matrix(-1 0 0 1 300 0)" d="${SH_LENS}"/><path class="br" d="M139 28Q150 18 161 28"/><path class="gl" d="M30 24L60 24M33 32L48 32"/><path class="gl" transform="matrix(-1 0 0 1 300 0)" d="M140 24L110 24"/></svg>`;
+      const de = document.documentElement, cls = next === 'dark' ? 'vt-shades-on' : 'vt-shades-off';
+      de.classList.add(cls);   // 先加 class：關掉預設的交叉淡入淡出
+      const vt = document.startViewTransition(() => { apply(); document.body.append(frame); });
+      vt.ready.then(() => {
+        const dur = 1200, pseudo = '::view-transition-old(root)';   // 只裁舊畫面（新畫面是即時的，在部分合成層上裁不乾淨）：戴上＝舊的淺色挖出鏡片、拿掉＝舊的深色只留鏡片
+        const box = (ty, s) => ({ x: L[0] - (L[0] - left) * s, y: L[1] + ty - (L[1] - top) * s, w: W * s, h: H * s });
+        de.animate(steps.map(([o, ty, s, , e]) => { const b = box(ty, s); return { offset: o, easing: e, clipPath: shadesClip(b.x, b.y, b.w, b.h, next === 'dark') }; }), { duration: dur, pseudoElement: pseudo, fill: 'both' });
+        de.animate(steps.map(([o, ty, s, op, e]) => ({ offset: o, easing: e, opacity: op, transformOrigin: `${L[0] - left}px ${L[1] - top}px`, transform: `translate(${left}px, ${top + ty}px) scale(${s})` })), { duration: dur, pseudoElement: '::view-transition-group(shades)', fill: 'both' });
+      }).catch(() => {});
+      vt.finished.finally(() => { frame.remove(); document.documentElement.classList.remove('vt-shades-on', 'vt-shades-off'); });
+    }
+    tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; shadesSwap(next, () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); }); });
     new MutationObserver(paint).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint);
     paint();

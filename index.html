@@ -4009,12 +4009,13 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       }
     }
     /* 進場（風捲）：像落葉被一陣風捲進來——整群繞一圈，再依序脫離、各自鋪平
-       · 卡片縮小成葉片大小，從螢幕左上角外依閱讀順序一張接一張被吹進來，排成一串沿同一條橢圓軌道繞畫面中央
-       · 每張至少繞約一圈，到了面向自己落點的方向就脫離軌道，順勢飄過去放大、鋪平
+       · 每張卡只露出左上角固定大小的一塊（160×110，看得到標題），所有葉片一樣大、內容不變形；從螢幕左上角外依閱讀順序一張接一張被吹進來，排成一串沿同一條橢圓軌道繞畫面中央
+       · 每張至少繞約一圈，到了面向自己落點的方向就脫離軌道，順勢飄過去，裁切邊飄邊展開成整張卡片、鋪平
+       · 翻轉與移動以葉片中心為支點（transform-origin 設在裁切區中心），不同大小的卡片走同一條軌道
        · 繞圈時葉片持續翻轉（3D），軌道下半圈離觀者近（較大、在前），上半圈遠（較小、在後）
        · 每張間隔最多 55ms、飛行 1.4 秒，全部到位約 2 秒；落點的微幅衝過頭跟「彈跳感」走
        離場（風捲走）：離開的卡片先收到畫面中央疊起來，再繞成一圈旋轉縮小，往右下角飛出畫面並淡出（約 0.6 秒） */
-    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('wind'); el.style.zIndex = ''; el._em = null; }
+    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('wind'); el.style.zIndex = ''; el.style.transformOrigin = ''; el._em = null; }
     const f1 = (v) => v.toFixed(1);
     function windIn(list) {
       const n = list.length, step = n > 1 ? Math.min(55, 600 / (n - 1)) : 0, k = FLY_K[theme.motion.bounce] ?? 1, dur = D(1400);
@@ -4023,24 +4024,29 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       list.forEach(([c, r], i) => {
         const el = c.el; emergeStop(el);
         el.classList.add('wind'); el.style.zIndex = 30;
-        const tx = r.left + r.width / 2, ty = r.top + r.height / 2, leaf = Math.min(0.45, 170 / r.width);
+        const W0 = Math.min(160, r.width), H0 = Math.min(110, r.height), rad = getComputedStyle(el).borderTopLeftRadius || '0px';
+        el.style.transformOrigin = `${W0 / 2}px ${H0 / 2}px`;
+        const tx = r.left + W0 / 2, ty = r.top + H0 / 2, leaf = 0.9;   // 支點（葉片中心）在畫面上的落點
+        const clipLeaf = `inset(0px ${f1(r.width - W0)}px ${f1(r.height - H0)}px 0px round 12px)`;
         // 脫離點：至少繞 300°，之後到面向落點的方向就脫離
         let dir = Math.atan2((ty - cy) / Ry, (tx - cx) / Rx) * 180 / Math.PI; while (dir < A0 + 300) dir += 360;
         const span = dir - A0, kf = [];
-        const T = (x, y, rz, rx, ry, sc) => `perspective(900px) translate(${f1(x - tx)}px, ${f1(y - ty)}px) rotateZ(${f1(rz)}deg) rotateX(${f1(rx)}deg) rotateY(${f1(ry)}deg) scale(${sc.toFixed(3)})`;
-        kf.push({ offset: 0, opacity: 0, zIndex: 30, transform: T(-160, -140, -50, 60, -40, leaf * 0.7), easing: 'cubic-bezier(.3, .5, .6, 1)' });
+        const T = (x, y, rz, rx, ry, sc, clip = clipLeaf) => ({ clipPath: clip, transform: `perspective(900px) translate(${f1(x - tx)}px, ${f1(y - ty)}px) rotateZ(${f1(rz)}deg) rotateX(${f1(rx)}deg) rotateY(${f1(ry)}deg) scale(${sc.toFixed(3)})` });
+        kf.push({ offset: 0, opacity: 0, zIndex: 30, ...T(-160, -140, -50, 60, -40, leaf * 0.7), easing: 'cubic-bezier(.3, .5, .6, 1)' });
         // 軌道：每 30° 一個點，等速（linear）
         const m = Math.ceil(span / 30);
         for (let j = 0; j <= m; j++) {
           const deg = A0 + span * j / m, [x, y, d] = orb(deg), o = 0.14 + 0.64 * j / m;
-          kf.push({ offset: o, ...(j === 0 ? { opacity: 1 } : {}), zIndex: Math.round(40 + d * 20), transform: T(x, y, (deg - A0) * 0.12 + Math.sin(j * 1.1) * 18, Math.sin(j * 1.3) * 50, Math.cos(j * 0.9) * 38, leaf * (1 + d * 0.18)), easing: 'linear' });
+          kf.push({ offset: o, ...(j === 0 ? { opacity: 1 } : {}), zIndex: Math.round(40 + d * 20), ...T(x, y, (deg - A0) * 0.12 + Math.sin(j * 1.1) * 18, Math.sin(j * 1.3) * 50, Math.cos(j * 0.9) * 38, leaf * (1 + d * 0.18)), easing: 'linear' });
         }
         // 脫離：順著切線方向飄出、再落到位置
         const [ex, ey] = orb(dir), tg = (dir + 90) * Math.PI / 180, mx = (ex + Math.cos(tg) * Rx * 0.35 + tx) / 2, my = (ey + Math.sin(tg) * Ry * 0.35 + ty) / 2;
         kf[kf.length - 1].easing = 'cubic-bezier(.35, 0, .55, 1)';
-        kf.push({ offset: 0.89, zIndex: 60, transform: T(mx, my, 8, -16, 12, (leaf + 1) / 2), easing: 'cubic-bezier(.25, .6, .35, 1)' });
-        kf.push({ offset: 0.95, zIndex: 60, transform: T(tx, ty, 1.5 * k, -3 * k, 2 * k, 1 + 0.012 * k), easing: 'cubic-bezier(.45, 0, .55, 1)' });
-        kf.push({ offset: 1, zIndex: 30, transform: T(tx, ty, 0, 0, 0, 1) });
+        // 裁切展開：0.89 展開一半、0.95 整張卡片；最後放寬到卡片外，讓陰影漸漸出現（不會在結束時突然跳出）
+        const half = `inset(0px ${f1((r.width - W0) / 2)}px ${f1((r.height - H0) / 2)}px 0px round ${rad})`;
+        kf.push({ offset: 0.89, zIndex: 60, ...T(mx, my, 8, -16, 12, 0.96, half), easing: 'cubic-bezier(.25, .6, .35, 1)' });
+        kf.push({ offset: 0.95, zIndex: 60, ...T(tx, ty, 1.5 * k, -3 * k, 2 * k, 1 + 0.012 * k, `inset(0px 0px 0px 0px round ${rad})`), easing: 'cubic-bezier(.45, 0, .55, 1)' });
+        kf.push({ offset: 1, zIndex: 30, ...T(tx, ty, 0, 0, 0, 1, `inset(-60px -60px -60px -60px round ${rad})`) });
         const delay = D(60) + D(i * step);
         el._em = { anims: [el.animate(kf, { duration: dur, delay, fill: 'backwards' })], t: setTimeout(() => emergeStop(el), delay + dur + 50) };
       });

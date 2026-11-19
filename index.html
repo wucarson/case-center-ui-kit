@@ -4788,7 +4788,7 @@ const { colors, setPreference } = useTheme();
 
     /* ---- AI／框架元件規格包：元件樣式（從畫面直接抽出、變數已解析）＋每個元件的結構與規格 ---- */
     // 頁面外框（展示牆自己的版面、面板、彈窗、詳細頁）不算元件，排除
-    const AI_EXCL = /^(\.cell\b|\.shell|\.top\b|\.top-a|\.ttl|\.wf\b|\.wall|\.cz|\.ck-|\.cmdk|\.sh\b|\.sh-|\.sp\b|\.sp-|\.dt-|\.doc|\.api|\.a11y|body|html|h1|\.ctl|\.body\b|\.sub\b|#|\*|\.ping|\.held|\.live|\.norise|\.ready|\.curtain|\.dd-k)/;
+    const AI_EXCL = /^(\.cell\b|\.shell|\.top\b|\.top-a|\.ttl|\.wf\b|\.wall|\.cz|\.ck-|\.cmdk|\.sh\b|\.sh-|\.sp\b|\.sp-|\.dt-|\.doc|\.api|\.a11y|body|html|h1|\.ctl|\.body\b|\.sub\b|#|\*|\.ping|\.held|\.live|\.norise|\.ready|\.curtain|\.dd-k|\.ash-cv)/;
     const DARK_PRE = [':root[data-theme="dark"] ', ":root[data-theme='dark'] ", ':root:not([data-theme="light"]) '];
     function aiKeep(sel) {
       // 只切最外層的逗號：:is(a, b) 裡的逗號不能切，否則括號不成對、整段樣式失效

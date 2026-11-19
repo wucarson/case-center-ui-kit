@@ -149,34 +149,8 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
   transition: transform calc(.55s * var(--dur)) var(--spring-soft), box-shadow calc(.4s * var(--dur)) var(--ease);
 }
 .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
-/* 布幕掃描：卡片上暫時蓋一塊同底色的布幕（::after），上方再疊一層光線（::before），兩者用同一組動畫一起往下滑。
-   只動 transform，卡片本身不重畫。卡片的外框、陰影、底色先出現，內容再被掃出來。畫面外的卡片 .norise 直接就位。
-   · 接近等速（頭尾稍緩），像掃描器
-   · 時間依卡片高度（--sd，JS 計算：矮 0.45 秒～高 0.8 秒），每張的掃描速度一致
-   · 光線中間亮、兩端漸隱，上方留 20px 主色餘光 */
 @keyframes rise { from { transform: none; } }   /* 只用來計時：首次進場全部播完才標記 .ready */
-@keyframes curtain-in { from { transform: translateY(0); } to { transform: translateY(calc(100% + 28px)); } }
-:root { --scan-ease: cubic-bezier(.45, .05, .55, .95); }
-.wall:not(.ready) > .cell:not(.norise), .cell.curtain-in { position: relative; }
-.wall:not(.ready) > .cell:not(.norise)::after, .cell.curtain-in::after {
-  content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none; will-change: transform;
-  background: inherit; transform: translateY(calc(100% + 28px));
-}
-/* 光線層：比布幕高 22px 起跳，光線落在布幕上緣（20–22px），上面 0–20px 是餘光 */
-.wall:not(.ready) > .cell:not(.norise)::before, .cell.curtain-in::before {
-  content: ""; position: absolute; inset: -22px 0 22px; z-index: 6; pointer-events: none; will-change: transform;
-  background:
-    linear-gradient(90deg, transparent, var(--primary) 25%, var(--primary) 75%, transparent) 0 20px / 100% 2px no-repeat,
-    linear-gradient(90deg, transparent, var(--glow) 25%, var(--glow) 75%, transparent) 0 17px / 100% 8px no-repeat,
-    linear-gradient(to bottom, transparent, color-mix(in srgb, var(--primary) 14%, transparent)) 0 0 / 100% 20px no-repeat;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
-  transform: translateY(calc(100% + 28px));
-}
-.wall:not(.ready) > .cell:not(.norise)::after, .wall:not(.ready) > .cell:not(.norise)::before { animation: curtain-in var(--sd, calc(.55s * var(--dur))) var(--scan-ease) both; animation-delay: calc(var(--i, 0) * calc(55ms * var(--dur))); }
-.cell.curtain-in::after, .cell.curtain-in::before { animation: curtain-in var(--sd, calc(.55s * var(--dur))) var(--scan-ease) both; animation-delay: var(--cd, 0ms); }
-/* ==== 進場效果「科技」（data-enter="hud"）：描框由 JS 在卡片位置疊畫布處理（digiPlay），卡片的掃描偽元素在這個模式關掉 ==== */
-:root[data-enter="hud"] :is(.wall:not(.ready) > .cell:not(.norise), .cell.curtain-in)::before,
-:root[data-enter="hud"] :is(.wall:not(.ready) > .cell:not(.norise), .cell.curtain-in)::after { display: none; }
+/* 進場：描框（digiPlay）——卡片先隱藏，從左上角逆時針描出外框，描完內容淡入；外框畫在固定於視窗的畫布上，每幀跟著卡片位置 */
 .digi-cv { position: fixed; left: 0; top: 0; z-index: 20; pointer-events: none; will-change: transform; }
 
 .wf { scroll-margin-top: 16px; }   /* 切換分類時捲回這裡 */
@@ -1661,8 +1635,6 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="y2k"] .wf button[aria-pressed="true"] { background: var(--y2k-gloss-s) padding-box, var(--y2k-sel) padding-box, linear-gradient(180deg, color-mix(in srgb, var(--primary) 45%, #ffffff), var(--primary)) border-box; }
 :root[data-ui="y2k"] :is(.wf button, .top-a .ctl):hover { filter: brightness(1.05); }
 
-/* 布幕掃描進場（布幕＝卡片底色 inherit）：玻璃半透明，布幕加同樣的模糊才蓋得住內容 */
-:root[data-ui="glass"] :is(.wall:not(.ready) > .cell:not(.norise), .cell.curtain-in)::after { -webkit-backdrop-filter: blur(22px) saturate(170%); backdrop-filter: blur(22px) saturate(170%); }
 
 /* ==== 頁籤樣式（data-tabs）：列表頁籤與詳情頁籤一起換 ==== */
 :root[data-tabs] .tab { position: relative; z-index: 1; }
@@ -3411,7 +3383,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       color: { primary: '#1f6fff', darkPrimary: '', success: '#12b866', warn: '#f59e0b', danger: '#ef3340', info: '#1846c9', series: ['#1f6fff', '#00a3b8', '#8b5cf6', '#f59e0b'], neutral: 'cool' },
       shape: { card: 20, control: 10, pill: 'full' },
       depth: { shadow: 2, glow: 100, border: 'standard' },
-      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'scan' },
+      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false },
       layout: { cols: 4, density: 'standard', hidden: [], order: [] },
     };
     const UI_KEYS = ['standard', 'flat', 'glass', 'contrast', 'neu', 'swiss', 'y2k'];
@@ -3662,7 +3634,6 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       root.lang = { zh: 'zh-Hant', en: 'en', ja: 'ja', th: 'th', de: 'de' }[LANG];
       const ui = theme.style.ui, tb = theme.style.tabs;
       ui === 'standard' ? root.removeAttribute('data-ui') : root.setAttribute('data-ui', ui);
-      theme.motion.enter === 'hud' ? root.setAttribute('data-enter', 'hud') : root.removeAttribute('data-enter');
       theme.layout.density === 'standard' ? root.removeAttribute('data-density') : root.setAttribute('data-density', theme.layout.density);
       tb === 'auto' ? root.removeAttribute('data-tabs') : root.setAttribute('data-tabs', tb);
       // 自動播放：只在設定真的變了才動播放鈕；第一次載入且是預設（開）時，尊重系統的「減少動態效果」
@@ -3965,7 +3936,6 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     let pending = null;
     const EASE = 'cubic-bezier(.22, 1, .36, 1)';   // 快出慢停，同 CSS 的 --reveal-ease
     const scanMs = (h) => D(Math.min(800, Math.max(450, h * 2.2)));
-    const enterMs = (h) => scanMs(h);   // 掃描依卡片高度；科技（描框）由 digiPlay 自己計時約 0.77 秒   // 掃描時間依卡片高度，速度一致：矮 0.45 秒～高 0.8 秒
     const stepOf = (n) => n > 1 ? Math.min(55, 300 / (n - 1)) : 0;   // 依序出現：每張最多隔 55ms，錯開總長不超過 0.3 秒
     // shift：畫面正在平滑捲動時，用捲完後的位置判斷是否在畫面內
     const inViewport = (list, shift = 0) => list.filter(([, r]) => r.top - shift < innerHeight && r.bottom - shift > 0).sort((a, b) => Math.round(a[1].top - b[1].top) || a[1].left - b[1].left);
@@ -3983,10 +3953,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       if (wf.getBoundingClientRect().top < 0) wf.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
       if (!out.length) return relayout(still);
       hushFor(D(1000));   // 轉場期間暫停卡片內的示範動畫，讓出運算
-      // 離場：原地模糊到 4px 並淡出，0.22 秒，不做光線；畫面內離開的卡片同時進行
-      const digi = theme.motion.enter === 'hud';
-      const exitKf = () => (digi ? [{ opacity: 1 }, { opacity: 0 }] : [{ filter: 'blur(0)', opacity: 1 }, { filter: 'blur(4px)', opacity: 0 }]);   // 科技：離場只淡出
-      pending = { out: out.map(([c]) => [c, c.el.animate(exitKf(c.el), { duration: D(220), easing: EASE, fill: 'forwards' })]) };
+      // 離場：原地淡出 0.22 秒；畫面內離開的卡片同時進行
+      pending = { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]) };
       pending.t = setTimeout(() => { const p = pending; pending = null; relayout(false); p.out.forEach(([c, a]) => { a.cancel(); digiStop(c.el); }); }, D(220));
     }
     function relayout(still) {
@@ -4001,18 +3969,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         const b = before.get(c), a = c.el.getBoundingClientRect();
         if (!b || Math.hypot(b.left - a.left, b.top - a.top) > 320) entering.push([c, a]);
       });
-      // 進場：只有畫面內的卡片照閱讀順序依序出現；布幕由上往下滑開
+      // 進場：只有畫面內的卡片照閱讀順序依序描框出現
       const shift = wf.getBoundingClientRect().top - 16;   // 還在捲回途中的距離
       const list = inViewport(entering, Math.min(0, shift)), step = stepOf(list.length);
       list.forEach(([c, r], i) => {
-        const el = c.el, delay = D(i * step), sd = enterMs(r.height);
-        if (theme.motion.enter === 'hud') { digiPlay(el, delay); return; }
-        el.style.setProperty('--cd', delay + 'ms'); el.style.setProperty('--sd', sd + 'ms');
-        el.classList.remove('curtain-in'); void el.offsetWidth; el.classList.add('curtain-in');
-        clearTimeout(el._cur); el._cur = setTimeout(() => el.classList.remove('curtain-in'), delay + sd + 50);
+        digiPlay(c.el, D(i * step));
       });
     }
-    /* 科技進場（描框）：卡片先隱藏，在它的位置疊一張畫布，從左上角逆時針描出外框（左邊往下 → 底邊往右 → 右邊往上 → 頂邊往左），
+    /* 進場（描框）：卡片先隱藏，在它的位置疊一張畫布，從左上角逆時針描出外框（左邊往下 → 底邊往右 → 右邊往上 → 頂邊往左），
        描完後卡片淡入、外框同時淡出。畫布固定在視窗上，每一幀重新量卡片位置與大小（設定面板開關、捲動、卡片滑過浮起都跟得上，不會錯位留下殘影） */
     function digiStop(el) { const d = el._digi; if (!d) return; cancelAnimationFrame(d.raf); d.cv.remove(); d.fade.cancel(); el._digi = null; }
     function digiPlay(el, delay = 0) {
@@ -4057,18 +4021,6 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       };
       el._digi = { cv, fade, raf: requestAnimationFrame(frame) };
     }
-    function replayEnter() {
-      if (matchMedia('(prefers-reduced-motion: reduce)').matches || theme.motion.reduce) return;
-      const list = inViewport(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()])), step = stepOf(list.length);
-      hushFor(D(1000));
-      list.forEach(([c, r], i) => {
-        const el = c.el, delay = D(i * step), sd = enterMs(r.height);
-        if (theme.motion.enter === 'hud') { digiPlay(el, delay); return; }
-        el.style.setProperty('--cd', delay + 'ms'); el.style.setProperty('--sd', sd + 'ms');
-        el.classList.remove('curtain-in'); void el.offsetWidth; el.classList.add('curtain-in');
-        clearTimeout(el._cur); el._cur = setTimeout(() => el.classList.remove('curtain-in'), delay + sd + 50);
-      });
-    }
     wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });
     { const q = new URLSearchParams(location.search).get('cat'), k = q && (CAT[q] ? q : Object.keys(CAT).find((x) => CAT_LABEL[x] === q)); if (k) wallCat = k; }   // 網址可用內部名稱或畫面上的名稱（例如 表單）
     applyLayout();
@@ -4077,7 +4029,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const shown = cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()]);
       const vis = inViewport(shown), seen = new Set(vis.map(([c]) => c));
       const step = stepOf(vis.length);
-      vis.forEach(([c, r], k) => { c.el.style.setProperty('--i', (k * step / 55).toFixed(3)); c.el.style.setProperty('--sd', enterMs(r.height) + 'ms'); if (theme.motion.enter === 'hud' && !matchMedia('(prefers-reduced-motion: reduce)').matches) digiPlay(c.el, D(k * step)); });   // --i：CSS 以 55ms 為單位
+      vis.forEach(([c, r], k) => { c.el.style.setProperty('--i', (k * step / 55).toFixed(3)); c.el.style.setProperty('--sd', scanMs(r.height) + 'ms'); if (!matchMedia('(prefers-reduced-motion: reduce)').matches) digiPlay(c.el, D(k * step)); });   // --i：CSS 以 55ms 為單位
       shown.forEach(([c]) => { if (!seen.has(c)) c.el.classList.add('norise'); });
     }
     const isDarkNow = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
@@ -4134,8 +4086,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           return { name, thumb: t,
             on: () => (m ? !theme.motion.reduce && theme.motion.speed === m.speed && theme.motion.bounce === m.bounce : theme.motion.reduce),
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
-        })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['scan', '掃描'], ['hud', '科技']].map(([v, n]) => { const on = () => (theme.motion.enter || 'scan') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; }))),
+        }))),
       )];
     }
     function catsEl() {

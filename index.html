@@ -150,7 +150,7 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 }
 .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
 @keyframes rise { from { transform: none; } }   /* 只用來計時：首次進場全部播完才標記 .ready */
-/* 進場：浮出（emergePlay，整張卡片從中央擴散）；離場 .sink 蓋層回到頁面色 */
+/* 進場：浮出（emergePlay，液面由上往下揭開）；離場 .sink 蓋層回到頁面色 */
 .cell.emerge, .cell.sink { position: relative; }
 .cell.emerge { background-clip: padding-box; transform-origin: 50% 100%; }   /* 外框底下不透出卡片色；以底邊為支點拉伸（底邊黏住） */
 .cell.sink::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; z-index: 5; background: var(--page); animation: em-sink var(--em-t) ease-in both; }
@@ -4010,34 +4010,34 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         list.forEach(([c]) => emergePlay(c.el, 0));   // 浮出：所有卡片同時升起
       }
     }
-    /* 進場（浮出）：整張卡片（底色、外框、內容）從中央擴散出來，同時由模糊變清楚（1.2 秒，所有卡片同時）
-       · 0.15–0.9 秒：圓形遮罩從卡片中央放大到整張卡片，模糊 8px → 清楚；同時從低 6px 上浮到 -2px、底邊稍微拉長
-       · 0.9–1.2 秒：落定；陰影等擴散完才長出（避免被圓形遮罩切掉）
-       模糊加在整張卡片上，一張卡只算一次 */
+    /* 進場（液面揭開）：一層液面從卡片上緣往下流，邊緣帶幾道滴落；流過的地方由模糊變清楚（1.2 秒，所有卡片同時）
+       · 0.15–0.9 秒：液面由上往下揭開整張卡片（底色、外框、內容一起），模糊 8px → 清楚；同時從低 6px 上浮落定
+       · 0.9–1.2 秒：落定；陰影等揭開完才長出（避免被遮罩切掉）
+       遮罩高度是卡片的 3 倍：上段不透明、中間是滴落邊緣、下段透明，移動遮罩位置就是液面往下流 */
+    const EM_MASK = 'url("data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 300" preserveAspectRatio="none"><path d="M0 0H100V146C97 146 95 143 92 144C89.5 145 89 168 86.5 172C84 168 84 147 80 145C74 142 70 148 66 147C64 147 64.5 182 62 186C59.5 182 60 150 57 147C50 141 44 146 40 145C38.5 145 39 160 37 163C35 160 35.5 146 33 144C26 139 20 147 15 147C13.5 147 14 174 11.5 177C9 174 9.5 148 7 146C4 144 2 145 0 145Z"/></svg>') + '")';
     function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('emerge', 'sink'); el._em = null; }
     function emergePlay(el, delay = 0) {
       emergeStop(el);
       const T = D(1200);
       if (!(T > 0)) return;
       el.classList.add('emerge');
-      const smooth = 'cubic-bezier(.4, 0, .2, 1)', settle = 'cubic-bezier(.3, 0, .2, 1)', o = { duration: T, delay, fill: 'backwards' };
-      const r = el.getBoundingClientRect(), R = (Math.hypot(r.width, r.height) / 2 + 2).toFixed(1), S = 0.15 / 0.9;
+      const smooth = 'cubic-bezier(.4, 0, .2, 1)', settle = 'cubic-bezier(.3, 0, .2, 1)', o = { duration: T, delay, fill: 'backwards' }, S = 0.15 / 0.9;
+      const m = (y) => ({ maskImage: EM_MASK, webkitMaskImage: EM_MASK, maskRepeat: 'no-repeat', webkitMaskRepeat: 'no-repeat', maskSize: '100% 300%', webkitMaskSize: '100% 300%', maskPosition: `50% ${y}%`, webkitMaskPosition: `50% ${y}%` });
       const anims = [
-        // 擴散＋模糊：0.15 秒起、0.9 秒結束；結束後遮罩自動移除，陰影才不會被切
+        // 液面揭開＋模糊：0.15 秒起、0.9 秒結束；結束後遮罩自動移除，陰影才不會被切
         el.animate([
-          { clipPath: 'circle(0px at 50% 50%)', filter: 'blur(8px)', opacity: 0 },
-          { clipPath: 'circle(0px at 50% 50%)', filter: 'blur(8px)', opacity: 0, offset: S, easing: 'cubic-bezier(.33, .6, .3, 1)' },
-          { opacity: 1, offset: S + 0.15 },
-          { clipPath: `circle(${R}px at 50% 50%)`, filter: 'blur(0px)', opacity: 1 },
+          { ...m(100), filter: 'blur(8px)' },
+          { ...m(100), filter: 'blur(8px)', offset: S, easing: 'cubic-bezier(.45, .05, .35, 1)' },
+          { ...m(0), filter: 'blur(0px)' },
         ], { duration: T * 0.75, delay, fill: 'backwards' }),
-        // 位置與拉伸：擴散時上浮、落定
+        // 位置與拉伸：揭開時上浮、落定
         el.animate([
           { transform: 'translateY(6px) scaleY(1)', easing: smooth },
           { transform: 'translateY(6px) scaleY(1)', offset: 0.125, easing: smooth },
           { transform: 'translateY(-2px) scaleY(1.012)', offset: 0.55, easing: settle },
           { transform: 'none' },
         ], o),
-        // 陰影：擴散完才長出
+        // 陰影：揭開完才長出
         el.animate([{ boxShadow: 'none' }, { boxShadow: 'none', offset: 0.75, easing: settle }, {}], o),
       ];
       el._em = { anims, t: setTimeout(() => emergeStop(el), delay + T + 50) };

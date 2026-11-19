@@ -4010,11 +4010,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       }
     }
     /* 描框（精緻版）：
-       1. 筆尖：線頭一小段較亮、帶淡光暈，畫過的線維持線條色
-       2. 線條對齊卡片外框（1px、圓角相同、位於外框中線），描完後跟卡片交疊淡換，不會疊出雙線
-       3. 時長依外框周長（約 2.6px／ms，0.35～0.6 秒），大小卡片描線速度一致
-       4. 描到 75% 就開始分層進場：卡片底色 → 內容（上移 4px 到位）→ 陰影
-       5. 首尾接上時，起點亮一下當句點 */
+       1. 線條對齊卡片外框（1px、圓角相同、位於外框中線），描完後跟卡片交疊淡換，不會疊出雙線
+       2. 時長依外框周長（約 2.6px／ms，0.35～0.6 秒），大小卡片描線速度一致
+       3. 描到 75% 就開始分層進場：卡片底色 → 內容（上移 4px 到位）→ 陰影
+       4. 首尾接上時，起點亮一下當句點 */
     function digiStop(el) { const d = el._digi; if (!d) return; cancelAnimationFrame(d.raf); d.cv.remove(); d.anims.forEach((a) => a.cancel()); el._digi = null; }
     function digiPlay(el, delay = 0) {
       digiStop(el);
@@ -4059,8 +4058,6 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           g.lineWidth = lw; g.lineCap = 'round';
           // 畫過的線
           g.globalAlpha = fadeOut; g.shadowBlur = 0; g.strokeStyle = line; g.setLineDash([len, L]); g.stroke(path);
-          // 筆尖：最前面 28px，較亮帶光暈；描完後跟著淡出
-          if (e < STROKE) { const hl = Math.min(28, len); g.globalAlpha = 0.85; g.strokeStyle = head; g.shadowColor = head; g.shadowBlur = 6; g.lineWidth = lw + 0.5; g.setLineDash([0, len - hl, hl, L * 2]); g.stroke(path); }
           // 句點：首尾接上時起點亮一下
           const fe = (e - STROKE) / FLASH;
           if (fe > 0 && fe < 1) { g.setLineDash([]); g.globalAlpha = Math.sin(Math.PI * fe) * 0.55; g.fillStyle = head; g.shadowColor = head; g.shadowBlur = 8; g.beginPath(); g.arc(sx, sy, 1.8, 0, Math.PI * 2); g.fill(); }

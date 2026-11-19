@@ -3383,7 +3383,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       color: { primary: '#1f6fff', darkPrimary: '', success: '#12b866', warn: '#f59e0b', danger: '#ef3340', info: '#1846c9', series: ['#1f6fff', '#00a3b8', '#8b5cf6', '#f59e0b'], neutral: 'cool' },
       shape: { card: 20, control: 10, pill: 'full' },
       depth: { shadow: 2, glow: 100, border: 'standard' },
-      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false },
+      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'outline' },
       layout: { cols: 4, density: 'standard', hidden: [], order: [] },
     };
     const UI_KEYS = ['standard', 'flat', 'glass', 'contrast', 'neu', 'swiss', 'y2k'];
@@ -3969,15 +3969,38 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         const b = before.get(c), a = c.el.getBoundingClientRect();
         if (!b || Math.hypot(b.left - a.left, b.top - a.top) > 320) entering.push([c, a]);
       });
-      // 進場：只有畫面內的卡片照閱讀順序依序描框出現
+      // 進場：只有畫面內的卡片（描框照閱讀順序、飛入由中心往外）
       const shift = wf.getBoundingClientRect().top - 16;   // 還在捲回途中的距離
-      const list = inViewport(entering, Math.min(0, shift)), step = stepOf(list.length);
-      list.forEach(([c, r], i) => {
-        digiPlay(c.el, D(i * step));
-      });
+      playEnter(inViewport(entering, Math.min(0, shift)), false);
     }
     /* 進場（描框）：卡片先隱藏，在它的位置疊一張畫布，從左上角逆時針描出外框（左邊往下 → 底邊往右 → 右邊往上 → 頂邊往左），
        描完後卡片淡入、外框同時淡出。畫布固定在視窗上，每一幀重新量卡片位置與大小（設定面板開關、捲動、卡片滑過浮起都跟得上，不會錯位留下殘影） */
+    /* 進場（飛入，仿 iOS 解鎖）：卡片從「畫面中心 → 卡片中心」方向再往外推 18% 的位置、放大 1.25 倍收攏回原位，
+       透明度在前 35% 就到位；用目前的彈性曲線（跟彈跳感設定走）。離畫面中心越遠越晚到（0～80ms），整體像一起收攏 */
+    function flyPlay(el, delay = 0) {
+      const r = el.getBoundingClientRect(), cx = innerWidth / 2, cy = innerHeight / 2;
+      const dx = (r.left + r.width / 2 - cx) * 0.18, dy = (r.top + r.height / 2 - cy) * 0.18;
+      return el.animate([{ transform: `translate(${dx}px, ${dy}px) scale(1.25)`, opacity: 0 }, { opacity: 1, offset: 0.35 }, { transform: 'none', opacity: 1 }], { duration: D(600), delay, easing: SOFT, fill: 'backwards' });
+    }
+    // 背景從 1.08 倍縮回、淡入；標題列與分類列淡入下移到位（只在首次載入與重播時）
+    function flyScene() {
+      const out = 'cubic-bezier(.22, 1, .36, 1)';
+      document.body.animate([{ transform: 'scale(1.08)' }, { transform: 'scale(1)' }], { duration: D(700), easing: out, pseudoElement: '::before', composite: 'add' });   // add：疊在玻璃背景自己的飄移上
+      document.body.animate([{ opacity: 0 }], { duration: D(700), easing: out, pseudoElement: '::before' });                                          // 只給起點：淡回各風格原本的透明度
+      [$('.top'), wf].forEach((e) => e?.animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], { duration: D(400), delay: D(100), easing: out, fill: 'backwards' }));
+    }
+    // 進場入口：依設定播描框或飛入；scene＝連動背景與標題列
+    function playEnter(list, scene) {
+      if (!list.length || matchMedia('(prefers-reduced-motion: reduce)').matches || theme.motion.reduce) return;
+      if (theme.motion.enter === 'fly') {
+        const cx = innerWidth / 2, cy = innerHeight / 2, md = Math.hypot(cx, cy) || 1;
+        list.forEach(([c, r]) => flyPlay(c.el, D(Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md * 80)));
+        if (scene) flyScene();
+      } else {
+        const step = stepOf(list.length);
+        list.forEach(([c], i) => digiPlay(c.el, D(i * step)));
+      }
+    }
     function digiStop(el) { const d = el._digi; if (!d) return; cancelAnimationFrame(d.raf); d.cv.remove(); d.fade.cancel(); el._digi = null; }
     function digiPlay(el, delay = 0) {
       digiStop(el);
@@ -4021,6 +4044,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       };
       el._digi = { cv, fade, raf: requestAnimationFrame(frame) };
     }
+    const replayEnter = () => { hushFor(D(1000)); playEnter(inViewport(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()])), true); };
     wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });
     { const q = new URLSearchParams(location.search).get('cat'), k = q && (CAT[q] ? q : Object.keys(CAT).find((x) => CAT_LABEL[x] === q)); if (k) wallCat = k; }   // 網址可用內部名稱或畫面上的名稱（例如 表單）
     applyLayout();
@@ -4029,7 +4053,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const shown = cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()]);
       const vis = inViewport(shown), seen = new Set(vis.map(([c]) => c));
       const step = stepOf(vis.length);
-      vis.forEach(([c, r], k) => { c.el.style.setProperty('--i', (k * step / 55).toFixed(3)); c.el.style.setProperty('--sd', scanMs(r.height) + 'ms'); if (!matchMedia('(prefers-reduced-motion: reduce)').matches) digiPlay(c.el, D(k * step)); });   // --i：CSS 以 55ms 為單位
+      vis.forEach(([c, r], k) => { c.el.style.setProperty('--i', (k * step / 55).toFixed(3)); c.el.style.setProperty('--sd', scanMs(r.height) + 'ms'); });
+      playEnter(vis, true);   // --i：CSS 以 55ms 為單位
       shown.forEach(([c]) => { if (!seen.has(c)) c.el.classList.add('norise'); });
     }
     const isDarkNow = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
@@ -4086,7 +4111,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           return { name, thumb: t,
             on: () => (m ? !theme.motion.reduce && theme.motion.speed === m.speed && theme.motion.bounce === m.bounce : theme.motion.reduce),
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
-        }))),
+        })),
+          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['outline', '描框'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter || 'outline') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; }))),
       )];
     }
     function catsEl() {

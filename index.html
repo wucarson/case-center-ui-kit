@@ -4022,29 +4022,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
        · 0–20%：仍是背景色（::after 頁面色蓋層、外框透明、沒有陰影），低 6px
        · 20–60%：浮出：卡片色透出，平滑上浮到 -2px、底邊稍微拉長（1.012 倍）再落定；各風格自己的外框慢慢出現
        · 60–100%：落地：陰影落下（Neumorphism 例外：形狀靠陰影，跟著浮出就出現）
-       · 20–85%：整張卡片被水面扭曲（水波濾鏡 16 → 0），浮起時最強、漸漸平靜
-       · 55–100%：內容淡入、0.98 → 1 倍
+       · 50–100%：快到頂點時，內容從卡片中央向外擴散出來（圓形遮罩由小放大）
        液態玻璃不用頁面色蓋層，改由卡片底色與毛玻璃從無到有 */
-    /* 水波：卡片浮出水面時整張被扭曲，波紋慢慢平靜。所有卡片同時升起，共用同一個 SVG 濾鏡，每幀只改一個扭曲值 */
-    const RIPPLE_MAX = 16;
-    const rippleSvg = new DOMParser().parseFromString('<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;width:0;height:0" aria-hidden="true"><filter id="em-ripple" x="-4%" y="-4%" width="108%" height="108%"><feTurbulence type="fractalNoise" baseFrequency="0.012 0.03" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></svg>', 'image/svg+xml').documentElement;
-    document.body.append(document.importNode(rippleSvg, true));
-    const rippleMap = document.querySelector('#em-ripple feDisplacementMap');
-    const rippled = new Set();
-    let rippleRaf = 0;
-    // from：開始平靜的時間點、dur：平靜所需時間；期間扭曲值 16 → 0（減速）
-    function rippleRun(from, dur) {
-      cancelAnimationFrame(rippleRaf);
-      rippleMap.setAttribute('scale', RIPPLE_MAX);
-      const tick = (now) => {
-        const p = Math.min(1, Math.max(0, (now - from) / dur));
-        rippleMap.setAttribute('scale', (RIPPLE_MAX * Math.pow(1 - p, 2)).toFixed(2));
-        if (p < 1) rippleRaf = requestAnimationFrame(tick);
-        else { rippled.forEach((k) => { k.style.filter = ''; }); rippled.clear(); }
-      };
-      rippleRaf = requestAnimationFrame(tick);
-    }
-    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); if (rippled.delete(el)) el.style.filter = ''; el.classList.remove('emerge', 'sink'); el._em = null; }
+    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('emerge', 'sink'); el._em = null; }
     function emergePlay(el, delay = 0) {
       emergeStop(el);
       const T = D(1200);
@@ -4067,16 +4047,17 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         el.animate([{ boxShadow: 'none' }, { boxShadow: 'none', offset: ui === 'neu' ? 0.3 : 0.6, easing: settle }, {}], o),
         ...(ui === 'glass' ? [el.animate([{ backgroundColor: 'transparent', backdropFilter: 'blur(0px) saturate(100%)' }, { backgroundColor: 'transparent', backdropFilter: 'blur(0px) saturate(100%)', offset: 0.2, easing: smooth }, { offset: 0.6 }, {}], o)] : []),
       ];
-      // 整張卡片被水面扭曲：浮起（20%）時波紋最強，到 85% 平靜；內容只淡入
-      el.style.filter = 'url(#em-ripple)'; rippled.add(el);
+      // 內容：快到頂點（50%）時從卡片中央向外擴散——每個子元素用同一個圓心（卡片中心）的圓形遮罩由小放大
+      const cr = el.getBoundingClientRect(), cx = cr.left + cr.width / 2, cy = cr.top + cr.height / 2, R = Math.hypot(cr.width, cr.height) / 2 + 2;
       [...el.children].forEach((k) => {
+        const kr = k.getBoundingClientRect(), x = (cx - kr.left).toFixed(1), y = (cy - kr.top).toFixed(1);
         anims.push(k.animate([
-          { opacity: 0, transform: 'scale(.98)' },
-          { opacity: 0, transform: 'scale(.98)', offset: 0.55, easing: settle },
-          { opacity: 1, transform: 'none' },
+          { clipPath: `circle(0px at ${x}px ${y}px)`, opacity: 0 },
+          { clipPath: `circle(0px at ${x}px ${y}px)`, opacity: 0, offset: 0.5, easing: 'cubic-bezier(.25, .8, .3, 1)' },
+          { opacity: 1, offset: 0.62 },
+          { clipPath: `circle(${R.toFixed(1)}px at ${x}px ${y}px)`, opacity: 1 },
         ], o));
       });
-      rippleRun(performance.now() + delay + T * 0.2, T * 0.65);
       el._em = { anims, t: setTimeout(() => emergeStop(el), delay + T + 50) };
     }
     function sinkPlay(el, T) {

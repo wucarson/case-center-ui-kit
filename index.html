@@ -159,6 +159,7 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 .cell.emerge::after, .cell.sink::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; }
 .cell.emerge::after { z-index: 5; background: var(--page); animation: em-cover var(--em-t) linear var(--em-d) both; }
 .cell.sink::after { z-index: 5; background: var(--page); animation: em-sink var(--em-t) ease-in both; }
+:root[data-ui="glass"] .cell.emerge::after { display: none; }   /* 玻璃改由卡片底色與毛玻璃從無到有，頁面色蓋不住彩色背景 */
 /* 蓋層：前 22% 完全是背景色，浮起時才淡化、透出卡片色（和卡片的位移用同一條緩動，才不會一層先一層後） */
 @keyframes em-cover { 0%, 22% { opacity: 1; animation-timing-function: cubic-bezier(.4, 0, .2, 1); } 70%, 100% { opacity: 0; } }
 @keyframes em-sink { from { opacity: 0; } to { opacity: 1; } }
@@ -4020,8 +4021,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     /* 進場（浮出）：卡片和背景完全同色，浮起時才淡化變色，邊緣像脫膠一樣鬆開（1.2 秒）
        全部用卡片自己的屬性做（不另外疊會錯位的陰影層），一條連續的軌跡、不急轉，才不會有殘影：
        · 0–22%：完全是背景色（頁面色蓋層、外框透明、沒有陰影），低 6px
-       · 22–60%：平滑上浮到 -2px，底邊黏著稍微拉長（高度 1.012 倍），貼地的接觸陰影（drop-shadow）先變深、再隨上浮變鬆變淡——這就是脫膠
-       · 60–100%：平滑落定；卡片原本的陰影從無慢慢長出來，內容淡入上移到位 */
+       · 22–60%：平滑上浮到 -2px，底邊黏著稍微拉長（高度 1.012 倍），卡片色透出，沒有陰影
+       · 60–100%：平滑落定；快停住時陰影才落下（Neumorphism 例外，陰影跟著浮起），內容淡入上移到位 */
     function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('emerge', 'sink'); el._em = null; }
     function emergePlay(el, delay = 0) {
       emergeStop(el);
@@ -4029,7 +4030,6 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       if (!(T > 0)) return;
       el.style.setProperty('--em-t', T + 'ms'); el.style.setProperty('--em-d', delay + 'ms');
       el.classList.add('emerge');
-      const glue = getComputedStyle(el).getPropertyValue('--em-lo').trim() || 'rgba(0,0,0,.3)';
       const smooth = 'cubic-bezier(.4, 0, .2, 1)', settle = 'cubic-bezier(.3, 0, .2, 1)';
       const anims = [
         // 位置與拉伸：一上一落，兩段都是平滑的 S 曲線
@@ -4039,20 +4039,12 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           { transform: 'translateY(-2px) scaleY(1.012)', offset: 0.6, easing: settle },
           { transform: 'none' },
         ], { duration: T, delay, fill: 'backwards' }),
-        // 脫膠：貼地的接觸陰影先收緊變深（黏住），隨上浮放鬆、變淡到消失
-        el.animate([
-          { filter: `drop-shadow(0 0 0 transparent)` },
-          { filter: `drop-shadow(0 0 0 transparent)`, offset: 0.2, easing: smooth },
-          { filter: `drop-shadow(0 1px 1.5px ${glue})`, offset: 0.36, easing: smooth },
-          { filter: `drop-shadow(0 6px 10px transparent)`, offset: 0.72 },
-          { filter: `drop-shadow(0 6px 10px transparent)` },
-        ], { duration: T, delay, fill: 'backwards' }),
-        // 外框與卡片原本的陰影：從 38% 起慢慢長出來（終點就是各風格自己的值）
-        el.animate([
-          { borderColor: 'transparent', boxShadow: 'none' },
-          { borderColor: 'transparent', boxShadow: 'none', offset: 0.38, easing: settle },
-          {},
-        ], { duration: T, delay, fill: 'backwards' }),
+        // 外框：浮起時慢慢出現
+        el.animate([{ borderColor: 'transparent' }, { borderColor: 'transparent', offset: 0.38, easing: settle }, {}], { duration: T, delay, fill: 'backwards' }),
+        // 卡片陰影：浮起過程不要陰影，快落定（70%）才落下；Neumorphism 的形狀靠陰影，跟著浮起（38%）就出現
+        el.animate([{ boxShadow: 'none' }, { boxShadow: 'none', offset: theme.style.ui === 'neu' ? 0.38 : 0.7, easing: settle }, {}], { duration: T, delay, fill: 'backwards' }),
+        // 液態玻璃：不用頁面色蓋層（蓋不住彩色背景），改成卡片本身的底色與毛玻璃從無到有
+        ...(theme.style.ui === 'glass' ? [el.animate([{ backgroundColor: 'transparent', backdropFilter: 'blur(0px) saturate(100%)' }, { backgroundColor: 'transparent', backdropFilter: 'blur(0px) saturate(100%)', offset: 0.22, easing: smooth }, { offset: 0.7 }, {}], { duration: T, delay, fill: 'backwards' })] : []),
       ];
       [...el.children].forEach((k) => anims.push(k.animate([{ opacity: 0, transform: 'translateY(3px)' }, { opacity: 0, transform: 'translateY(3px)', offset: 0.45, easing: settle }, { opacity: 1, transform: 'none' }], { duration: T, delay, fill: 'backwards' })));
       el._em = { anims, t: setTimeout(() => emergeStop(el), delay + T + 50) };

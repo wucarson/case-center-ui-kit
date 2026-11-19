@@ -3975,26 +3975,35 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     }
     /* 進場（描框）：卡片先隱藏，在它的位置疊一張畫布，從左上角逆時針描出外框（左邊往下 → 底邊往右 → 右邊往上 → 頂邊往左），
        描完後卡片淡入、外框同時淡出。畫布固定在視窗上，每一幀重新量卡片位置與大小（設定面板開關、捲動、卡片滑過浮起都跟得上，不會錯位留下殘影） */
-    /* 進場（飛入，仿 iOS 解鎖）：卡片從「畫面中心 → 卡片中心」方向再往外推 18% 的位置、放大 1.25 倍收攏回原位，
-       透明度在前 35% 就到位；用目前的彈性曲線（跟彈跳感設定走）。離畫面中心越遠越晚到（0～80ms），整體像一起收攏 */
+    /* 進場（飛入，仿 iOS 解鎖）：卡片從「畫面中心 → 卡片中心」方向再往外推 32% 的位置、放大 1.5 倍收攏，
+       衝過頭（縮到 0.95、位置越過原位 3%）再彈回 1.02、停在 1。回彈幅度跟「彈跳感」設定走（無＝只收攏不回彈）。
+       透明度在前 30% 就到位；離畫面中心越遠越晚到（0～140ms） */
+    const FLY_K = { none: 0, soft: 0.6, standard: 1, strong: 1.6 };
     function flyPlay(el, delay = 0) {
-      const r = el.getBoundingClientRect(), cx = innerWidth / 2, cy = innerHeight / 2;
-      const dx = (r.left + r.width / 2 - cx) * 0.18, dy = (r.top + r.height / 2 - cy) * 0.18;
-      return el.animate([{ transform: `translate(${dx}px, ${dy}px) scale(1.25)`, opacity: 0 }, { opacity: 1, offset: 0.35 }, { transform: 'none', opacity: 1 }], { duration: D(600), delay, easing: SOFT, fill: 'backwards' });
+      const r = el.getBoundingClientRect(), vx = r.left + r.width / 2 - innerWidth / 2, vy = r.top + r.height / 2 - innerHeight / 2;
+      const k = FLY_K[theme.motion.bounce] ?? 1, T = (m, sc) => `translate(${vx * m}px, ${vy * m}px) scale(${sc})`;
+      const kf = k > 0
+        ? [{ transform: T(0.32, 1.5), opacity: 0, easing: 'cubic-bezier(.2, .75, .3, 1)' },
+           { opacity: 1, offset: 0.3 },
+           { transform: T(-0.03 * k, 1 - 0.05 * k), offset: 0.55, easing: 'cubic-bezier(.45, 0, .55, 1)' },
+           { transform: T(0.01 * k, 1 + 0.02 * k), offset: 0.78, easing: 'cubic-bezier(.45, 0, .55, 1)' },
+           { transform: 'none', opacity: 1 }]
+        : [{ transform: T(0.32, 1.5), opacity: 0, easing: 'cubic-bezier(.22, 1, .36, 1)' }, { opacity: 1, offset: 0.3 }, { transform: 'none', opacity: 1 }];
+      return el.animate(kf, { duration: D(750), delay, fill: 'backwards' });
     }
-    // 背景從 1.08 倍縮回、淡入；標題列與分類列淡入下移到位（只在首次載入與重播時）
+    // 背景從 1.15 倍縮回、淡入；標題列與分類列淡入、從上方 12px 移到位（只在首次載入與重播時）
     function flyScene() {
       const out = 'cubic-bezier(.22, 1, .36, 1)';
-      document.body.animate([{ transform: 'scale(1.08)' }, { transform: 'scale(1)' }], { duration: D(700), easing: out, pseudoElement: '::before', composite: 'add' });   // add：疊在玻璃背景自己的飄移上
-      document.body.animate([{ opacity: 0 }], { duration: D(700), easing: out, pseudoElement: '::before' });                                          // 只給起點：淡回各風格原本的透明度
-      [$('.top'), wf].forEach((e) => e?.animate([{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], { duration: D(400), delay: D(100), easing: out, fill: 'backwards' }));
+      document.body.animate([{ transform: 'scale(1.15)' }, { transform: 'scale(1)' }], { duration: D(800), easing: out, pseudoElement: '::before', composite: 'add' });   // add：疊在玻璃背景自己的飄移上
+      document.body.animate([{ opacity: 0 }], { duration: D(800), easing: out, pseudoElement: '::before' });                                          // 只給起點：淡回各風格原本的透明度
+      [$('.top'), wf].forEach((e) => e?.animate([{ opacity: 0, transform: 'translateY(-12px)' }, { opacity: 1, transform: 'none' }], { duration: D(500), delay: D(120), easing: out, fill: 'backwards' }));
     }
     // 進場入口：依設定播描框或飛入；scene＝連動背景與標題列
     function playEnter(list, scene) {
       if (!list.length || matchMedia('(prefers-reduced-motion: reduce)').matches || theme.motion.reduce) return;
       if (theme.motion.enter === 'fly') {
         const cx = innerWidth / 2, cy = innerHeight / 2, md = Math.hypot(cx, cy) || 1;
-        list.forEach(([c, r]) => flyPlay(c.el, D(Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md * 80)));
+        list.forEach(([c, r]) => flyPlay(c.el, D(Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md * 140)));
         if (scene) flyScene();
       } else {
         const step = stepOf(list.length);

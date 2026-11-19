@@ -4014,8 +4014,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         list.forEach(([c, r]) => flyPlay(c.el, D(Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md * 140)));
         if (scene) flyScene();
       } else {
-        const step = stepOf(list.length);
-        list.forEach(([c], i) => emergePlay(c.el, D(i * step)));
+        list.forEach(([c]) => emergePlay(c.el, 0));   // 浮出：所有卡片同時升起
       }
     }
     /* 進場（浮出）：卡片和背景完全同色，浮起時才淡化變色，邊緣像脫膠一樣鬆開（1.2 秒）

@@ -1691,7 +1691,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .vt-shades-on::view-transition-old(root), .vt-shades-on::view-transition-new(root), .vt-shades-off::view-transition-old(root), .vt-shades-off::view-transition-new(root),
 ::view-transition-group(shades), ::view-transition-new(shades), ::view-transition-old(shades),
 ::view-transition-group(speed), ::view-transition-new(speed), ::view-transition-old(speed) { animation: none; mix-blend-mode: normal; }
-.vt-shades-off::view-transition-old(root) { z-index: 2; }   /* 拿掉：舊的深色在上、只留鏡片內 */
+.vt-shades-off::view-transition-old(root) { z-index: 2; }
+.vt-shades-on::view-transition-new(root) { opacity: 0; }   /* 快照拍完到動畫開始前的空檔：深色新畫面先藏起來，不會整個閃出 */
+::view-transition-group(shades), ::view-transition-group(speed) { opacity: 0; }   /* 拿掉：舊的深色在上、只留鏡片內 */
 .vt-shades-on *, .vt-shades-off * { transition: none !important; }   /* 切換期間停掉元件自己的顏色過渡，新畫面一次到位 */
 ::view-transition-group(shades) { z-index: 3; }
 ::view-transition-group(speed) { z-index: 4; }
@@ -2252,7 +2254,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       return pts; };
     const SH_L = shOval(SH_LC[0], false), SH_R = shOval(SH_LC[1], false);   // 兩片同一個繞行方向：重疊處是聯集（不是洞）
     const shD = (pts) => pts.map(([m, c, e]) => (m ? `M${m[0].toFixed(2)} ${m[1].toFixed(2)}` : '') + `Q${c[0].toFixed(2)} ${c[1].toFixed(2)} ${e[0].toFixed(2)} ${e[1].toFixed(2)}`).join('') + 'Z';
+    let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途
     function shadesSwap(next, apply) {
+      if (shBusy) return;
       const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (!document.startViewTransition || reduce) { apply(); return; }
       const W = Math.min(innerWidth * 0.56, 760), H = W * 108 / 300, left = (innerWidth - W) / 2, top = innerHeight / 2 - H * SH_LY / 108;
@@ -2291,6 +2295,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       // 柔邊顏色＝深色模式的頁面底色：拿掉時現在就是深色，先讀；戴上時切換後再讀
       const edgeOf = () => getComputedStyle(de).getPropertyValue('--page').trim();
       if (!on) frame.style.setProperty('--sh-edge', edgeOf());
+      shBusy = true;
       const vt = document.startViewTransition(() => { apply(); if (on) frame.style.setProperty('--sh-edge', edgeOf()); document.body.append(frame); if (speed) document.body.append(speed); });
       vt.ready.then(() => {
         const o = { duration: 1200, fill: 'both' };
@@ -2308,7 +2313,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         // 速度線：約 0.56 秒起射出，每條略為錯開，往外飛、拉長後淡掉
         if (speed) speed.querySelectorAll('line').forEach((ln, i) => ln.animate([{ opacity: 0, transform: 'translate(0, 0)' }, { opacity: 0.75, offset: 0.25 }, { opacity: 0, transform: `translate(${ln.dataset.dx}px, ${ln.dataset.dy}px)` }], { duration: 420, delay: 560 + (i % 7) * 14, easing: 'cubic-bezier(.3, .2, .7, 1)', fill: 'both' }));
       }).catch(() => {});
-      vt.finished.finally(() => { frame.remove(); speed?.remove(); de.classList.remove('vt-shades-on', 'vt-shades-off'); });
+      vt.finished.finally(() => { frame.remove(); speed?.remove(); de.classList.remove('vt-shades-on', 'vt-shades-off'); shBusy = false; });
     }
     tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; shadesSwap(next, () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); }); });
     new MutationObserver(paint).observe(root, { attributes: true, attributeFilter: ['data-theme'] });

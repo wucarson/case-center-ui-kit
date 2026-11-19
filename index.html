@@ -4022,7 +4022,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
        · 0–20%：仍是背景色（::after 頁面色蓋層、外框透明、沒有陰影），低 6px
        · 20–60%：浮出：卡片色透出，平滑上浮到 -2px、底邊稍微拉長（1.012 倍）再落定；各風格自己的外框慢慢出現
        · 60–100%：落地：陰影落下（Neumorphism 例外：形狀靠陰影，跟著浮出就出現）
-       · 50–100%：快到頂點時，內容從卡片中央向外擴散出來（圓形遮罩由小放大）
+       · 0.6 秒起：快到頂點時，內容從卡片中央向外慢慢擴散出來（圓形遮罩由小放大，約 1.1 秒），同時由模糊 8px 變清楚
        液態玻璃不用頁面色蓋層，改由卡片底色與毛玻璃從無到有 */
     function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('emerge', 'sink'); el._em = null; }
     function emergePlay(el, delay = 0) {
@@ -4051,14 +4051,15 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const cr = el.getBoundingClientRect(), cx = cr.left + cr.width / 2, cy = cr.top + cr.height / 2, R = Math.hypot(cr.width, cr.height) / 2 + 2;
       [...el.children].forEach((k) => {
         const kr = k.getBoundingClientRect(), x = (cx - kr.left).toFixed(1), y = (cy - kr.top).toFixed(1);
+        // 擴散放慢：內容的時長拉長到卡片的 1.4 倍（約 1.7 秒），從 0.6 秒開始、約 1.1 秒擴散完；同時由模糊變清楚
         anims.push(k.animate([
-          { clipPath: `circle(0px at ${x}px ${y}px)`, opacity: 0 },
-          { clipPath: `circle(0px at ${x}px ${y}px)`, opacity: 0, offset: 0.5, easing: 'cubic-bezier(.25, .8, .3, 1)' },
-          { opacity: 1, offset: 0.62 },
-          { clipPath: `circle(${R.toFixed(1)}px at ${x}px ${y}px)`, opacity: 1 },
-        ], o));
+          { clipPath: `circle(0px at ${x}px ${y}px)`, opacity: 0, filter: 'blur(8px)' },
+          { clipPath: `circle(0px at ${x}px ${y}px)`, opacity: 0, filter: 'blur(8px)', offset: 0.36, easing: 'cubic-bezier(.33, .6, .3, 1)' },
+          { opacity: 1, offset: 0.5 },
+          { clipPath: `circle(${R.toFixed(1)}px at ${x}px ${y}px)`, opacity: 1, filter: 'blur(0px)' },
+        ], { duration: T * 1.4, delay, fill: 'backwards' }));
       });
-      el._em = { anims, t: setTimeout(() => emergeStop(el), delay + T + 50) };
+      el._em = { anims, t: setTimeout(() => emergeStop(el), delay + T * 1.4 + 50) };
     }
     function sinkPlay(el, T) {
       emergeStop(el);

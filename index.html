@@ -4009,18 +4009,24 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         list.forEach(([c], i) => digiPlay(c.el, D(i * step)));
       }
     }
-    function digiStop(el) { const d = el._digi; if (!d) return; cancelAnimationFrame(d.raf); d.cv.remove(); d.fade.cancel(); el._digi = null; }
+    /* 描框（精緻版）：
+       1. 筆尖：線頭一小段較亮、帶淡光暈，畫過的線維持線條色
+       2. 線條對齊卡片外框（1px、圓角相同、位於外框中線），描完後跟卡片交疊淡換，不會疊出雙線
+       3. 時長依外框周長（約 2.6px／ms，0.35～0.6 秒），大小卡片描線速度一致
+       4. 描到 75% 就開始分層進場：卡片底色 → 內容（上移 4px 到位）→ 陰影
+       5. 首尾接上時，起點亮一下當句點 */
+    function digiStop(el) { const d = el._digi; if (!d) return; cancelAnimationFrame(d.raf); d.cv.remove(); d.anims.forEach((a) => a.cancel()); el._digi = null; }
     function digiPlay(el, delay = 0) {
       digiStop(el);
-      const STROKE = D(450), FADE = D(320), total = STROKE + FADE;
-      if (!(total > 0)) return;
-      const dpr = Math.min(2, devicePixelRatio || 1), lw = 1.5, o = lw / 2;
+      if (!(D(1) > 0)) return;
+      const dpr = Math.min(2, devicePixelRatio || 1), lw = 1, o = lw / 2;
       const cv = document.createElement('canvas'); cv.className = 'digi-cv';
       document.body.append(cv);
       const g = cv.getContext('2d');
-      const line = getComputedStyle(document.documentElement).getPropertyValue('--line-strong').trim();   // 線條色：跟著深淺色、底色走
-      let w = 0, h = 0, path = null, L = 0;
-      const build = (nw, nh) => {   // 卡片大小變了才重建畫布與路徑
+      const rs = getComputedStyle(document.documentElement);
+      const line = rs.getPropertyValue('--line-strong').trim(), head = rs.getPropertyValue('--ink').trim();
+      let w = 0, h = 0, path = null, L = 0, sx = 0, sy = 0;
+      const build = (nw, nh) => {
         w = nw; h = nh;
         cv.width = Math.ceil(w * dpr); cv.height = Math.ceil(h * dpr); cv.style.width = w + 'px'; cv.style.height = h + 'px';
         g.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -4031,11 +4037,16 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         path.lineTo(o + W - R, o + H); path.arcTo(o + W, o + H, o + W, o + H - R, R);
         path.lineTo(o + W, o + R); path.arcTo(o + W, o, o + W - R, o, R);
         path.lineTo(o + R, o); path.arcTo(o, o, o, o + R, R);
-        L = 2 * (W - 2 * R) + 2 * (H - 2 * R) + 2 * Math.PI * R;
+        L = 2 * (W - 2 * R) + 2 * (H - 2 * R) + 2 * Math.PI * R; sx = o; sy = o + R;
       };
-      // 卡片本體：描框期間隱藏（含延遲等待），描完淡入
-      const fade = el.animate([{ opacity: 0 }, { opacity: 0, offset: STROKE / total, easing: 'cubic-bezier(.22, 1, .36, 1)' }, { opacity: 1 }], { duration: total, delay, fill: 'backwards' });
+      const r0 = el.getBoundingClientRect(); build(r0.width, r0.height);
+      const STROKE = D(Math.min(600, Math.max(350, L / 2.6))), FADE = D(340), FLASH = D(220), total = STROKE + FADE;
       const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+      // 分層進場：描到 75% 開始。底色（整張卡片）→ 內容 → 陰影
+      const t0 = STROKE * 0.75, out = 'cubic-bezier(.22, 1, .36, 1)';
+      const anims = [el.animate([{ opacity: 0 }, { opacity: 0, offset: t0 / total, easing: out }, { opacity: 1 }], { duration: total, delay, fill: 'backwards' })];
+      [...el.children].forEach((k) => anims.push(k.animate([{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: FADE, delay: delay + t0 + D(60), easing: out, fill: 'backwards' })));
+      anims.push(el.animate([{ boxShadow: 'none' }], { duration: FADE, delay: delay + t0 + D(120), easing: out, fill: 'backwards' }));
       const start = performance.now() + delay;
       const frame = (now) => {
         const r = el.getBoundingClientRect();
@@ -4044,13 +4055,20 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         const e = now - start;
         g.clearRect(0, 0, w, h);
         if (e >= 0) {
-          g.globalAlpha = 1 - Math.min(1, Math.max(0, (e - STROKE) / FADE));
-          g.lineWidth = lw; g.lineCap = 'round'; g.strokeStyle = line;
-          g.setLineDash([L * ease(Math.min(1, e / STROKE)), L]); g.stroke(path);
+          const len = L * ease(Math.min(1, e / STROKE)), fadeOut = 1 - Math.min(1, Math.max(0, (e - STROKE) / FADE));
+          g.lineWidth = lw; g.lineCap = 'round';
+          // 畫過的線
+          g.globalAlpha = fadeOut; g.shadowBlur = 0; g.strokeStyle = line; g.setLineDash([len, L]); g.stroke(path);
+          // 筆尖：最前面 28px，較亮帶光暈；描完後跟著淡出
+          if (e < STROKE) { const hl = Math.min(28, len); g.globalAlpha = 0.85; g.strokeStyle = head; g.shadowColor = head; g.shadowBlur = 6; g.lineWidth = lw + 0.5; g.setLineDash([0, len - hl, hl, L * 2]); g.stroke(path); }
+          // 句點：首尾接上時起點亮一下
+          const fe = (e - STROKE) / FLASH;
+          if (fe > 0 && fe < 1) { g.setLineDash([]); g.globalAlpha = Math.sin(Math.PI * fe) * 0.55; g.fillStyle = head; g.shadowColor = head; g.shadowBlur = 8; g.beginPath(); g.arc(sx, sy, 1.8, 0, Math.PI * 2); g.fill(); }
+          g.shadowBlur = 0; g.globalAlpha = 1;
         }
         if (e < total) el._digi.raf = requestAnimationFrame(frame); else digiStop(el);
       };
-      el._digi = { cv, fade, raf: requestAnimationFrame(frame) };
+      el._digi = { cv, anims, raf: requestAnimationFrame(frame) };
     }
     const replayEnter = () => { hushFor(D(1000)); playEnter(inViewport(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()])), true); };
     wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });

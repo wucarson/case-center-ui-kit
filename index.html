@@ -149,31 +149,10 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
   transition: transform calc(.55s * var(--dur)) var(--spring-soft), box-shadow calc(.4s * var(--dur)) var(--ease);
 }
 .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
-/* 布幕掃描：卡片上暫時蓋一塊同底色的布幕（::after），上方再疊一層光線（::before），兩者用同一組動畫一起往下滑。
-   只動 transform，卡片本身不重畫。卡片的外框、陰影、底色先出現，內容再被掃出來。畫面外的卡片 .norise 直接就位。
-   · 接近等速（頭尾稍緩），像掃描器
-   · 時間依卡片高度（--sd，JS 計算：矮 0.45 秒～高 0.8 秒），每張的掃描速度一致
-   · 光線中間亮、兩端漸隱，上方留 20px 主色餘光 */
 @keyframes rise { from { transform: none; } }   /* 只用來計時：首次進場全部播完才標記 .ready */
-@keyframes curtain-in { from { transform: translateY(0); } to { transform: translateY(calc(100% + 28px)); } }
-:root { --scan-ease: cubic-bezier(.45, .05, .55, .95); }
-.wall:not(.ready) > .cell:not(.norise), .cell.curtain-in { position: relative; }
-.wall:not(.ready) > .cell:not(.norise)::after, .cell.curtain-in::after {
-  content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none; will-change: transform;
-  background: inherit; transform: translateY(calc(100% + 28px));
-}
-/* 光線層：比布幕高 22px 起跳，光線落在布幕上緣（20–22px），上面 0–20px 是餘光 */
-.wall:not(.ready) > .cell:not(.norise)::before, .cell.curtain-in::before {
-  content: ""; position: absolute; inset: -22px 0 22px; z-index: 6; pointer-events: none; will-change: transform;
-  background:
-    linear-gradient(90deg, transparent, var(--primary) 25%, var(--primary) 75%, transparent) 0 20px / 100% 2px no-repeat,
-    linear-gradient(90deg, transparent, var(--glow) 25%, var(--glow) 75%, transparent) 0 17px / 100% 8px no-repeat,
-    linear-gradient(to bottom, transparent, color-mix(in srgb, var(--primary) 14%, transparent)) 0 0 / 100% 20px no-repeat;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
-  transform: translateY(calc(100% + 28px));
-}
-.wall:not(.ready) > .cell:not(.norise)::after, .wall:not(.ready) > .cell:not(.norise)::before { animation: curtain-in var(--sd, calc(.55s * var(--dur))) var(--scan-ease) both; animation-delay: calc(var(--i, 0) * calc(55ms * var(--dur))); }
-.cell.curtain-in::after, .cell.curtain-in::before { animation: curtain-in var(--sd, calc(.55s * var(--dur))) var(--scan-ease) both; animation-delay: var(--cd, 0ms); }
+/* 進場：風捲（windIn／windOut）——動畫期間以卡片中心翻轉，z-index 由程式設定 */
+.cell.wind { position: relative; transform-origin: 50% 50%; backface-visibility: hidden; }
+
 .wf { scroll-margin-top: 16px; }   /* 切換分類時捲回這裡 */
 body.hush :is(.spin, .shim, .caret) { animation-play-state: paused; }
 :root { --reveal-ease: cubic-bezier(.22, 1, .36, 1); }
@@ -1286,6 +1265,9 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .cz-menu.end { width: 180px; }
 .cz-menu.down { top: calc(100% + 6px); bottom: auto; }
 .cz-hint { margin: -6px 0 0; font-size: 12px; line-height: 18px; color: var(--weak); }
+.cz-locked { opacity: .45; }
+.cz-locked :is(button, input) { cursor: not-allowed; }
+.cz-locked + .cz-hint { margin-top: 6px; }
 .cz-tprev { padding: 6px 10px; border-radius: var(--r-sm); background: var(--surface); color: var(--ink); line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cz-tgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: auto auto; grid-auto-flow: column; gap: 4px 6px; }
 .cz-tgrid > span { font-size: 11px; font-weight: 600; color: var(--weak); }
@@ -1484,6 +1466,176 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="flat"] { --hi: transparent; --sheen: transparent; --card-edge: var(--line); }
 :root[data-ui="flat"] .cell:hover { transform: none; border-color: var(--line-strong); }
 
+/* Neumorphism：卡片與頁面同色，層次只靠雙向柔和陰影（亮側混白、暗側混深，跟著底色色調走） */
+:root[data-ui="neu"], :root[data-theme="dark"][data-ui="neu"], :root:not([data-theme="light"])[data-ui="neu"] {
+  --card: var(--page); --tile: var(--page); --field: var(--page);
+  --card-edge: transparent; --hi: transparent; --sheen: transparent;
+  --shadow: -3px -3px 8.5px var(--neu-hi), 3px 3px 8.5px var(--neu-lo);
+  --shadow-lift: -5px -5px 12px var(--neu-hi), 5px 5px 12px var(--neu-lo);
+  --raise: -2px -2px 4.25px var(--neu-hi), 2px 2px 4.25px var(--neu-lo);
+  --inset: inset 2px 2px 3.4px var(--neu-lo), inset -2px -2px 3.4px var(--neu-hi);
+}
+:root[data-ui="neu"] { --neu-hi: color-mix(in srgb, color-mix(in srgb, var(--page) 12%, #ffffff) 96%, transparent); --neu-lo: color-mix(in srgb, color-mix(in srgb, var(--page) 74%, var(--ink)) 72%, transparent); }   /* 模糊半徑收小，顏色加深一點補回立體感 */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --neu-hi: color-mix(in srgb, color-mix(in srgb, var(--page) 86%, #ffffff) 96%, transparent); --neu-lo: color-mix(in srgb, var(--page) 50%, #000000); } }
+:root[data-theme="dark"][data-ui="neu"] { --neu-hi: color-mix(in srgb, color-mix(in srgb, var(--page) 86%, #ffffff) 96%, transparent); --neu-lo: color-mix(in srgb, var(--page) 50%, #000000); }
+:root[data-ui="neu"] :is(.b2, .top-a .ctl, .search, .dd-t, .tp-f, .dp-f, .stat, .nt, .tp-col .v) { border-color: transparent; }
+:root[data-ui="neu"] .seg { background: var(--card); }
+:root[data-ui="neu"] .tg { background: color-mix(in srgb, var(--card) 62%, var(--line-strong)); }   /* 關閉的開關底槽要看得到（深色時特別需要） */
+:root[data-ui="neu"] :is(.btn, .top-a .ctl) { box-shadow: var(--raise); }
+:root[data-ui="neu"] .cell:hover { transform: none; }
+
+/* Swiss Style：無陰影、直角，卡片上方一條粗實線；Helvetica 系字型、標題加粗收字距、英文標示大寫 */
+:root[data-ui="swiss"], :root[data-theme="dark"][data-ui="swiss"], :root:not([data-theme="light"])[data-ui="swiss"] {
+  --hi: transparent; --sheen: transparent; --card-edge: transparent;
+  --shadow: none; --shadow-lift: none; --raise: none; --inset: none;
+  --font: 'Helvetica Neue', Helvetica, Arial, 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+}
+:root[data-ui="swiss"] .cell { border-style: solid; border-width: 3px 1px 1px; border-color: var(--ink) var(--line-strong) var(--line-strong); border-radius: 0; }   /* 細線框＋頂端粗線，卡片區塊清楚 */
+:root[data-ui="swiss"] .cell:hover { transform: none; }
+:root[data-ui="swiss"] .cell > header { font-weight: 700; }
+:root[data-ui="swiss"] .cell > header em { text-transform: uppercase; letter-spacing: .08em; font-size: 11px; }
+:root[data-ui="swiss"] h1 { font-weight: 700; letter-spacing: -.03em; }
+
+/* Y2K 鉻金屬：金屬漸層卡片＋上半亮面＋鉻邊（雙層背景做漸層外框，不用偽元素）；主色填色加亮面；珠光背景 */
+:root[data-ui="y2k"], :root[data-theme="dark"][data-ui="y2k"], :root:not([data-theme="light"])[data-ui="y2k"] {
+  --grad: linear-gradient(180deg, color-mix(in srgb, var(--primary) 52%, #ffffff) 0%, var(--primary) 50%, color-mix(in srgb, var(--primary) 82%, #000000) 100%);
+  --grad-v: var(--grad);
+}
+:root[data-ui="y2k"] {
+  --y2k-fill: linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 88%, var(--page)) 60%, color-mix(in srgb, var(--surface) 72%, var(--page)) 100%);   /* 下緣仍比頁面亮 */
+  --y2k-gloss: linear-gradient(180deg, rgb(255 255 255 / .75), rgb(255 255 255 / 0) 28%);
+  --y2k-rim: linear-gradient(180deg, #ffffff, color-mix(in srgb, var(--line-strong) 55%, #ffffff) 45%, var(--line-strong));
+  --y2k-btn: linear-gradient(180deg, var(--surface), color-mix(in srgb, var(--surface) 70%, var(--page)));
+  --y2k-glow: 0 10px 28px -10px rgb(60 90 150 / .4);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] {
+  --y2k-fill: linear-gradient(180deg, color-mix(in srgb, var(--surface) 92%, #ffffff) 0%, var(--surface) 60%, color-mix(in srgb, var(--surface) 65%, var(--page)) 100%);
+  --y2k-gloss: linear-gradient(180deg, rgb(255 255 255 / .09), rgb(255 255 255 / 0) 28%);
+  --y2k-rim: linear-gradient(180deg, color-mix(in srgb, var(--line-strong) 45%, #ffffff), var(--line-strong) 45%, var(--line));
+  --y2k-btn: linear-gradient(180deg, color-mix(in srgb, var(--surface) 80%, #ffffff), var(--surface));
+  --y2k-glow: 0 0 26px -8px color-mix(in srgb, var(--primary) 55%, transparent);
+} }
+:root[data-theme="dark"][data-ui="y2k"] {
+  --y2k-fill: linear-gradient(180deg, color-mix(in srgb, var(--surface) 92%, #ffffff) 0%, var(--surface) 60%, color-mix(in srgb, var(--surface) 65%, var(--page)) 100%);
+  --y2k-gloss: linear-gradient(180deg, rgb(255 255 255 / .09), rgb(255 255 255 / 0) 28%);
+  --y2k-rim: linear-gradient(180deg, color-mix(in srgb, var(--line-strong) 45%, #ffffff), var(--line-strong) 45%, var(--line));
+  --y2k-btn: linear-gradient(180deg, color-mix(in srgb, var(--surface) 80%, #ffffff), var(--surface));
+  --y2k-glow: 0 0 26px -8px color-mix(in srgb, var(--primary) 55%, transparent);
+}
+:root[data-ui="y2k"] :is(.b2, .top-a .ctl) { border: 1px solid transparent; background: var(--y2k-btn) padding-box, var(--y2k-rim) border-box; }
+:root[data-ui="y2k"] .btn { box-shadow: inset 0 1px 0 rgb(255 255 255 / .65), 0 8px 18px -8px var(--glow); }
+:root[data-ui="y2k"] body::before {
+  opacity: 1; -webkit-mask-image: none; mask-image: none;
+  background:
+    radial-gradient(60vw 42vw at 12% 0%, color-mix(in srgb, rgb(186 218 255) 55%, var(--page)), transparent 70%),
+    radial-gradient(50vw 40vw at 92% 18%, color-mix(in srgb, rgb(255 204 238) 50%, var(--page)), transparent 70%),
+    radial-gradient(64vw 50vw at 50% 100%, color-mix(in srgb, rgb(206 196 255) 50%, var(--page)), transparent 70%);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] body::before {
+  background:
+    radial-gradient(60vw 42vw at 12% 0%, color-mix(in srgb, rgb(70 140 255 / .22) 60%, transparent), transparent 70%),
+    radial-gradient(50vw 40vw at 92% 18%, color-mix(in srgb, rgb(255 90 200 / .14) 60%, transparent), transparent 70%),
+    radial-gradient(64vw 50vw at 50% 100%, color-mix(in srgb, rgb(140 110 255 / .18) 60%, transparent), transparent 70%);
+} }
+:root[data-theme="dark"][data-ui="y2k"] body::before {
+  background:
+    radial-gradient(60vw 42vw at 12% 0%, color-mix(in srgb, rgb(70 140 255 / .22) 60%, transparent), transparent 70%),
+    radial-gradient(50vw 40vw at 92% 18%, color-mix(in srgb, rgb(255 90 200 / .14) 60%, transparent), transparent 70%),
+    radial-gradient(64vw 50vw at 50% 100%, color-mix(in srgb, rgb(140 110 255 / .18) 60%, transparent), transparent 70%);
+}
+:root[data-ui="y2k"] h1 { background: linear-gradient(180deg, #5d6b82 0%, #1c2433 48%, #6f7d94 52%, #2a3343 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] h1 { background-image: linear-gradient(180deg, #ffffff 0%, #c6d3ea 48%, #8ea0bf 52%, #e9f0ff 100%); } }
+:root[data-theme="dark"][data-ui="y2k"] h1 { background-image: linear-gradient(180deg, #ffffff 0%, #c6d3ea 48%, #8ea0bf 52%, #e9f0ff 100%); }
+
+/* ---- 三種新風格的細節（11-18 第二輪）：卡片裡的元件、彈出層、互動狀態一起跟上 ---- */
+/* Neumorphism：彈出層同底色＋浮起；按下凹陷；深色加極淡上緣亮線讓卡片邊界看得到 */
+:root[data-ui="neu"] .ff-i { border-color: transparent; }
+:root[data-ui="neu"] :is(.dd-m, .ms-p, .mn-p, .ip-p, .dp-p, .toast, .dl-d) { background: var(--card); -webkit-backdrop-filter: none; backdrop-filter: none; border-color: transparent; box-shadow: var(--shadow-lift); }
+/* 指南：光源固定左上；滑過上浮 1px、按下回到原位並翻成凹陷；轉場 160ms */
+:root[data-ui="neu"] :is(.btn, .b2) { transition: box-shadow 160ms ease, transform 160ms ease, background-color 160ms ease, color 160ms ease; }
+:root[data-ui="neu"] :is(.btn, .b2, .top-a .ctl):is(:hover, .hv) { transform: translateY(-1px); }
+:root[data-ui="neu"] :is(.btn, .b2, .top-a .ctl):is(:active, .is-press) { transform: translateY(0); box-shadow: inset 4px 4px 8px var(--neu-lo), inset -4px -4px 8px var(--neu-hi); }
+/* 開關：軌道是凹槽、把手是凸起的圓 */
+:root[data-ui="neu"] .tg i { box-shadow: -1px -1px 3px var(--neu-hi), 2px 2px 4px var(--neu-lo); }
+/* 焦點：2px 主色實線環，不用柔和光暈（欄位維持凹陷再加外環） */
+:root[data-ui="neu"] :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+:root[data-ui="neu"] :is(.search.focus, .ff.focus .ff-i, .dd.open .dd-t, .ms.open .ms-t) { border-color: transparent; box-shadow: var(--inset), 0 0 0 2px var(--primary); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 8.5px var(--neu-hi), 3px 3px 8.5px var(--neu-lo), inset 0 1px 0 rgb(255 255 255 / .05); } }
+:root[data-theme="dark"][data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 8.5px var(--neu-hi), 3px 3px 8.5px var(--neu-lo), inset 0 1px 0 rgb(255 255 255 / .05); }
+
+/* Swiss Style：字級拉開層次、卡片不填色只留頂線、互動用底線與色塊 */
+:root[data-ui="swiss"] body::before { display: none; }
+:root[data-ui="swiss"] .cell { background: var(--surface); transition: border-color calc(.2s * var(--dur)) var(--ease); }
+:root[data-ui="swiss"] .cell:hover { border-top-color: var(--primary); }
+:root[data-ui="swiss"] .cell > header { font-size: calc(15px * var(--fs-k)); line-height: 1.3; letter-spacing: -.01em; color: var(--ink); }
+:root[data-ui="swiss"] .cell > header em { font-size: 10.5px; font-weight: 600; color: var(--weak); }
+:root[data-ui="swiss"] .stat b { font-size: calc(32px * var(--fs-k)); font-weight: 700; letter-spacing: -.03em; }
+:root[data-ui="swiss"] .seg-p b { font-weight: 700; letter-spacing: -.03em; }
+:root[data-ui="swiss"] :is(.b2:hover, .b2.hv) { background: var(--soft); border-color: var(--ink); }
+:root[data-ui="swiss"] .tab:not(.on):hover { text-decoration: underline 2px; text-underline-offset: 6px; }
+
+/* Y2K 鉻金屬：元件也換成同材質（細鉻邊、內凹亮面）；彈出層霧面鉻；滑過按鈕亮面掃過一次 */
+:root[data-ui="y2k"] :where(.search, .dd-t, .tp-f, .dp-f, .ff-i) { background-image: linear-gradient(180deg, rgb(110 130 165 / .1), rgb(110 130 165 / 0) 45%); }
+:root[data-ui="y2k"] :where(.search, .dd-t, .tp-f, .dp-f, .ff-i):not(.focus):not(.open):not(:focus-within) { border-color: color-mix(in srgb, var(--line-strong) 70%, #ffffff); }
+:root[data-ui="y2k"] :is(.tab, .dtab):not(.on) b { background: var(--y2k-btn); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line-strong) 70%, transparent), inset 0 1px 0 rgb(255 255 255 / .5); }
+:root[data-ui="y2k"] :is(.dd-m, .ms-p, .mn-p, .ip-p, .dp-p, .toast, .dl-d) { background: color-mix(in srgb, var(--surface) 70%, transparent); -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6); border-color: color-mix(in srgb, #ffffff 65%, var(--line)); box-shadow: inset 0 1px 0 rgb(255 255 255 / .55), var(--shadow-pop); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] :is(.dd-m, .ms-p, .mn-p, .ip-p, .dp-p, .toast, .dl-d) { border-color: rgb(255 255 255 / .14); box-shadow: inset 0 1px 0 rgb(255 255 255 / .08), var(--shadow-pop); } }
+:root[data-theme="dark"][data-ui="y2k"] :is(.dd-m, .ms-p, .mn-p, .ip-p, .dp-p, .toast, .dl-d) { border-color: rgb(255 255 255 / .14); box-shadow: inset 0 1px 0 rgb(255 255 255 / .08), var(--shadow-pop); }
+:root[data-ui="y2k"] { --y2k-sweep: linear-gradient(110deg, transparent 38%, rgb(255 255 255 / .5) 50%, transparent 62%); }
+:root[data-ui="y2k"] .btn { background: var(--y2k-sweep) -160% 0 / 260% 100% no-repeat, var(--grad); transition: background-position calc(.8s * var(--dur)) var(--ease); }
+:root[data-ui="y2k"] .btn:is(:hover, .hv) { background-position: 160% 0, 0 0; }
+:root[data-ui="y2k"] .b2 { background: var(--y2k-sweep) -160% 0 / 260% 100% no-repeat padding-box, var(--y2k-btn) padding-box, var(--y2k-rim) border-box; transition: background-position calc(.8s * var(--dur)) var(--ease); }
+:root[data-ui="y2k"] .b2:is(:hover, .hv) { background-position: 160% 0, 0 0, 0 0; }
+
+/* Y2K 第三輪：均勻鉻邊＋內側白線；滑過轉全息彩虹邊（鉻邊三個色標註冊成顏色，才能平滑過渡）；選中狀態與分類標籤、工具列改鉻泡泡 */
+@property --y2k-r1 { syntax: '<color>'; inherits: false; initial-value: #ffffff; }
+@property --y2k-r2 { syntax: '<color>'; inherits: false; initial-value: #ccd4df; }
+@property --y2k-r3 { syntax: '<color>'; inherits: false; initial-value: #9ba7b9; }
+:root[data-ui="y2k"] {
+  --y2k-in1: rgb(255 255 255 / .95); --y2k-in2: rgb(255 255 255 / .4);
+  --y2k-gloss-s: linear-gradient(180deg, rgb(255 255 255 / .7), rgb(255 255 255 / 0) 50%);
+  --y2k-pill: linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 82%, var(--page)) 48%, color-mix(in srgb, var(--surface) 55%, var(--page)) 52%, var(--surface) 100%);
+  --y2k-pill-sh: inset 0 1px 0 #ffffff, inset 0 0 0 1px rgb(150 165 190 / .55), 0 2px 6px -2px rgb(60 90 150 / .35);
+  --y2k-sel: linear-gradient(180deg, color-mix(in srgb, var(--primary) 8%, #ffffff), color-mix(in srgb, var(--primary) 20%, #ffffff));
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] {
+  --y2k-in1: rgb(255 255 255 / .12); --y2k-in2: rgb(255 255 255 / .04);
+  --y2k-gloss-s: linear-gradient(180deg, rgb(255 255 255 / .12), rgb(255 255 255 / 0) 50%);
+  --y2k-pill: linear-gradient(180deg, color-mix(in srgb, var(--surface) 72%, #ffffff) 0%, color-mix(in srgb, var(--surface) 86%, #ffffff) 48%, var(--surface) 52%, color-mix(in srgb, var(--surface) 80%, #ffffff) 100%);
+  --y2k-pill-sh: inset 0 1px 0 rgb(255 255 255 / .22), inset 0 0 0 1px rgb(255 255 255 / .08), 0 2px 8px -2px rgb(0 0 0 / .5);
+  --y2k-sel: linear-gradient(180deg, color-mix(in srgb, var(--primary) 26%, #1a2133), color-mix(in srgb, var(--primary) 14%, #1a2133));
+} }
+:root[data-theme="dark"][data-ui="y2k"] {
+  --y2k-in1: rgb(255 255 255 / .12); --y2k-in2: rgb(255 255 255 / .04);
+  --y2k-gloss-s: linear-gradient(180deg, rgb(255 255 255 / .12), rgb(255 255 255 / 0) 50%);
+  --y2k-pill: linear-gradient(180deg, color-mix(in srgb, var(--surface) 72%, #ffffff) 0%, color-mix(in srgb, var(--surface) 86%, #ffffff) 48%, var(--surface) 52%, color-mix(in srgb, var(--surface) 80%, #ffffff) 100%);
+  --y2k-pill-sh: inset 0 1px 0 rgb(255 255 255 / .22), inset 0 0 0 1px rgb(255 255 255 / .08), 0 2px 8px -2px rgb(0 0 0 / .5);
+  --y2k-sel: linear-gradient(180deg, color-mix(in srgb, var(--primary) 26%, #1a2133), color-mix(in srgb, var(--primary) 14%, #1a2133));
+}
+/* 卡片：均勻鉻邊（上亮下暗）＋內側白線 */
+:root[data-ui="y2k"] .cell {
+  --y2k-r1: #ffffff; --y2k-r2: color-mix(in srgb, var(--line-strong) 55%, #ffffff); --y2k-r3: var(--line-strong);
+  border: 1px solid transparent;
+  background: var(--y2k-gloss) padding-box, var(--y2k-fill) padding-box, linear-gradient(180deg, var(--y2k-r1), var(--y2k-r2) 45%, var(--y2k-r3)) border-box;
+  box-shadow: inset 0 1px 0 var(--y2k-in1), inset 0 0 0 1px var(--y2k-in2), var(--y2k-glow);
+  transition: transform calc(.55s * var(--dur)) var(--spring-soft), box-shadow calc(.4s * var(--dur)) var(--ease), --y2k-r1 calc(.5s * var(--dur)) var(--ease), --y2k-r2 calc(.5s * var(--dur)) var(--ease), --y2k-r3 calc(.5s * var(--dur)) var(--ease);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] .cell { --y2k-r1: color-mix(in srgb, var(--line-strong) 45%, #ffffff); --y2k-r2: var(--line-strong); --y2k-r3: var(--line); } }
+:root[data-theme="dark"][data-ui="y2k"] .cell { --y2k-r1: color-mix(in srgb, var(--line-strong) 45%, #ffffff); --y2k-r2: var(--line-strong); --y2k-r3: var(--line); }
+/* 滑過：外框轉成淡淡的全息色（藍→粉→紫） */
+:root[data-ui="y2k"] .cell:hover { --y2k-r1: #9fdcff; --y2k-r2: #f3b4ff; --y2k-r3: #b4a6ff; box-shadow: inset 0 1px 0 var(--y2k-in1), inset 0 0 0 1px var(--y2k-in2), var(--y2k-glow), 0 18px 36px -14px rgb(60 90 150 / .35); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"][data-ui="y2k"] .cell:hover { --y2k-r1: #6fd0ff; --y2k-r2: #e58cff; --y2k-r3: #9b86ff; } }
+:root[data-theme="dark"][data-ui="y2k"][data-ui="y2k"] .cell:hover { --y2k-r1: #6fd0ff; --y2k-r2: #e58cff; --y2k-r3: #9b86ff; }
+/* 牆上卡片原本的轉場（#wall > .cell）權重較高，要在同一層補上鉻邊色標的過渡 */
+:root[data-ui="y2k"] #wall > .cell { transition: transform calc(.55s * var(--dur)) var(--spring-soft), box-shadow calc(.4s * var(--dur)) var(--ease), border-color calc(.25s * var(--dur)) var(--ease), --y2k-r1 calc(.5s * var(--dur)) var(--ease), --y2k-r2 calc(.5s * var(--dur)) var(--ease), --y2k-r3 calc(.5s * var(--dur)) var(--ease); }
+/* 選中狀態：鉻泡泡（分段、期間選擇、詳情頁籤） */
+:root[data-ui="y2k"][data-ui="y2k"] :is(.seg i, .ps > i), :root[data-ui="y2k"][data-ui="y2k"]:not([data-tabs="underline"]) .dt > .ind { background: var(--y2k-pill); box-shadow: var(--y2k-pill-sh); }
+/* 分類標籤、工具列：亮面＋鉻邊 */
+:root[data-ui="y2k"] :is(.wf button, .top-a .ctl) { border: 1px solid transparent; background: var(--y2k-gloss-s) padding-box, var(--y2k-btn) padding-box, var(--y2k-rim) border-box; box-shadow: inset 0 1px 0 var(--y2k-in1), 0 2px 6px -3px rgb(60 90 150 / .3); }
+:root[data-ui="y2k"] .wf button[aria-pressed="true"] { background: var(--y2k-gloss-s) padding-box, var(--y2k-sel) padding-box, linear-gradient(180deg, color-mix(in srgb, var(--primary) 45%, #ffffff), var(--primary)) border-box; }
+:root[data-ui="y2k"] :is(.wf button, .top-a .ctl):hover { filter: brightness(1.05); }
+
+
 /* ==== 頁籤樣式（data-tabs）：列表頁籤與詳情頁籤一起換 ==== */
 :root[data-tabs] .tab { position: relative; z-index: 1; }
 :root[data-tabs="underline"] .dt { padding: 0; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: none; box-shadow: none; }
@@ -1508,6 +1660,9 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 .cz-style i[data-ui="standard"] { border-radius: 8px; border-color: var(--line); box-shadow: 0 3px 8px rgb(30 70 150 / .25); }
 .cz-style i[data-ui="glass"] { border-radius: 9px; border-color: rgb(255 255 255 / .8); background: linear-gradient(135deg, rgb(255 255 255 / .75), rgb(255 255 255 / .25)), linear-gradient(135deg, var(--c1), var(--c3)); box-shadow: 0 3px 8px rgb(30 70 150 / .2); }
 .cz-style i[data-ui="contrast"] { border: 2px solid var(--ink); border-radius: 6px; box-shadow: none; }
+.cz-style i[data-ui="neu"] { border: 0; border-radius: 8px; background: var(--page); box-shadow: -3px -3px 6px color-mix(in srgb, var(--page) 20%, #fff), 3px 3px 6px rgb(110 125 150 / .45); }
+.cz-style i[data-ui="swiss"] { border: 0; border-top: 4px solid var(--ink); border-radius: 0; background: var(--surface); box-shadow: none; }
+.cz-style i[data-ui="y2k"] { border: 1px solid #aeb9cb; border-radius: 11px; background: linear-gradient(180deg, rgb(255 255 255 / .9), transparent 50%), linear-gradient(135deg, #f4f7fb, #c3ccda 50%, #eef2f8); box-shadow: 0 3px 8px rgb(60 90 150 / .25); }
 .cz-style i[data-ui="flat"] { border-radius: 4px; border-color: var(--line-strong); background: var(--soft); box-shadow: none; }
 /* ==== 字型七級（對齊 Material 3）：大標 display、標題 headline、子標題 title、內文 body、標籤 label、說明 caption、數字 numeric ==== */
 body { --rk: var(--k-body); font-size: calc(14px * var(--fs-k) * var(--rk)); line-height: calc(14px * var(--fs-k) * var(--rk) * var(--t-body-lh)); font-weight: var(--t-body-w); letter-spacing: var(--t-body-ls); }
@@ -3228,10 +3383,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       color: { primary: '#1f6fff', darkPrimary: '', success: '#12b866', warn: '#f59e0b', danger: '#ef3340', info: '#1846c9', series: ['#1f6fff', '#00a3b8', '#8b5cf6', '#f59e0b'], neutral: 'cool' },
       shape: { card: 20, control: 10, pill: 'full' },
       depth: { shadow: 2, glow: 100, border: 'standard' },
-      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false },
+      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'wind' },
       layout: { cols: 4, density: 'standard', hidden: [], order: [] },
     };
-    const UI_KEYS = ['standard', 'flat', 'glass', 'contrast'];
+    const UI_KEYS = ['standard', 'flat', 'glass', 'contrast', 'neu', 'swiss', 'y2k'];
     /* 字型：依「字型」與目前預覽語言組出字型堆疊；思源字型從 Google Fonts 載入 */
     let LANG = 'zh';
     try { const l = localStorage.getItem('wall-lang'); if (['zh', 'en', 'ja', 'th', 'de'].includes(l)) LANG = l; } catch (e) {}
@@ -3438,6 +3593,23 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     styleEl.id = 'theme-vars';
     // 放在 body 最後：claude.ai 會把頁面包進 <body>，原本的樣式表也在 body 裡；覆寫要排在它後面才會贏
     document.body.appendChild(styleEl);
+    // 外觀設定只作用在元件牆：設定面板（.cz）重新宣告樣式表原本的預設變數，主題引擎與風格寫在 :root 的覆寫傳不進去
+    {
+      const light = [], dark = [];
+      const take = (st, out) => { for (const k of st) if (k.startsWith('--')) out.push(`${k}: ${st.getPropertyValue(k).trim()};`); };
+      for (const sh of document.styleSheets) {
+        if (sh.ownerNode === styleEl) continue;
+        let rules; try { rules = sh.cssRules; } catch (e) { continue; }
+        for (const r of rules) {
+          if (r.selectorText === ':root') take(r.style, light);
+          else if (r.selectorText === ':root[data-theme="dark"]') take(r.style, dark);
+        }
+      }
+      const czDefaults = document.createElement('style');
+      czDefaults.id = 'cz-defaults';
+      czDefaults.textContent = `.cz { ${light.join(' ')} }\n@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cz { ${dark.join(' ')} } }\n:root[data-theme="dark"] .cz { ${dark.join(' ')} }`;
+      document.body.appendChild(czDefaults);
+    }
 
     let theme = clone(DEFAULT);
     let lastAuto = null;
@@ -3616,14 +3788,18 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     document.addEventListener('click', (e) => { if (!e.target.closest('.cz-split')) closeMenus(); });
 
     /* ---- 風格：外觀＋各自的滑感（形狀、層次、動態一起換；之後仍可個別微調） ---- */
+    // 風格只換外觀（形狀、陰影、光暈）；動畫速度與彈跳感由「動畫」設定決定，換風格不會改
     const STYLES = [
-      ['standard', '標準', { shape: DEFAULT.shape, depth: DEFAULT.depth, motion: { speed: 1, bounce: 'standard' } }],
-      ['flat', '扁平', { shape: { card: 12, control: 8, pill: 'soft' }, depth: { shadow: 0, glow: 0, border: 'standard' }, motion: { speed: 1.25, bounce: 'none' } }],
-      ['glass', '液態玻璃', { shape: { card: 24, control: 12, pill: 'full' }, depth: { shadow: 1, glow: 80, border: 'subtle' }, motion: { speed: 0.75, bounce: 'soft' } }],
-      ['contrast', '高對比', { shape: { card: 16, control: 8, pill: 'full' }, depth: { shadow: 1, glow: 0, border: 'standard' }, motion: { speed: 1.25, bounce: 'none' } }],
+      ['standard', '標準', { shape: DEFAULT.shape, depth: DEFAULT.depth }],
+      ['flat', '扁平', { shape: { card: 12, control: 8, pill: 'soft' }, depth: { shadow: 0, glow: 0, border: 'standard' } }],
+      ['glass', '液態玻璃', { shape: { card: 24, control: 12, pill: 'full' }, depth: { shadow: 1, glow: 80, border: 'subtle' } }],
+      ['contrast', '高對比', { shape: { card: 16, control: 8, pill: 'full' }, depth: { shadow: 1, glow: 0, border: 'standard' } }],
+      ['neu', 'Neumorphism', { shape: { card: 20, control: 14, pill: 'full' }, depth: { shadow: 2, glow: 0, border: 'standard' } }],
+      ['swiss', 'Swiss Style', { shape: { card: 0, control: 2, pill: 'soft' }, depth: { shadow: 0, glow: 0, border: 'strong' } }],
+      ['y2k', 'Y2K 鉻金屬', { shape: { card: 28, control: 16, pill: 'full' }, depth: { shadow: 2, glow: 80, border: 'standard' } }],
     ];
     const stylesEl = () => el('div', { class: 'cz-styles', role: 'group', 'aria-label': '介面風格' }, STYLES.map(([key, name, s]) => el('button', { type: 'button', class: 'cz-style', 'aria-pressed': String(theme.style.ui === key), onclick: () => {
-      theme.style.ui = key; theme.shape = clone(s.shape); theme.depth = clone(s.depth); theme.motion.speed = s.motion.speed; theme.motion.bounce = s.motion.bounce; 
+      theme.style.ui = key; theme.shape = clone(s.shape); theme.depth = clone(s.depth); 
       changed(); renderAll(); flash();
     } }, el('i', { 'data-ui': key }), name)));
     const resetBtn = $('#cz-reset');
@@ -3670,6 +3846,13 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       quick.push([b, on]);
       return b;
     }));
+    // Swiss Style 沒有圓角：圓角相關的控制項停用，旁邊註明原因
+    const lockShape = (node) => {
+      if (theme.style.ui !== 'swiss') return node;
+      node.querySelectorAll('button, input').forEach((c) => { c.disabled = true; });
+      node.classList.add('cz-locked');
+      return el('div', {}, node, el('p', { class: 'cz-hint' }, 'Swiss Style 固定直角，不能調整圓角。'));
+    };
     const thumb = (cls, style = '') => el('i', { class: 'cz-th ' + cls, style, 'aria-hidden': 'true' });
     const qrow = (label, ...kids) => el('div', { class: 'cz-q' }, el('div', { class: 'cz-ql' }, label), ...kids);
 
@@ -3752,11 +3935,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     // 兩批卡片不會同時佔同一個位置，就不會重疊
     let pending = null;
     const EASE = 'cubic-bezier(.22, 1, .36, 1)';   // 快出慢停，同 CSS 的 --reveal-ease
-    const scanMs = (h) => D(Math.min(800, Math.max(450, h * 2.2)));   // 掃描時間依卡片高度，速度一致：矮 0.45 秒～高 0.8 秒
+    const scanMs = (h) => D(Math.min(800, Math.max(450, h * 2.2)));
     const stepOf = (n) => n > 1 ? Math.min(55, 300 / (n - 1)) : 0;   // 依序出現：每張最多隔 55ms，錯開總長不超過 0.3 秒
     // shift：畫面正在平滑捲動時，用捲完後的位置判斷是否在畫面內
     const inViewport = (list, shift = 0) => list.filter(([, r]) => r.top - shift < innerHeight && r.bottom - shift > 0).sort((a, b) => Math.round(a[1].top - b[1].top) || a[1].left - b[1].left);
-    const clearPending = () => { if (!pending) return; clearTimeout(pending.t); pending.out.forEach(([, a]) => a.cancel()); pending = null; };
+    const clearPending = () => { if (!pending) return; clearTimeout(pending.t); pending.out.forEach(([c, a]) => { a.cancel(); emergeStop(c.el); }); pending = null; };
     function setCat(k) {
       if (k === wallCat) return;
       clearPending();   // 連續點擊：上一次還沒收完的直接停掉，以最後一次為準
@@ -3770,9 +3953,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       if (wf.getBoundingClientRect().top < 0) wf.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
       if (!out.length) return relayout(still);
       hushFor(D(1000));   // 轉場期間暫停卡片內的示範動畫，讓出運算
-      // 離場：原地模糊到 4px 並淡出，0.22 秒，不做光線；畫面內離開的卡片同時進行
-      pending = { out: out.map(([c]) => [c, c.el.animate([{ filter: 'blur(0)', opacity: 1 }, { filter: 'blur(4px)', opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]) };
-      pending.t = setTimeout(() => { const p = pending; pending = null; relayout(false); p.out.forEach(([, a]) => a.cancel()); }, D(220));
+      // 離場：原地淡出 0.22 秒；畫面內離開的卡片同時進行
+      // 飛入：原地淡出；風捲：收到中央繞一圈往右下吹走
+      const so = theme.motion.enter === 'fly' ? { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]), ms: D(220) } : windOut(out);
+      pending = { out: so.out };
+      pending.t = setTimeout(() => { const p = pending; pending = null; relayout(false); p.out.forEach(([c, a]) => { a.cancel(); emergeStop(c.el); }); }, so.ms);
     }
     function relayout(still) {
       const before = new Map(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()]));
@@ -3786,16 +3971,109 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         const b = before.get(c), a = c.el.getBoundingClientRect();
         if (!b || Math.hypot(b.left - a.left, b.top - a.top) > 320) entering.push([c, a]);
       });
-      // 進場：只有畫面內的卡片照閱讀順序依序出現；布幕由上往下滑開
+      // 進場：只有畫面內的卡片（風捲照閱讀順序、飛入由中心往外）
       const shift = wf.getBoundingClientRect().top - 16;   // 還在捲回途中的距離
-      const list = inViewport(entering, Math.min(0, shift)), step = stepOf(list.length);
+      playEnter(inViewport(entering, Math.min(0, shift)), false);
+    }
+    /* 進場（飛入，仿 iOS 解鎖）：卡片從「畫面中心 → 卡片中心」方向再往外推 32% 的位置、放大 1.5 倍收攏，
+       微幅衝過頭（縮到 0.982、位置越過原位 0.6%）就停在 1。回彈幅度跟「彈跳感」設定走（無＝只收攏不回彈）。
+       透明度在前 30% 就到位；離畫面中心越遠越晚到（0～140ms） */
+    const FLY_K = { none: 0, soft: 0.6, standard: 1, strong: 1.6 };
+    function flyPlay(el, delay = 0) {
+      const r = el.getBoundingClientRect(), vx = r.left + r.width / 2 - innerWidth / 2, vy = r.top + r.height / 2 - innerHeight / 2;
+      const k = FLY_K[theme.motion.bounce] ?? 1, T = (m, sc) => `translate(${vx * m}px, ${vy * m}px) scale(${sc})`;
+      const kf = k > 0
+        ? [{ transform: T(0.32, 1.5), opacity: 0, easing: 'cubic-bezier(.2, .75, .3, 1)' },
+           { opacity: 1, offset: 0.3 },
+           { transform: T(-0.006 * k, 1 - 0.018 * k), offset: 0.62, easing: 'cubic-bezier(.45, 0, .55, 1)' },
+           { transform: 'none', opacity: 1 }]
+        : [{ transform: T(0.32, 1.5), opacity: 0, easing: 'cubic-bezier(.22, 1, .36, 1)' }, { opacity: 1, offset: 0.3 }, { transform: 'none', opacity: 1 }];
+      return el.animate(kf, { duration: D(750), delay, fill: 'backwards' });
+    }
+    // 背景從 1.15 倍縮回、淡入；標題列與分類列淡入、從上方 12px 移到位（只在首次載入與重播時）
+    function flyScene() {
+      const out = 'cubic-bezier(.22, 1, .36, 1)';
+      document.body.animate([{ transform: 'scale(1.15)' }, { transform: 'scale(1)' }], { duration: D(800), easing: out, pseudoElement: '::before', composite: 'add' });   // add：疊在玻璃背景自己的飄移上
+      document.body.animate([{ opacity: 0 }], { duration: D(800), easing: out, pseudoElement: '::before' });                                          // 只給起點：淡回各風格原本的透明度
+      [$('.top'), wf].forEach((e) => e?.animate([{ opacity: 0, transform: 'translateY(-12px)' }, { opacity: 1, transform: 'none' }], { duration: D(500), delay: D(120), easing: out, fill: 'backwards' }));
+    }
+    // 進場入口：依設定播風捲或飛入；scene＝連動背景與標題列
+    function playEnter(list, scene) {
+      if (!list.length || matchMedia('(prefers-reduced-motion: reduce)').matches || theme.motion.reduce) return;
+      if (theme.motion.enter === 'fly') {
+        const cx = innerWidth / 2, cy = innerHeight / 2, md = Math.hypot(cx, cy) || 1;
+        list.forEach(([c, r]) => flyPlay(c.el, D(Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md * 140)));
+        if (scene) flyScene();
+      } else {
+        windIn(list);   // 風捲：從左上角外依閱讀順序飄進來
+      }
+    }
+    /* 進場（風捲）：像落葉被一陣風捲進來——整群繞一圈，再依序脫離、各自鋪平
+       · 每張卡只露出左上角固定大小的一塊（160×110，看得到標題），所有葉片一樣大、內容不變形；從螢幕左上角外依閱讀順序一張接一張被吹進來，排成一串沿同一條橢圓軌道繞畫面中央
+       · 每張至少繞約一圈，到了面向自己落點的方向就脫離軌道，順勢飄過去，裁切邊飄邊展開成整張卡片、鋪平
+       · 翻轉與移動以葉片中心為支點（transform-origin 設在裁切區中心），不同大小的卡片走同一條軌道
+       · 繞圈時葉片持續翻轉（3D），軌道下半圈離觀者近（較大、在前），上半圈遠（較小、在後）
+       · 每張間隔最多 55ms、飛行 1.4 秒，全部到位約 2 秒；落點的微幅衝過頭跟「彈跳感」走
+       離場（風捲走）：離開的卡片先收到畫面中央疊起來，再繞成一圈旋轉縮小，往右下角飛出畫面並淡出（約 0.6 秒） */
+    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('wind'); el.style.zIndex = ''; el.style.transformOrigin = ''; el._em = null; }
+    const f1 = (v) => v.toFixed(1);
+    function windIn(list) {
+      const n = list.length, step = n > 1 ? Math.min(55, 600 / (n - 1)) : 0, k = FLY_K[theme.motion.bounce] ?? 1, dur = D(1400);
+      const cx = innerWidth / 2, cy = innerHeight / 2, Rx = Math.min(innerWidth * 0.3, 420), Ry = Math.min(innerHeight * 0.26, 230), A0 = 225;
+      const orb = (deg) => { const t = deg * Math.PI / 180; return [cx + Math.cos(t) * Rx, cy + Math.sin(t) * Ry, Math.sin(t)]; };
       list.forEach(([c, r], i) => {
-        const el = c.el, delay = D(i * step), sd = scanMs(r.height);
-        el.style.setProperty('--cd', delay + 'ms'); el.style.setProperty('--sd', sd + 'ms');
-        el.classList.remove('curtain-in'); void el.offsetWidth; el.classList.add('curtain-in');
-        clearTimeout(el._cur); el._cur = setTimeout(() => el.classList.remove('curtain-in'), delay + sd + 50);
+        const el = c.el; emergeStop(el);
+        el.classList.add('wind'); el.style.zIndex = 30;
+        const W0 = Math.min(160, r.width), H0 = Math.min(110, r.height), rad = getComputedStyle(el).borderTopLeftRadius || '0px';
+        el.style.transformOrigin = `${W0 / 2}px ${H0 / 2}px`;
+        const tx = r.left + W0 / 2, ty = r.top + H0 / 2, leaf = 0.9;   // 支點（葉片中心）在畫面上的落點
+        const clipLeaf = `inset(0px ${f1(r.width - W0)}px ${f1(r.height - H0)}px 0px round 12px)`;
+        // 脫離點：至少繞 300°，之後到面向落點的方向就脫離
+        let dir = Math.atan2((ty - cy) / Ry, (tx - cx) / Rx) * 180 / Math.PI; while (dir < A0 + 300) dir += 360;
+        const span = dir - A0, kf = [];
+        const T = (x, y, rz, rx, ry, sc, clip = clipLeaf) => ({ clipPath: clip, transform: `perspective(900px) translate(${f1(x - tx)}px, ${f1(y - ty)}px) rotateZ(${f1(rz)}deg) rotateX(${f1(rx)}deg) rotateY(${f1(ry)}deg) scale(${sc.toFixed(3)})` });
+        kf.push({ offset: 0, opacity: 0, zIndex: 30, ...T(-160, -140, -50, 60, -40, leaf * 0.7), easing: 'cubic-bezier(.3, .5, .6, 1)' });
+        // 軌道：每 30° 一個點，等速（linear）
+        const m = Math.ceil(span / 30);
+        for (let j = 0; j <= m; j++) {
+          const deg = A0 + span * j / m, [x, y, d] = orb(deg), o = 0.14 + 0.64 * j / m;
+          kf.push({ offset: o, ...(j === 0 ? { opacity: 1 } : {}), zIndex: Math.round(40 + d * 20), ...T(x, y, (deg - A0) * 0.12 + Math.sin(j * 1.1) * 18, Math.sin(j * 1.3) * 50, Math.cos(j * 0.9) * 38, leaf * (1 + d * 0.18)), easing: 'linear' });
+        }
+        // 脫離：順著切線方向飄出、再落到位置
+        const [ex, ey] = orb(dir), tg = (dir + 90) * Math.PI / 180, mx = (ex + Math.cos(tg) * Rx * 0.35 + tx) / 2, my = (ey + Math.sin(tg) * Ry * 0.35 + ty) / 2;
+        kf[kf.length - 1].easing = 'cubic-bezier(.35, 0, .55, 1)';
+        // 裁切展開：0.89 展開一半、0.95 整張卡片；最後放寬到卡片外，讓陰影漸漸出現（不會在結束時突然跳出）
+        const half = `inset(0px ${f1((r.width - W0) / 2)}px ${f1((r.height - H0) / 2)}px 0px round ${rad})`;
+        kf.push({ offset: 0.89, zIndex: 60, ...T(mx, my, 8, -16, 12, 0.96, half), easing: 'cubic-bezier(.25, .6, .35, 1)' });
+        kf.push({ offset: 0.95, zIndex: 60, ...T(tx, ty, 1.5 * k, -3 * k, 2 * k, 1 + 0.012 * k, `inset(0px 0px 0px 0px round ${rad})`), easing: 'cubic-bezier(.45, 0, .55, 1)' });
+        kf.push({ offset: 1, zIndex: 30, ...T(tx, ty, 0, 0, 0, 1, `inset(-60px -60px -60px -60px round ${rad})`) });
+        const delay = D(60) + D(i * step);
+        el._em = { anims: [el.animate(kf, { duration: dur, delay, fill: 'backwards' })], t: setTimeout(() => emergeStop(el), delay + dur + 50) };
       });
     }
+    // 回傳 [卡片, 動畫] 與全部結束的時間
+    function windOut(list) {
+      const n = list.length, dur = D(600), cx = innerWidth / 2, cy = innerHeight / 2, ex = innerWidth + 260, ey = innerHeight + 220;
+      const out = list.map(([c, r], i) => {
+        const el = c.el; emergeStop(el);
+        el.classList.add('wind'); el.style.zIndex = n - i + 1;
+        const ox = r.left + r.width / 2, oy = r.top + r.height / 2, sc = Math.min(0.5, 160 / r.width), a0 = (i / Math.max(n, 1)) * 360;
+        const T = (x, y, rz, s, o) => ({ transform: `translate(${f1(x - ox)}px, ${f1(y - oy)}px) rotate(${f1(rz)}deg) scale(${s.toFixed(3)})`, ...(o == null ? {} : { opacity: o }) });
+        const kf = [{ ...T(ox, oy, 0, 1, 1), offset: 0 }, { ...T(cx + i * 2, cy + i * 2, i * 3 - 6, sc, 1), offset: 0.3 }];
+        // 繞一圈：每 45° 一個點，半徑由 110 收到 60，整圈往右下偏移
+        for (let j = 0; j <= 8; j++) {
+          const a = (a0 + j * 45) * Math.PI / 180, R = 110 - j * 6, sh = j / 8 * 0.12;
+          kf.push({ ...T(cx + Math.cos(a) * R + (ex - cx) * sh, cy + Math.sin(a) * R + (ey - cy) * sh, a0 + 90 + j * 45, sc * (1 - j * 0.03)), offset: 0.38 + j * 0.05 });
+        }
+        kf.push({ ...T(ex, ey, a0 + 90 + 460, sc * 0.4, 0), offset: 1 });
+        kf[kf.length - 2].opacity = 1;
+        const a = el.animate(kf, { duration: dur, easing: 'linear', fill: 'both' });
+        el._em = { anims: [a], t: 0 };
+        return [c, a];
+      });
+      return { out, ms: dur };
+    }
+    const replayEnter = () => { hushFor(D(1000)); playEnter(inViewport(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()])), true); };
     wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });
     { const q = new URLSearchParams(location.search).get('cat'), k = q && (CAT[q] ? q : Object.keys(CAT).find((x) => CAT_LABEL[x] === q)); if (k) wallCat = k; }   // 網址可用內部名稱或畫面上的名稱（例如 表單）
     applyLayout();
@@ -3804,7 +4082,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const shown = cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()]);
       const vis = inViewport(shown), seen = new Set(vis.map(([c]) => c));
       const step = stepOf(vis.length);
-      vis.forEach(([c, r], k) => { c.el.style.setProperty('--i', (k * step / 55).toFixed(3)); c.el.style.setProperty('--sd', scanMs(r.height) + 'ms'); });   // --i：CSS 以 55ms 為單位
+      vis.forEach(([c, r], k) => { c.el.style.setProperty('--i', (k * step / 55).toFixed(3)); c.el.style.setProperty('--sd', scanMs(r.height) + 'ms'); });
+      playEnter(vis, true);   // --i：CSS 以 55ms 為單位
       shown.forEach(([c]) => { if (!seen.has(c)) c.el.classList.add('norise'); });
     }
     const isDarkNow = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
@@ -3855,13 +4134,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           const p = (k === 'cool' ? COOL : NEUTRAL[k]).light;
           return { name, thumb: thumb('tone', `background:linear-gradient(90deg, ${p.page} 0 34%, ${p['line-strong']} 34% 67%, ${p.muted} 67%);border-color:${p['line-strong']}`), on: () => c.neutral === k, pick: () => { c.neutral = k; } };
         }))),
-        qrow('圓角', opts('圓角', RADIUS.map(([name, s, r]) => ({ name, thumb: thumb('r', `border-top-left-radius:${r}`), on: () => same(theme.shape, s), pick: () => { theme.shape = clone(s); } })))),
+        qrow('圓角', lockShape(opts('圓角', RADIUS.map(([name, s, r]) => ({ name, thumb: thumb('r', `border-top-left-radius:${r}`), on: () => same(theme.shape, s), pick: () => { theme.shape = clone(s); } }))))),
         qrow('動畫', opts('動畫', MOTION.map(([name, m, d]) => {
           const t = thumb('mo'); t.innerHTML = `<svg viewBox="0 0 24 24"><path d="${d}"/></svg>`;
           return { name, thumb: t,
             on: () => (m ? !theme.motion.reduce && theme.motion.speed === m.speed && theme.motion.bounce === m.bounce : theme.motion.reduce),
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
-        }))),
+        })),
+          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['wind', '風捲'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter === 'fly' ? 'fly' : 'wind') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; }))),
       )];
     }
     function catsEl() {
@@ -3909,9 +4189,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
               seg(p + '.weight', [[400, '一般'], [500, '中等'], [600, '半粗'], [700, '粗']], n + '粗細')));
           })),
         blk('圓角細節',
-          row('卡片', 'shape.card', range('shape.card', 0, 32, 1, (v) => v + 'px', '卡片圓角')),
-          row('按鈕與欄位', 'shape.control', range('shape.control', 0, 20, 1, (v) => v + 'px', '按鈕與欄位圓角')),
-          row('標籤', 'shape.pill', seg('shape.pill', [['full', '膠囊'], ['soft', '方塊']], '標籤形狀'))),
+          lockShape(el('div', { class: 'cz-lockable' },
+            row('卡片', 'shape.card', range('shape.card', 0, 32, 1, (v) => v + 'px', '卡片圓角')),
+            row('按鈕與欄位', 'shape.control', range('shape.control', 0, 20, 1, (v) => v + 'px', '按鈕與欄位圓角')),
+            row('標籤', 'shape.pill', seg('shape.pill', [['full', '膠囊'], ['soft', '方塊']], '標籤形狀'))))),
         blk('動畫細節',
           row('速度', 'motion.speed', range('motion.speed', 0.5, 2, 0.25, (v) => v + '×', '動畫速度')),
           row('彈跳感', 'motion.bounce', seg('motion.bounce', [['none', '無'], ['soft', '柔和'], ['standard', '標準'], ['strong', '強']], '彈跳感')),
@@ -3979,17 +4260,20 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       return out;
     }
     /* 介面風格：卡片外觀（surface＝各系統自己的表面色變數） */
-    const UI_NAME = { standard: '標準', flat: '扁平', glass: '液態玻璃', contrast: '高對比' };
+    const UI_NAME = { standard: '標準', flat: '扁平', glass: '液態玻璃', contrast: '高對比', neu: 'Neumorphism', swiss: 'Swiss Style', y2k: 'Y2K 鉻金屬' };
     // 間距 token（標準值：卡片內距 16px 18px、控制項 40px、字級 14px；Tailwind --spacing 0.25rem）
     const COMPACT = { 'space-card': '12px 14px', 'control-height': '34px', 'control-height-sm': '28px', 'font-size-base': '13px' };
     const RELAXED = { 'space-card': '20px 22px', 'control-height': '44px', 'control-height-sm': '36px' };
     const DENS = { compact: { vars: COMPACT, spacing: '0.22rem', control: { sm: '28px', md: '34px', lg: '44px' } }, relaxed: { vars: RELAXED, spacing: '0.28rem', control: { sm: '36px', md: '44px', lg: '52px' } } };
     const dens = () => DENS[theme.layout.density] || null;
-    const uiSpec = (surface, ink, hi, line, lineStrong) => ({
+    const uiSpec = (surface, ink, hi, line, lineStrong, page = surface) => ({
       standard: null,
       flat: { background: surface, border: `1px solid ${line}`, 'box-shadow': 'none' },
       glass: { background: `color-mix(in srgb, ${surface} 50%, transparent)`, border: `1px solid color-mix(in srgb, ${hi} 75%, transparent)`, 'backdrop-filter': 'blur(22px) saturate(170%)', 'box-shadow-extra': `inset 0 1px 0 ${hi}` },
       contrast: { border: `2px solid ${lineStrong}` },
+      neu: { background: page, border: '0', 'box-shadow': `-3px -3px 8.5px color-mix(in srgb, color-mix(in srgb, ${page} 12%, #ffffff) 96%, transparent), 3px 3px 8.5px color-mix(in srgb, color-mix(in srgb, ${page} 60%, #7d8ca8) 72%, transparent)` },
+      swiss: { border: `1px solid ${lineStrong}`, 'border-top': `3px solid ${ink}`, 'border-radius': '0', 'box-shadow': 'none' },
+      y2k: { border: '1px solid transparent', background: `linear-gradient(180deg, rgb(255 255 255 / .75), rgb(255 255 255 / 0) 28%) padding-box, linear-gradient(180deg, ${surface} 0%, color-mix(in srgb, ${surface} 72%, ${page}) 100%) padding-box, linear-gradient(180deg, #ffffff, color-mix(in srgb, ${lineStrong} 55%, #ffffff) 45%, ${lineStrong}) border-box`, 'box-shadow': 'inset 0 1px 0 rgb(255 255 255 / .95), inset 0 0 0 1px rgb(255 255 255 / .4), 0 10px 28px -10px rgb(60 90 150 / .4)' },
     })[theme.style.ui];
     const compactVars = (prefix, ind) => dens() ? Object.entries(dens().vars).map(([k, v]) => `${ind}--${prefix}${k}: ${v};`).join('\n') + '\n' : '';
     const uiDecl = (sp, ind) => sp ? Object.entries(sp).filter(([k]) => k !== 'box-shadow-extra').map(([k, v]) => `${ind}${k}: ${v};`).join('\n') : '';
@@ -4021,7 +4305,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         const sn = snapshot();
         const vars = (mode) => [...TOK.color.map((k) => `  --color-${k}: ${sn[mode][k]};`), ...TOK.shadow.map((k) => `  --shadow-${k}: ${sn[mode][k]};`)].join('\n');
         const common = [...TOK.radius.map((k) => `  --radius-${RNAME[k]}: ${sn.radius[k]};`), `  --ease-spring: ${sn.spring};`, `  --ease-spring-soft: ${sn.springSoft};`, `  --ease-standard: ${sn.ease};`, ...Object.entries(DUR(sn)).map(([k, v]) => `  --duration-${k}: ${v};`)].join('\n');
-        const sp = uiSpec('var(--color-surface)', 'var(--color-ink)', 'rgb(255 255 255 / .6)', 'var(--color-line)', 'var(--color-line-strong)');
+        const sp = uiSpec('var(--color-surface)', 'var(--color-ink)', 'rgb(255 255 255 / .6)', 'var(--color-line)', 'var(--color-line-strong)', 'var(--color-page)');
         const card = `\n/* 卡片（介面風格：${UI_NAME[theme.style.ui]}；頁籤：${theme.style.tabs}） */\n.ui-card {\n  background: ${sp?.background || 'var(--color-surface)'};\n  border-radius: var(--radius-card);\n  box-shadow: ${sp?.['box-shadow'] || (sp?.['box-shadow-extra'] ? sp['box-shadow-extra'] + ', ' : '') + 'var(--shadow-shadow)'};\n${[uiDecl(sp && Object.fromEntries(Object.entries(sp).filter(([k]) => !['background', 'box-shadow'].includes(k))), '  '), dens() ? '  padding: ' + dens().vars['space-card'] + ';' : ''].filter(Boolean).join('\n')}\n}\n`.replace(/\n\n}/, '\n}');
         return ['theme.css', `${fontNote() ? `@import url('${fontNote().url}');\n` : ''}/* ${stamp()} */\n:root {\n${common}\n${typeVars('', '  ')}${compactVars('', '  ')}${vars('light')}\n}\n@media (prefers-color-scheme: dark) {\n  :root:not([data-theme='light']) {\n${vars('dark').replace(/^/gm, '  ')}\n  }\n}\n:root[data-theme='dark'], .dark {\n${vars('dark')}\n}\n${card}`];
       },
@@ -4925,7 +5209,7 @@ ${stamp()}
     opener.addEventListener('click', () => open(!cz.classList.contains('open')));
     $('#cz-close').addEventListener('click', () => open(false));
     cz.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') { if (!$('#cz-share-menu').hidden || !$('#cz-more-menu').hidden) closeMenus(); else open(false); }
+      if (e.key === 'Escape') { if (!$('#cz-more-menu').hidden) closeMenus(); else open(false); }
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.target.matches('input[type="text"]')) { e.preventDefault(); travel(e.shiftKey ? 1 : -1); }
     });
 

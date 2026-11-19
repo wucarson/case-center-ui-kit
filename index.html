@@ -150,8 +150,9 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 }
 .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
 @keyframes rise { from { transform: none; } }   /* 只用來計時：首次進場全部播完才標記 .ready */
-/* 進場：震波（quakeIn）——以底邊為支點擠壓拉伸 */
-.cell.quake { position: relative; transform-origin: 50% 100%; }
+/* 進場：浮線（lineIn）以卡片中心展開；離場灰燼的顆粒畫在全畫面畫布 */
+.cell.lineup { transform-origin: 50% 50%; }
+.ash-cv { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 60; pointer-events: none; }
 
 .wf { scroll-margin-top: 16px; }   /* 切換分類時捲回這裡 */
 body.hush :is(.spin, .shim, .caret) { animation-play-state: paused; }
@@ -3393,7 +3394,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       color: { primary: '#1f6fff', darkPrimary: '', success: '#12b866', warn: '#f59e0b', danger: '#ef3340', info: '#1846c9', series: ['#1f6fff', '#00a3b8', '#8b5cf6', '#f59e0b'], neutral: 'cool' },
       shape: { card: 20, control: 10, pill: 'full' },
       depth: { shadow: 2, glow: 100, border: 'standard' },
-      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'quake' },
+      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'line' },
       layout: { cols: 4, density: 'standard', hidden: [], order: [] },
     };
     const UI_KEYS = ['standard', 'flat', 'glass', 'contrast', 'neu', 'swiss', 'y2k'];
@@ -3963,9 +3964,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       if (wf.getBoundingClientRect().top < 0) wf.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
       if (!out.length) return relayout(still);
       hushFor(D(1000));   // 轉場期間暫停卡片內的示範動畫，讓出運算
-      // 離場：原地淡出 0.22 秒；畫面內離開的卡片同時進行
-      // 離場：原地淡出
-      const so = theme.motion.enter === 'fly' ? { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]), ms: D(220) } : { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]), ms: D(220) };
+      // 離場：飛入＝原地淡出 0.22 秒；浮線＝由下往上碎成灰燼吹散 0.6 秒（畫面內離開的卡片同時進行）
+      const so = theme.motion.enter === 'fly' ? { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]), ms: D(220) } : ashOut(out);
       pending = { out: so.out };
       pending.t = setTimeout(() => { const p = pending; pending = null; relayout(false); p.out.forEach(([c, a]) => { a.cancel(); emergeStop(c.el); }); }, so.ms);
     }
@@ -3981,7 +3981,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         const b = before.get(c), a = c.el.getBoundingClientRect();
         if (!b || Math.hypot(b.left - a.left, b.top - a.top) > 320) entering.push([c, a]);
       });
-      // 進場：只有畫面內的卡片（震波由中央往外、飛入由中心往外）
+      // 進場：只有畫面內的卡片（浮線照閱讀順序、飛入由中心往外）
       const shift = wf.getBoundingClientRect().top - 16;   // 還在捲回途中的距離
       playEnter(inViewport(entering, Math.min(0, shift)), false);
     }
@@ -4007,7 +4007,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       document.body.animate([{ opacity: 0 }], { duration: D(800), easing: out, pseudoElement: '::before' });                                          // 只給起點：淡回各風格原本的透明度
       [$('.top'), wf].forEach((e) => e?.animate([{ opacity: 0, transform: 'translateY(-12px)' }, { opacity: 1, transform: 'none' }], { duration: D(500), delay: D(120), easing: out, fill: 'backwards' }));
     }
-    // 進場入口：依設定播震波或飛入；scene＝連動背景與標題列
+    // 進場入口：依設定播浮線或飛入；scene＝連動背景與標題列
     function playEnter(list, scene) {
       if (!list.length || matchMedia('(prefers-reduced-motion: reduce)').matches || theme.motion.reduce) return;
       if (theme.motion.enter === 'fly') {
@@ -4015,34 +4015,93 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         list.forEach(([c, r]) => flyPlay(c.el, D(Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md * 140)));
         if (scene) flyScene();
       } else {
-        quakeIn(list);   // 震波：從中央往外一圈圈彈出
+        const step = stepOf(list.length); list.forEach(([c], i) => lineIn(c.el, D(i * step)));   // 浮線：依閱讀順序錯開
       }
     }
-    /* 進場（震波）：像彗星撞擊地面——卡片從撞擊點（畫面內元件牆的中央）往外，一圈圈從地面彈出來
-       · 延遲依距離（最遠約晚 0.38 秒），像震波往外推；越近彈得越高、晃得越多，越遠越輕（衰減）
-       · 卡通式擠壓與拉伸：從地面壓扁的薄片 → 拉長衝高 → 落地壓扁 → 回彈 → 小晃 → 停住（以底邊為支點）
-       · 地板掀起：彈起時 3D 傾斜、背向撞擊點翻起，隨回彈來回擺動後放平；也順著震波方向被推一下
-       · 約 1.1 秒；擠壓拉伸的幅度跟「彈跳感」設定走
-       離場：原地淡出 */
-    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('quake'); el._em = null; }
-    function quakeIn(list) {
-      const w = $('#wall').getBoundingClientRect(), ix = innerWidth / 2, iy = (Math.max(w.top, 0) + innerHeight) / 2;
-      const pts = list.map(([c, r]) => { const dx = r.left + r.width / 2 - ix, dy = r.top + r.height / 2 - iy; return [c, dx, dy, Math.hypot(dx, dy)]; });
-      const maxD = Math.max(1, ...pts.map((x) => x[3])), K = { none: 0.35, soft: 0.7, standard: 1, strong: 1.35 }[theme.motion.bounce] ?? 1, dur = D(1100);
-      const ease = 'cubic-bezier(.33, 0, .4, 1)';
-      pts.forEach(([c, dx, dy, d]) => {
-        const el = c.el; emergeStop(el);
-        const q = d / maxD, a = (1 - q * 0.55) * K, ux = d ? dx / d : 0, uy = d ? dy / d : 0;
-        // [時間點, 位移y, 往外推, 寬, 高, 傾斜]（偏移量 × a）
-        const S = [[0.18, -46, 14, -0.16, 0.3, 16], [0.36, 8, 4, 0.14, -0.16, -9], [0.52, -18, 0, -0.05, 0.08, 5], [0.68, 4, 0, 0.03, -0.035, -2.5], [0.84, -3, 0, -0.01, 0.012, 1]];
-        const T = (y, push, sx, sy, tilt) => `perspective(800px) translate(${(ux * push).toFixed(1)}px, ${(y + uy * push).toFixed(1)}px) rotateX(${(uy * tilt).toFixed(2)}deg) rotateY(${(-ux * tilt).toFixed(2)}deg) scale(${sx.toFixed(3)}, ${sy.toFixed(3)})`;
-        const kf = [{ offset: 0, opacity: 0, transform: T(18, -10, 0.6, 0.12, 0), easing: 'cubic-bezier(.2, .7, .3, 1)' }];
-        S.forEach(([o, y, p, sx, sy, t], i) => kf.push({ offset: o, ...(i === 0 ? { opacity: 1 } : {}), transform: T(y * a, p * a, 1 + sx * a, 1 + sy * a, t * a), easing: ease }));
-        kf.push({ offset: 1, transform: T(0, 0, 1, 1, 0) });
-        el.classList.add('quake');
-        const delay = D(380 * q);
-        el._em = { anims: [el.animate(kf, { duration: dur, delay, fill: 'backwards' })], t: setTimeout(() => emergeStop(el), delay + dur + 50) };
-      });
+    /* 進場（浮線）：像舊電視開機——卡片先是一條主色細線，從中央往左右延伸到全寬（0–30%），再上下展開成整張卡片並微微回彈（30–80%）；
+       內容在展開後段淡入、由模糊變清楚。約 0.8 秒，依閱讀順序錯開
+       離場（灰燼）：卡片由下往上碎裂消失（雜訊門檻掃過，邊緣不規則，像紙被燒掉），碎裂邊緣噴出灰燼顆粒，被風往右上吹散、旋轉縮小淡出；
+       約 0.6 秒。網頁內容無法取樣成像素，顆粒用卡片底色、線條色與文字色 */
+    function emergeStop(el) { const d = el._em; if (d) { clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el._em = null; } el.classList.remove('lineup'); el.style.filter = ''; }
+    function lineIn(el, delay = 0, dur = D(800)) {
+      emergeStop(el);
+      if (!(dur > 0)) return;
+      const k = FLY_K[theme.motion.bounce] ?? 1, h = el.offsetHeight || 1, line = Math.max(0.006, 2 / h), o = { duration: dur, delay, fill: 'backwards' };
+      const pri = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+      el.classList.add('lineup');
+      const anims = [
+        el.animate([
+          { transform: `scale(0, ${line})`, opacity: 0, easing: 'cubic-bezier(.3, .7, .3, 1)' },
+          { opacity: 1, offset: 0.08 },
+          { transform: `scale(1, ${line})`, offset: 0.3, easing: 'cubic-bezier(.3, .9, .35, 1)' },
+          { transform: `scale(1, ${1 + 0.035 * k})`, offset: 0.62, easing: 'cubic-bezier(.45, 0, .55, 1)' },
+          { transform: `scale(1, ${1 - 0.012 * k})`, offset: 0.8, easing: 'cubic-bezier(.45, 0, .55, 1)' },
+          { transform: 'scale(1, 1)', opacity: 1 },
+        ], o),
+        // 線條階段用主色，一開始展開就快速換回卡片底色（0.28–0.36）；陰影展開後才出現
+        el.animate([{ backgroundColor: pri, boxShadow: 'none', borderColor: 'transparent' }, { backgroundColor: pri, boxShadow: 'none', borderColor: 'transparent', offset: 0.28, easing: 'cubic-bezier(.4, 0, .2, 1)' }, { offset: 0.36 }, {}], o),
+      ];
+      [...el.children].forEach((c) => anims.push(c.animate([{ opacity: 0, filter: 'blur(4px)' }, { opacity: 0, filter: 'blur(4px)', offset: 0.42, easing: 'cubic-bezier(.3, .6, .4, 1)' }, { opacity: 1, filter: 'blur(0px)' }], o)));
+      el._em = { anims, t: setTimeout(() => emergeStop(el), delay + dur + 50) };
+    }
+    // 灰燼：共用一個 SVG 濾鏡（所有離場卡片同時播，門檻一起掃）＋一張全畫面畫布畫顆粒
+    let ashFx = null;
+    function ensureAsh() {
+      if (ashFx) return ashFx;
+      const grad = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="10" height="100" preserveAspectRatio="none"><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><rect width="10" height="100" fill="url(#g)"/></svg>');
+      document.body.insertAdjacentHTML('beforeend', `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="ash-f" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="1" seed="7" result="n"/>
+        <feColorMatrix in="n" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0" result="na"/>
+        <feImage href="${grad}" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="g"/>
+        <feComposite in="na" in2="g" operator="arithmetic" k1="0" k2="0.5" k3="1" k4="0.45" result="m"/>
+        <feComponentTransfer in="m" result="mt"><feFuncA type="linear" slope="14" intercept="-7"/></feComponentTransfer>
+        <feComposite in="SourceGraphic" in2="mt" operator="in"/></filter></svg>`);
+      const cv = document.createElement('canvas'); cv.className = 'ash-cv'; cv.setAttribute('aria-hidden', 'true'); document.body.append(cv);
+      ashFx = { k4: document.querySelector('#ash-f feComposite[operator="arithmetic"]'), cv, g: cv.getContext('2d'), parts: [], raf: 0, sweep: null };
+      return ashFx;
+    }
+    const K4_FROM = 0.45, K4_TO = -1.0;
+    function ashLoop() {
+      const A = ashFx, now = performance.now();
+      const { cv, g } = A;
+      if (cv.width !== innerWidth || cv.height !== innerHeight) { cv.width = innerWidth; cv.height = innerHeight; }
+      let dt = Math.min(0.05, (now - (A.last || now)) / 1000); A.last = now;
+      if (A.sweep) {
+        const s = A.sweep, p = Math.min(1, (now - s.t0) / s.dur), k4 = K4_FROM + (K4_TO - K4_FROM) * p;
+        A.k4.setAttribute('k4', k4.toFixed(3));
+        // 碎裂前緣：門檻 0.5 = 0.5×雜訊(平均 0.5) + 漸層 + k4 → 漸層 ≈ 0.25 − k4（上 1、下 0）
+        const gf = 0.25 - k4, fy = 1 - Math.min(1, Math.max(0, gf));
+        if (p < 1) s.cards.forEach((c) => {
+          const r = c.r, y = r.top + r.height * fy, n = Math.ceil(r.width / 70);   // 每幀每張卡噴出的顆粒數
+          if (fy <= 0 || fy >= 1) return;
+          for (let i = 0; i < n; i++) A.parts.push({ x: r.left + Math.random() * r.width, y: y + (Math.random() - 0.5) * 18, vx: 50 + Math.random() * 150, vy: -(50 + Math.random() * 110), s: 1.5 + Math.random() * 3, a: Math.random() * 6.28, va: (Math.random() - 0.5) * 10, life: 0, max: 0.55 + Math.random() * 0.45, c: c.cols[(Math.random() * c.cols.length) | 0], ph: Math.random() * 6.28 });
+        });
+        if (p >= 1) A.sweep = null;
+      }
+      g.clearRect(0, 0, cv.width, cv.height);
+      A.parts = A.parts.filter((q) => (q.life += dt) < q.max);
+      for (const q of A.parts) {
+        const t = q.life / q.max;
+        q.vx += 40 * dt; q.vy -= 20 * dt;   // 風往右上越吹越快
+        q.x += (q.vx + Math.sin(q.ph + q.life * 9) * 40) * dt; q.y += q.vy * dt; q.a += q.va * dt;
+        const sz = q.s * (1 - t * 0.7);
+        g.globalAlpha = (1 - t) * 0.9; g.fillStyle = q.c;
+        const cs = Math.cos(q.a), sn = Math.sin(q.a); g.setTransform(cs, sn, -sn, cs, q.x, q.y); g.fillRect(-sz / 2, -sz / 2, sz, sz * 0.6);
+      }
+      g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1;
+      A.raf = (A.sweep || A.parts.length) ? requestAnimationFrame(ashLoop) : 0;
+      if (!A.raf) { g.clearRect(0, 0, cv.width, cv.height); A.last = 0; }
+    }
+    // 回傳 [卡片, 動畫] 與全部結束的時間
+    function ashOut(list) {
+      const A = ensureAsh(), dur = D(600), rs = getComputedStyle(document.documentElement);
+      const ink = rs.getPropertyValue('--ink').trim(), ln = rs.getPropertyValue('--line-strong').trim();
+      const cards = list.map(([c, r]) => { emergeStop(c.el); c.el.style.filter = 'url(#ash-f)'; const bg = getComputedStyle(c.el).backgroundColor; return { r, cols: [bg, bg, ln, ln, ink] }; });
+      A.k4.setAttribute('k4', K4_FROM);
+      A.sweep = { t0: performance.now(), dur, cards };
+      if (!A.raf) A.raf = requestAnimationFrame(ashLoop);
+      // 佔位動畫：讓切換流程照常 cancel／收尾
+      return { out: list.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 1 }], { duration: dur, fill: 'forwards' })]), ms: dur };
     }
     const replayEnter = () => { hushFor(D(1000)); playEnter(inViewport(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()])), true); };
     wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });
@@ -4112,7 +4171,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
             on: () => (m ? !theme.motion.reduce && theme.motion.speed === m.speed && theme.motion.bounce === m.bounce : theme.motion.reduce),
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
         })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['quake', '震波'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter === 'fly' ? 'fly' : 'quake') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; }))),
+          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['line', '浮線'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter === 'fly' ? 'fly' : 'line') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; }))),
       )];
     }
     function catsEl() {

@@ -1,0 +1,31 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "upload",
+  "title": "檔案上傳",
+  "tier": "class",
+  "logic": "core/upload.ts",
+  "description": "一個附件的上傳進度、完成或失敗；圖示顏色依檔案類型。",
+  "use": "案件、工單附件。",
+  "instead": [{ "when": "大量檔案管理", "use": "文件頁籤" }],
+  "parts": [
+    { "name": "root", "selector": ".up", "element": "div", "classes": { "up": "檔案上傳", "done": "完成", "fail": "失敗" } },
+    { "name": "icon", "selector": ".up > .up-i", "element": "span", "classes": { "up-i": "檔案圖示（顏色依類型）" } },
+    { "name": "main", "selector": ".up > .up-m", "element": "div", "classes": { "up-m": "檔名與進度" } },
+    { "name": "row", "selector": ".up-m > .up-r", "element": "div", "classes": { "up-r": "檔名＋狀態" } },
+    { "name": "status", "selector": ".up-r > .st", "element": "span", "classes": { "st": "狀態文字", "num": "等寬數字" } },
+    {
+      "name": "bar",
+      "selector": ".up-m > .up-b",
+      "element": "div",
+      "classes": { "up-b": "進度條" },
+      "attrs": {
+        "role": { "values": ["progressbar"], "required": true },
+        "aria-label": { "required": true },
+        "aria-valuemin": { "values": ["0"], "required": true },
+        "aria-valuemax": { "values": ["100"], "required": true },
+        "aria-valuenow": { "required": true }
+      }
+    }
+  ],
+  "example": "<div class=\"up\"><span class=\"up-i\" style=\"--tone:var(--danger)\">…</span><div class=\"up-m\"><div class=\"up-r\"><span class=\"roll nm\"><span>設計規範_v3.pdf</span></span><span class=\"st num\">1.1 / 2.4 MB・45%</span></div><div class=\"up-b\" role=\"progressbar\" aria-label=\"設計規範_v3.pdf 上傳進度\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-valuenow=\"45\"><i style=\"width:45%\"></i></div></div></div>"
+}

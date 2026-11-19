@@ -37,6 +37,12 @@ const DT = {
 // 頭像群組的示意成員
 const PEOPLE = [{ name: '陳大文', initial: '陳', color: 2 }, { name: '林小華', initial: '林', color: 4 }, { name: '張大同', initial: '張', color: 3 }, { name: '王小明', initial: '王', color: 1 }, { name: '黃小玲', initial: '黃', color: 2 }];
 
+// 搜尋建議、拖移排序、統計卡、分段統計條的示意資料（和展示牆樣本相同）
+const TAGS = [{ label: '系統維護', count: '8 篇' }, { label: '系統升級', count: '3 篇' }, { label: '教育訓練', count: '12 篇' }, { label: '資安宣導', count: '6 篇' }];
+const SORT = [{ key: 'name', label: '名稱', locked: true, visible: true }, { key: 'status', label: '狀態', visible: true }, { key: 'owner', label: '負責人', visible: true }, { key: 'due', label: '到期日', visible: false }];
+const STAT3 = [{ label: '進行中案件', value: 42, unit: '件', hot: true }, { label: '本週工時', value: 316, unit: '小時' }, { label: '逾期工單', value: 7, unit: '件' }];
+const SEG4 = [{ label: '進行中', value: 43 }, { label: '待審核', value: 18 }, { label: '已完成', value: 55 }, { label: '未開始', value: 12 }];
+
 export const CASES: Record<string, Case[]> = {
   button: [
     { id: 'v0', props: { children: '儲存變更' } },
@@ -276,5 +282,51 @@ export const CASES: Record<string, Case[]> = {
     { id: 's0', props: { on: false, label: '追蹤案件' } },
     { id: 's1', props: { on: true, label: '追蹤案件' } },
     { id: 's2', props: { on: false, label: '追蹤案件' }, interact: { type: 'focus', selector: '.starb' } },
+  ],
+  'tag-search': [
+    { id: 'v0', props: { label: '搜尋公告', tags: TAGS, value: '系統' }, interact: { type: 'focus', selector: 'input' } },
+    { id: 's0', props: { label: '搜尋公告', tags: TAGS, value: '' } },
+    { id: 's1', props: { label: '搜尋公告', tags: TAGS, value: '' }, interact: { type: 'hover', selector: '.search' } },
+    { id: 's2', props: { label: '搜尋公告', tags: TAGS, value: '' }, interact: { type: 'focus', selector: 'input' } },
+    { id: 's3', props: { label: '搜尋公告', tags: TAGS, value: '系統' }, interact: { type: 'focus', selector: 'input' } },
+    { id: 's4', props: { label: '搜尋公告', tags: TAGS, value: '空調' }, interact: { type: 'focus', selector: 'input' } },
+  ],
+  'hold-to-confirm': [
+    { id: 'v0', props: { label: '結案' } },
+    { id: 's0', props: { label: '結案' } },
+    { id: 's1', props: { label: '結案' }, interact: { type: 'hover', selector: '.btn' } },
+    // 按住中、完成：固定顯示（真的按住會隨時間變，截不穩）
+    { id: 's2', props: { label: '結案', progress: 0.5 } },
+    { id: 's3', props: { label: '結案', done: true } },
+    { id: 's4', props: { label: '結案', disabled: true } },
+  ],
+  'drag-sort': [
+    { id: 'v0', props: { items: SORT } },
+    { id: 's0', props: { items: SORT } },
+    { id: 's1', props: { items: SORT }, interact: { type: 'hover', selector: '.drg-r:nth-child(3) .drg-h' } },
+    { id: 's2', props: { items: SORT }, interact: { type: 'press', selector: '.drg-r:nth-child(3) .drg-h' } },
+  ],
+  upload: [
+    { id: 'v0', props: { name: '設計規範_v3.pdf', status: 'done' } },
+    { id: 'v1', props: { name: '首頁視覺稿.fig', status: 'done' } },
+    { id: 'v2', props: { name: '訪談紀錄_1112.docx', status: 'done' } },
+    { id: 'v3', props: { name: '工時統計_11月.xlsx', status: 'done' } },
+    { id: 's0', props: { name: '設計規範_v3.pdf', status: 'uploading', progress: 45, size: 2.4 } },
+    { id: 's1', props: { name: '設計規範_v3.pdf', status: 'done' } },
+    { id: 's2', props: { name: '設計規範_v3.pdf', status: 'failed', progress: 45 } },
+  ],
+  'filter-chips': [
+    { id: 'v0', props: { items: ['狀態：進行中', '設計部', '本月到期'] } },
+    { id: 'v1', props: { items: ['設計部'] } },
+    { id: 's0', props: { items: ['狀態：進行中', '設計部'] } },
+    { id: 's1', props: { items: ['狀態：進行中', '設計部'] }, interact: { type: 'hover', selector: '.chip:nth-child(1) u' } },
+  ],
+  'stat-row': [
+    { id: 'v0', props: { items: STAT3 } },
+    { id: 'v1', props: { items: STAT3.slice(1) } },
+  ],
+  'segmented-bar': [
+    { id: 'v0', props: { segments: SEG4, unit: '件工單' } },
+    { id: 'v1', props: { segments: [{ label: '已完成', value: 32, color: 'var(--success)' }, { label: '未開始', value: 8, color: 'var(--line-strong)' }], unit: '件工單' } },
   ],
 };

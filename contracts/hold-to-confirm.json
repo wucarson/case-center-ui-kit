@@ -1,0 +1,29 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "hold-to-confirm",
+  "title": "按住確認",
+  "tier": "logic",
+  "logic": "core/hold.ts",
+  "description": "按住一段時間才送出，防止誤觸不可逆的動作；中途放開、移出或按 Esc 就取消。下方寫出要按多久。",
+  "use": "結案、送出審核這類不可逆、但不需要輸入資訊的動作。",
+  "instead": [{ "when": "偶爾才做的刪除", "use": "dialog" }],
+  "parts": [
+    { "name": "root", "selector": ".hold-c", "element": "div", "classes": { "hold-c": "按住確認" } },
+    {
+      "name": "button",
+      "selector": ".hold-c > .btn",
+      "element": "button",
+      "classes": { "btn": "主要按鈕", "hold": "按住確認", "done": "已完成", "is-off": "停用" },
+      "attrs": { "type": { "values": ["button"], "required": true }, "aria-describedby": { "required": true } }
+    },
+    { "name": "fill", "selector": ".hold > .fill", "element": "i", "classes": { "fill": "進度底色" } },
+    { "name": "bar", "selector": ".hold > .bar", "element": "i", "classes": { "bar": "底部進度線" } },
+    { "name": "text", "selector": ".hold > .roll", "element": "span", "classes": { "roll": "按鈕文字" } },
+    { "name": "hint", "selector": ".hold-c > .hold-h", "element": "div", "classes": { "hold-h": "說明：要按多久" } }
+  ],
+  "keyboard": [
+    { "keys": "Space、Enter（按住）", "action": "開始計時，按滿才送出" },
+    { "keys": "放開、Esc", "action": "還沒按滿就取消" }
+  ],
+  "example": "<div class=\"hold-c\"><button type=\"button\" class=\"btn hold\" aria-describedby=\"h\"><i class=\"fill\"></i><i class=\"bar\"></i><span class=\"roll\"><span>按住結案</span></span></button><div class=\"hold-h\" id=\"h\">按住 1.5 秒才會送出</div></div>"
+}

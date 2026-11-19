@@ -1,0 +1,23 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "filter-chips",
+  "title": "篩選標籤",
+  "tier": "logic",
+  "logic": "core/chips.ts",
+  "description": "目前套用的篩選條件，可逐一移除；移除後焦點移到下一個。",
+  "use": "列表頁的篩選列。",
+  "instead": [{ "when": "選擇條件本身", "use": "multi-select" }],
+  "parts": [
+    { "name": "root", "selector": ".chips", "element": "div", "classes": { "chips": "篩選標籤" }, "attrs": { "role": { "values": ["list"], "required": true }, "aria-label": { "required": true } } },
+    { "name": "chip", "selector": ".chips > .chip", "element": "span", "classes": { "chip": "條件", "kill": "即將移除" }, "attrs": { "role": { "values": ["listitem"], "required": true } } },
+    {
+      "name": "remove",
+      "selector": ".chip > u",
+      "element": "u",
+      "classes": {},
+      "attrs": { "role": { "values": ["button"], "required": true }, "tabindex": { "values": ["0"], "required": true }, "aria-label": { "required": true } }
+    }
+  ],
+  "keyboard": [{ "keys": "Enter、Space（在移除鈕上）", "action": "移除條件，焦點移到下一個" }],
+  "example": "<div class=\"chips\" role=\"list\" aria-label=\"目前的篩選條件\"><span class=\"chip\" role=\"listitem\">設計部<u role=\"button\" tabindex=\"0\" aria-label=\"移除篩選：設計部\">…</u></span></div>"
+}

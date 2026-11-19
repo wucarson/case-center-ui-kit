@@ -15,6 +15,10 @@ import { FieldControl, FormField } from './app/field';
 import { Combo, MultiSelect } from './app/listbox';
 import { ConfirmDialog, InfoPopover, Toast } from './app/overlay';
 import { Sidebar } from './app/sidebar';
+import { HoldConfirm } from './app/hold';
+import { FilterChips, SegmentedBar, StatRow, Upload } from './app/metrics';
+import { TagSearch } from './app/search';
+import { DragSort } from './app/sort';
 import { fieldCount } from '../../core/field';
 import { Icon } from './app/icon';
 
@@ -30,9 +34,10 @@ const only = new URLSearchParams(location.search).get('c');
     NgTemplateOutlet, Button, Callout, Checkbox, CheckboxList, DetailTabs, EmptyState, Menu, MenuPanel, Pagination, RadioGroup, Segmented,
     Skeleton, StarToggle, StatusBadge, Stepper, Switch, Tabs, TimePicker, Timeline,
     AvatarGroup, Combo, ConfirmDialog, DatePicker, FieldControl, FormField, Icon, InfoPopover, MultiSelect, PeriodPicker, Sidebar, Toast,
+    DragSort, FilterChips, HoldConfirm, SegmentedBar, StatRow, TagSearch, Upload,
   ],
   host: { style: 'display: block' },
-  template: `@let refs = { switch: tSwitch, menu: tMenu, button: tButton, 'status-badge': tBadge, callout: tCallout, 'empty-state': tEmpty, timeline: tTimeline, skeleton: tSkeleton, stepper: tStepper, checkbox: tCheckbox, 'radio-group': tRadio, segmented: tSegmented, tabs: tTabs, 'detail-tabs': tDetailTabs, 'star-toggle': tStar, pagination: tPagination, 'time-picker': tTime, 'form-field': tField, combo: tCombo, 'multi-select': tMulti, dialog: tDialog, toast: tToast, 'info-popover': tPopover, 'date-picker': tDate, 'period-picker': tPeriod, sidebar: tSidebar, 'avatar-group': tAvatar };
+  template: `@let refs = { switch: tSwitch, menu: tMenu, button: tButton, 'status-badge': tBadge, callout: tCallout, 'empty-state': tEmpty, timeline: tTimeline, skeleton: tSkeleton, stepper: tStepper, checkbox: tCheckbox, 'radio-group': tRadio, segmented: tSegmented, tabs: tTabs, 'detail-tabs': tDetailTabs, 'star-toggle': tStar, pagination: tPagination, 'time-picker': tTime, 'form-field': tField, combo: tCombo, 'multi-select': tMulti, dialog: tDialog, toast: tToast, 'info-popover': tPopover, 'date-picker': tDate, 'period-picker': tPeriod, sidebar: tSidebar, 'avatar-group': tAvatar, 'tag-search': tTagSearch, 'hold-to-confirm': tHold, 'drag-sort': tDrag, upload: tUpload, 'filter-chips': tChips, 'stat-row': tStat, 'segmented-bar': tSeg };
   <main class="cases">
     @for (e of list; track e.name) {
       @for (c of e.cases; track c.id) {
@@ -98,11 +103,18 @@ const only = new URLSearchParams(location.search).get('c');
   <ng-template #tDate let-p><div ccDatePicker [value]="p.value" [label]="p.label" [help]="p.help" [min]="p.min" [today]="p.today" [open]="!!p.defaultOpen"></div></ng-template>
   <ng-template #tPeriod let-p><div ccPeriodPicker [value]="p.value" [today]="p.today" [custom]="p.custom" [style]="p.style ?? null"></div></ng-template>
   <ng-template #tSidebar let-p><div ccSidebar [groups]="p.groups" [value]="p.value" [collapsed]="!!p.collapsed" [brand]="p.brand" [user]="p.user"></div></ng-template>
-  <ng-template #tAvatar let-p><div ccAvatarGroup [people]="p.people"></div></ng-template>`,
+  <ng-template #tAvatar let-p><div ccAvatarGroup [people]="p.people"></div></ng-template>
+  <ng-template #tTagSearch let-p><div ccTagSearch [tags]="p.tags" [value]="p.value" [label]="p.label"></div></ng-template>
+  <ng-template #tHold let-p><div ccHoldConfirm [label]="p.label" [progress]="p.progress" [done]="!!p.done" [disabled]="!!p.disabled"></div></ng-template>
+  <ng-template #tDrag let-p><div ccDragSort [items]="p.items"></div></ng-template>
+  <ng-template #tUpload let-p><div ccUpload [name]="p.name" [status]="p.status" [progress]="p.progress ?? 0" [size]="p.size"></div></ng-template>
+  <ng-template #tChips let-p><div ccFilterChips [items]="p.items"></div></ng-template>
+  <ng-template #tStat let-p><div ccStatRow [items]="p.items"></div></ng-template>
+  <ng-template #tSeg let-p><div ccSegmentedBar [segments]="p.segments" [unit]="p.unit"></div></ng-template>`,
 })
 export class Demo {
   /** 有 Angular 外殼的元件（名稱＝shared/cases.ts 的 key；樣板對照在 template 的 refs） */
-  private static readonly NAMES = ['switch', 'menu', 'button', 'status-badge', 'callout', 'empty-state', 'timeline', 'skeleton', 'stepper', 'checkbox', 'radio-group', 'segmented', 'tabs', 'detail-tabs', 'star-toggle', 'pagination', 'time-picker', 'form-field', 'combo', 'multi-select', 'dialog', 'toast', 'info-popover', 'date-picker', 'period-picker', 'sidebar', 'avatar-group'];
+  private static readonly NAMES = ['switch', 'menu', 'button', 'status-badge', 'callout', 'empty-state', 'timeline', 'skeleton', 'stepper', 'checkbox', 'radio-group', 'segmented', 'tabs', 'detail-tabs', 'star-toggle', 'pagination', 'time-picker', 'form-field', 'combo', 'multi-select', 'dialog', 'toast', 'info-popover', 'date-picker', 'period-picker', 'sidebar', 'avatar-group', 'tag-search', 'hold-to-confirm', 'drag-sort', 'upload', 'filter-chips', 'stat-row', 'segmented-bar'];
   protected readonly list = Demo.NAMES.filter((n) => !only || n === only).map((name) => ({ name, cases: CASES[name] ?? [] }));
   protected interact(c: Case) { return c.interact ? JSON.stringify(c.interact) : null; }
   /** 文字欄位：每個案例一個固定的輸入框 id */

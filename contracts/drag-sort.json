@@ -1,0 +1,36 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "drag-sort",
+  "title": "拖移排序",
+  "tier": "logic",
+  "logic": "core/sort.ts",
+  "description": "拖握把調整順序，其他列滑開讓位，原位留虛線空位；開頭的固定列不能移動。右側開關控制顯示。",
+  "use": "欄位顯示順序、覆核順序。",
+  "instead": [{ "when": "跨群組移動", "use": "menu（「移動到…」）" }],
+  "parts": [
+    { "name": "root", "selector": ".drg", "element": "div", "classes": { "drg": "拖移排序" }, "attrs": { "role": { "values": ["list"], "required": true } } },
+    { "name": "placeholder", "selector": ".drg > .drg-ph", "element": "i", "classes": { "drg-ph": "原位的虛線空位", "show": "拖移中" } },
+    { "name": "row", "selector": ".drg > .drg-r", "element": "div", "classes": { "drg-r": "一列", "vis": "顯示中", "lift": "拿起中", "landed": "剛放下（淡底閃一下）" }, "attrs": { "role": { "values": ["listitem"], "required": true } } },
+    {
+      "name": "handle",
+      "selector": ".drg-r > button.drg-h",
+      "element": "button",
+      "classes": { "drg-h": "握把" },
+      "attrs": { "type": { "values": ["button"], "required": true }, "aria-label": { "required": true } }
+    },
+    { "name": "locked", "selector": ".drg-r > span.drg-h", "element": "span", "classes": { "drg-h": "握把", "lk": "固定列（鎖頭）" } },
+    { "name": "name", "selector": ".drg-r > .drg-n", "element": "span", "classes": { "drg-n": "名稱" } },
+    {
+      "name": "toggle",
+      "selector": ".drg-r > .drg-s",
+      "element": "button",
+      "classes": { "drg-s": "顯示開關" },
+      "attrs": { "role": { "values": ["switch"], "required": true }, "aria-checked": { "values": ["true", "false"], "required": true }, "aria-label": { "required": true } }
+    }
+  ],
+  "keyboard": [
+    { "keys": "↑、↓（在握把上）", "action": "上移、下移一格；移動後告知目前第幾項" },
+    { "keys": "Space、Enter（在開關上）", "action": "切換顯示" }
+  ],
+  "example": "<div class=\"drg\" role=\"list\"><i class=\"drg-ph\"></i><div class=\"drg-r vis\" role=\"listitem\"><button class=\"drg-h\" type=\"button\" aria-label=\"拖移排序：狀態，第 2 項，共 4 項\">…</button><span class=\"drg-n\">狀態</span><button class=\"drg-s\" type=\"button\" role=\"switch\" aria-checked=\"true\" aria-label=\"顯示狀態\"><span class=\"tg\"><i></i></span></button></div></div>"
+}

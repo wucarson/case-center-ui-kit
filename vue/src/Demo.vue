@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { h, type Component } from 'vue';
 import { CASES } from '../../shared/cases';
-import { AvatarGroup, Button, Callout, Checkbox, CheckboxList, Combo, ConfirmDialog, DatePicker, DetailTabs, EmptyState, FormField, InfoPopover, Menu, MenuPanel, MultiSelect, Pagination, PeriodPicker, RadioGroup, Segmented, Sidebar, Skeleton, StarToggle, StatusBadge, Stepper, Switch, Tabs, TextField, TimePicker, Timeline, Toast } from './components';
+import { AvatarGroup, Button, Callout, Checkbox, CheckboxList, Combo, ConfirmDialog, DatePicker, DetailTabs, EmptyState, FormField, InfoPopover, Menu, MenuPanel, MultiSelect, Pagination, PeriodPicker, RadioGroup, Segmented, Sidebar, Skeleton, StarToggle, StatusBadge, Stepper, Switch, Tabs, TextField, TimePicker, Timeline, Toast, DragSort, FilterChips, HoldConfirm, SegmentedBar, StatRow, TagSearch, Upload } from './components';
 
 // 放在 FormField 裡的下拉／多選：field 是外框的設定
 const inField = (C: Component) => (p: Record<string, any>) => { const { field, ...rest } = p; return h(FormField, field, () => h(C, { ...rest, inField: true })); };
@@ -35,6 +35,13 @@ const RENDER: Record<string, (p: Record<string, unknown>) => Component> = {
   skeleton: () => Skeleton,
   'star-toggle': () => StarToggle,
   'detail-tabs': () => DetailTabs,
+  'tag-search': () => TagSearch,
+  'hold-to-confirm': () => HoldConfirm,
+  'drag-sort': () => DragSort,
+  upload: () => Upload,
+  'filter-chips': () => FilterChips,
+  'stat-row': () => StatRow,
+  'segmented-bar': () => SegmentedBar,
 };
 const only = new URLSearchParams(location.search).get('c');
 const list = Object.entries(CASES).filter(([n]) => (!only || n === only) && RENDER[n]).flatMap(([n, cs]) => cs.map((c) => ({ n, c })));

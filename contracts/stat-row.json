@@ -1,0 +1,16 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "stat-row",
+  "title": "統計卡",
+  "tier": "class",
+  "logic": "core/metrics.ts",
+  "description": "一列 2–4 個重點數字，第一個常設為重點（主色）；數字變動時可滾動更新。",
+  "use": "報表、總覽頁的 KPI。",
+  "instead": [{ "when": "超過 4 個數字", "use": "分組或表格" }],
+  "parts": [
+    { "name": "root", "selector": ".stats", "element": "div", "classes": { "stats": "統計卡列" }, "attrs": { "role": { "values": ["list"], "required": true } } },
+    { "name": "stat", "selector": ".stats > .stat", "element": "div", "classes": { "stat": "一張卡", "hot": "重點數字（主色）" }, "attrs": { "role": { "values": ["listitem"], "required": true } } },
+    { "name": "value", "selector": ".stat > b", "element": "b", "classes": { "num": "等寬數字" } }
+  ],
+  "example": "<div class=\"stats\" role=\"list\" style=\"--n:3\"><div class=\"stat hot\" role=\"listitem\"><span>進行中案件</span><b class=\"num\">42</b><small>件</small></div>…</div>"
+}

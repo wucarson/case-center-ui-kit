@@ -8,3 +8,6 @@ html, body { margin: 0; background: var(--card); color: var(--ink); font-size: 1
 .case[data-c="date-picker"] { width: 460px; }
 .case > .ip { width: 100%; align-self: start; }
 .case > .dp { align-self: start; }
+.case > :is(.tsr, .hold-c, .drg, .up, .chips, .stats, .sb) { width: 100%; }
+.case > :is(.tsr, .drg, .chips) { align-self: start; }
+.case:is([data-c="upload"], [data-c="stat-row"], [data-c="segmented-bar"]) { width: 460px; }

@@ -1,4 +1,4 @@
-/* 元件樣式 —— 主題：案管中心預設・匯出自元件展示牆 2026-11-18
+/* 元件樣式 —— 主題：案管中心預設・匯出自元件展示牆 2026-11-19
    從元件展示牆畫面直接抽出：每個元件的所有狀態（滑過、聚焦、選中、展開、停用、錯誤）與動畫都在這裡，
    變數已解析成實際值。React／Vue 元件只要輸出 COMPONENTS.md 裡的 HTML 結構與 class，外觀就和展示牆一致。
    深色模式：<html data-theme="dark">，或跟隨系統。 */
@@ -213,10 +213,6 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-wid
 @keyframes rise { 
   0% { transform: none; }
 }
-@keyframes curtain-in { 
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(calc(100% + 28px)); }
-}
 .w2 { grid-column: span 2; }
 .h2 { grid-row: span 2; }
 .num { font-variant-numeric: tabular-nums; }
@@ -264,6 +260,8 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentcolor; stroke-wid
 @media (hover: hover) and (pointer: fine) { .b2:hover:not(.dis):not(.is-off) { background: var(--tint); border-color: var(--primary); } }
 .b2.dng.hv { background: var(--danger-bg); border-color: var(--danger-fg); }
 @media (hover: hover) and (pointer: fine) { .b2.dng:hover:not(.dis):not(.is-off) { background: var(--danger-bg); border-color: var(--danger-fg); } }
+.hold-c { display: flex; flex-direction: column; align-items: stretch; }
+.hold-h { font-size: calc(12px * var(--fs-k) * var(--rk, 1)); line-height: calc(18px * var(--fs-k) * var(--rk, 1)); color: var(--weak); margin-top: 8px; }
 .hold .fill { position: absolute; inset: 0px; background: var(--hold); transform: scaleX(0); transform-origin: 0px 50%; z-index: 1; }
 .hold .bar { position: absolute; left: 0px; right: 0px; bottom: 0px; height: 3px; background: currentcolor; transform: scaleX(0); transform-origin: 0px 50%; z-index: 1; }
 .search { height: 40px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--field); box-shadow: var(--inset); display: flex; align-items: center; gap: 8px; padding: 0px 12px; color: var(--weak); transition: border-color calc(.2s * var(--dur)), box-shadow calc(.2s * var(--dur)); }
@@ -272,7 +270,8 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentcolor; stroke-wid
 .search .ph { color: var(--label); margin-left: -8px; }
 .results { margin-top: 6px; display: flex; flex-direction: column; gap: 2px; }
 .res { height: 34px; padding: 0px 10px; border-radius: var(--r-sm); display: flex; align-items: center; gap: 8px; font-size: calc(13px * var(--fs-k) * var(--rk, 1)); opacity: 0; transform: translateY(8px) scale(0.98); transition: opacity calc(.3s * var(--dur)) var(--ease), transform calc(.5s * var(--dur)) var(--spring-soft); }
-.res:first-child { background: var(--tint); }
+.res.hl { background: var(--tint); }
+.tsr { min-width: 0px; }
 .res em { margin-left: auto; font-style: normal; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); color: var(--weak); font-variant-numeric: tabular-nums; }
 .results.show .res { opacity: 1; transform: none; }
 .results.show .res:nth-child(2) { transition-delay: 80ms; }
@@ -325,11 +324,15 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentcolor; stroke-wid
 .rad.on { background: var(--tint); color: var(--selected-fg); font-weight: 600; }
 .rad.on i { border-color: var(--primary); }
 .rad.on i::after { transform: scale(1); }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; min-height: 106px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; }
 .chip { height: 30px; padding: 0px 6px 0px 12px; border-radius: var(--r-pill); background: var(--tint); color: var(--selected-fg); font-size: calc(13px * var(--fs-k) * var(--rk, 1)); font-weight: 500; display: inline-flex; align-items: center; gap: 4px; box-shadow: inset 0 1px 0 var(--hi), 0 2px 6px -2px var(--glow); }
 .chip u { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: background calc(.2s * var(--dur)); }
 .chip u svg { width: 11px; height: 11px; stroke-width: 2.6; }
 .chip.kill u { background: var(--danger-bg); color: var(--danger-fg); }
+@media (hover: hover) and (pointer: fine) {
+  .chip u:hover { background: var(--danger-bg); color: var(--danger-fg); }
+}
+.chip u:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
 .co { align-self: stretch; display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: var(--r-lg); border: 1px solid; transition: background calc(.45s * var(--dur)) var(--ease), color calc(.45s * var(--dur)) var(--ease), border-color calc(.45s * var(--dur)) var(--ease); }
 .co svg { width: 20px; height: 20px; margin-top: 2px; }
 .co strong { display: block; font-size: calc(14px * var(--fs-k) * var(--rk, 1)); font-weight: 600; }
@@ -339,7 +342,7 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentcolor; stroke-wid
 .co.warn { background: var(--warn-bg); color: var(--warn-fg); border-color: color-mix(in srgb, var(--warn-fg) 30%, transparent); }
 .co.dng { background: var(--danger-bg); color: var(--danger-fg); border-color: color-mix(in srgb, var(--danger-fg) 30%, transparent); }
 .co > div { min-width: 0px; flex: 1 1 0%; }
-.stats { align-self: stretch; display: grid; grid-template-columns: repeat(3, minmax(0px, 1fr)); gap: 10px; }
+.stats { align-self: stretch; display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: 10px; }
 .stat { background: var(--tile); border: 1px solid var(--line-subtle); border-radius: var(--r-lg); box-shadow: var(--raise); padding: 12px 14px; min-width: 0px; }
 .stat span { display: block; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); line-height: calc(18px * var(--fs-k) * var(--rk, 1)); font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .stat b { font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height: calc(36px * var(--fs-k) * var(--rk, 1)); font-weight: 600; letter-spacing: -0.02em; }
@@ -440,6 +443,8 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentcolor; stroke-wid
 .up-b i { display: block; height: 100%; width: 0px; border-radius: 4px; background: var(--grad-v); }
 .up.done .up-b i { background: var(--ok-grad); }
 .up.done .st { color: var(--ok-fg); font-weight: 600; }
+.up.fail .up-b i { background: var(--danger); }
+.up.fail .st { color: var(--danger-fg); font-weight: 600; }
 .sk { align-self: stretch; display: grid; }
 .sk > div { grid-area: 1 / 1; display: flex; align-items: center; gap: 10px; transition: opacity calc(.4s * var(--dur)) var(--ease), transform calc(.6s * var(--dur)) var(--spring-soft); }
 .shim { background: linear-gradient(90deg, var(--soft) 25%, var(--hover) 40%, var(--soft) 60%) 0 0 / 300% 100%; animation: shim calc(1.3s * var(--dur)) linear infinite; }
@@ -864,9 +869,17 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentcolor; stroke-wid
   30% { box-shadow: var(--shadow), 0 0 0 6px var(--focus); }
   100% { box-shadow: var(--shadow), 0 0 0 0 transparent; }
 }
+@keyframes glass-a { 
+  0% { transform: translate3d(-3vw, -2vh, 0px) scale(1) rotate(0deg); }
+  100% { transform: translate3d(3vw, 3vh, 0px) scale(1.08) rotate(4deg); }
+}
+@keyframes glass-b { 
+  0% { transform: translate3d(3vw, 2vh, 0px) scale(1.06) rotate(0deg); }
+  100% { transform: translate3d(-4vw, -3vh, 0px) scale(1) rotate(-5deg); }
+}
 :is(.co strong, .lc-t b, .dp-m, .tp-c > b) { --rk: var(--k-headline); font-weight: var(--t-headline-w); letter-spacing: var(--t-headline-ls); }
 :is(.tab, .dtab, .b2, .btn, .ctl, .chip, .seg span, .rad, .pg, .sd-it, .ps span, .bdg, .tagx) { --rk: var(--k-label); letter-spacing: var(--t-label-ls); }
 :is(.bdg, .tagx, .tab b, .dtab b, .sd-it b, .cell > header em.prop) { --rk: var(--k-label); font-weight: var(--t-label-w); }
-:is(small, .sub, .dp-h, .ppl-c, .pg-s, .ps-l, .res em, .stat span, .stk-c, .pie-r em, .tr.hd, .sd-g, .cell > header em:not(.prop)) { --rk: var(--k-caption); letter-spacing: var(--t-caption-ls); }
-:is(small, .sub, .dp-h) { font-weight: var(--t-caption-w); }
+:is(small, .sub, .hold-h, .dp-h, .ppl-c, .pg-s, .ps-l, .res em, .stat span, .stk-c, .pie-r em, .tr.hd, .sd-g, .cell > header em:not(.prop)) { --rk: var(--k-caption); letter-spacing: var(--t-caption-ls); }
+:is(small, .sub, .hold-h, .dp-h) { font-weight: var(--t-caption-w); }
 :is(.stat b, .sb-h b, .seg-p b, .pie-m b, .tp-col .v, .num) { --rk: var(--k-numeric); font-weight: var(--t-numeric-w); letter-spacing: var(--t-numeric-ls); font-variant-numeric: tabular-nums; }

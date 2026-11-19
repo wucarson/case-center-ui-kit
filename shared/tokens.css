@@ -1,4 +1,4 @@
-/* 主題：案管中心預設・匯出自元件展示牆 2026-11-18 */
+/* 主題：案管中心預設・匯出自元件展示牆 2026-11-19 */
 :root {
   --radius-xs: 6px;
   --radius-sm: 8px;
@@ -175,9 +175,7 @@
   --space-8: 32px;
   --space-10: 40px;
   --space-12: 48px;
-  --control-sm: 32px;
-  --control-md: 40px;
-  --control-lg: 48px;
+
   --duration-fast: 200ms;
   --duration-base: 420ms;
   --duration-slow: 560ms;

@@ -943,5 +943,183 @@
         "<div style=\"width:100%\"><div class=\"ps\"><i style=\"width: 66px; transform: translateX(195px);\"></i><span>本月</span><span>近 30 天</span><span>近 90 天</span><span class=\"on\">自訂<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"></path></svg></span></div><div class=\"ps-r\">2026-11-03 ～ 2026-11-12・共 10 天</div></div>"
       ]
     ]
+  },
+  "tag-search": {
+    "title": "搜尋與標籤建議",
+    "wide": true,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"tsr\"><div class=\"search focus\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><input class=\"ff-real\" placeholder=\"搜尋公告標題或標籤\" value=\"系統\"></div><div class=\"results show\"><div class=\"res hl\"><span>系統維護</span><em>8 篇</em></div><div class=\"res\"><span>系統升級</span><em>3 篇</em></div></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Empty",
+        "<div class=\"tsr\"><div class=\"search\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><input class=\"ff-real\" placeholder=\"搜尋公告標題或標籤\"></div></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"tsr\"><div class=\"search hv\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><input class=\"ff-real\" placeholder=\"搜尋公告標題或標籤\"></div></div>"
+      ],
+      [
+        "Focus",
+        "<div class=\"tsr\"><div class=\"search focus\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><input class=\"ff-real\" placeholder=\"搜尋公告標題或標籤\"></div></div>"
+      ],
+      [
+        "Suggestions",
+        "<div class=\"tsr\"><div class=\"search focus\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><input class=\"ff-real\" placeholder=\"搜尋公告標題或標籤\" value=\"系統\"></div><div class=\"results show\"><div class=\"res hl\"><span>系統維護</span><em>8 篇</em></div><div class=\"res\"><span>系統升級</span><em>3 篇</em></div></div></div>"
+      ],
+      [
+        "No results",
+        "<div class=\"tsr\"><div class=\"search focus\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><input class=\"ff-real\" placeholder=\"搜尋公告標題或標籤\" value=\"空調\"></div></div>"
+      ]
+    ]
+  },
+  "hold-to-confirm": {
+    "title": "按住確認",
+    "wide": false,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"hold-c\"><span class=\"btn hold\"><i class=\"fill\"></i><i class=\"bar\"></i><span class=\"roll\"><span>按住結案</span></span></span><div class=\"hold-h\">按住 1.5 秒才會送出</div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"hold-c\"><span class=\"btn hold\"><i class=\"fill\"></i><i class=\"bar\"></i><span class=\"roll\"><span>按住結案</span></span></span><div class=\"hold-h\">按住 1.5 秒才會送出</div></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"hold-c\"><span class=\"btn hold hv\"><i class=\"fill\"></i><i class=\"bar\"></i><span class=\"roll\"><span>按住結案</span></span></span><div class=\"hold-h\">按住 1.5 秒才會送出</div></div>"
+      ],
+      [
+        "Holding",
+        "<div class=\"hold-c\"><span class=\"btn hold\"><i class=\"fill\" style=\"transform:scaleX(0.5)\"></i><i class=\"bar\" style=\"transform:scaleX(0.5)\"></i><span class=\"roll\"><span>持續按住…</span></span></span><div class=\"hold-h\">按住 1.5 秒才會送出</div></div>"
+      ],
+      [
+        "Complete",
+        "<div class=\"hold-c\"><span class=\"btn hold done\"><i class=\"fill\"></i><i class=\"bar\"></i><span class=\"roll\"><span><svg class=\"ic draw\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>已結案</span></span></span><div class=\"hold-h\">按住 1.5 秒才會送出</div></div>"
+      ],
+      [
+        "Disabled",
+        "<div class=\"hold-c\"><span class=\"btn hold is-off\"><i class=\"fill\"></i><i class=\"bar\"></i><span class=\"roll\"><span>按住結案</span></span></span><div class=\"hold-h\">按住 1.5 秒才會送出</div></div>"
+      ]
+    ]
+  },
+  "drag-sort": {
+    "title": "拖移排序",
+    "wide": false,
+    "variants": [
+      [
+        "欄位面板",
+        "<div class=\"drg\"><i class=\"drg-ph\"></i><div class=\"drg-r vis\" style=\"transform:translateY(0px)\"><span class=\"drg-h lk\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"5\" y=\"11\" width=\"14\" height=\"9.5\" rx=\"2\"/><path d=\"M8 11V8a4 4 0 0 1 8 0v3\"/></svg></span><span class=\"drg-n\">名稱</span><button class=\"drg-s\" type=\"button\" disabled><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis\" style=\"transform:translateY(32px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">狀態</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis\" style=\"transform:translateY(64px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">負責人</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r\" style=\"transform:translateY(96px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">到期日</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"drg\"><i class=\"drg-ph\"></i><div class=\"drg-r vis\" style=\"transform:translateY(0px)\"><span class=\"drg-h lk\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"5\" y=\"11\" width=\"14\" height=\"9.5\" rx=\"2\"/><path d=\"M8 11V8a4 4 0 0 1 8 0v3\"/></svg></span><span class=\"drg-n\">名稱</span><button class=\"drg-s\" type=\"button\" disabled><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis\" style=\"transform:translateY(32px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">狀態</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis\" style=\"transform:translateY(64px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">負責人</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r\" style=\"transform:translateY(96px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">到期日</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div></div>"
+      ],
+      [
+        "Handle hover",
+        "<div class=\"drg\"><i class=\"drg-ph\"></i><div class=\"drg-r vis\" style=\"transform:translateY(0px)\"><span class=\"drg-h lk\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"5\" y=\"11\" width=\"14\" height=\"9.5\" rx=\"2\"/><path d=\"M8 11V8a4 4 0 0 1 8 0v3\"/></svg></span><span class=\"drg-n\">名稱</span><button class=\"drg-s\" type=\"button\" disabled><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis\" style=\"transform:translateY(32px)\"><button class=\"drg-h hv\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">狀態</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis\" style=\"transform:translateY(64px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">負責人</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r\" style=\"transform:translateY(96px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">到期日</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div></div>"
+      ],
+      [
+        "Lifted",
+        "<div class=\"drg\"><i class=\"drg-ph show\" style=\"transform:translateY(32px)\"></i><div class=\"drg-r vis\" style=\"transform:translateY(0px)\"><span class=\"drg-h lk\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"5\" y=\"11\" width=\"14\" height=\"9.5\" rx=\"2\"/><path d=\"M8 11V8a4 4 0 0 1 8 0v3\"/></svg></span><span class=\"drg-n\">名稱</span><button class=\"drg-s\" type=\"button\" disabled><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis lift\" style=\"transform:translateY(32px)\"><button class=\"drg-h hv\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">狀態</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis\" style=\"transform:translateY(64px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">負責人</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r\" style=\"transform:translateY(96px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">到期日</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div></div>"
+      ]
+    ]
+  },
+  "upload": {
+    "title": "檔案上傳",
+    "wide": true,
+    "variants": [
+      [
+        "PDF",
+        "<div class=\"up done\"><span class=\"up-i\" style=\"--tone:var(--danger)\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/></svg></span><div class=\"up-m\"><div class=\"up-r\"><span class=\"roll nm\"><span>設計規範_v3.pdf</span></span><span class=\"st num\">上傳完成</span></div><div class=\"up-b\"><i style=\"width:100%\"></i></div></div></div>"
+      ],
+      [
+        "Figma",
+        "<div class=\"up done\"><span class=\"up-i\" style=\"--tone:var(--g3)\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/></svg></span><div class=\"up-m\"><div class=\"up-r\"><span class=\"roll nm\"><span>首頁視覺稿.fig</span></span><span class=\"st num\">上傳完成</span></div><div class=\"up-b\"><i style=\"width:100%\"></i></div></div></div>"
+      ],
+      [
+        "Word",
+        "<div class=\"up done\"><span class=\"up-i\" style=\"--tone:var(--g2)\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/></svg></span><div class=\"up-m\"><div class=\"up-r\"><span class=\"roll nm\"><span>訪談紀錄_1112.docx</span></span><span class=\"st num\">上傳完成</span></div><div class=\"up-b\"><i style=\"width:100%\"></i></div></div></div>"
+      ],
+      [
+        "Excel",
+        "<div class=\"up done\"><span class=\"up-i\" style=\"--tone:var(--success)\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/></svg></span><div class=\"up-m\"><div class=\"up-r\"><span class=\"roll nm\"><span>工時統計_11月.xlsx</span></span><span class=\"st num\">上傳完成</span></div><div class=\"up-b\"><i style=\"width:100%\"></i></div></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Uploading",
+        "<div class=\"up\"><span class=\"up-i\" style=\"--tone:var(--danger)\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/></svg></span><div class=\"up-m\"><div class=\"up-r\"><span class=\"roll nm\"><span>設計規範_v3.pdf</span></span><span class=\"st num\">1.1 / 2.4 MB・45%</span></div><div class=\"up-b\"><i style=\"width:45%\"></i></div></div></div>"
+      ],
+      [
+        "Complete",
+        "<div class=\"up done\"><span class=\"up-i\" style=\"--tone:var(--danger)\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/></svg></span><div class=\"up-m\"><div class=\"up-r\"><span class=\"roll nm\"><span>設計規範_v3.pdf</span></span><span class=\"st num\">上傳完成</span></div><div class=\"up-b\"><i style=\"width:100%\"></i></div></div></div>"
+      ],
+      [
+        "Failed",
+        "<div class=\"up fail\"><span class=\"up-i\" style=\"--tone:var(--danger)\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/></svg></span><div class=\"up-m\"><div class=\"up-r\"><span class=\"roll nm\"><span>設計規範_v3.pdf</span></span><span class=\"st num\">上傳失敗</span></div><div class=\"up-b\"><i style=\"width:45%\"></i></div></div></div>"
+      ]
+    ]
+  },
+  "filter-chips": {
+    "title": "篩選標籤",
+    "wide": false,
+    "variants": [
+      [
+        "多個條件",
+        "<div class=\"chips\"><span class=\"chip\">狀態：進行中<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span><span class=\"chip\">設計部<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span><span class=\"chip\">本月到期<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span></div>"
+      ],
+      [
+        "一個條件",
+        "<div class=\"chips\"><span class=\"chip\">設計部<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"chips\"><span class=\"chip\">狀態：進行中<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span><span class=\"chip\">設計部<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span></div>"
+      ],
+      [
+        "Remove hover",
+        "<div class=\"chips\"><span class=\"chip kill\">狀態：進行中<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span><span class=\"chip\">設計部<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span></div>"
+      ]
+    ]
+  },
+  "stat-row": {
+    "title": "統計卡",
+    "wide": true,
+    "variants": [
+      [
+        "三個指標",
+        "<div class=\"stats\" style=\"--n:3\"><div class=\"stat hot\"><span>進行中案件</span><b class=\"num\">42</b><small>件</small></div><div class=\"stat\"><span>本週工時</span><b class=\"num\">316</b><small>小時</small></div><div class=\"stat\"><span>逾期工單</span><b class=\"num\">7</b><small>件</small></div></div>"
+      ],
+      [
+        "兩個指標",
+        "<div class=\"stats\" style=\"--n:2\"><div class=\"stat\"><span>本週工時</span><b class=\"num\">316</b><small>小時</small></div><div class=\"stat\"><span>逾期工單</span><b class=\"num\">7</b><small>件</small></div></div>"
+      ]
+    ],
+    "states": []
+  },
+  "segmented-bar": {
+    "title": "分段統計條",
+    "wide": true,
+    "variants": [
+      [
+        "四個狀態",
+        "<div class=\"sb\"><div class=\"sb-h\"><b class=\"num\">128</b><span>件工單</span></div><div class=\"sb-b\"><i style=\"--c:var(--g2);--f:43\"></i><i style=\"--c:var(--warn);--f:18\"></i><i style=\"--c:var(--success);--f:55\"></i><i style=\"--c:var(--line-strong);--f:12\"></i></div><div class=\"sb-l\"><span><i style=\"--c:var(--g2)\"></i>進行中<b class=\"num\">43</b></span><span><i style=\"--c:var(--warn)\"></i>待審核<b class=\"num\">18</b></span><span><i style=\"--c:var(--success)\"></i>已完成<b class=\"num\">55</b></span><span><i style=\"--c:var(--line-strong)\"></i>未開始<b class=\"num\">12</b></span></div></div>"
+      ],
+      [
+        "兩個狀態",
+        "<div class=\"sb\"><div class=\"sb-h\"><b class=\"num\">40</b><span>件工單</span></div><div class=\"sb-b\"><i style=\"--c:var(--success);--f:32\"></i><i style=\"--c:var(--line-strong);--f:8\"></i></div><div class=\"sb-l\"><span><i style=\"--c:var(--success)\"></i>已完成<b class=\"num\">32</b></span><span><i style=\"--c:var(--line-strong)\"></i>未開始<b class=\"num\">8</b></span></div></div>"
+      ]
+    ],
+    "states": []
   }
 }

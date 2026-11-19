@@ -150,11 +150,8 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 }
 .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
 @keyframes rise { from { transform: none; } }   /* 只用來計時：首次進場全部播完才標記 .ready */
-/* 進場：浮出（emergePlay，液面由上往下揭開）；離場 .sink 蓋層回到頁面色 */
-.cell.emerge, .cell.sink { position: relative; }
-.cell.emerge { background-clip: padding-box; transform-origin: 50% 100%; }   /* 外框底下不透出卡片色；以底邊為支點拉伸（底邊黏住） */
-.cell.sink::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; z-index: 5; background: var(--page); animation: em-sink var(--em-t) ease-in both; }
-@keyframes em-sink { from { opacity: 0; } to { opacity: 1; } }
+/* 進場：堆疊（dealIn／stackOut）——動畫期間以左上角為支點縮放，z-index 由程式設定（第一張在最上面） */
+.cell.deal { position: relative; transform-origin: 0 0; }
 
 .wf { scroll-margin-top: 16px; }   /* 切換分類時捲回這裡 */
 body.hush :is(.spin, .shim, .caret) { animation-play-state: paused; }
@@ -3386,7 +3383,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       color: { primary: '#1f6fff', darkPrimary: '', success: '#12b866', warn: '#f59e0b', danger: '#ef3340', info: '#1846c9', series: ['#1f6fff', '#00a3b8', '#8b5cf6', '#f59e0b'], neutral: 'cool' },
       shape: { card: 20, control: 10, pill: 'full' },
       depth: { shadow: 2, glow: 100, border: 'standard' },
-      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'emerge' },
+      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'stack' },
       layout: { cols: 4, density: 'standard', hidden: [], order: [] },
     };
     const UI_KEYS = ['standard', 'flat', 'glass', 'contrast', 'neu', 'swiss', 'y2k'];
@@ -3957,9 +3954,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       if (!out.length) return relayout(still);
       hushFor(D(1000));   // 轉場期間暫停卡片內的示範動畫，讓出運算
       // 離場：原地淡出 0.22 秒；畫面內離開的卡片同時進行
-      const fly = theme.motion.enter === 'fly';   // 飛入：淡出；浮出：沉回水面
-      pending = { out: out.map(([c]) => [c, fly ? c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' }) : sinkPlay(c.el, D(220))]) };
-      pending.t = setTimeout(() => { const p = pending; pending = null; relayout(false); p.out.forEach(([c, a]) => { a.cancel(); emergeStop(c.el); }); }, D(220));
+      // 飛入：原地淡出；堆疊：飛回左上角
+      const so = theme.motion.enter === 'fly' ? { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]), ms: D(220) } : stackOut(out);
+      pending = { out: so.out };
+      pending.t = setTimeout(() => { const p = pending; pending = null; relayout(false); p.out.forEach(([c, a]) => { a.cancel(); emergeStop(c.el); }); }, so.ms);
     }
     function relayout(still) {
       const before = new Map(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()]));
@@ -3973,7 +3971,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         const b = before.get(c), a = c.el.getBoundingClientRect();
         if (!b || Math.hypot(b.left - a.left, b.top - a.top) > 320) entering.push([c, a]);
       });
-      // 進場：只有畫面內的卡片（浮出照閱讀順序、飛入由中心往外）
+      // 進場：只有畫面內的卡片（堆疊照閱讀順序發牌、飛入由中心往外）
       const shift = wf.getBoundingClientRect().top - 16;   // 還在捲回途中的距離
       playEnter(inViewport(entering, Math.min(0, shift)), false);
     }
@@ -3999,7 +3997,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       document.body.animate([{ opacity: 0 }], { duration: D(800), easing: out, pseudoElement: '::before' });                                          // 只給起點：淡回各風格原本的透明度
       [$('.top'), wf].forEach((e) => e?.animate([{ opacity: 0, transform: 'translateY(-12px)' }, { opacity: 1, transform: 'none' }], { duration: D(500), delay: D(120), easing: out, fill: 'backwards' }));
     }
-    // 進場入口：依設定播浮出或飛入；scene＝連動背景與標題列
+    // 進場入口：依設定播堆疊或飛入；scene＝連動背景與標題列
     function playEnter(list, scene) {
       if (!list.length || matchMedia('(prefers-reduced-motion: reduce)').matches || theme.motion.reduce) return;
       if (theme.motion.enter === 'fly') {
@@ -4007,48 +4005,46 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         list.forEach(([c, r]) => flyPlay(c.el, D(Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md * 140)));
         if (scene) flyScene();
       } else {
-        list.forEach(([c]) => emergePlay(c.el, 0));   // 浮出：所有卡片同時升起
+        dealIn(list);   // 堆疊：從左上角依閱讀順序發牌
       }
     }
-    /* 進場（液面揭開）：一層液面從卡片上緣往下流，邊緣帶幾道滴落；流過的地方由模糊變清楚（1.2 秒，所有卡片同時）
-       · 0.15–0.9 秒：液面由上往下揭開整張卡片（底色、外框、內容一起），模糊 8px → 清楚；同時從低 6px 上浮落定
-       · 0.9–1.2 秒：落定；陰影等揭開完才長出（避免被遮罩切掉）
-       遮罩高度是卡片的 3 倍：上段不透明、中間是滴落邊緣、下段透明，移動遮罩位置就是液面往下流 */
-    const EM_MASK = 'url("data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 300" preserveAspectRatio="none"><path d="M0 0H100V146C97 146 95 143 92 144C89.5 145 89 168 86.5 172C84 168 84 147 80 145C74 142 70 148 66 147C64 147 64.5 182 62 186C59.5 182 60 150 57 147C50 141 44 146 40 145C38.5 145 39 160 37 163C35 160 35.5 146 33 144C26 139 20 147 15 147C13.5 147 14 174 11.5 177C9 174 9.5 148 7 146C4 144 2 145 0 145Z"/></svg>') + '")';
-    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('emerge', 'sink'); el._em = null; }
-    function emergePlay(el, delay = 0) {
-      emergeStop(el);
-      const T = D(1200);
-      if (!(T > 0)) return;
-      el.classList.add('emerge');
-      const smooth = 'cubic-bezier(.4, 0, .2, 1)', settle = 'cubic-bezier(.3, 0, .2, 1)', o = { duration: T, delay, fill: 'backwards' }, S = 0.15 / 0.9;
-      const m = (y) => ({ maskImage: EM_MASK, webkitMaskImage: EM_MASK, maskRepeat: 'no-repeat', webkitMaskRepeat: 'no-repeat', maskSize: '100% 300%', webkitMaskSize: '100% 300%', maskPosition: `50% ${y}%`, webkitMaskPosition: `50% ${y}%` });
-      const anims = [
-        // 液面揭開＋模糊：0.15 秒起、0.9 秒結束；結束後遮罩自動移除，陰影才不會被切
-        el.animate([
-          { ...m(100), filter: 'blur(8px)' },
-          { ...m(100), filter: 'blur(8px)', offset: S, easing: 'cubic-bezier(.45, .05, .35, 1)' },
-          { ...m(0), filter: 'blur(0px)' },
-        ], { duration: T * 0.75, delay, fill: 'backwards' }),
-        // 位置與拉伸：揭開時上浮、落定
-        el.animate([
-          { transform: 'translateY(6px) scaleY(1)', easing: smooth },
-          { transform: 'translateY(6px) scaleY(1)', offset: 0.125, easing: smooth },
-          { transform: 'translateY(-2px) scaleY(1.012)', offset: 0.55, easing: settle },
-          { transform: 'none' },
-        ], o),
-        // 陰影：揭開完才長出
-        el.animate([{ boxShadow: 'none' }, { boxShadow: 'none', offset: 0.75, easing: settle }, {}], o),
-      ];
-      el._em = { anims, t: setTimeout(() => emergeStop(el), delay + T + 50) };
+    /* 進場（堆疊發牌）：卡片先縮小疊在元件牆左上角（每張略微錯位、傾斜），停 0.15 秒後依閱讀順序一張張發到自己的位置
+       · 每張間隔最多 70ms、飛行 0.7 秒，全部到位約 1.6 秒；第一張在最上面、最先發
+       · 落定時順著飛行方向微微衝過頭再停住，幅度跟「彈跳感」設定走（無＝不衝過頭）
+       離場（飛出）：反過來，最後一張先飛回左上角，第一張最後回到最上面，邊飛邊淡出 */
+    function emergeStop(el) { const d = el._em; if (!d) return; clearTimeout(d.t); d.anims.forEach((x) => x.cancel()); el.classList.remove('deal'); el.style.zIndex = ''; el._em = null; }
+    // 疊在左上角時的 transform：縮到寬約 240px、往右下錯位、傾斜 ±2.4°
+    function stackAt(r, i) {
+      const w = $('#wall').getBoundingClientRect(), ox = w.left, oy = Math.max(w.top, 16), off = Math.min(i, 6) * 3;
+      const sc = Math.min(1, 240 / r.width), rot = (((i * 37) % 7) - 3) * 0.8;
+      return { dx: ox + off - r.left, dy: oy + off - r.top, t: `translate(${(ox + off - r.left).toFixed(1)}px, ${(oy + off - r.top).toFixed(1)}px) rotate(${rot}deg) scale(${sc.toFixed(3)})` };
     }
-    function sinkPlay(el, T) {
-      emergeStop(el);
-      el.style.setProperty('--em-t', T + 'ms'); el.style.setProperty('--em-d', '0ms');
-      el.classList.add('sink');
-      const a = el.animate([{ transform: 'none', opacity: 1 }, { boxShadow: 'none', borderColor: 'transparent', transform: 'translateY(4px) scale(.99)', opacity: 0 }], { duration: T, easing: 'cubic-bezier(.4, 0, 1, 1)', fill: 'forwards' });
-      el._em = { anims: [a], t: 0 };
-      return a;
+    function dealIn(list) {
+      const n = list.length, step = n > 1 ? Math.min(70, 900 / (n - 1)) : 0, k = FLY_K[theme.motion.bounce] ?? 1, dur = D(700);
+      list.forEach(([c, r], i) => {
+        const el = c.el; emergeStop(el);
+        el.classList.add('deal'); el.style.zIndex = n - i + 1;
+        const { dx, dy, t } = stackAt(r, i), ov = Math.min(1, 8 / (Math.hypot(dx, dy) * 0.012 || 1)) * 0.012 * k;   // 衝過頭最多 8px
+        const kf = k > 0
+          ? [{ transform: t, easing: 'cubic-bezier(.3, .7, .3, 1)' },
+             { transform: `translate(${(-dx * ov).toFixed(1)}px, ${(-dy * ov).toFixed(1)}px)`, offset: 0.72, easing: 'cubic-bezier(.45, 0, .55, 1)' },
+             { transform: 'none' }]
+          : [{ transform: t, easing: 'cubic-bezier(.22, 1, .36, 1)' }, { transform: 'none' }];
+        const delay = D(150) + D(i * step);
+        el._em = { anims: [el.animate(kf, { duration: dur, delay, fill: 'backwards' })], t: setTimeout(() => emergeStop(el), delay + dur + 50) };
+      });
+    }
+    // 回傳 [卡片, 動畫] 與全部結束的時間
+    function stackOut(list) {
+      const n = list.length, step = n > 1 ? Math.min(25, 150 / (n - 1)) : 0, dur = D(300);
+      const out = list.map(([c, r], i) => {
+        const el = c.el; emergeStop(el);
+        el.classList.add('deal'); el.style.zIndex = n - i + 1;
+        const a = el.animate([{ transform: 'none', opacity: 1 }, { opacity: 1, offset: 0.55 }, { transform: stackAt(r, i).t, opacity: 0 }], { duration: dur, delay: D((n - 1 - i) * step), easing: 'cubic-bezier(.55, 0, .7, .25)', fill: 'both' });
+        el._em = { anims: [a], t: 0 };
+        return [c, a];
+      });
+      return { out, ms: dur + D((n - 1) * step) };
     }
     const replayEnter = () => { hushFor(D(1000)); playEnter(inViewport(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()])), true); };
     wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });
@@ -4118,7 +4114,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
             on: () => (m ? !theme.motion.reduce && theme.motion.speed === m.speed && theme.motion.bounce === m.bounce : theme.motion.reduce),
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
         })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['emerge', '浮出'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter === 'fly' ? 'fly' : 'emerge') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; }))),
+          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['stack', '堆疊'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter === 'fly' ? 'fly' : 'stack') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; }))),
       )];
     }
     function catsEl() {

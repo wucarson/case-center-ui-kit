@@ -2333,26 +2333,31 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           { strokeDashoffset: 0, opacity: 0.85, strokeWidth: 2, offset: (BOOM - st) / len, easing: 'ease-out' },
           { strokeDashoffset: 0, opacity: 0, strokeWidth: 2 }],
           { duration: len, delay: st, fill: 'both' }); });
-      // 收尾（炸開）：碎片先往內蓄力，再帶 3D 翻轉往外炸——有的往鏡頭飛（放大、較快），有的往後（縮小、較慢）
+      // 收尾（炸開）：碎片先往內蓄力，再帶 3D 翻轉往外炸，景深誇張——
+      //   近景碎片衝向鏡頭（放大到約 2.3 倍、最快、疊在最上面），遠景碎片退後（縮小到約 0.5 倍、較慢、較早淡出）；不用濾鏡（全螢幕碎片加模糊太吃效能）
+      //   深度平均分配給每塊碎片，前後層次一定拉得開；新版面同時從 0.93 倍推近到原大，像鏡頭往前穿過碎片
       const onB = (x, y) => x < 1 || y < 1 || x > W - 1 || y > H - 1;
-      pieces.forEach(({ el, gx, gy, pg }) => {
+      const zs = pieces.map((_, i) => (pieces.length > 1 ? (i / (pieces.length - 1)) * 2 - 1 : 0)).sort(() => Math.random() - 0.5);
+      document.querySelector('.shell')?.animate([{ transform: 'scale(.93)' }, { transform: 'none' }], { duration: TOTAL - BOOM, delay: BOOM, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'backwards' });
+      pieces.forEach(({ el, gx, gy, pg }, pi) => {
         // 切口亮邊：只畫刀切出來的邊（畫面四周的邊不畫），炸開瞬間亮起、跟著碎片飛
         const edges = pg.map((p, i) => [p, pg[(i + 1) % pg.length]]).filter(([p, q]) => !(onB(...p) && onB(...q) && (Math.abs(p[0] - q[0]) < 1 || Math.abs(p[1] - q[1]) < 1)));
         el.insertAdjacentHTML('beforeend', `<svg class="slash-rim" width="${W}" height="${H}">${edges.map(([p, q]) => `<line x1="${p[0].toFixed(1)}" y1="${p[1].toFixed(1)}" x2="${q[0].toFixed(1)}" y2="${q[1].toFixed(1)}"/>`).join('')}</svg>`);
         el.lastElementChild.animate([{ opacity: 0 }, { opacity: 0, offset: (BOOM - 10) / TOTAL }, { opacity: 1, offset: BOOM / TOTAL }, { opacity: 0.6 }], { duration: TOTAL, fill: 'both' });
         const vx = gx - cx, vy = gy - cy, d = Math.hypot(vx, vy) || 1, ux = vx / d, uy = vy / d;
-        const z = Math.random() * 2 - 1, sp = 0.75 + (z + 1) * 0.3, dist = (0.28 * Math.max(W, H) + Math.random() * 100) * sp, sc = 1 + z * 0.35;
+        const z = zs[pi], sp = 0.55 + (z + 1) * 0.55, dist = (0.26 * Math.max(W, H) + Math.random() * 80) * sp, sc = z > 0 ? 1 + z * 1.3 : 1 + z * 0.5;
+        el.style.zIndex = Math.round((z + 1) * 10);
         const rx = (Math.random() - 0.5) * 70, ry = (Math.random() - 0.5) * 70, rz = (Math.random() - 0.5) * 50;
         el.style.transformOrigin = `${gx.toFixed(0)}px ${gy.toFixed(0)}px`;
         el.animate([
           { offset: 0, transform: 'perspective(1200px) none', opacity: 1 },
           { offset: CUT_END / TOTAL, transform: 'perspective(1200px) translate(0px, 0px) scale(1)', opacity: 1, easing: 'cubic-bezier(.4, 0, .6, 1)' },
           { offset: BOOM / TOTAL, transform: `perspective(1200px) translate(${(-ux * 10).toFixed(1)}px, ${(-uy * 10).toFixed(1)}px) scale(.97)`, opacity: 1, easing: 'cubic-bezier(.2, .55, .35, 1)' },
-          { offset: (BOOM + (TOTAL - BOOM) * 0.55) / TOTAL, opacity: 1 },   // 前半段不淡，看得到碎片翻飛
-          { offset: 1, transform: `perspective(1200px) translate(${(ux * dist).toFixed(0)}px, ${(uy * dist).toFixed(0)}px) rotateX(${rx.toFixed(0)}deg) rotateY(${ry.toFixed(0)}deg) rotate(${rz.toFixed(0)}deg) scale(${(sc * 0.9).toFixed(2)})`, opacity: 0 }],
+          { offset: (BOOM + (TOTAL - BOOM) * (z < 0 ? 0.3 : 0.6)) / TOTAL, opacity: 1 },   // 前半段不淡；遠景碎片較早淡出（像沒入遠方）
+          { offset: 1, transform: `perspective(1200px) translate(${(ux * dist).toFixed(0)}px, ${(uy * dist).toFixed(0)}px) rotateX(${rx.toFixed(0)}deg) rotateY(${ry.toFixed(0)}deg) rotate(${rz.toFixed(0)}deg) scale(${sc.toFixed(2)})`, opacity: 0 }],
           { duration: TOTAL, easing: 'linear', fill: 'both' });
       });
-      // 細小碎屑：從三刀交叉點與切口噴出 55 片三角形碎屑（9–23px、不透明、帶陰影與光暈，深淺底都看得到）
+      // 細小碎屑：從三刀交叉點與切口噴出 55 片三角形碎屑（帶陰影與光暈，深淺底都看得到）
       const spots = [];
       cuts.forEach((c, i) => cuts.slice(i + 1).forEach((e) => { const den = c.dx * e.dy - c.dy * e.dx; if (Math.abs(den) < 1e-6) return;
         const t = ((e.px - c.px) * e.dy - (e.py - c.py) * e.dx) / den, x = c.px + c.dx * t, y = c.py + c.dy * t; if (x > 0 && x < W && y > 0 && y < H) spots.push([x, y]); }));
@@ -2360,14 +2365,16 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const cols = ['#ffffff', '#ffffff', getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#2f6bff', '#dfe6f2'];   // 不透明，加主色點綴
       const dwrap = document.createElement('div'); dwrap.className = 'slash-debris-wrap'; layer.append(dwrap);
       for (let k = 0; k < 55; k++) {
-        const [x, y] = spots[k % spots.length], sz = 9 + Math.random() * 14, a0 = Math.random() * Math.PI * 2, v = 160 + Math.random() * 320;
+        // 碎屑也有景深：近的大、快、微糊，遠的小、慢、淡
+        const dz = Math.random() * 2 - 1, m = 0.55 + (dz + 1) * 0.85, [x, y] = spots[k % spots.length], sz = (8 + Math.random() * 10) * m, a0 = Math.random() * Math.PI * 2, v = (140 + Math.random() * 260) * (0.6 + (dz + 1) * 0.55);
         const dbr = document.createElement('i'); dbr.className = 'slash-debris';
-        dbr.style.cssText = `left:${(x - sz / 2).toFixed(0)}px;top:${(y - sz / 2).toFixed(0)}px;width:${sz.toFixed(0)}px;height:${sz.toFixed(0)}px;background:${cols[k % cols.length]}`;
+        dbr.style.cssText = `left:${(x - sz / 2).toFixed(0)}px;top:${(y - sz / 2).toFixed(0)}px;width:${sz.toFixed(0)}px;height:${sz.toFixed(0)}px;background:${cols[k % cols.length]};z-index:${Math.round((dz + 1) * 10)}${dz > 0.6 ? ';filter:blur(1.5px)' : ''}`;
+        const peak = dz < -0.4 ? 0.55 : 1;
         dwrap.append(dbr);
         dbr.animate([
           { opacity: 0, transform: 'translate(0, 0) rotate(0deg) scale(.6)' },
-          { opacity: 1, offset: 0.06 },
-          { opacity: 1, offset: 0.55 },
+          { opacity: peak, offset: 0.06 },
+          { opacity: peak, offset: 0.55 },
           { opacity: 0, transform: `translate(${(Math.cos(a0) * v).toFixed(0)}px, ${(Math.sin(a0) * v + 40).toFixed(0)}px) rotate(${(Math.random() * 720 - 360).toFixed(0)}deg) scale(.3)` }],
           { duration: 520 + Math.random() * 180, delay: BOOM - 20, easing: 'cubic-bezier(.15, .7, .3, 1)', fill: 'both' });
       }

@@ -1501,8 +1501,8 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="neu"] :is(.btn, .top-a .ctl) { box-shadow: var(--raise); }
 :root[data-ui="neu"] .cell:hover { transform: none; }
 /* 卡片內緣：左上受光亮邊＋右下微暗，做出鼓起的立體感 */
-:root[data-ui="neu"] .cell { border: 0; padding: 17px 19px 19px; --neu-in: inset 3px 3px 6px var(--neu-hi), inset -3px -3px 5.6px color-mix(in srgb, var(--neu-lo) 35%, transparent); box-shadow: var(--shadow), var(--neu-in); }   /* 內亮與外亮同色同模糊、去掉 1px 邊框間隙，左上無縫接起來 */
-:root[data-ui="neu"] .cell:hover { box-shadow: var(--shadow-lift), var(--neu-in); }
+:root[data-ui="neu"] .cell { border: 0; padding: 17px 19px 19px; --neu-in: inset 3px 3px 6px var(--neu-hi), inset -3px -3px 5.6px color-mix(in srgb, var(--neu-lo) 35%, transparent); box-shadow: -3px -3px 6px var(--neu-hi), 6px 6px 8px 2px var(--neu-lo), var(--neu-in); }   /* 內亮與外亮同色同模糊、去掉 1px 邊框間隙，左上無縫接起來 */
+:root[data-ui="neu"] .cell:hover { box-shadow: -5px -5px 8.4px var(--neu-hi), 8px 8px 10.4px 2px var(--neu-lo), var(--neu-in); }   /* 外暗：平時 6px 偏移、8px 模糊、擴張 2px；滑過再遠一點 */
 
 /* Swiss Style：無陰影、直角，卡片上方一條粗實線；Helvetica 系字型、標題加粗收字距、英文標示大寫 */
 :root[data-ui="swiss"], :root[data-theme="dark"][data-ui="swiss"], :root:not([data-theme="light"])[data-ui="swiss"] {
@@ -1718,6 +1718,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .wand-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; view-transition-name: wand; }
 .wand { position: absolute; transform-origin: 0 50%; filter: drop-shadow(0 10px 14px rgb(0 0 0 / .35)); }
 .wand svg { display: block; overflow: visible; }
+.wand .wand-cv { display: block; width: 100%; height: 100%; }
 .wand .wand-tip { top: 50%; margin-top: -14px; }
 .wand-tip { position: absolute; left: -14px; top: -5px; width: 28px; height: 28px; border-radius: 50%; }
 .lumos .wand-tip { background: radial-gradient(circle, #fff 0 22%, rgb(220 235 255 / .9) 38%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 24px 8px rgb(210 230 255 / .7); }
@@ -2542,21 +2543,57 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
          魔杖、光暈、咒語放在一個暫時的元素裡（自己的 view-transition-name，疊在最上面）
        · 時間軸：0–0.33 秒魔杖伸入 → 0.43 秒杖尖點下施咒 → 0.43–1.33 秒漩渦（Lumos 過曝圓形暈開／Nox 畫面縮小吸入漩渦＋Canvas 星芒），咒語描寫 → 約 1.5 秒結束 */
     if (!document.getElementById('gf-cinzel')) document.head.insertAdjacentHTML('beforeend', '<link id="gf-cinzel" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap">');
-    // 接骨木魔杖：杖身由尖到粗、沿途一節節的瘤結（越靠握把越大），握把有兩圈雕刻膨起與尾端圓頭；灰褐木色、上緣受光
-    const ELDER = (() => {
-      const knots = [[120, 3.2], [205, 3.8], [285, 4.4], [360, 5], [430, 5.6], [495, 6.2], [555, 6.8], [610, 7.4]];
-      const half = (x) => 2.6 + (x / 680) * 5.6;   // 杖身半徑（杖尖 2.6 → 680 處 8.2）
-      const body = `M0 ${21 - 2.6} ${[100, 250, 400, 550, 680].map((x) => `L${x} ${(21 - half(x)).toFixed(1)}`).join(' ')} L680 ${(21 + half(680)).toFixed(1)} ${[550, 400, 250, 100].map((x) => `L${x} ${(21 + half(x)).toFixed(1)}`).join(' ')} L0 ${21 + 2.6} Z`;
-      const knot = ([x, r]) => `<ellipse cx="${x}" cy="21" rx="${(r * 1.5).toFixed(1)}" ry="${(half(x) + r * 0.55).toFixed(1)}" fill="url(#ew-wood)"/><ellipse cx="${x - r * 0.3}" cy="${(21 - half(x) * 0.55).toFixed(1)}" rx="${(r * 0.7).toFixed(1)}" ry="${(r * 0.35).toFixed(1)}" fill="#fff" opacity=".22"/>`;
-      return `<svg viewBox="0 0 1000 42" width="100%" height="100%" preserveAspectRatio="none"><defs>
-        <linearGradient id="ew-wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d8cbb3"/><stop offset=".4" stop-color="#a8957b"/><stop offset="1" stop-color="#5e4f3e"/></linearGradient>
-        <linearGradient id="ew-grip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9b89c"/><stop offset=".45" stop-color="#8d7a61"/><stop offset="1" stop-color="#4a3d2f"/></linearGradient></defs>
-        <path d="${body}" fill="url(#ew-wood)"/>
-        <path d="M680 13 Q700 10 720 11 Q735 6 752 10 Q790 12 830 11 Q848 6 866 10 Q920 12 960 12 Q985 6 998 14 Q1003 21 998 28 Q985 36 960 30 Q920 30 866 32 Q848 36 830 31 Q790 30 752 32 Q735 36 720 31 Q700 32 680 29 Z" fill="url(#ew-grip)"/>
-        ${knots.map(knot).join('')}
-        <path d="M735 9 Q738 21 735 33 M849 9 Q852 21 849 33" stroke="#3e3226" stroke-width="2" fill="none" opacity=".5"/>
-        <path d="M6 19.8 L670 14.6" stroke="#fff" stroke-opacity=".25" stroke-width="1.2" fill="none"/></svg>`;
-    })();
+    // 接骨木魔杖（Canvas，轉場開始前畫一次）：杖尖在左（x = 0），杖身由尖漸粗、沿途 8 個節瘤（越靠握把越大），
+    // 握把兩圈雕刻環與凹槽、尾端圓頭；每一直條都用圓柱明暗（上緣窄高光、下緣反光），再疊沿杖身流動、繞過節瘤的木紋
+    function drawElder(cv, L, Hh) {
+      const g = cv.getContext('2d'), c = Hh / 2, R = Hh / 2, GRIP = 0.68;
+      const KN = [0.12, 0.205, 0.285, 0.36, 0.43, 0.495, 0.555, 0.61];
+      // 半徑輪廓：杖身漸粗＋節瘤高斯隆起；握把：雕刻環隆起、凹槽、尾端圓頭
+      const base = (u) => u < GRIP ? R * (0.2 + 0.46 * (u / GRIP)) : R * 0.78;
+      const bump = (u, at, w, h) => h * Math.exp(-(((u - at) / w) ** 2));
+      const rad = (u) => { let r = base(u);
+        if (u < GRIP) { for (const k of KN) r += base(k) * bump(u, k, 0.009 + k * 0.006, 0.38 + k * 0.25); r += R * bump(u, GRIP, 0.012, 0.14); }
+        else { r += R * (bump(u, 0.735, 0.012, 0.2) + bump(u, 0.845, 0.012, 0.2) - bump(u, 0.705, 0.006, 0.07) - bump(u, 0.765, 0.006, 0.07) - bump(u, 0.815, 0.006, 0.07) - bump(u, 0.875, 0.006, 0.07) + bump(u, 0.975, 0.03, 0.2)); }
+        if (u > 0.985) r *= Math.sqrt(Math.max(0, (1 - u) / 0.015));   // 尾端收圓
+        if (u < 0.01) r *= 0.6 + 40 * u;   // 杖尖收尖
+        return Math.max(0.5, Math.min(R * 0.99, r)); };
+      const N = Math.ceil(L), rs = Array.from({ length: N + 1 }, (_, x) => rad(x / L));
+      // 外形路徑
+      g.beginPath(); g.moveTo(0, c - rs[0]);
+      for (let x = 1; x <= N; x++) g.lineTo(x, c - rs[x]);
+      for (let x = N; x >= 0; x--) g.lineTo(x, c + rs[x]);
+      g.closePath(); g.save(); g.clip();
+      // 圓柱明暗條：上緣暗 → 窄高光 → 中間木色 → 下方暗 → 反光 → 下緣暗
+      const strip = document.createElement('canvas'); strip.width = 1; strip.height = 256;
+      { const sg = strip.getContext('2d'), gr = sg.createLinearGradient(0, 0, 0, 256);
+        [[0, '#3b3027'], [0.12, '#7d6a54'], [0.26, '#e2d6bf'], [0.34, '#c4b296'], [0.55, '#a08c71'], [0.78, '#64533f'], [0.88, '#7c6a53'], [1, '#2f261e']].forEach(([o, col]) => gr.addColorStop(o, col));
+        sg.fillStyle = gr; sg.fillRect(0, 0, 1, 256); }
+      for (let x = 0; x <= N; x++) g.drawImage(strip, 0, 0, 1, 256, x, c - rs[x], 1.5, rs[x] * 2);
+      // 握把略深
+      const gx = L * GRIP; const gg = g.createLinearGradient(gx - L * 0.01, 0, gx + L * 0.02, 0); gg.addColorStop(0, 'rgba(35,25,15,0)'); gg.addColorStop(1, 'rgba(35,25,15,.2)'); g.fillStyle = gg; g.fillRect(gx - L * 0.01, 0, L, Hh);
+      // 木紋：沿杖身、依半徑縮放（遇到節瘤自然繞開），深色細紋＋少量淺色纖維
+      const rnd = (() => { let s = 7; return () => ((s = (s * 16807) % 2147483647) / 2147483647); })();
+      for (let i = 0; i < 46; i++) { const v = (rnd() * 2 - 1) * 0.92, ph = rnd() * 6.28, f = 0.004 + rnd() * 0.01, amp = 0.04 + rnd() * 0.06, light = i % 6 === 0;
+        g.strokeStyle = light ? 'rgba(255,245,225,.16)' : 'rgba(45,32,20,' + (0.1 + rnd() * 0.16).toFixed(2) + ')'; g.lineWidth = Math.max(0.6, Hh * (0.012 + rnd() * 0.018));
+        g.beginPath(); let x0 = rnd() * L * 0.1; const x1 = Math.min(N, x0 + L * (0.3 + rnd() * 0.7));
+        for (let x = Math.floor(x0); x <= x1; x += 3) { const y = c + rs[x] * (v + Math.sin(x * f + ph) * amp); x === Math.floor(x0) ? g.moveTo(x, y) : g.lineTo(x, y); }
+        g.stroke(); }
+      // 節瘤：上方高光、兩側陰影（像隆起的木節）
+      for (const k of KN) { const x = k * L, r = rs[Math.round(x)], w = L * (0.009 + k * 0.006) * 1.3;
+        const sh = g.createRadialGradient(x, c, r * 0.2, x, c, w * 1.6); sh.addColorStop(0, 'rgba(0,0,0,0)'); sh.addColorStop(0.7, 'rgba(30,20,12,.18)'); sh.addColorStop(1, 'rgba(30,20,12,0)'); g.fillStyle = sh; g.fillRect(x - w * 2, 0, w * 4, Hh);
+        const hl = g.createRadialGradient(x - w * 0.15, c - r * 0.5, 0, x - w * 0.15, c - r * 0.5, w * 0.9); hl.addColorStop(0, 'rgba(255,250,235,.55)'); hl.addColorStop(1, 'rgba(255,250,235,0)'); g.fillStyle = hl; g.fillRect(x - w * 2, 0, w * 4, Hh);
+        g.strokeStyle = 'rgba(40,28,18,.35)'; g.lineWidth = Math.max(0.6, Hh * 0.015); g.beginPath(); g.ellipse(x, c, w * 0.55, r * 0.92, 0, -Math.PI * 0.35, Math.PI * 0.35); g.stroke(); }
+      // 握把雕刻：凹槽暗線＋旁邊亮邊
+      for (const u of [0.705, 0.765, 0.815, 0.875]) { const x = u * L, r = rs[Math.round(x)];
+        g.strokeStyle = 'rgba(25,17,10,.55)'; g.lineWidth = Math.max(1, L * 0.0035); g.beginPath(); g.ellipse(x, c, L * 0.002, r, 0, -Math.PI / 2, Math.PI / 2); g.stroke();
+        g.strokeStyle = 'rgba(255,240,215,.22)'; g.lineWidth = Math.max(0.6, L * 0.0016); g.beginPath(); g.ellipse(x + L * 0.004, c, L * 0.002, r * 0.9, 0, -Math.PI / 2, Math.PI / 2); g.stroke(); }
+      // 尾端圓頭的磨損亮面、杖尖用久的深色
+      { const x = L * 0.975, hl = g.createRadialGradient(x, c - R * 0.35, 0, x, c - R * 0.35, L * 0.025); hl.addColorStop(0, 'rgba(255,248,230,.5)'); hl.addColorStop(1, 'rgba(255,248,230,0)'); g.fillStyle = hl; g.fillRect(x - L * 0.04, 0, L * 0.06, Hh); }
+      { const tg = g.createLinearGradient(0, 0, L * 0.06, 0); tg.addColorStop(0, 'rgba(30,22,14,.55)'); tg.addColorStop(1, 'rgba(30,22,14,0)'); g.fillStyle = tg; g.fillRect(0, 0, L * 0.06, Hh); }
+      g.restore();
+      // 外緣一圈極細的暗邊，讓輪廓在淺色底上也清楚
+      g.strokeStyle = 'rgba(30,22,15,.35)'; g.lineWidth = Math.max(0.6, Hh * 0.012); g.beginPath(); g.moveTo(0, c - rs[0]); for (let x = 1; x <= N; x += 2) g.lineTo(x, c - rs[x]); for (let x = N; x >= 0; x -= 2) g.lineTo(x, c + rs[x]); g.closePath(); g.stroke();
+    }
     function wandSwap(next, apply) {
       if (shBusy) return;
       if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) { apply(); return; }
@@ -2579,7 +2616,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const fx = document.createElement('div'); fx.className = 'wand-fx' + (lumos ? ' lumos' : ' nox'); fx.setAttribute('aria-hidden', 'true');
       fx.innerHTML = `<canvas class="wand-dust" width="${W}" height="${H}"></canvas>${twinkles}
         <div class="wand-halo" style="left:${C[0]}px;top:${C[1]}px"></div>
-        <div class="wand" style="left:${tip[0]}px;top:${(tip[1] - WH / 2).toFixed(1)}px;width:${WL.toFixed(0)}px;height:${WH.toFixed(1)}px;transform:rotate(${th}deg)">${ELDER}<i class="wand-tip"></i></div>
+        <div class="wand" style="left:${tip[0]}px;top:${(tip[1] - WH / 2).toFixed(1)}px;width:${WL.toFixed(0)}px;height:${WH.toFixed(1)}px;transform:rotate(${th}deg)"><canvas class="wand-cv"></canvas><i class="wand-tip"></i></div>
         <svg class="wand-word" width="${W}" height="${H}" style="font-size:${FS.toFixed(1)}px"><defs>
           <linearGradient id="ww-fill" x1="0" y1="${(C[1] - FS * 0.45).toFixed(0)}" x2="0" y2="${(C[1] + FS * 0.45).toFixed(0)}" gradientUnits="userSpaceOnUse">${lumos
             ? '<stop offset="0" stop-color="#fff6d2"/><stop offset=".45" stop-color="#f3c75e"/><stop offset=".55" stop-color="#d9a13c"/><stop offset="1" stop-color="#8e5f18"/>'
@@ -2588,6 +2625,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           <linearGradient id="ww-hl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
           <mask id="ww-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect class="ww-sweep" x="${(C[0] - total / 2 - 160).toFixed(0)}" y="0" width="140" height="${H}" fill="url(#ww-hl)"/></mask></defs>
           <ellipse class="ww-glow" cx="${C[0]}" cy="${C[1]}" rx="${(total / 2 + FS * 0.7).toFixed(0)}" ry="${(FS * 0.85).toFixed(0)}" fill="url(#ww-g)"/><g class="ww-main">${letters('ww-l')}</g>${lumos ? `<g class="ww-shine" mask="url(#ww-mask)">${letters('ww-s')}</g>` : ''}</svg>`;
+      { const wc = fx.querySelector('.wand-cv'), dpr = Math.min(2, devicePixelRatio || 1); wc.width = Math.round(WL * dpr); wc.height = Math.round(WH * dpr); drawElder(wc, wc.width, wc.height); }
       const de = document.documentElement;
       de.classList.add('vt-wand', lumos ? 'vt-lumos' : 'vt-nox');
       shBusy = true;

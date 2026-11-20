@@ -1709,6 +1709,13 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .wand-tip { position: absolute; left: -14px; top: -5px; width: 28px; height: 28px; border-radius: 50%; }
 .lumos .wand-tip { background: radial-gradient(circle, #fff 0 22%, rgb(220 235 255 / .9) 38%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 24px 8px rgb(210 230 255 / .7); }
 .nox .wand-tip { background: radial-gradient(circle, #fff 0 18%, rgb(200 220 255 / .7) 40%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 14px 4px rgb(200 220 255 / .45); }
+.wand-trail { position: absolute; inset: 0; overflow: visible; }
+.wand-trail path { fill: none; stroke-width: 4.5; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.lumos .wand-trail path { stroke: #ffd36b; filter: drop-shadow(0 0 4px #ffe7a6) drop-shadow(0 0 10px rgb(255 200 90 / .7)); }
+.nox .wand-trail path { stroke: #7f9bff; filter: drop-shadow(0 0 4px #b9ccff) drop-shadow(0 0 10px rgb(120 150 255 / .6)); }
+.wand-star { position: absolute; clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%); will-change: transform, opacity; }   /* 四芒星 */
+.lumos .wand-star { background: radial-gradient(circle, #fff 0 22%, #ffd36b 55%, #f0a92e 100%); }
+.nox .wand-star { background: radial-gradient(circle, #fff 0 22%, #9fb4ff 55%, #5a74e6 100%); }   /* 中心白、外圈帶色，淺色底上也看得到 */
 .wand-halo { position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; }
 .lumos .wand-halo { background: radial-gradient(circle, rgb(255 255 255 / .95) 0, rgb(235 244 255 / .6) 30%, rgb(255 255 255 / 0) 65%); }
 .nox .wand-halo { display: none; }   /* Nox 是從外往內收合，不需要中央墨暈 */
@@ -2497,13 +2504,13 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       }
       setTimeout(() => { layer.remove(); shBusy = false; }, TOTAL + 40);
     }
-    /* 深淺色轉場（魔杖，約 1.4 秒）：接骨木魔杖從右下角伸入（下緣三分之一在畫面外）、杖尖指向畫面中央，施咒時杖尖往前點一下——
+    /* 深淺色轉場（魔杖，約 1.6 秒）：接骨木魔杖從右下角伸入（下緣三分之一在畫面外）、杖尖指向畫面中央，施咒時杖尖往前點一下——
        · Lumos（切到淺色）：杖尖亮起白光，光暈從中央漾開，光到的地方變成淺色版面
        · Nox（切到深色）：杖尖的光熄滅，黑暗從畫面四周往中央收合（先慢後快），最後連中央也暗下
        · 咒語：中央用古典襯線字（Cinzel）逐字從模糊浮現、帶微光，停一下後散成光點消失；魔杖施咒後縮回
        · 做法：View Transitions；舊畫面用徑向遮罩挖出一個柔邊圓洞（--wr 半徑由 0 放大），露出底下的新畫面；
          魔杖、光暈、咒語放在一個暫時的元素裡（自己的 view-transition-name，疊在最上面）
-       · 時間軸：0–0.42 秒魔杖伸入、杖尖點下 → 0.42–1.18 秒暈開／收合（從點下那一刻開始）→ 0.4–1.2 秒咒語 → 0.7–1.2 秒魔杖縮回 */
+       · 時間軸：0–0.24 秒魔杖伸入 → 0.24–0.58 秒杖尖逆時針畫一圈（光軌）→ 0.64 秒點下施咒 → 0.64–1.4 秒暈開／收合、星點交替閃爍 → 0.86–1.34 秒魔杖縮回（約 1.6 秒） */
     if (!document.getElementById('gf-cinzel')) document.head.insertAdjacentHTML('beforeend', '<link id="gf-cinzel" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap">');
     // 接骨木魔杖：杖身由尖到粗、沿途一節節的瘤結（越靠握把越大），握把有兩圈雕刻膨起與尾端圓頭；灰褐木色、上緣受光
     const ELDER = (() => {
@@ -2529,8 +2536,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const R = Math.hypot(W, H) / 2 + 180;
       // 魔杖長度：杖尖沿杖身方向到畫面邊緣的距離 × 1.5，下緣三分之一伸出畫面外
       const dx = Math.cos(th * Math.PI / 180), dy = Math.sin(th * Math.PI / 180), exit = Math.min((W - tip[0]) / dx, (H - tip[1]) / dy), WL = exit * 1.5, WH = WL * 0.07;
+      const CIR = Math.min(70, W * 0.05), CX = tip[0] - CIR, CY = tip[1];   // 杖尖畫圈的半徑與圓心
+      const stars = Array.from({ length: 46 }, () => { const sz = 12 + Math.random() * 24; return `<i class="wand-star" style="left:${(Math.random() * W).toFixed(0)}px;top:${(Math.random() * H).toFixed(0)}px;width:${sz.toFixed(0)}px;height:${sz.toFixed(0)}px"></i>`; }).join('');
       const fx = document.createElement('div'); fx.className = 'wand-fx' + (lumos ? ' lumos' : ' nox'); fx.setAttribute('aria-hidden', 'true');
-      fx.innerHTML = `<div class="wand-halo" style="left:${C[0]}px;top:${C[1]}px"></div>
+      fx.innerHTML = `<svg class="wand-trail" width="${W}" height="${H}" style="transform-origin:${CX}px ${CY}px"><path pathLength="1" d="M${CX + CIR} ${CY} A${CIR} ${CIR} 0 1 0 ${CX - CIR} ${CY} A${CIR} ${CIR} 0 1 0 ${CX + CIR} ${CY}"/></svg>${stars}
+        <div class="wand-halo" style="left:${C[0]}px;top:${C[1]}px"></div>
         <div class="wand" style="left:${tip[0]}px;top:${(tip[1] - WH / 2).toFixed(1)}px;width:${WL.toFixed(0)}px;height:${WH.toFixed(1)}px;transform:rotate(${th}deg)">${ELDER}<i class="wand-tip"></i></div>
         <div class="wand-spell" style="left:${C[0]}px;top:${C[1]}px">${[...(lumos ? 'Lumos' : 'Nox')].map((ch) => `<span>${ch}</span>`).join('')}</div>`;
       const de = document.documentElement;
@@ -2541,36 +2551,46 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         // 暈開：舊畫面挖出柔邊圓洞，半徑 0 → 蓋過整個畫面
         // 暈開／收合從杖尖點下的瞬間（420ms）開始。Lumos：光從中央往外漾開（先快後慢）
         // Nox：黑暗從四周往中央收合——先慢、中間快、縮到小光點時輕輕停約 80ms 再熄滅（像燭火被吹熄）；柔邊由寬（220px）收窄（40px），最後的光點才不糊
-        const HIT = 420, SPREAD = 760, PT = (t) => Math.round(HIT + t * SPREAD);
+        const DUR = 1600, HIT = 640, SPREAD = 760, PT = (t) => Math.round(HIT + t * SPREAD);
         if (lumos) de.animate([{ '--wr': '0px' }, { '--wr': `${R.toFixed(0)}px` }], { duration: 700, delay: HIT, easing: 'cubic-bezier(.45, .05, .25, 1)', fill: 'both', pseudoElement: '::view-transition-old(root)' });
         else de.animate([
           { offset: 0, '--wr': `${R.toFixed(0)}px`, '--wf': '220px', easing: 'cubic-bezier(.45, 0, .55, 1)' },
           { offset: 0.78, '--wr': '90px', '--wf': '70px', easing: 'cubic-bezier(.25, .6, .4, 1)' },
           { offset: 0.88, '--wr': '64px', '--wf': '50px', easing: 'cubic-bezier(.5, 0, .9, .4)' },
           { offset: 1, '--wr': '0px', '--wf': '40px' }], { duration: SPREAD, delay: HIT, fill: 'both', pseudoElement: '::view-transition-old(root)' });
-        // 魔杖：沿杖身方向從畫面外伸入 → 揚起 → 點下指向中央 → 施咒後縮回
+        // 魔杖：沿杖身方向從畫面外伸入 → 杖尖逆時針畫一圈（留下光軌）→ 點下施咒 → 縮回
         const wand = fx.querySelector('.wand'), out = WL * 0.75, rad = th * Math.PI / 180, ox = Math.cos(rad) * out, oy = Math.sin(rad) * out;
-        const T = (d, r) => `translate(${(ox * d).toFixed(0)}px, ${(oy * d).toFixed(0)}px) rotate(${(th + r).toFixed(1)}deg)`;
-        wand.animate([
+        const T = (d, r, ex = 0, ey = 0) => `translate(${(ox * d + ex).toFixed(1)}px, ${(oy * d + ey).toFixed(1)}px) rotate(${(th + r).toFixed(1)}deg)`;
+        const C0 = 240, C1 = 580, CR = CIR, kf = [
           { offset: 0, transform: T(1, 6), easing: 'cubic-bezier(.2, .8, .3, 1)' },
-          { offset: 0.24, transform: T(0, 0), easing: 'cubic-bezier(.5, 0, .2, 1)' },
-          { offset: 0.3, transform: T(-0.035, 0), easing: 'cubic-bezier(.3, 0, .3, 1)' },   // 施咒：杖尖往前點一下
-          { offset: 0.37, transform: T(0, 0) },
-          { offset: 0.5, transform: T(0, 0), easing: 'cubic-bezier(.5, 0, .75, .2)' },   // 施咒完就縮回，焦點留給暈開／收合
-          { offset: 0.85, transform: T(1.05, 8) },
-          { offset: 1, transform: T(1.05, 8) }], { duration: 1400, fill: 'both' });
+          { offset: C0 / DUR, transform: T(0, 0) }];
+        // 畫圈：圓心在杖尖左邊 CR，角度 0 → −360°（畫面上是逆時針），杖身跟著微微擺動
+        for (let k = 1; k <= 12; k++) { const a = -k / 12 * Math.PI * 2; kf.push({ offset: (C0 + (C1 - C0) * k / 12) / DUR, transform: T(0, Math.sin(a) * 3, -CR + Math.cos(a) * CR, Math.sin(a) * CR), easing: k === 12 ? 'cubic-bezier(.5, 0, .2, 1)' : 'linear' }); }
+        kf.push({ offset: HIT / DUR, transform: T(-0.035, 0), easing: 'cubic-bezier(.3, 0, .3, 1)' },   // 施咒：杖尖往前點一下
+          { offset: (HIT + 90) / DUR, transform: T(0, 0) },
+          { offset: (HIT + 220) / DUR, transform: T(0, 0), easing: 'cubic-bezier(.5, 0, .75, .2)' },   // 施咒完就縮回
+          { offset: (HIT + 700) / DUR, transform: T(1.05, 8) },
+          { offset: 1, transform: T(1.05, 8) });
+        wand.animate(kf, { duration: DUR, fill: 'both' });
+        // 光軌：跟著杖尖畫出的圓，點下施咒時往外一擴、淡掉
+        const trail = fx.querySelector('.wand-trail path');
+        trail.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 1, offset: C0 / DUR }, { strokeDashoffset: 0, offset: C1 / DUR }, { strokeDashoffset: 0 }], { duration: DUR, fill: 'both' });
+        fx.querySelector('.wand-trail').animate([{ opacity: 1, transform: 'scale(1)' }, { opacity: 1, transform: 'scale(1)', offset: HIT / DUR, easing: 'cubic-bezier(.2, .7, .3, 1)' }, { opacity: 0, transform: 'scale(1.6)', offset: (HIT + 320) / DUR }, { opacity: 0, transform: 'scale(1.6)' }], { duration: DUR, fill: 'both' });
+        // 閃耀星點：施咒後在畫面各處交替閃爍（Lumos 暖金白、Nox 冷銀藍）
+        fx.querySelectorAll('.wand-star').forEach((st, i) => { const d0 = HIT - 80 + Math.random() * 760, len = 380 + Math.random() * 260;
+          st.animate([{ opacity: 0, transform: 'scale(0) rotate(0deg)' }, { opacity: 1, transform: `scale(1) rotate(${45 + Math.random() * 45}deg)`, offset: 0.4 }, { opacity: 0, transform: 'scale(0) rotate(120deg)' }], { duration: len, delay: d0, easing: 'cubic-bezier(.3, .6, .4, 1)', fill: 'both' }); });
         // 杖尖：Lumos 施咒時亮起；Nox 先亮著、施咒時熄滅
         fx.querySelector('.wand-tip').animate(lumos
-          ? [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 0, transform: 'scale(.3)', offset: 0.3 }, { opacity: 1, transform: 'scale(1.8)', offset: 0.36 }, { opacity: 1, transform: 'scale(1)', offset: 0.6 }, { opacity: 0, transform: 'scale(.6)' }]
-          : [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1)', offset: 0.15 }, { opacity: 1, transform: 'scale(1.2)', offset: 0.31 }, { opacity: 0, transform: 'scale(0)', offset: 0.38 }, { opacity: 0, transform: 'scale(0)' }],
-          { duration: 1400, fill: 'both' });
+          ? [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 0.7, transform: 'scale(.55)', offset: C0 / DUR }, { opacity: 0.7, transform: 'scale(.55)', offset: (HIT - 30) / DUR }, { opacity: 1, transform: 'scale(1.8)', offset: (HIT + 50) / DUR }, { opacity: 1, transform: 'scale(1)', offset: 0.62 }, { opacity: 0, transform: 'scale(.6)' }]
+          : [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1)', offset: C0 / DUR }, { opacity: 1, transform: 'scale(1.2)', offset: (HIT - 20) / DUR }, { opacity: 0, transform: 'scale(0)', offset: (HIT + 90) / DUR }, { opacity: 0, transform: 'scale(0)' }],
+          { duration: DUR, fill: 'both' });
         // 中央光暈（Lumos 白光爆開／Nox 暗色墨暈）
         fx.querySelector('.wand-halo').animate([{ opacity: 0, transform: 'translate(-50%, -50%) scale(.1)' }, { opacity: lumos ? 1 : 0.8, transform: 'translate(-50%, -50%) scale(1)', offset: 0.25 }, { opacity: 0, transform: 'translate(-50%, -50%) scale(2.6)' }],
           { duration: 760, delay: HIT, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'both' });
         // 咒語：逐字從模糊浮現 → 停留 → Lumos 往上散開淡出；Nox 等亮圓縮到字的大小時（約收合 64%）才跟著往中央收進去
         const spellOut = PT(0.64), END = PT(0.95);
         fx.querySelectorAll('.wand-spell span').forEach((sp, i, all) => {
-          const delay = 400 + i * 60;
+          const delay = HIT - 60 + i * 60;
           if (lumos) { sp.animate([
             { opacity: 0, filter: 'blur(10px)', transform: 'translateY(12px) scale(.9)' },
             { opacity: 1, filter: 'blur(0px)', transform: 'none', offset: 0.28 },

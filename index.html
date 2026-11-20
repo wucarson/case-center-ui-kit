@@ -1500,6 +1500,12 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="neu"] .tg { background: color-mix(in srgb, var(--card) 62%, var(--line-strong)); }   /* 關閉的開關底槽要看得到（深色時特別需要） */
 :root[data-ui="neu"] :is(.btn, .top-a .ctl) { box-shadow: var(--raise); }
 :root[data-ui="neu"] .cell:hover { transform: none; }
+/* 卡片內緣：左上受光亮邊＋右下微暗，做出鼓起的立體感 */
+:root[data-ui="neu"] { --neu-rim: rgb(255 255 255 / .95); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --neu-rim: rgb(255 255 255 / .1); } }
+:root[data-theme="dark"][data-ui="neu"] { --neu-rim: rgb(255 255 255 / .1); }
+:root[data-ui="neu"] .cell { --neu-in: inset 2px 2px 1.5px var(--neu-rim), inset 6px 6px 14px color-mix(in srgb, var(--neu-rim) 45%, transparent), inset -3px -3px 8px color-mix(in srgb, var(--neu-lo) 35%, transparent); box-shadow: var(--shadow), var(--neu-in); }
+:root[data-ui="neu"] .cell:hover { box-shadow: var(--shadow-lift), var(--neu-in); }
 
 /* Swiss Style：無陰影、直角，卡片上方一條粗實線；Helvetica 系字型、標題加粗收字距、英文標示大寫 */
 :root[data-ui="swiss"], :root[data-theme="dark"][data-ui="swiss"], :root:not([data-theme="light"])[data-ui="swiss"] {
@@ -1706,18 +1712,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 @property --wa { syntax: '<angle>'; inherits: false; initial-value: 0deg; }   /* 螺旋臂整體逆時針轉（不轉畫面本身，免得露出矩形邊角） */
 .vt-wand::view-transition-old(root), .vt-wand::view-transition-new(root), ::view-transition-group(wand), ::view-transition-old(wand), ::view-transition-new(wand) { animation: none; mix-blend-mode: normal; }
 .vt-wand::view-transition-old(root) { z-index: 2; }
-/* Lumos：舊畫面＝柔邊圓外 ∩（扇形外 ∪ 螺旋臂外）→ 中心開口加一條逆時針掃開的螺旋臂 */
-.vt-lumos::view-transition-old(root) {
-  mask-image: radial-gradient(circle, transparent calc(var(--wr) - 140px), #000 var(--wr)),
-    conic-gradient(from var(--wa), #000 0deg, transparent 50deg, transparent calc(var(--ws) - 10deg), #000 calc(var(--ws) + 40deg)),
-    radial-gradient(circle, transparent calc(var(--wr2) - 220px), #000 var(--wr2));
-  mask-composite: intersect, add; }
-/* Nox：舊畫面＝柔邊圓內 ∪（扇形內 ∩ 螺旋臂內）→ 剩下的淺色帶著螺旋臂捲進中心 */
-.vt-nox::view-transition-old(root) {
-  mask-image: radial-gradient(circle, #000 calc(var(--wr) - 140px), transparent var(--wr)),
-    conic-gradient(from var(--wa), transparent 0deg, #000 50deg, #000 calc(var(--ws) - 10deg), transparent calc(var(--ws) + 40deg)),
-    radial-gradient(circle, #000 calc(var(--wr2) - 220px), transparent var(--wr2));
-  mask-composite: add, intersect; }
+/* Lumos：舊畫面挖出柔邊圓洞往外擴（過曝的光從中心暈開）；Nox：舊畫面只留中央柔邊圓，連同畫面一起旋轉縮小被吸進漩渦 */
+.vt-lumos::view-transition-old(root) { mask-image: radial-gradient(circle, transparent calc(var(--wr) - 260px), #000 var(--wr)); }
+.vt-nox::view-transition-old(root) { transform-origin: 50% 50%; mask-image: radial-gradient(circle, #000 calc(var(--wr) - var(--wf)), transparent var(--wr)); }
 .wand-dust { position: absolute; inset: 0; width: 100%; height: 100%; }
 .vt-wand * { transition: none !important; }
 ::view-transition-group(wand) { z-index: 3; }
@@ -1749,7 +1746,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .lumos .wand-star { background: radial-gradient(circle, #fff 0 22%, #ffd36b 55%, #f0a92e 100%); }
 .nox .wand-star { background: radial-gradient(circle, #fff 0 22%, #9fb4ff 55%, #5a74e6 100%); }   /* 中心白、外圈帶色，淺色底上也看得到 */
 .wand-halo { position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; }
-.lumos .wand-halo { background: radial-gradient(circle, rgb(255 255 255 / .95) 0, rgb(235 244 255 / .6) 30%, rgb(255 255 255 / 0) 65%); }
+.lumos .wand-halo { background: radial-gradient(circle, #fff 0, rgb(255 253 245 / .97) 22%, rgb(255 246 222 / .75) 38%, rgb(255 240 210 / .3) 52%, rgb(255 255 255 / 0) 64%); }   /* 過曝的光：中心整片白、邊緣暖白柔退 */
 .nox .wand-halo { display: none; }   /* Nox 是從外往內收合，不需要中央墨暈 */
 .wand-spell { position: absolute; transform: translate(-50%, -50%); display: flex; gap: .04em; font: 700 clamp(52px, 8vw, 112px)/1 'Cinzel', 'Trajan Pro', 'Times New Roman', serif; letter-spacing: .08em; white-space: nowrap; }
 .wand-spell span { display: inline-block; }
@@ -2546,7 +2543,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
        · 咒語：中央用古典襯線字（Cinzel）逐字從模糊浮現、帶微光，停一下後散成光點消失；魔杖施咒後縮回
        · 做法：View Transitions；舊畫面用徑向遮罩挖出一個柔邊圓洞（--wr 半徑由 0 放大），露出底下的新畫面；
          魔杖、光暈、咒語放在一個暫時的元素裡（自己的 view-transition-name，疊在最上面）
-       · 時間軸：0–0.33 秒魔杖伸入 → 0.43 秒杖尖點下施咒 → 0.43–1.33 秒漩渦（柔邊螺旋遮罩逆時針轉開＋Canvas 光塵），咒語描寫 → 約 1.5 秒結束 */
+       · 時間軸：0–0.33 秒魔杖伸入 → 0.43 秒杖尖點下施咒 → 0.43–1.33 秒漩渦（Lumos 過曝圓形暈開／Nox 畫面旋轉縮小吸入漩渦＋Canvas 星芒），咒語描寫 → 約 1.5 秒結束 */
     if (!document.getElementById('gf-cinzel')) document.head.insertAdjacentHTML('beforeend', '<link id="gf-cinzel" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap">');
     // 接骨木魔杖：杖身由尖到粗、沿途一節節的瘤結（越靠握把越大），握把有兩圈雕刻膨起與尾端圓頭；灰褐木色、上緣受光
     const ELDER = (() => {
@@ -2601,30 +2598,32 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       vt.ready.then(() => {
         // 時間軸：0–0.33 秒魔杖伸入 → 0.43 秒杖尖點下施咒 → 0.43–1.33 秒漩渦轉開／捲入、光塵流動、咒語描寫
         const DUR = 1500, C0 = 330, HIT = 430, SPIN = 900, PT = (t) => Math.round(HIT + t * SPIN);
-        // 漩渦遮罩（全部是連續漸層，用註冊過的 CSS 變數內插）：
-        //   --wr 柔邊圓的半徑、--wr2 螺旋臂伸出去的半徑（領先 --wr）、--ws 扇形角度（逆時針掃開的螺旋臂）
+        // Lumos：過曝圓形暈開——柔邊圓洞單一順滑曲線擴到全螢幕，同時白光從中心爆亮再隨圓擴散退去
+        // Nox：被吸入漩渦——先把淺色收成畫面內的圓（不露出矩形邊角），接著整個圓一邊越轉越快、一邊縮小吸進中心
         const px = (v) => `${Math.round(v)}px`, o = { duration: SPIN, delay: HIT, fill: 'both', pseudoElement: '::view-transition-old(root)' };
-        if (lumos) de.animate([
-          { '--wr': '0px', '--wr2': '0px', '--ws': '0deg', '--wa': '0deg', easing: 'cubic-bezier(.45, .05, .4, 1)' },
-          { '--wr': px(RV * 0.35), '--wr2': px(RV * 0.8), '--ws': '220deg', '--wa': '-70deg', offset: 0.5, easing: 'cubic-bezier(.3, .3, .3, 1)' },
-          { '--wr': px(RV), '--wr2': px(RV * 1.2), '--ws': '360deg', '--wa': '-140deg' }], o);
-        else de.animate([
-          { '--wr': px(RV), '--wr2': px(RV * 1.2), '--ws': '360deg', '--wa': '0deg', easing: 'cubic-bezier(.4, 0, .5, 1)' },
-          { '--wr': px(RV * 0.42), '--wr2': px(RV * 0.85), '--ws': '200deg', '--wa': '-80deg', offset: 0.55, easing: 'cubic-bezier(.4, .1, .6, 1)' },
-          { '--wr': '0px', '--wr2': '0px', '--ws': '0deg', '--wa': '-170deg' }], o);
-        // 魔法光塵（Canvas）：沿同一股漩渦流動；每格蓋一層淡淡的透明（不清空）留下拖尾；亮度緩慢呼吸，不快速閃爍
-        const cv = fx.querySelector('.wand-dust'), g = cv.getContext('2d'), N = 300, sprite = document.createElement('canvas'); sprite.width = sprite.height = 32;
-        { const sg = sprite.getContext('2d'), gr = sg.createRadialGradient(16, 16, 0, 16, 16, 16); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.25, 'rgba(255,255,255,.85)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); sg.fillStyle = gr; sg.fillRect(0, 0, 32, 32); }
+        if (lumos) de.animate([{ '--wr': '0px' }, { '--wr': px(RV + 260) }], { ...o, easing: 'cubic-bezier(.35, .1, .25, 1)' });
+        else { const r0 = Math.min(W, H) / 2;   // 圓半徑不超過畫面短邊一半時旋轉，圓永遠在畫面矩形內
+          de.animate([
+            { offset: 0, '--wr': px(RV), '--wf': '260px', transform: 'none', easing: 'cubic-bezier(.4, 0, .6, 1)' },
+            { offset: 0.28, '--wr': px(r0), '--wf': '200px', transform: 'none', easing: 'cubic-bezier(.5, 0, .85, .45)' },
+            { offset: 1, '--wr': px(r0 * 0.9), '--wf': '120px', transform: 'rotate(-300deg) scale(0)' }], o); }
+        // 魔法光塵（Canvas）：星芒沿同一股漩渦流動（Lumos 噴出、Nox 吸入），高解析度、每格清空保持銳利；亮度緩慢呼吸，不快速閃爍
+        const cv = fx.querySelector('.wand-dust'), DPR = Math.min(2, devicePixelRatio || 1), g = cv.getContext('2d'), N = 220, SS = 64, sprite = document.createElement('canvas'); sprite.width = sprite.height = SS;
+        cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); g.scale(DPR, DPR);
+        // 星芒印章：四道細長光芒（橫直長、斜向短）＋小而亮的核心，邊緣銳利
+        { const sg = sprite.getContext('2d'), c = SS / 2, ray = (len, w, ang) => { sg.save(); sg.translate(c, c); sg.rotate(ang); sg.beginPath(); sg.moveTo(-len, 0); sg.quadraticCurveTo(0, -w, len, 0); sg.quadraticCurveTo(0, w, -len, 0); sg.fill(); sg.restore(); };
+          sg.fillStyle = '#fff'; ray(c * 0.98, c * 0.13, 0); ray(c * 0.98, c * 0.13, Math.PI / 2); sg.globalAlpha = 0.7; ray(c * 0.5, c * 0.09, Math.PI / 4); ray(c * 0.5, c * 0.09, -Math.PI / 4);
+          sg.globalAlpha = 1; const core = sg.createRadialGradient(c, c, 0, c, c, c * 0.22); core.addColorStop(0, '#fff'); core.addColorStop(0.6, 'rgba(255,255,255,.9)'); core.addColorStop(1, 'rgba(255,255,255,0)'); sg.fillStyle = core; sg.fillRect(0, 0, SS, SS); }
         const hues = lumos ? [[255, 214, 120], [255, 236, 190], [255, 250, 235]] : [[150, 175, 255], [190, 170, 255], [225, 232, 255]];
-        const tint = hues.map(([r, gg, b]) => { const c = document.createElement('canvas'); c.width = c.height = 32; const cg = c.getContext('2d'); cg.drawImage(sprite, 0, 0); cg.globalCompositeOperation = 'source-in'; cg.fillStyle = `rgb(${r},${gg},${b})`; cg.fillRect(0, 0, 32, 32); return c; });
+        const tint = hues.map(([r, gg, b]) => { const c = document.createElement('canvas'); c.width = c.height = SS; const cg = c.getContext('2d'); cg.drawImage(sprite, 0, 0); cg.globalCompositeOperation = 'source-atop'; cg.fillStyle = `rgba(${r},${gg},${b},.75)`; cg.fillRect(0, 0, SS, SS); return c; });
         const parts = Array.from({ length: N }, (_, i) => { const z = Math.random(), born = HIT + (i / N) * SPIN * 0.8 + Math.random() * 60;
-          return { born, a: Math.random() * Math.PI * 2, r: lumos ? 6 + Math.random() * 30 : RV * (0.65 + Math.random() * 0.4), z, sz: 2 + z * 7, ph: Math.random() * 6.28, c: tint[i % tint.length], life: 0 }; });
+          return { born, a: Math.random() * Math.PI * 2, r: lumos ? 6 + Math.random() * 30 : RV * (0.65 + Math.random() * 0.4), z, sz: 5 + z * 11, rot: Math.random() * 6.28, spin: (Math.random() - 0.5) * 3, ph: Math.random() * 6.28, c: tint[i % tint.length], life: 0 }; });
         const t0 = performance.now(); let last = t0;
         const dust = (now) => {
           if (!fx.isConnected) return;
           const t = now - t0, dt = Math.min(0.05, (now - last) / 1000); last = now;
-          g.globalCompositeOperation = 'destination-out'; g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(0, 0, W, H);   // 拖尾
-          g.globalCompositeOperation = 'lighter';
+          g.clearRect(0, 0, W, H);   // 每格清空：星芒保持銳利，不留模糊拖尾
+          g.globalCompositeOperation = 'source-over';
           let alive = 0;
           for (const p of parts) {
             if (t < p.born) { alive++; continue; }
@@ -2637,8 +2636,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
             alive++;
             const fadeIn = Math.min(1, p.life / 0.15), fadeOut = Math.min(1, (1.1 - p.life) / 0.35), breathe = 0.75 + 0.25 * Math.sin(now / 260 + p.ph);
             g.globalAlpha = (0.35 + p.z * 0.65) * fadeIn * fadeOut * breathe;
-            const x = C[0] + Math.cos(p.a) * p.r, y = C[1] + Math.sin(p.a) * p.r * 0.92, d = p.sz * 2.4;
-            g.drawImage(p.c, x - d / 2, y - d / 2, d, d);
+            const x = C[0] + Math.cos(p.a) * p.r, y = C[1] + Math.sin(p.a) * p.r * 0.92, d = p.sz * 2;
+            p.rot += p.spin * dt; g.setTransform(DPR, 0, 0, DPR, x * DPR, y * DPR); g.rotate(p.rot); g.drawImage(p.c, -d / 2, -d / 2, d, d); g.setTransform(DPR, 0, 0, DPR, 0, 0);
           }
           g.globalAlpha = 1;
           if (alive || t < HIT + 200) requestAnimationFrame(dust); else g.clearRect(0, 0, W, H);
@@ -2663,8 +2662,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           ? [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 0.7, transform: 'scale(.55)', offset: C0 / DUR }, { opacity: 0.7, transform: 'scale(.55)', offset: (HIT - 30) / DUR }, { opacity: 1, transform: 'scale(1.8)', offset: (HIT + 50) / DUR }, { opacity: 1, transform: 'scale(1)', offset: 0.6 }, { opacity: 0, transform: 'scale(.6)' }]
           : [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1)', offset: C0 / DUR }, { opacity: 1, transform: 'scale(1.2)', offset: (HIT - 20) / DUR }, { opacity: 0, transform: 'scale(0)', offset: (HIT + 90) / DUR }, { opacity: 0, transform: 'scale(0)' }],
           { duration: DUR, fill: 'both' });
-        if (lumos) fx.querySelector('.wand-halo').animate([{ opacity: 0, transform: 'translate(-50%, -50%) scale(.1)' }, { opacity: lumos ? 1 : 0.8, transform: 'translate(-50%, -50%) scale(1)', offset: 0.25 }, { opacity: 0, transform: 'translate(-50%, -50%) scale(2.6)' }],
-          { duration: 760, delay: HIT, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'both' });
+        if (lumos) fx.querySelector('.wand-halo').animate([
+          { opacity: 0, transform: 'translate(-50%, -50%) scale(.05)', easing: 'cubic-bezier(.2, .8, .3, 1)' },
+          { opacity: 1, transform: 'translate(-50%, -50%) scale(.55)', offset: 0.18, easing: 'cubic-bezier(.35, .1, .25, 1)' },
+          { opacity: 0.9, transform: 'translate(-50%, -50%) scale(1.5)', offset: 0.55, easing: 'ease-in' },
+          { opacity: 0, transform: 'translate(-50%, -50%) scale(2.6)' }], { duration: SPIN, delay: HIT - 20, fill: 'both' });
         // 咒語：① 先描邊（像魔杖寫出來）再填入金屬漸層 ② Lumos 一道高光掃過、Nox 銀色霧面冷光 ③ 字距呼吸：寬 → 正常 → 離場時 Lumos 放寬上飄、Nox 收進中央
         const mid = (word.length - 1) / 2, spellOut = PT(0.7), END = PT(0.97);
         fx.querySelectorAll('.ww-l').forEach((el, i) => {

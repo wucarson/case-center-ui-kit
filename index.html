@@ -2260,7 +2260,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       return pts; };
     const SH_L = shOval(SH_LC[0], false), SH_R = shOval(SH_LC[1], false);   // 兩片同一個繞行方向：重疊處是聯集（不是洞）
     const shD = (pts) => pts.map(([m, c, e]) => (m ? `M${m[0].toFixed(2)} ${m[1].toFixed(2)}` : '') + `Q${c[0].toFixed(2)} ${c[1].toFixed(2)} ${e[0].toFixed(2)} ${e[1].toFixed(2)}`).join('') + 'Z';
-    /* 深淺色轉場（亂刀，約 1.25 秒）：5 刀白色刀光依序劃過畫面（固定刀位），把畫面切成大小不一的碎塊，最後碎塊從中央往外炸開，露出新版面
+    /* 深淺色轉場（亂刀，1 秒）：5 刀白色刀光依序劃過畫面（固定刀位），把畫面切成大小不一的碎塊，最後碎塊從中央往外炸開，露出新版面
        · 做法：把目前畫面（.shell）複製到每一塊碎片裡（碎片用 clip-path 多邊形裁切，聯集剛好是整個畫面），蓋在最上層後立刻切換深淺色；
          複製品帶著切換前的顏色變數，所以碎片保持舊配色。刀光結束後碎片各自往外飛、旋轉、縮小淡出，底下就是新版面
        · 前 3 刀真的切開畫面（碎片固定 5 塊），後 2 刀只有刀光
@@ -2315,32 +2315,21 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       // 換配色的重算很重：等兩個畫格（重算完成）才開始動畫，時間軸才不會一開始就被吃掉
       requestAnimationFrame(() => requestAnimationFrame(() => run(layer, cuts, pieces, cx, cy, W, H)));
     }
-    /* 打擊感：① 每刀劃到底時停頓 45ms（卡肉）② 每刀落下時碎片往刀口兩側震開再回彈，最後一刀震最大
-       ③ 炸開前碎片先往內縮（蓄力 90ms），再猛力往外炸。全長約 1.25 秒 */
+    /* 打擊感：① 每刀劃到底時停頓 35ms（卡肉）② 炸開前碎片先往內縮（蓄力 70ms），再猛力往外炸。全長 1 秒 */
     function run(layer, cuts, pieces, cx, cy, W, H) {
-      const DRAW = 90, HOLD = 45, GAP = 40, STEP = DRAW + HOLD + GAP, SHAKE = [4, 5, 5, 4, 8];
-      const HIT = cuts.map((_, i) => i * STEP + DRAW), CUT_END = HIT[HIT.length - 1] + HOLD + 70, CHARGE = 90, FLY = 560, TOTAL = CUT_END + CHARGE + FLY;
-      // 刀光：劃到底（90ms）→ 停住（45ms）→ 淡掉
+      const DRAW = 70, HOLD = 35, GAP = 5, STEP = DRAW + HOLD + GAP, LINE = 170;
+      const HIT = cuts.map((_, i) => i * STEP + DRAW), CUT_END = HIT[HIT.length - 1] + HOLD + 20, CHARGE = 70, TOTAL = 1000, FLY = TOTAL - CUT_END - CHARGE;
+      // 刀光：劃到底（70ms）→ 停住（35ms）→ 淡掉
       layer.querySelectorAll('.slash-lines line').forEach((ln, i) => ln.animate([
         { strokeDashoffset: 1, opacity: 1, strokeWidth: 5, easing: 'cubic-bezier(.3, .7, .3, 1)' },
-        { strokeDashoffset: 0, opacity: 1, strokeWidth: 3.5, offset: DRAW / 220 },
-        { strokeDashoffset: 0, opacity: 1, strokeWidth: 3, offset: (DRAW + HOLD) / 220, easing: 'ease-in' },
+        { strokeDashoffset: 0, opacity: 1, strokeWidth: 3.5, offset: DRAW / LINE },
+        { strokeDashoffset: 0, opacity: 1, strokeWidth: 3, offset: (DRAW + HOLD) / LINE, easing: 'ease-in' },
         { strokeDashoffset: 0, opacity: 0, strokeWidth: 1 }],
-        { duration: 220, delay: i * STEP, fill: 'both' }));
+        { duration: LINE, delay: i * STEP, fill: 'both' }));
       pieces.forEach(({ el, gx, gy }) => {
         const vx = gx - cx, vy = gy - cy, d = Math.hypot(vx, vy) || 1, ux = vx / d, uy = vy / d, dist = 0.6 * Math.max(W, H) + Math.random() * 200, rot = (Math.random() - 0.5) * 60;
         const kf = [{ offset: 0, transform: 'none', opacity: 1 }];
-        let ox = 0, oy = 0;   // 累積的刀口錯位（每刀留一點）
-        cuts.forEach((c, i) => {
-          // 刀的法線方向，往碎片所在的那一側推
-          const nx = -c.dy, ny = c.dx, sgn = Math.sign(nx * (gx - c.px) + ny * (gy - c.py)) || 1, a = SHAKE[i] * sgn;
-          const t0 = HIT[i] / TOTAL, t1 = (HIT[i] + 30) / TOTAL, t2 = (HIT[i] + HOLD + 50) / TOTAL;
-          const T = (x, y) => `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
-          kf.push({ offset: t0, transform: T(ox, oy), easing: 'cubic-bezier(.2, .9, .3, 1)' });
-          kf.push({ offset: t1, transform: T(ox + nx * a, oy + ny * a), easing: 'cubic-bezier(.4, 0, .3, 1)' });
-          ox += nx * a * 0.3; oy += ny * a * 0.3;
-          kf.push({ offset: t2, transform: T(ox, oy) });
-        });
+        const ox = 0, oy = 0;   // 刀光期間碎片不動
         // 蓄力：往中心縮一點；炸開：猛力往外
         kf.push({ offset: CUT_END / TOTAL, transform: `translate(${ox.toFixed(1)}px, ${oy.toFixed(1)}px)`, easing: 'cubic-bezier(.4, 0, .6, 1)' });
         kf.push({ offset: (CUT_END + CHARGE) / TOTAL, transform: `translate(${(ox - ux * 10).toFixed(1)}px, ${(oy - uy * 10).toFixed(1)}px) scale(.97)`, opacity: 1, easing: 'cubic-bezier(.15, .6, .25, 1)' });

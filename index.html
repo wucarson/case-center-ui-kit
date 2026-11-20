@@ -1696,7 +1696,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 /* 深淺色轉場：魔杖（wandSwap）——舊畫面挖柔邊圓洞（--wr），魔杖、光暈、咒語在 .wand-fx */
 @property --wr { syntax: '<length>'; inherits: false; initial-value: 0px; }
 .vt-wand::view-transition-old(root), .vt-wand::view-transition-new(root), ::view-transition-group(wand), ::view-transition-old(wand), ::view-transition-new(wand) { animation: none; mix-blend-mode: normal; }
-.vt-wand::view-transition-old(root) { z-index: 2; -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--wr) - 160px), #000 var(--wr)); mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--wr) - 160px), #000 var(--wr)); }
+.vt-wand::view-transition-old(root) { z-index: 2; }
+.vt-lumos::view-transition-old(root) { -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--wr) - 160px), #000 var(--wr)); mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--wr) - 160px), #000 var(--wr)); }   /* 中央挖洞往外擴 */
+.vt-nox::view-transition-old(root) { -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--wr) - 220px), transparent var(--wr)); mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--wr) - 220px), transparent var(--wr)); }   /* 亮的只剩中央圓，往內收合 */
 .vt-wand * { transition: none !important; }
 ::view-transition-group(wand) { z-index: 3; }
 .wand-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; view-transition-name: wand; }
@@ -1708,7 +1710,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .nox .wand-tip { background: radial-gradient(circle, #fff 0 18%, rgb(200 220 255 / .7) 40%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 14px 4px rgb(200 220 255 / .45); }
 .wand-halo { position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; }
 .lumos .wand-halo { background: radial-gradient(circle, rgb(255 255 255 / .95) 0, rgb(235 244 255 / .6) 30%, rgb(255 255 255 / 0) 65%); }
-.nox .wand-halo { background: radial-gradient(circle, rgb(4 6 14 / .85) 0, rgb(8 12 26 / .5) 35%, rgb(8 12 26 / 0) 68%); }
+.nox .wand-halo { display: none; }   /* Nox 是從外往內收合，不需要中央墨暈 */
 .wand-spell { position: absolute; transform: translate(-50%, -50%); display: flex; gap: .04em; font: 700 clamp(52px, 8vw, 112px)/1 'Cinzel', 'Trajan Pro', 'Times New Roman', serif; letter-spacing: .08em; white-space: nowrap; }
 .wand-spell span { display: inline-block; }
 .lumos .wand-spell { color: #f6e6b4; text-shadow: 0 0 18px rgb(255 214 120 / .9), 0 0 42px rgb(255 190 80 / .55), 0 2px 3px rgb(60 40 10 / .5); }
@@ -2399,7 +2401,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     }
     /* 深淺色轉場（魔杖，約 1.4 秒）：接骨木魔杖從右下角伸入（下緣三分之一在畫面外）、杖尖指向畫面中央，施咒時杖尖往前點一下——
        · Lumos（切到淺色）：杖尖亮起白光，光暈從中央漾開，光到的地方變成淺色版面
-       · Nox（切到深色）：杖尖的光熄滅，黑暗像墨一樣從中央暈開，暈到的地方變成深色版面
+       · Nox（切到深色）：杖尖的光熄滅，黑暗從畫面四周往中央收合（先慢後快），最後連中央也暗下
        · 咒語：中央用古典襯線字（Cinzel）逐字從模糊浮現、帶微光，停一下後散成光點消失；魔杖施咒後縮回
        · 做法：View Transitions；舊畫面用徑向遮罩挖出一個柔邊圓洞（--wr 半徑由 0 放大），露出底下的新畫面；
          魔杖、光暈、咒語放在一個暫時的元素裡（自己的 view-transition-name，疊在最上面）
@@ -2434,12 +2436,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         <div class="wand" style="left:${tip[0]}px;top:${(tip[1] - WH / 2).toFixed(1)}px;width:${WL.toFixed(0)}px;height:${WH.toFixed(1)}px;transform:rotate(${th}deg)">${ELDER}<i class="wand-tip"></i></div>
         <div class="wand-spell" style="left:${C[0]}px;top:${C[1]}px">${[...(lumos ? 'Lumos' : 'Nox')].map((ch) => `<span>${ch}</span>`).join('')}</div>`;
       const de = document.documentElement;
-      de.classList.add('vt-wand');
+      de.classList.add('vt-wand', lumos ? 'vt-lumos' : 'vt-nox');
       shBusy = true;
       const vt = document.startViewTransition(() => { apply(); document.body.append(fx); });
       vt.ready.then(() => {
         // 暈開：舊畫面挖出柔邊圓洞，半徑 0 → 蓋過整個畫面
-        de.animate([{ '--wr': '0px' }, { '--wr': `${R.toFixed(0)}px` }], { duration: 700, delay: 450, easing: 'cubic-bezier(.45, .05, .25, 1)', fill: 'both', pseudoElement: '::view-transition-old(root)' });
+        // Lumos：光從中央往外漾開（先快後慢）；Nox：黑暗從四周往中央收合（先慢後快，像被吞沒）
+        de.animate(lumos ? [{ '--wr': '0px' }, { '--wr': `${R.toFixed(0)}px` }] : [{ '--wr': `${R.toFixed(0)}px` }, { '--wr': '0px' }],
+          { duration: 700, delay: 450, easing: lumos ? 'cubic-bezier(.45, .05, .25, 1)' : 'cubic-bezier(.55, 0, .75, .4)', fill: 'both', pseudoElement: '::view-transition-old(root)' });
         // 魔杖：沿杖身方向從畫面外伸入 → 揚起 → 點下指向中央 → 施咒後縮回
         const wand = fx.querySelector('.wand'), out = WL * 0.75, rad = th * Math.PI / 180, ox = Math.cos(rad) * out, oy = Math.sin(rad) * out;
         const T = (d, r) => `translate(${(ox * d).toFixed(0)}px, ${(oy * d).toFixed(0)}px) rotate(${(th + r).toFixed(1)}deg)`;
@@ -2466,7 +2470,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           { opacity: 0, filter: 'blur(6px)', transform: `translate(${((i - 2) * 10).toFixed(0)}px, -18px) scale(1.15)` }],
           { duration: 820 - i * 40, delay: 400 + i * 60, easing: 'cubic-bezier(.3, .6, .3, 1)', fill: 'both' }));
       }).catch(() => {});
-      vt.finished.finally(() => { fx.remove(); de.classList.remove('vt-wand'); shBusy = false; });
+      vt.finished.finally(() => { fx.remove(); de.classList.remove('vt-wand', 'vt-lumos', 'vt-nox'); shBusy = false; });
     }
     let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途
     function shadesSwap(next, apply) {

@@ -1501,10 +1501,7 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="neu"] :is(.btn, .top-a .ctl) { box-shadow: var(--raise); }
 :root[data-ui="neu"] .cell:hover { transform: none; }
 /* 卡片內緣：左上受光亮邊＋右下微暗，做出鼓起的立體感 */
-:root[data-ui="neu"] { --neu-rim: rgb(255 255 255 / .95); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --neu-rim: rgb(255 255 255 / .1); } }
-:root[data-theme="dark"][data-ui="neu"] { --neu-rim: rgb(255 255 255 / .1); }
-:root[data-ui="neu"] .cell { --neu-in: inset 2px 2px 1.5px var(--neu-rim), inset 6px 6px 14px color-mix(in srgb, var(--neu-rim) 45%, transparent), inset -3px -3px 8px color-mix(in srgb, var(--neu-lo) 35%, transparent); box-shadow: var(--shadow), var(--neu-in); }
+:root[data-ui="neu"] .cell { border: 0; padding: 17px 19px 19px; --neu-in: inset 3px 3px 8.5px var(--neu-hi), inset -3px -3px 8px color-mix(in srgb, var(--neu-lo) 35%, transparent); box-shadow: var(--shadow), var(--neu-in); }   /* 內亮與外亮同色同模糊、去掉 1px 邊框間隙，左上無縫接起來 */
 :root[data-ui="neu"] .cell:hover { box-shadow: var(--shadow-lift), var(--neu-in); }
 
 /* Swiss Style：無陰影、直角，卡片上方一條粗實線；Helvetica 系字型、標題加粗收字距、英文標示大寫 */
@@ -1583,8 +1580,8 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 /* 焦點：2px 主色實線環，不用柔和光暈（欄位維持凹陷再加外環） */
 :root[data-ui="neu"] :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 :root[data-ui="neu"] :is(.search.focus, .ff.focus .ff-i, .dd.open .dd-t, .ms.open .ms-t) { border-color: transparent; box-shadow: var(--inset), 0 0 0 2px var(--primary); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 8.5px var(--neu-hi), 3px 3px 8.5px var(--neu-lo), inset 0 1px 0 rgb(255 255 255 / .05); } }
-:root[data-theme="dark"][data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 8.5px var(--neu-hi), 3px 3px 8.5px var(--neu-lo), inset 0 1px 0 rgb(255 255 255 / .05); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 8.5px var(--neu-hi), 3px 3px 8.5px var(--neu-lo); } }
+:root[data-theme="dark"][data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 8.5px var(--neu-hi), 3px 3px 8.5px var(--neu-lo); }
 
 /* Swiss Style：字級拉開層次、卡片不填色只留頂線、互動用底線與色塊 */
 :root[data-ui="swiss"] body::before { display: none; }
@@ -1712,7 +1709,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 @property --wa { syntax: '<angle>'; inherits: false; initial-value: 0deg; }   /* 螺旋臂整體逆時針轉（不轉畫面本身，免得露出矩形邊角） */
 .vt-wand::view-transition-old(root), .vt-wand::view-transition-new(root), ::view-transition-group(wand), ::view-transition-old(wand), ::view-transition-new(wand) { animation: none; mix-blend-mode: normal; }
 .vt-wand::view-transition-old(root) { z-index: 2; }
-/* Lumos：舊畫面挖出柔邊圓洞往外擴（過曝的光從中心暈開）；Nox：舊畫面只留中央柔邊圓，連同畫面一起旋轉縮小被吸進漩渦 */
+/* Lumos：舊畫面挖出柔邊圓洞往外擴（過曝的光從中心暈開）；Nox：舊畫面只留中央柔邊圓，連同畫面一起縮小被吸進漩渦 */
 .vt-lumos::view-transition-old(root) { mask-image: radial-gradient(circle, transparent calc(var(--wr) - 260px), #000 var(--wr)); }
 .vt-nox::view-transition-old(root) { transform-origin: 50% 50%; mask-image: radial-gradient(circle, #000 calc(var(--wr) - var(--wf)), transparent var(--wr)); }
 .wand-dust { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -2543,7 +2540,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
        · 咒語：中央用古典襯線字（Cinzel）逐字從模糊浮現、帶微光，停一下後散成光點消失；魔杖施咒後縮回
        · 做法：View Transitions；舊畫面用徑向遮罩挖出一個柔邊圓洞（--wr 半徑由 0 放大），露出底下的新畫面；
          魔杖、光暈、咒語放在一個暫時的元素裡（自己的 view-transition-name，疊在最上面）
-       · 時間軸：0–0.33 秒魔杖伸入 → 0.43 秒杖尖點下施咒 → 0.43–1.33 秒漩渦（Lumos 過曝圓形暈開／Nox 畫面旋轉縮小吸入漩渦＋Canvas 星芒），咒語描寫 → 約 1.5 秒結束 */
+       · 時間軸：0–0.33 秒魔杖伸入 → 0.43 秒杖尖點下施咒 → 0.43–1.33 秒漩渦（Lumos 過曝圓形暈開／Nox 畫面縮小吸入漩渦＋Canvas 星芒），咒語描寫 → 約 1.5 秒結束 */
     if (!document.getElementById('gf-cinzel')) document.head.insertAdjacentHTML('beforeend', '<link id="gf-cinzel" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap">');
     // 接骨木魔杖：杖身由尖到粗、沿途一節節的瘤結（越靠握把越大），握把有兩圈雕刻膨起與尾端圓頭；灰褐木色、上緣受光
     const ELDER = (() => {
@@ -2599,14 +2596,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         // 時間軸：0–0.33 秒魔杖伸入 → 0.43 秒杖尖點下施咒 → 0.43–1.33 秒漩渦轉開／捲入、光塵流動、咒語描寫
         const DUR = 1500, C0 = 330, HIT = 430, SPIN = 900, PT = (t) => Math.round(HIT + t * SPIN);
         // Lumos：過曝圓形暈開——柔邊圓洞單一順滑曲線擴到全螢幕，同時白光從中心爆亮再隨圓擴散退去
-        // Nox：被吸入漩渦——先把淺色收成畫面內的圓（不露出矩形邊角），接著整個圓一邊越轉越快、一邊縮小吸進中心
+        // Nox：被吸入漩渦——先把淺色收成畫面內的圓，接著整個圓加速縮小吸進中心（畫面本身不旋轉）
         const px = (v) => `${Math.round(v)}px`, o = { duration: SPIN, delay: HIT, fill: 'both', pseudoElement: '::view-transition-old(root)' };
         if (lumos) de.animate([{ '--wr': '0px' }, { '--wr': px(RV + 260) }], { ...o, easing: 'cubic-bezier(.35, .1, .25, 1)' });
         else { const r0 = Math.min(W, H) / 2;   // 圓半徑不超過畫面短邊一半時旋轉，圓永遠在畫面矩形內
           de.animate([
             { offset: 0, '--wr': px(RV), '--wf': '260px', transform: 'none', easing: 'cubic-bezier(.4, 0, .6, 1)' },
             { offset: 0.28, '--wr': px(r0), '--wf': '200px', transform: 'none', easing: 'cubic-bezier(.5, 0, .85, .45)' },
-            { offset: 1, '--wr': px(r0 * 0.9), '--wf': '120px', transform: 'rotate(-300deg) scale(0)' }], o); }
+            { offset: 1, '--wr': px(r0 * 0.9), '--wf': '120px', transform: 'scale(0)' }], o); }   // 只縮小、不旋轉：畫面被吸進中心，漩渦感交給星芒的流動
         // 魔法光塵（Canvas）：星芒沿同一股漩渦流動（Lumos 噴出、Nox 吸入），高解析度、每格清空保持銳利；亮度緩慢呼吸，不快速閃爍
         const cv = fx.querySelector('.wand-dust'), DPR = Math.min(2, devicePixelRatio || 1), g = cv.getContext('2d'), N = 220, SS = 64, sprite = document.createElement('canvas'); sprite.width = sprite.height = SS;
         cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); g.scale(DPR, DPR);

@@ -2269,7 +2269,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) { const cx = (i + 0.5) * tw, cy = (j + 0.5) * th, d = Math.hypot(cx - ox, cy - oy); maxD = Math.max(maxD, d); tiles.push([cx, cy, d]); }
       const DUR = 800, LEN = 350, SPAN = DUR - LEN, N = 30, ease = (t) => 1 - Math.pow(1 - t, 3);
       const kf = Array.from({ length: N + 1 }, (_, k) => { const now = (k / N) * DUR;
-        const d = tiles.map(([cx, cy, dist]) => { const p = Math.min(1, Math.max(0, (now - (dist / maxD) * SPAN) / LEN)), e = ease(p), hw = (tw / 2 + 0.6) * e, hh = (th / 2 + 0.6) * e;
+        const d = tiles.map(([cx, cy, dist]) => { const p = Math.min(1, Math.max(0, (now - (dist / maxD) * SPAN) / LEN)), e = ease(p), hw = (tw / 2 + 1.5) * e, hh = (th / 2 + 1.5) * e;   // 每邊多 1.5px：相鄰格子重疊，長滿時不露格線
           return `M${(cx - hw).toFixed(1)} ${(cy - hh).toFixed(1)}H${(cx + hw).toFixed(1)}V${(cy + hh).toFixed(1)}H${(cx - hw).toFixed(1)}Z`; }).join('');
         return { offset: k / N, clipPath: `path("${d}")` }; });
       const de = document.documentElement;

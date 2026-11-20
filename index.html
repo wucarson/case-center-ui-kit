@@ -2530,7 +2530,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
        · 咒語：中央用古典襯線字（Cinzel）逐字從模糊浮現、帶微光，停一下後散成光點消失；魔杖施咒後縮回
        · 做法：View Transitions；舊畫面用徑向遮罩挖出一個柔邊圓洞（--wr 半徑由 0 放大），露出底下的新畫面；
          魔杖、光暈、咒語放在一個暫時的元素裡（自己的 view-transition-name，疊在最上面）
-       · 時間軸：0–0.33 秒魔杖伸入 → 0.43 秒杖尖點下施咒 → 0.43–1.25 秒螺旋掃開（Lumos 轉出、Nox 轉進），光軌壓在交界、沿途掉落星耀，咒語描寫 → 約 1.5 秒結束 */
+       · 時間軸：0–0.33 秒魔杖伸入 → 0.43 秒杖尖點下施咒 → 0.43–1.33 秒乾刷沿螺旋逆時針刷開（Lumos 由內往外、Nox 由外往內），咒語描寫 → 約 1.5 秒結束 */
     if (!document.getElementById('gf-cinzel')) document.head.insertAdjacentHTML('beforeend', '<link id="gf-cinzel" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap">');
     // 接骨木魔杖：杖身由尖到粗、沿途一節節的瘤結（越靠握把越大），握把有兩圈雕刻膨起與尾端圓頭；灰褐木色、上緣受光
     const ELDER = (() => {
@@ -2556,18 +2556,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const R = Math.hypot(W, H) / 2 + 180;
       // 魔杖長度：杖尖沿杖身方向到畫面邊緣的距離 × 1.5，下緣三分之一伸出畫面外
       const dx = Math.cos(th * Math.PI / 180), dy = Math.sin(th * Math.PI / 180), exit = Math.min((W - tip[0]) / dx, (H - tip[1]) / dy), WL = exit * 1.5, WH = WL * 0.07;
-      // 螺旋光軌：從畫面中心逆時針轉 1.5 圈擴散到畫面外（畫面上角度遞減＝逆時針）
-      // 螺旋掃開：像時鐘指針從中心逆時針掃，掃過的角度 φ 越多、半徑也越大（r = kα），邊緣就是螺旋線；掃 1.5 圈蓋滿全螢幕
-      //   Lumos：φ 由 0 → 1.5 圈，新的淺色沿螺旋從中心轉出去
-      //   Nox：  φ 由 1.5 圈 → 0（螺旋改成順時針繞向，倒著播時看起來仍是逆時針），剩下的淺色沿螺旋轉進中心，黑暗從外圈吞進來
-      const PHI = Math.PI * 3, RC = Math.hypot(W, H) / 2 + 40, KR = RC / Math.PI, TH0 = -Math.PI / 2, SG = lumos ? -1 : 1, SM = 96;
-      const spt = (a) => [C[0] + Math.cos(TH0 + SG * a) * KR * a, C[1] + Math.sin(TH0 + SG * a) * KR * a];
-      const f1 = (v) => v.toFixed(1), pstr = (pts) => pts.map(([x, y], i) => (i ? 'L' : 'M') + f1(x) + ' ' + f1(y)).join('');
-      const arc = (a0, a1, n) => Array.from({ length: n + 1 }, (_, i) => spt(a0 + (a1 - a0) * i / n));
-      const sweepAt = (u) => { const e = u < 0.5 ? 2 * u * u : 1 - 2 * (1 - u) * (1 - u); return PHI * (lumos ? e : 1 - e); };   // 先慢、中間快、最後慢
-      // 掉落的星耀：沿螺旋邊緣取點，掃到那裡時從那裡掉下
-      const sheds = Array.from({ length: 20 }, (_, i) => { const a = PHI * (0.12 + 0.84 * (i + 0.5) / 20), [x, y] = spt(a), sz = 9 + Math.random() * 15;
-        return { a, html: `<i class="wand-star shed" style="left:${(x - sz / 2).toFixed(0)}px;top:${(y - sz / 2).toFixed(0)}px;width:${sz.toFixed(0)}px;height:${sz.toFixed(0)}px"></i>` }; });
+      // 乾刷（Dry Brush）：一支大刷子沿螺旋從中心逆時針刷 4 圈刷到畫面外，刷過的地方露出新畫面
+      //   做法：低解析度 Canvas 當遮罩，每格沿路徑蓋印乾刷筆刷（destination-out 擦掉），轉成圖片套在舊畫面快照的 mask-image
+      //   Lumos：由中心往外刷；Nox：由外往中心刷（繞向相反，看起來仍是逆時針）
+      const BT = 4, RC = Math.hypot(W, H) / 2 + 90, BK = RC / (Math.PI * 2 * BT), TEND = Math.PI * 2 * BT, TH0 = -Math.PI / 2, SG = lumos ? -1 : 1;
+      const bpt = (t) => [C[0] + Math.cos(TH0 + SG * t) * BK * t, C[1] + Math.sin(TH0 + SG * t) * BK * t];
       const twinkles = Array.from({ length: 10 }, () => { const sz = 10 + Math.random() * 20; return `<i class="wand-star tw" style="left:${(Math.random() * W).toFixed(0)}px;top:${(Math.random() * H).toFixed(0)}px;width:${sz.toFixed(0)}px;height:${sz.toFixed(0)}px"></i>`; }).join('');
       // 咒語：每個字母一個 SVG 文字（先描邊再填色），用畫布量字寬排位置
       const word = lumos ? 'Lumos' : 'Nox', FS = Math.min(112, Math.max(52, W * 0.08)), GAP = FS * 0.08;
@@ -2576,8 +2569,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       let cur = C[0] - total / 2; const xs = ws.map((w) => { const x = cur + w / 2; cur += w + GAP; return x; });
       const letters = (cls) => [...word].map((ch, i) => `<text class="${cls}" x="${xs[i].toFixed(1)}" y="${C[1]}" text-anchor="middle" dominant-baseline="central">${ch}</text>`).join('');
       const fx = document.createElement('div'); fx.className = 'wand-fx' + (lumos ? ' lumos' : ' nox'); fx.setAttribute('aria-hidden', 'true');
-      fx.innerHTML = `<svg class="wand-spiral" width="${W}" height="${H}"><path class="sp-band"/><path class="sp-head halo"/><path class="sp-head"/></svg>
-        ${sheds.map((x) => x.html).join('')}${twinkles}
+      fx.innerHTML = `${twinkles}
         <div class="wand-halo" style="left:${C[0]}px;top:${C[1]}px"></div>
         <div class="wand" style="left:${tip[0]}px;top:${(tip[1] - WH / 2).toFixed(1)}px;width:${WL.toFixed(0)}px;height:${WH.toFixed(1)}px;transform:rotate(${th}deg)">${ELDER}<i class="wand-tip"></i></div>
         <svg class="wand-word" width="${W}" height="${H}" style="font-size:${FS.toFixed(1)}px"><defs>
@@ -2591,30 +2583,46 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const de = document.documentElement;
       de.classList.add('vt-wand', lumos ? 'vt-lumos' : 'vt-nox');
       shBusy = true;
-      // 高溫霧化：兩層（濃：緊跟交界、模糊 12px；淡：拖在後面、模糊 5px），只在指針剛掃過的扇形帶裡
-      const hazes = (lumos ? [[12, 1.06, 0.38], [5, 1.03, 0.95]] : [[12, 1.28, 0.38], [5, 1.12, 0.95]]).map(([bl, br, span]) => { const h = document.createElement('div'); h.className = 'wand-haze'; h.setAttribute('aria-hidden', 'true');
-        h.style.cssText = `-webkit-backdrop-filter:blur(${bl}px) brightness(${br}) saturate(1.15);backdrop-filter:blur(${bl}px) brightness(${br}) saturate(1.15)`; h._span = span; return h; });
-      const vt = document.startViewTransition(() => { apply(); hazes.forEach((h) => document.body.append(h)); document.body.append(fx); });
+      const bmStyle = document.createElement('style'); document.head.append(bmStyle);   // 舊畫面快照的遮罩（每格換一張筆刷遮罩圖）
+      const vt = document.startViewTransition(() => { apply(); document.body.append(fx); });
+      const vtT0 = performance.now();
       vt.ready.then(() => {
         // 時間軸：0–0.33 秒魔杖伸入 → 0.43 秒杖尖點下施咒 → 螺旋光軌從中心逆時針擴散、掉落星耀；同時暈開／收合、咒語描寫
-        const DUR = 1500, C0 = 330, HIT = 430, SPIN = 820, PT = (t) => Math.round(HIT + t * SPIN);
-        // 螺旋掃開：舊畫面用 clip-path 裁切（預先算 48 個關鍵影格，每格頂點數相同才能平滑內插）
-        //   Lumos：整個畫面挖掉螺旋區（evenodd），露出底下的淺色；Nox：舊的淺色只留在螺旋區，越縮越小
-        const NK = 48, frames = Array.from({ length: NK + 1 }, (_, k) => { const ph = sweepAt(k / NK), a0 = Math.max(0, ph - Math.PI * 2);
-          return { k, ph, edge: arc(a0, ph, SM), head: arc(Math.max(0, ph - 1.1), ph, 20) }; });
-        const shape = ({ edge }) => 'M' + f1(C[0]) + ' ' + f1(C[1]) + edge.map(([x, y]) => 'L' + f1(x) + ' ' + f1(y)).join('') + 'Z';
-        const full = `M-20 -20L${W + 20} -20L${W + 20} ${H + 20}L-20 ${H + 20}Z`;
-        de.animate(frames.map((fr) => ({ offset: fr.k / NK, clipPath: lumos ? `path(evenodd, "${full} ${shape(fr)}")` : `path("${shape(fr)}")` })),
-          { duration: SPIN, delay: HIT, easing: 'linear', fill: 'both', pseudoElement: '::view-transition-old(root)' });
-        // 光軌壓在新舊交界：一整圈的柔光帶（遮住裁切硬邊）＋前端的彗星亮頭
-        fx.querySelector('.sp-band').animate(frames.map((fr) => ({ offset: fr.k / NK, d: `path("${pstr(fr.edge)}")` })), { duration: SPIN, delay: HIT, easing: 'linear', fill: 'both' });
-        fx.querySelectorAll('.sp-head').forEach((el) => el.animate(frames.map((fr) => ({ offset: fr.k / NK, d: `path("${pstr(fr.head)}")` })), { duration: SPIN, delay: HIT, easing: 'linear', fill: 'both' }));
-        // 霧化帶：指針剛掃過的扇形（外緣是這次掃到的螺旋、內緣是上一圈），Lumos 拖在 φ 之後、Nox 拖在 φ 之前
-        const ring = (a0, a1, n) => { if (a1 - a0 < 1e-3) a1 = a0 + 1e-3; const o = arc(a0, a1, n), inn = Array.from({ length: n + 1 }, (_, i) => { const a = a1 - (a1 - a0) * i / n, r = KR * Math.max(0, a - Math.PI * 2); return [C[0] + Math.cos(TH0 + SG * a) * r, C[1] + Math.sin(TH0 + SG * a) * r]; });
-          return 'path("' + pstr(o.concat(inn)) + 'Z")'; };
-        hazes.forEach((h) => h.animate(frames.map((fr) => { const a0 = lumos ? Math.max(0, fr.ph - h._span) : fr.ph, a1 = lumos ? fr.ph : Math.min(PHI, fr.ph + h._span);
-          return { offset: fr.k / NK, clipPath: ring(a0, a1, 22) }; }), { duration: SPIN, delay: HIT, easing: 'linear', fill: 'both' }));
-        fx.querySelector('.wand-spiral').animate([{ opacity: 0 }, { opacity: 1, offset: 0.06 }, { opacity: 1, offset: 0.88 }, { opacity: 0 }], { duration: SPIN, delay: HIT, fill: 'both' });
+        const DUR = 1500, C0 = 330, HIT = 430, SPIN = 900, PT = (t) => Math.round(HIT + t * SPIN);
+        // 乾刷遮罩：半解析度畫布，一開始整片不透明（舊畫面全露），刷過的地方擦成透明（露出新畫面）
+        const MS = 0.5, mc = document.createElement('canvas'), mw = Math.ceil(W * MS), mh = Math.ceil(H * MS); mc.width = mw; mc.height = mh;
+        const mg = mc.getContext('2d'); mg.fillStyle = '#000'; mg.fillRect(0, 0, mw, mh);
+        // 乾刷筆刷印章：沿筆畫方向（x）一條條長短不一的刷毛，中間密、兩側稀疏有飛白
+        const RB = Math.max(70, BK * Math.PI * 2 * 0.62) * MS, stamp = document.createElement('canvas'); stamp.width = Math.ceil(RB * 2.4); stamp.height = Math.ceil(RB * 2);
+        { const sg = stamp.getContext('2d'), sw = stamp.width, sh = stamp.height; sg.lineCap = 'round';
+          sg.fillStyle = '#000'; sg.globalAlpha = 0.9; sg.beginPath(); sg.ellipse(sw / 2, sh / 2, sw * 0.42, sh * 0.3, 0, 0, Math.PI * 2); sg.fill();
+          for (let i = 0; i < 90; i++) { const y = sh / 2 + (Math.random() * 2 - 1) * sh * 0.47, edge = Math.abs(y - sh / 2) / (sh / 2);
+            let x = Math.random() * sw * 0.15; sg.lineWidth = 0.8 + Math.random() * 2.4 * (1 - edge * 0.6);
+            while (x < sw * (0.85 + Math.random() * 0.15)) { const len = sw * (0.12 + Math.random() * 0.5) * (1 - edge * 0.5);
+              sg.globalAlpha = (0.35 + Math.random() * 0.65) * (1 - edge * 0.55); sg.strokeStyle = '#000'; sg.beginPath(); sg.moveTo(x, y + (Math.random() - 0.5) * 2); sg.lineTo(x + len, y + (Math.random() - 0.5) * 3); sg.stroke();
+              x += len + sw * Math.random() * 0.12 * (0.3 + edge); } } }
+        mg.globalCompositeOperation = 'destination-out';
+        const stampAt = (t) => { const [x, y] = bpt(t), [x2, y2] = bpt(t + 0.02), ang = Math.atan2(y2 - y, x2 - x), sc = 0.9 + Math.random() * 0.22;
+          mg.save(); mg.translate(x * MS, y * MS); mg.rotate(ang); mg.scale(sc, sc); mg.globalAlpha = 0.55 + Math.random() * 0.35; mg.drawImage(stamp, -stamp.width / 2, -stamp.height / 2); mg.restore(); };
+        // 每格：把筆刷從上次的位置蓋到這一格的位置；畫布轉成圖片（先解碼完成才換上，避免閃一下）
+        const ease = (u) => (u < 0.5 ? 2 * u * u : 1 - 2 * (1 - u) * (1 - u)), STEP = RB * 0.16 / MS;
+        let tCur = lumos ? 0 : TEND, busy = false, lastUrl = '', done = false;
+        const push = () => { if (busy) return; busy = true; mc.toBlob((blob) => { if (!blob) { busy = false; return; } const url = URL.createObjectURL(blob), im = new Image(); im.src = url;
+          im.decode().catch(() => {}).then(() => { if (!done || url) { bmStyle.textContent = `.vt-wand::view-transition-old(root){-webkit-mask-image:url(${url});mask-image:url(${url});-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}`; }
+            if (lastUrl) URL.revokeObjectURL(lastUrl); lastUrl = url; busy = false; }); }, 'image/png'); };
+        const tStart = performance.now() + HIT - (performance.now() - vtT0);
+        const brushFrame = (now) => {
+          const u = Math.min(1, Math.max(0, (now - tStart) / SPIN)), tGoal = TEND * (lumos ? ease(u) : 1 - ease(u));
+          if (u > 0) { while (lumos ? tCur < tGoal : tCur > tGoal) { const ds = STEP / (BK * Math.max(tCur, 1.2)); tCur = lumos ? Math.min(tGoal, tCur + ds) : Math.max(tGoal, tCur - ds); stampAt(tCur); }
+            // 最後一段：補擦乾刷留下的飛白空隙，收乾淨
+            if (u > 0.82) { mg.globalAlpha = (u - 0.82) / 0.18 * 0.5; mg.fillRect(0, 0, mw, mh); }
+            if (u >= 1) { mg.globalAlpha = 1; mg.fillRect(0, 0, mw, mh); }
+            push(); }
+          if (u < 1) requestAnimationFrame(brushFrame); else done = true;
+        };
+        requestAnimationFrame(brushFrame);
+        // 讓轉場撐到刷完（View Transitions 只看動畫的長度）
+        de.animate([{ opacity: 1 }, { opacity: 1 }], { duration: HIT + SPIN + 200, pseudoElement: '::view-transition-old(root)' });
         // 魔杖：沿杖身方向從畫面外伸入 → 點下施咒 → 縮回
         const wand = fx.querySelector('.wand'), out = WL * 0.75, rad = th * Math.PI / 180, ox = Math.cos(rad) * out, oy = Math.sin(rad) * out;
         const T = (d, r) => `translate(${(ox * d).toFixed(1)}px, ${(oy * d).toFixed(1)}px) rotate(${(th + r).toFixed(1)}deg)`;
@@ -2626,13 +2634,6 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           { offset: (HIT + 220) / DUR, transform: T(0, 0), easing: 'cubic-bezier(.5, 0, .75, .2)' },   // 施咒完就縮回
           { offset: (HIT + 700) / DUR, transform: T(1.05, 8) },
           { offset: 1, transform: T(1.05, 8) }], { duration: DUR, fill: 'both' });
-        // 掉落星耀：亮頭經過時從光軌上掉下（往下墜、閃一下、旋轉淡出）
-        const timeAt = (a) => { for (let i = 1; i <= NK; i++) { const p0 = frames[i - 1].ph, p1 = frames[i].ph; if ((a - p0) * (a - p1) <= 0) return HIT + SPIN * (i - 1 + (a - p0) / ((p1 - p0) || 1)) / NK; } return HIT; };
-        sheds.forEach(({ a }, i) => fx.querySelectorAll('.wand-star.shed')[i].animate([
-          { opacity: 0, transform: 'translate(0, 0) scale(.2) rotate(0deg)' },
-          { opacity: 1, transform: 'translate(0, 6px) scale(1.1) rotate(40deg)', offset: 0.2 },
-          { opacity: 0, transform: `translate(${((Math.random() - 0.5) * 30).toFixed(0)}px, ${(40 + Math.random() * 60).toFixed(0)}px) scale(.3) rotate(160deg)` }],
-          { duration: 420 + Math.random() * 160, delay: timeAt(a), easing: 'cubic-bezier(.3, .4, .6, 1)', fill: 'both' }));
         // 全畫面星點交替閃爍
         fx.querySelectorAll('.wand-star.tw').forEach((st) => st.animate([{ opacity: 0, transform: 'scale(0) rotate(0deg)' }, { opacity: 1, transform: `scale(1) rotate(${45 + Math.random() * 45}deg)`, offset: 0.4 }, { opacity: 0, transform: 'scale(0) rotate(120deg)' }],
           { duration: 360 + Math.random() * 200, delay: HIT + 60 + Math.random() * 560, easing: 'cubic-bezier(.3, .6, .4, 1)', fill: 'both' }));
@@ -2663,7 +2664,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           fx.querySelector('.ww-shine').animate([{ opacity: 0 }, { opacity: 1, offset: 0.1 }, { opacity: 1, offset: 0.9 }, { opacity: 0 }], { duration: 520, delay: HIT + 380, fill: 'both' });
         }
       }).catch(() => {});
-      vt.finished.finally(() => { fx.remove(); hazes.forEach((h) => h.remove()); de.classList.remove('vt-wand', 'vt-lumos', 'vt-nox'); shBusy = false; });
+      vt.finished.finally(() => { fx.remove(); bmStyle.remove(); de.classList.remove('vt-wand', 'vt-lumos', 'vt-nox'); shBusy = false; });
     }
     let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途
     function shadesSwap(next, apply) {

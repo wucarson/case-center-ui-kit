@@ -1697,6 +1697,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .slash-pc { position: absolute; inset: 0; overflow: hidden; will-change: transform, opacity; }
 .slash-pc * { transition: none !important; animation: none !important; }   /* 複製品不重播進場動畫（否則會停在透明的起點） */
 .slash-lines { position: absolute; inset: 0; overflow: visible; }
+.slash-rim { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+.slash-rim line { stroke: rgb(255 255 255 / .9); stroke-width: 2; filter: drop-shadow(0 0 3px rgb(255 255 255 / .8)); }
+.slash-debris { position: absolute; clip-path: polygon(50% 0, 100% 100%, 0 80%); will-change: transform, opacity; }
 .slash-lines line { stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 1; filter: drop-shadow(0 0 6px rgb(255 255 255 / .9)) drop-shadow(0 0 2px rgb(120 170 255 / .9)); }
 .vt-shades-on::view-transition-new(root) { opacity: 0; }   /* 快照拍完到動畫開始前的空檔：深色新畫面先藏起來，不會整個閃出 */
 ::view-transition-group(shades), ::view-transition-group(speed) { opacity: 0; }   /* 拿掉：舊的深色在上、只留鏡片內 */
@@ -2260,7 +2263,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       return pts; };
     const SH_L = shOval(SH_LC[0], false), SH_R = shOval(SH_LC[1], false);   // 兩片同一個繞行方向：重疊處是聯集（不是洞）
     const shD = (pts) => pts.map(([m, c, e]) => (m ? `M${m[0].toFixed(2)} ${m[1].toFixed(2)}` : '') + `Q${c[0].toFixed(2)} ${c[1].toFixed(2)} ${e[0].toFixed(2)} ${e[1].toFixed(2)}`).join('') + 'Z';
-    /* 深淺色轉場（亂刀，1 秒）：3 刀白色刀光依序劃過畫面（固定刀位），把畫面切成大小不一的碎塊，最後碎塊靜止一拍後順著刀口滑開，露出新版面
+    /* 深淺色轉場（亂刀，1 秒）：3 刀白色刀光依序劃過畫面（固定刀位），把畫面切成大小不一的碎塊，最後碎塊從中央往外炸開，露出新版面
        · 做法：把目前畫面（.shell）複製到每一塊碎片裡（碎片用 clip-path 多邊形裁切，聯集剛好是整個畫面），蓋在最上層後立刻切換深淺色；
          複製品帶著切換前的顏色變數，所以碎片保持舊配色。刀光結束後碎片各自往外飛、旋轉、縮小淡出，底下就是新版面
        · 3 刀都切開畫面（碎片固定 5 塊）
@@ -2304,7 +2307,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         const c = base.cloneNode(true); c.style.cssText = `position:absolute;left:${sr.left}px;top:${sr.top}px;width:${sr.width}px;margin:0`;
         el.append(c); layer.append(el);
         const gx = pg.reduce((s, p) => s + p[0], 0) / pg.length, gy = pg.reduce((s, p) => s + p[1], 0) / pg.length;
-        return { el, gx, gy };
+        return { el, gx, gy, pg };
       });
       // 刀光：從畫面一端劃到另一端
       const L = Math.hypot(W, H);
@@ -2315,11 +2318,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       // 換配色的重算很重：等兩個畫格（重算完成）才開始動畫，時間軸才不會一開始就被吃掉
       requestAnimationFrame(() => requestAnimationFrame(() => run(layer, cuts, pieces, cx, cy, W, H)));
     }
-    /* 打擊感：每刀劃到底時停頓 40ms（卡肉），刀口的光保留到碎片滑開。全長 1 秒 */
+    /* 打擊感：每刀劃到底時停頓 40ms（卡肉），刀口的光保留到炸開；炸開帶 3D 翻飛、遠近速度差、切口亮邊與碎屑。全長 1 秒 */
     function run(layer, cuts, pieces, cx, cy, W, H) {
       const DRAW = 100, HOLD = 40, GAP = 30, STEP = DRAW + HOLD + GAP;   // 每刀間隔 0.17 秒，看得出順序
-      const HIT = cuts.map((_, i) => i * STEP + DRAW), CUT_END = HIT[HIT.length - 1] + HOLD + 20, CHARGE = 100, TOTAL = 1000;   // CHARGE：砍完靜止一拍
-      // 刀光：劃到底（100ms）→ 刀口的光一直留著 → 碎片滑開瞬間 80ms 內淡掉（不加亮、不留殘影）
+      const HIT = cuts.map((_, i) => i * STEP + DRAW), CUT_END = HIT[HIT.length - 1] + HOLD + 20, CHARGE = 70, TOTAL = 1000;   // CHARGE：炸開前往內蓄力
+      // 刀光：劃到底（100ms）→ 刀口的光一直留著 → 炸開瞬間 80ms 內淡掉（光轉到碎片的切口亮邊上，跟著碎片飛走）
       const BOOM = CUT_END + CHARGE;
       layer.querySelectorAll('.slash-lines line').forEach((ln, i) => { const st = i * STEP, len = BOOM + 80 - st;
         ln.animate([
@@ -2329,18 +2332,42 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           { strokeDashoffset: 0, opacity: 0.85, strokeWidth: 2, offset: (BOOM - st) / len, easing: 'ease-out' },
           { strokeDashoffset: 0, opacity: 0, strokeWidth: 2 }],
           { duration: len, delay: st, fill: 'both' }); });
-      // 收尾（居合斬）：砍完靜止一拍，碎片才順著刀口錯開滑走——同一刀兩側的碎片往相反方向滑，越滑越快、同時淡出
-      pieces.forEach(({ el, gx, gy }) => {
-        let dx = 0, dy = 0;
-        cuts.forEach((c) => { const nx = -c.dy, ny = c.dx, sd = Math.sign(nx * (gx - c.px) + ny * (gy - c.py)) || 1;
-          dx += c.dx * sd + nx * sd * 0.25; dy += c.dy * sd + ny * sd * 0.25; });   // 沿刀口滑＋往刀口外側微微分開
-        const dl = Math.hypot(dx, dy) || 1, dist = 0.45 * Math.max(W, H), rot = (Math.random() - 0.5) * 8;
+      // 收尾（炸開）：碎片先往內蓄力，再帶 3D 翻轉往外炸——有的往鏡頭飛（放大、較快），有的往後（縮小、較慢）
+      const onB = (x, y) => x < 1 || y < 1 || x > W - 1 || y > H - 1;
+      pieces.forEach(({ el, gx, gy, pg }) => {
+        // 切口亮邊：只畫刀切出來的邊（畫面四周的邊不畫），炸開瞬間亮起、跟著碎片飛
+        const edges = pg.map((p, i) => [p, pg[(i + 1) % pg.length]]).filter(([p, q]) => !(onB(...p) && onB(...q) && (Math.abs(p[0] - q[0]) < 1 || Math.abs(p[1] - q[1]) < 1)));
+        el.insertAdjacentHTML('beforeend', `<svg class="slash-rim" width="${W}" height="${H}">${edges.map(([p, q]) => `<line x1="${p[0].toFixed(1)}" y1="${p[1].toFixed(1)}" x2="${q[0].toFixed(1)}" y2="${q[1].toFixed(1)}"/>`).join('')}</svg>`);
+        el.lastElementChild.animate([{ opacity: 0 }, { opacity: 0, offset: (BOOM - 10) / TOTAL }, { opacity: 1, offset: BOOM / TOTAL }, { opacity: 0.6 }], { duration: TOTAL, fill: 'both' });
+        const vx = gx - cx, vy = gy - cy, d = Math.hypot(vx, vy) || 1, ux = vx / d, uy = vy / d;
+        const z = Math.random() * 2 - 1, sp = 0.75 + (z + 1) * 0.3, dist = (0.28 * Math.max(W, H) + Math.random() * 100) * sp, sc = 1 + z * 0.35;
+        const rx = (Math.random() - 0.5) * 70, ry = (Math.random() - 0.5) * 70, rz = (Math.random() - 0.5) * 50;
+        el.style.transformOrigin = `${gx.toFixed(0)}px ${gy.toFixed(0)}px`;
         el.animate([
-          { offset: 0, transform: 'none', opacity: 1 },
-          { offset: BOOM / TOTAL, transform: 'none', opacity: 1, easing: 'cubic-bezier(.55, 0, .85, .35)' },
-          { offset: 1, transform: `translate(${(dx / dl * dist).toFixed(0)}px, ${(dy / dl * dist).toFixed(0)}px) rotate(${rot.toFixed(1)}deg)`, opacity: 0 }],
+          { offset: 0, transform: 'perspective(1200px) none', opacity: 1 },
+          { offset: CUT_END / TOTAL, transform: 'perspective(1200px) translate(0px, 0px) scale(1)', opacity: 1, easing: 'cubic-bezier(.4, 0, .6, 1)' },
+          { offset: BOOM / TOTAL, transform: `perspective(1200px) translate(${(-ux * 10).toFixed(1)}px, ${(-uy * 10).toFixed(1)}px) scale(.97)`, opacity: 1, easing: 'cubic-bezier(.2, .55, .35, 1)' },
+          { offset: (BOOM + (TOTAL - BOOM) * 0.55) / TOTAL, opacity: 1 },   // 前半段不淡，看得到碎片翻飛
+          { offset: 1, transform: `perspective(1200px) translate(${(ux * dist).toFixed(0)}px, ${(uy * dist).toFixed(0)}px) rotateX(${rx.toFixed(0)}deg) rotateY(${ry.toFixed(0)}deg) rotate(${rz.toFixed(0)}deg) scale(${(sc * 0.9).toFixed(2)})`, opacity: 0 }],
           { duration: TOTAL, easing: 'linear', fill: 'both' });
       });
+      // 細小碎屑：從三刀交叉點與切口噴出的小三角形（很輕，不複製畫面）
+      const spots = [];
+      cuts.forEach((c, i) => cuts.slice(i + 1).forEach((e) => { const den = c.dx * e.dy - c.dy * e.dx; if (Math.abs(den) < 1e-6) return;
+        const t = ((e.px - c.px) * e.dy - (e.py - c.py) * e.dx) / den, x = c.px + c.dx * t, y = c.py + c.dy * t; if (x > 0 && x < W && y > 0 && y < H) spots.push([x, y]); }));
+      cuts.forEach((c) => { for (let k = 0; k < 3; k++) { const t = (Math.random() - 0.5) * Math.min(W, H) * 0.8, x = c.px + c.dx * t, y = c.py + c.dy * t; if (x > 0 && x < W && y > 0 && y < H) spots.push([x, y]); } });
+      const cols = ['rgb(255 255 255 / .95)', 'rgb(255 255 255 / .7)', getComputedStyle(document.documentElement).getPropertyValue('--line-strong').trim() || '#9aa7bd'];
+      for (let k = 0; k < 18; k++) {
+        const [x, y] = spots[k % spots.length], sz = 4 + Math.random() * 9, a0 = Math.random() * Math.PI * 2, v = 120 + Math.random() * 260;
+        const dbr = document.createElement('i'); dbr.className = 'slash-debris';
+        dbr.style.cssText = `left:${(x - sz / 2).toFixed(0)}px;top:${(y - sz / 2).toFixed(0)}px;width:${sz.toFixed(0)}px;height:${sz.toFixed(0)}px;background:${cols[k % cols.length]}`;
+        layer.append(dbr);
+        dbr.animate([
+          { opacity: 0, transform: 'translate(0, 0) rotate(0deg) scale(.6)' },
+          { opacity: 1, offset: 0.08 },
+          { opacity: 0, transform: `translate(${(Math.cos(a0) * v).toFixed(0)}px, ${(Math.sin(a0) * v + 40).toFixed(0)}px) rotate(${(Math.random() * 720 - 360).toFixed(0)}deg) scale(.3)` }],
+          { duration: 380 + Math.random() * 120, delay: BOOM, easing: 'cubic-bezier(.15, .7, .3, 1)', fill: 'both' });
+      }
       setTimeout(() => { layer.remove(); shBusy = false; }, TOTAL + 40);
     }
     let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途

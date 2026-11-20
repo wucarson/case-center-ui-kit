@@ -121,9 +121,9 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 .top p { margin: 2px 0 0; color: var(--weak); font-size: calc(13px * var(--fs-k) * var(--rk, 1)); line-height: calc(19px * var(--fs-k) * var(--rk, 1)); }
 .top-sentinel { display: block; height: 0; margin-bottom: -20px; }   /* 標題列開始固定的位置（抵掉 .shell 的間距） */
 .top-a { display: flex; gap: 8px; }
-/* 標題列（含右側設定按鈕）捲動時固定在頂部；捲動後才浮出毛玻璃底與細分隔線，底色延伸到整個視窗寬 */
+/* 標題列（含右側設定按鈕）捲動時固定在頂部；捲動後才浮出毛玻璃底與細分隔線。底色以視窗為準鋪滿整個畫面寬（設定面板開著時也一樣） */
 .top { position: sticky; top: 0; z-index: 25; padding-block: 10px; margin-block: -10px; }
-.top::before { content: ""; position: absolute; z-index: -1; inset: 0 calc(50% - 50vw); background: color-mix(in srgb, var(--page) 78%, transparent); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%); border-bottom: 1px solid var(--line-subtle); opacity: 0; transition: opacity calc(.2s * var(--dur)) var(--ease); pointer-events: none; }
+.top::before { content: ""; position: fixed; z-index: -1; top: 0; left: 0; right: 0; height: var(--top-h, 56px); background: color-mix(in srgb, var(--page) 78%, transparent); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%); border-bottom: 1px solid var(--line-subtle); opacity: 0; transition: opacity calc(.2s * var(--dur)) var(--ease); pointer-events: none; }
 .top.stuck::before { opacity: 1; }
 .ctl {
   height: 32px; padding: 0 12px; border-radius: var(--r-md); border: 1px solid var(--line);
@@ -1790,7 +1790,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 @media (max-width: 760px) {
   .cz { top: auto; left: 24px; right: 24px; bottom: 24px; width: auto; max-width: none; height: calc(60vh - 24px); border: 1px solid var(--ev-line-2); border-radius: 22px; transform: translateY(calc(100% + 40px)); }
 }
-@media (min-width: 761px) { body.cz-open { inset: 0 404px 0 0; } }   /* 讓出面板寬＋右邊界 */
+@media (min-width: 761px) {
+  body.cz-open { inset: 0 404px 0 0; margin: 0; scrollbar-width: none; }   /* 讓出面板寬＋右邊界；元件區照常捲動但不顯示捲動軸 */
+  body.cz-open::-webkit-scrollbar { display: none; }
+}
 
 /* 頂部列：標題、狀態燈 */
 .cz .cz-h { padding: 16px 12px 12px 18px; border-bottom: 1px solid var(--ev-line); }

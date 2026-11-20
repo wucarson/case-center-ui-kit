@@ -2258,8 +2258,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const SH_L = shOval(SH_LC[0], false), SH_R = shOval(SH_LC[1], false);   // 兩片同一個繞行方向：重疊處是聯集（不是洞）
     const shD = (pts) => pts.map(([m, c, e]) => (m ? `M${m[0].toFixed(2)} ${m[1].toFixed(2)}` : '') + `Q${c[0].toFixed(2)} ${c[1].toFixed(2)} ${e[0].toFixed(2)} ${e[1].toFixed(2)}`).join('') + 'Z';
     /* 深淺色轉場（方塊 Grid tiles，約 0.8 秒）：畫面切成約 48px 的格子，從切換按鈕開始依距離往外一格格擴散；
-       每格的新畫面從格子中心由 0 長到滿格，長的同時被震波擠壓變形：先順著震波方向拉長、垂直方向壓扁，再反過來壓扁一下，
-       長滿時剛好回正（震波在長出來的這一段就結束，之後不再晃動）。做法：新畫面快照的 clip-path 是所有格子的聯集，
+       每格的新畫面從格子中心由 0 長到滿格，長的同時被水面漣漪帶動變形：一圈圈波峰、波谷從按鈕往外傳（波長約 170px、週期約 0.26 秒），
+       波峰處的格子順著漣漪方向拉長、往外推，波谷處壓扁、往回收，相鄰幾圈一拉一壓形成節奏；
+       長滿時變形歸零（漣漪在長出來的這一段就結束，之後不再晃動）。做法：新畫面快照的 clip-path 是所有格子的聯集，
        預先算 40 個關鍵影格（每格的大小），交給 WAAPI 在影格之間內插。不支援 View Transitions 或減少動態效果時直接切換 */
     function tilesSwap(next, apply, from) {
       if (shBusy) return;
@@ -2267,13 +2268,15 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const Wv = innerWidth, Hv = innerHeight, cols = Math.ceil(Wv / 48), rows = Math.ceil(Hv / 48), tw = Wv / cols, th = Hv / rows;
       const r = from?.getBoundingClientRect(), ox = r ? r.left + r.width / 2 : Wv, oy = r ? r.top + r.height / 2 : 0;
       const tiles = []; let maxD = 1;
-      for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) { const cx = (i + 0.5) * tw, cy = (j + 0.5) * th, d = Math.hypot(cx - ox, cy - oy); maxD = Math.max(maxD, d); tiles.push([cx, cy, d, Math.abs(cx - ox) / (d || 1) - Math.abs(cy - oy) / (d || 1)]); }   // 最後一項：震波方向偏水平（+）或偏垂直（−）
+      for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) { const cx = (i + 0.5) * tw, cy = (j + 0.5) * th, d = Math.hypot(cx - ox, cy - oy); maxD = Math.max(maxD, d); tiles.push([cx, cy, d, (cx - ox) / (d || 1), (cy - oy) / (d || 1)]); }   // 後兩項：漣漪方向（單位向量）
       const DUR = 800, LEN = 400, SPAN = DUR - LEN, N = 40;
       const ease = (t) => 1 - Math.pow(1 - t, 3);
-      // 擠壓變形量：前半段順著震波方向拉長（+），後半段反過來壓扁（−），長滿時歸零
-      const squash = (t) => 0.45 * Math.sin(t * Math.PI * 2) * (1 - t);
+      const LAMBDA = 170, PERIOD = 260;   // 漣漪：波長（px）、週期（ms）
       const kf = Array.from({ length: N + 1 }, (_, k) => { const now = (k / N) * DUR;
-        const d = tiles.map(([cx, cy, dist, dir]) => { const p = Math.min(1, Math.max(0, (now - (dist / maxD) * SPAN) / LEN)), e = ease(p), q = squash(p) * (dir >= 0 ? 1 : -1) * Math.max(0.35, Math.abs(dir)),
+        const d = tiles.map(([cx0, cy0, dist, ux, uy]) => { const p = Math.min(1, Math.max(0, (now - (dist / maxD) * SPAN) / LEN)), e = ease(p),
+            wave = Math.sin((dist / LAMBDA - now / PERIOD) * Math.PI * 2), amp = Math.sin(p * Math.PI) * (1 - p * 0.4),   // 剛冒出與長滿時為 0
+            q = 0.28 * wave * amp * (Math.abs(ux) >= Math.abs(uy) ? 1 : -1),   // 拉長的軸：漣漪偏水平拉寬、偏垂直拉高
+            push = 7 * wave * amp, cx = cx0 + ux * push, cy = cy0 + uy * push,   // 波峰往外推、波谷往回收
             hw = (tw / 2 + 1.5) * e * (1 + q), hh = (th / 2 + 1.5) * e * (1 - q);   // 每邊多 1.5px：相鄰格子重疊，長滿時不露格線
           return `M${(cx - hw).toFixed(1)} ${(cy - hh).toFixed(1)}H${(cx + hw).toFixed(1)}V${(cy + hh).toFixed(1)}H${(cx - hw).toFixed(1)}Z`; }).join('');
         return { offset: k / N, clipPath: `path("${d}")` }; });

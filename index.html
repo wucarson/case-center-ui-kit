@@ -1767,13 +1767,13 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
    數值用等寬數字（儀表讀數）。不用左側垂直色條。 */
 .cz {
   --ev-glass: color-mix(in srgb, var(--surface) 76%, transparent);
-  --ev-cell: color-mix(in srgb, var(--ink) 3.5%, transparent);
-  --ev-line: color-mix(in srgb, var(--ink) 9%, transparent);
-  --ev-line-2: color-mix(in srgb, var(--ink) 16%, transparent);
+  --ev-cell: color-mix(in srgb, var(--ink) 6.5%, transparent);   /* 選項區塊：加深對比 */
+  --ev-line: color-mix(in srgb, var(--ink) 13%, transparent);
+  --ev-line-2: color-mix(in srgb, var(--ink) 24%, transparent);
   --ev-dim: color-mix(in srgb, var(--ink) 50%, transparent);
   --ev-acc: var(--primary);
   --ev-glow: color-mix(in srgb, var(--primary) 42%, transparent);
-  --ev-sel: color-mix(in srgb, var(--primary) 9%, transparent);
+  --ev-sel: color-mix(in srgb, var(--primary) 14%, transparent);
   --ev-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
   top: 24px; right: 24px; bottom: 24px; width: 380px; max-width: calc(100% - 48px);
   border: 1px solid var(--ev-line-2); border-radius: 22px; overflow: hidden;
@@ -1783,14 +1783,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .cz {
-    --ev-glass: color-mix(in srgb, #070b14 74%, transparent); --ev-cell: rgb(255 255 255 / .035); --ev-line: rgb(255 255 255 / .08); --ev-line-2: rgb(255 255 255 / .14); --ev-dim: rgb(255 255 255 / .5);
-    --ev-glow: color-mix(in srgb, var(--primary) 60%, transparent); --ev-sel: color-mix(in srgb, var(--primary) 14%, transparent);
+    --ev-glass: color-mix(in srgb, color-mix(in srgb, var(--page) 70%, #000) 76%, transparent); --ev-cell: rgb(255 255 255 / .07); --ev-line: rgb(255 255 255 / .13); --ev-line-2: rgb(255 255 255 / .22); --ev-dim: rgb(255 255 255 / .6);
+    --ev-glow: color-mix(in srgb, var(--primary) 60%, transparent); --ev-sel: color-mix(in srgb, var(--primary) 22%, transparent);
     box-shadow: 0 30px 80px -24px rgb(0 0 0 / .7), inset 0 1px 0 rgb(255 255 255 / .07), 0 0 0 1px color-mix(in srgb, var(--primary) 14%, transparent);
   }
 }
 :root[data-theme="dark"] .cz {
-  --ev-glass: color-mix(in srgb, #070b14 74%, transparent); --ev-cell: rgb(255 255 255 / .035); --ev-line: rgb(255 255 255 / .08); --ev-line-2: rgb(255 255 255 / .14); --ev-dim: rgb(255 255 255 / .5);
-  --ev-glow: color-mix(in srgb, var(--primary) 60%, transparent); --ev-sel: color-mix(in srgb, var(--primary) 14%, transparent);
+  --ev-glass: color-mix(in srgb, color-mix(in srgb, var(--page) 70%, #000) 76%, transparent); --ev-cell: rgb(255 255 255 / .07); --ev-line: rgb(255 255 255 / .13); --ev-line-2: rgb(255 255 255 / .22); --ev-dim: rgb(255 255 255 / .6);
+  --ev-glow: color-mix(in srgb, var(--primary) 60%, transparent); --ev-sel: color-mix(in srgb, var(--primary) 22%, transparent);
   box-shadow: 0 30px 80px -24px rgb(0 0 0 / .7), inset 0 1px 0 rgb(255 255 255 / .07), 0 0 0 1px color-mix(in srgb, var(--primary) 14%, transparent);
 }
 @media (max-width: 760px) {
@@ -4227,10 +4227,11 @@ void main(){
     styleEl.id = 'theme-vars';
     // 放在 body 最後：claude.ai 會把頁面包進 <body>，原本的樣式表也在 body 裡；覆寫要排在它後面才會贏
     document.body.appendChild(styleEl);
-    // 外觀設定只作用在元件牆：設定面板（.cz）重新宣告樣式表原本的預設變數，主題引擎與風格寫在 :root 的覆寫傳不進去
+    // 外觀設定只作用在元件牆：設定面板（.cz）重新宣告樣式表原本的預設變數，主題引擎與風格寫在 :root 的覆寫傳不進去（底色類除外）
     {
       const light = [], dark = [];
-      const take = (st, out) => { for (const k of st) if (k.startsWith('--')) out.push(`${k}: ${st.getPropertyValue(k).trim()};`); };
+      const FOLLOW = new Set(['--page', '--surface', '--soft', '--hover']);   // 底色類跟著外觀切換同步，其餘維持面板自己的預設
+      const take = (st, out) => { for (const k of st) if (k.startsWith('--') && !FOLLOW.has(k)) out.push(`${k}: ${st.getPropertyValue(k).trim()};`); };
       for (const sh of document.styleSheets) {
         if (sh.ownerNode === styleEl) continue;
         let rules; try { rules = sh.cssRules; } catch (e) { continue; }

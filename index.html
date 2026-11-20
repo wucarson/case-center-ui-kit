@@ -2260,10 +2260,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       return pts; };
     const SH_L = shOval(SH_LC[0], false), SH_R = shOval(SH_LC[1], false);   // 兩片同一個繞行方向：重疊處是聯集（不是洞）
     const shD = (pts) => pts.map(([m, c, e]) => (m ? `M${m[0].toFixed(2)} ${m[1].toFixed(2)}` : '') + `Q${c[0].toFixed(2)} ${c[1].toFixed(2)} ${e[0].toFixed(2)} ${e[1].toFixed(2)}`).join('') + 'Z';
-    /* 深淺色轉場（亂刀，約 1.1 秒）：5 刀白色刀光依序亂向劃過畫面，把畫面切成大小不一的碎塊，最後碎塊從中央往外炸開，露出新版面
+    /* 深淺色轉場（亂刀，約 1.1 秒）：5 刀白色刀光依序劃過畫面（固定刀位），把畫面切成大小不一的碎塊，最後碎塊從中央往外炸開，露出新版面
        · 做法：把目前畫面（.shell）複製到每一塊碎片裡（碎片用 clip-path 多邊形裁切，聯集剛好是整個畫面），蓋在最上層後立刻切換深淺色；
          複製品帶著切換前的顏色變數，所以碎片保持舊配色。刀光結束後碎片各自往外飛、旋轉、縮小淡出，底下就是新版面
-       · 前 3 刀真的切開畫面（碎片最多 7 塊，數量少才流暢），後 2 刀只有刀光
+       · 前 3 刀真的切開畫面（碎片固定 5 塊），後 2 刀只有刀光
        · 減少動態效果時直接切換 */
     function slashSwap(next, apply) {
       if (shBusy) return;
@@ -2271,9 +2271,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       if (matchMedia('(prefers-reduced-motion: reduce)').matches || !shell) { apply(); return; }
       shBusy = true;
       const W = innerWidth, H = innerHeight, cx = W / 2, cy = H / 2, de = document.documentElement;
-      // 刀線：通過畫面中間 60% 的隨機點、隨機角度（避免太接近前一刀）
-      const cuts = []; let lastA = Math.random() * Math.PI;
-      for (let i = 0; i < 5; i++) { const a = lastA + (0.5 + Math.random() * 1.6); lastA = a; cuts.push({ px: W * (0.2 + Math.random() * 0.6), py: H * (0.2 + Math.random() * 0.6), dx: Math.cos(a), dy: Math.sin(a) }); }
+      // 刀線固定（以畫面比例表示）：碎片固定 5 塊，每次卡頓程度一致，構圖也事先調好
+      //   1 長斜刀橫過畫面 → 2 陡刀與第 1 刀交叉（4 塊）→ 3 切掉右下角（5 塊）；4、5 只有刀光
+      const seg = (x1, y1, x2, y2) => { const dx = (x2 - x1) * W, dy = (y2 - y1) * H, d = Math.hypot(dx, dy); return { px: x1 * W, py: y1 * H, dx: dx / d, dy: dy / d }; };
+      const cuts = [seg(0, 0.32, 1, 0.66), seg(0.63, 0, 0.36, 1), seg(1, 0.76, 0.7, 1), seg(0.08, 0, 0.3, 0.42), seg(0.55, 1, 1, 0.82)];
       // 用前 3 刀把畫面矩形一路切開（凸多邊形對直線切割）
       let polys = [[[0, 0], [W, 0], [W, H], [0, H]]];
       const side = (c, [x, y]) => c.dx * (y - c.py) - c.dy * (x - c.px);

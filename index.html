@@ -2319,16 +2319,15 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     function run(layer, cuts, pieces, cx, cy, W, H) {
       const DRAW = 70, HOLD = 35, GAP = 5, STEP = DRAW + HOLD + GAP;
       const HIT = cuts.map((_, i) => i * STEP + DRAW), CUT_END = HIT[HIT.length - 1] + HOLD + 20, CHARGE = 70, TOTAL = 1000, FLY = TOTAL - CUT_END - CHARGE;
-      // 刀光：劃到底（70ms）→ 刀口的光一直留著 → 炸開那一刻亮一下，跟著碎片散掉
+      // 刀光：劃到底（70ms）→ 刀口的光一直留著 → 炸開瞬間 80ms 內淡掉（不加亮、不留殘影）
       const BOOM = CUT_END + CHARGE;
-      layer.querySelectorAll('.slash-lines line').forEach((ln, i) => { const st = i * STEP, len = BOOM + 160 - st;
+      layer.querySelectorAll('.slash-lines line').forEach((ln, i) => { const st = i * STEP, len = BOOM + 80 - st;
         ln.animate([
           { strokeDashoffset: 1, opacity: 1, strokeWidth: 5, easing: 'cubic-bezier(.3, .7, .3, 1)' },
           { strokeDashoffset: 0, opacity: 1, strokeWidth: 3.5, offset: DRAW / len },
           { strokeDashoffset: 0, opacity: 0.85, strokeWidth: 2, offset: (DRAW + HOLD) / len },
-          { strokeDashoffset: 0, opacity: 0.85, strokeWidth: 2, offset: (BOOM - st) / len, easing: 'cubic-bezier(.2, .8, .3, 1)' },
-          { strokeDashoffset: 0, opacity: 1, strokeWidth: 5, offset: (BOOM + 40 - st) / len, easing: 'ease-in' },
-          { strokeDashoffset: 0, opacity: 0, strokeWidth: 1 }],
+          { strokeDashoffset: 0, opacity: 0.85, strokeWidth: 2, offset: (BOOM - st) / len, easing: 'ease-out' },
+          { strokeDashoffset: 0, opacity: 0, strokeWidth: 2 }],
           { duration: len, delay: st, fill: 'both' }); });
       pieces.forEach(({ el, gx, gy }) => {
         const vx = gx - cx, vy = gy - cy, d = Math.hypot(vx, vy) || 1, ux = vx / d, uy = vy / d, dist = 0.6 * Math.max(W, H) + Math.random() * 200, rot = (Math.random() - 0.5) * 60;

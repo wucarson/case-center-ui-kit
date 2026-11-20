@@ -1501,8 +1501,8 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="neu"] :is(.btn, .top-a .ctl) { box-shadow: var(--raise); }
 :root[data-ui="neu"] .cell:hover { transform: none; }
 /* 卡片內緣：左上受光亮邊＋右下微暗，做出鼓起的立體感 */
-:root[data-ui="neu"] .cell { border: 0; padding: 17px 19px 19px; --neu-in: inset 3px 3px 6px var(--neu-hi), inset -3px -3px 5.6px color-mix(in srgb, var(--neu-lo) 35%, transparent); box-shadow: -3px -3px 6px var(--neu-hi), 6px 6px 8px 2px var(--neu-lo), var(--neu-in); }   /* 內亮與外亮同色同模糊、去掉 1px 邊框間隙，左上無縫接起來 */
-:root[data-ui="neu"] .cell:hover { box-shadow: -5px -5px 8.4px var(--neu-hi), 8px 8px 10.4px 2px var(--neu-lo), var(--neu-in); }   /* 外暗：平時 6px 偏移、8px 模糊、擴張 2px；滑過再遠一點 */
+:root[data-ui="neu"] .cell { border: 0; padding: 17px 19px 19px; --neu-in: inset 3px 3px 6px var(--neu-hi), inset -3px -3px 5.6px color-mix(in srgb, var(--neu-lo) 35%, transparent); box-shadow: -6px -6px 8px 2px var(--neu-hi), 6px 6px 8px 2px var(--neu-lo), var(--neu-in); }   /* 內亮與外亮同色同模糊、去掉 1px 邊框間隙，左上無縫接起來 */
+:root[data-ui="neu"] .cell:hover { box-shadow: -8px -8px 10.4px 2px var(--neu-hi), 8px 8px 10.4px 2px var(--neu-lo), var(--neu-in); }   /* 外亮／外暗對稱：平時 6px 偏移、8px 模糊、擴張 2px；滑過再遠一點 */
 
 /* Swiss Style：無陰影、直角，卡片上方一條粗實線；Helvetica 系字型、標題加粗收字距、英文標示大寫 */
 :root[data-ui="swiss"], :root[data-theme="dark"][data-ui="swiss"], :root:not([data-theme="light"])[data-ui="swiss"] {

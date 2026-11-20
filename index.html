@@ -1709,9 +1709,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .nox .wand-tip { background: radial-gradient(circle, #fff 0 18%, rgb(200 220 255 / .7) 40%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 14px 4px rgb(200 220 255 / .45); }
 .wand-spiral, .wand-word { position: absolute; inset: 0; overflow: visible; }
 .wand-spiral path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.wand-spiral .sp-band { stroke-width: 34; stroke-opacity: .2; }   /* 交界的柔光帶：遮住裁切硬邊、像微柔邊 */
-.wand-spiral .sp-head.halo { stroke-width: 16; stroke-opacity: .35; }
-.wand-spiral .sp-head:not(.halo) { stroke-width: 4; }
+.wand-spiral .sp-band { stroke-width: 30; stroke-opacity: .1; }   /* 交界的柔光帶：遮住裁切硬邊、像微柔邊 */
+.wand-spiral .sp-head.halo { stroke-width: 14; stroke-opacity: .18; }
+.wand-spiral .sp-head:not(.halo) { stroke-width: 2.5; stroke-opacity: .7; }
+.wand-haze { position: fixed; inset: 0; z-index: 150; pointer-events: none; clip-path: polygon(0 0, 0 0, 0 0); }   /* 高溫霧化帶（clip-path 由動畫給） */
 .lumos .wand-spiral path { stroke: #ffd36b; }
 .lumos .wand-spiral .sp-head:not(.halo) { stroke: #fff4cf; }
 .nox .wand-spiral path { stroke: #8aa4ff; }
@@ -2585,7 +2586,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const de = document.documentElement;
       de.classList.add('vt-wand', lumos ? 'vt-lumos' : 'vt-nox');
       shBusy = true;
-      const vt = document.startViewTransition(() => { apply(); document.body.append(fx); });
+      // 高溫霧化：兩層（濃：緊跟交界、模糊 12px；淡：拖在後面、模糊 5px），只在指針剛掃過的扇形帶裡
+      const hazes = (lumos ? [[12, 1.06, 0.38], [5, 1.03, 0.95]] : [[12, 1.28, 0.38], [5, 1.12, 0.95]]).map(([bl, br, span]) => { const h = document.createElement('div'); h.className = 'wand-haze'; h.setAttribute('aria-hidden', 'true');
+        h.style.cssText = `-webkit-backdrop-filter:blur(${bl}px) brightness(${br}) saturate(1.15);backdrop-filter:blur(${bl}px) brightness(${br}) saturate(1.15)`; h._span = span; return h; });
+      const vt = document.startViewTransition(() => { apply(); hazes.forEach((h) => document.body.append(h)); document.body.append(fx); });
       vt.ready.then(() => {
         // 時間軸：0–0.33 秒魔杖伸入 → 0.43 秒杖尖點下施咒 → 螺旋光軌從中心逆時針擴散、掉落星耀；同時暈開／收合、咒語描寫
         const DUR = 1500, C0 = 330, HIT = 430, SPIN = 820, PT = (t) => Math.round(HIT + t * SPIN);
@@ -2600,6 +2604,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         // 光軌壓在新舊交界：一整圈的柔光帶（遮住裁切硬邊）＋前端的彗星亮頭
         fx.querySelector('.sp-band').animate(frames.map((fr) => ({ offset: fr.k / NK, d: `path("${pstr(fr.edge)}")` })), { duration: SPIN, delay: HIT, easing: 'linear', fill: 'both' });
         fx.querySelectorAll('.sp-head').forEach((el) => el.animate(frames.map((fr) => ({ offset: fr.k / NK, d: `path("${pstr(fr.head)}")` })), { duration: SPIN, delay: HIT, easing: 'linear', fill: 'both' }));
+        // 霧化帶：指針剛掃過的扇形（外緣是這次掃到的螺旋、內緣是上一圈），Lumos 拖在 φ 之後、Nox 拖在 φ 之前
+        const ring = (a0, a1, n) => { if (a1 - a0 < 1e-3) a1 = a0 + 1e-3; const o = arc(a0, a1, n), inn = Array.from({ length: n + 1 }, (_, i) => { const a = a1 - (a1 - a0) * i / n, r = KR * Math.max(0, a - Math.PI * 2); return [C[0] + Math.cos(TH0 + SG * a) * r, C[1] + Math.sin(TH0 + SG * a) * r]; });
+          return 'path("' + pstr(o.concat(inn)) + 'Z")'; };
+        hazes.forEach((h) => h.animate(frames.map((fr) => { const a0 = lumos ? Math.max(0, fr.ph - h._span) : fr.ph, a1 = lumos ? fr.ph : Math.min(PHI, fr.ph + h._span);
+          return { offset: fr.k / NK, clipPath: ring(a0, a1, 22) }; }), { duration: SPIN, delay: HIT, easing: 'linear', fill: 'both' }));
         fx.querySelector('.wand-spiral').animate([{ opacity: 0 }, { opacity: 1, offset: 0.06 }, { opacity: 1, offset: 0.88 }, { opacity: 0 }], { duration: SPIN, delay: HIT, fill: 'both' });
         // 魔杖：沿杖身方向從畫面外伸入 → 點下施咒 → 縮回
         const wand = fx.querySelector('.wand'), out = WL * 0.75, rad = th * Math.PI / 180, ox = Math.cos(rad) * out, oy = Math.sin(rad) * out;
@@ -2649,7 +2658,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           fx.querySelector('.ww-shine').animate([{ opacity: 0 }, { opacity: 1, offset: 0.1 }, { opacity: 1, offset: 0.9 }, { opacity: 0 }], { duration: 520, delay: HIT + 380, fill: 'both' });
         }
       }).catch(() => {});
-      vt.finished.finally(() => { fx.remove(); de.classList.remove('vt-wand', 'vt-lumos', 'vt-nox'); shBusy = false; });
+      vt.finished.finally(() => { fx.remove(); hazes.forEach((h) => h.remove()); de.classList.remove('vt-wand', 'vt-lumos', 'vt-nox'); shBusy = false; });
     }
     let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途
     function shadesSwap(next, apply) {

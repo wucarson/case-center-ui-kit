@@ -2315,17 +2315,21 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       // 換配色的重算很重：等兩個畫格（重算完成）才開始動畫，時間軸才不會一開始就被吃掉
       requestAnimationFrame(() => requestAnimationFrame(() => run(layer, cuts, pieces, cx, cy, W, H)));
     }
-    /* 打擊感：① 每刀劃到底時停頓 35ms（卡肉）② 炸開前碎片先往內縮（蓄力 70ms），再猛力往外炸。全長 1 秒 */
+    /* 打擊感：① 每刀劃到底時停頓 35ms（卡肉），刀口的光保留到炸開 ② 炸開前碎片先往內縮（蓄力 70ms），再猛力往外炸。全長 1 秒 */
     function run(layer, cuts, pieces, cx, cy, W, H) {
-      const DRAW = 70, HOLD = 35, GAP = 5, STEP = DRAW + HOLD + GAP, LINE = 170;
+      const DRAW = 70, HOLD = 35, GAP = 5, STEP = DRAW + HOLD + GAP;
       const HIT = cuts.map((_, i) => i * STEP + DRAW), CUT_END = HIT[HIT.length - 1] + HOLD + 20, CHARGE = 70, TOTAL = 1000, FLY = TOTAL - CUT_END - CHARGE;
-      // 刀光：劃到底（70ms）→ 停住（35ms）→ 淡掉
-      layer.querySelectorAll('.slash-lines line').forEach((ln, i) => ln.animate([
-        { strokeDashoffset: 1, opacity: 1, strokeWidth: 5, easing: 'cubic-bezier(.3, .7, .3, 1)' },
-        { strokeDashoffset: 0, opacity: 1, strokeWidth: 3.5, offset: DRAW / LINE },
-        { strokeDashoffset: 0, opacity: 1, strokeWidth: 3, offset: (DRAW + HOLD) / LINE, easing: 'ease-in' },
-        { strokeDashoffset: 0, opacity: 0, strokeWidth: 1 }],
-        { duration: LINE, delay: i * STEP, fill: 'both' }));
+      // 刀光：劃到底（70ms）→ 刀口的光一直留著 → 炸開那一刻亮一下，跟著碎片散掉
+      const BOOM = CUT_END + CHARGE;
+      layer.querySelectorAll('.slash-lines line').forEach((ln, i) => { const st = i * STEP, len = BOOM + 160 - st;
+        ln.animate([
+          { strokeDashoffset: 1, opacity: 1, strokeWidth: 5, easing: 'cubic-bezier(.3, .7, .3, 1)' },
+          { strokeDashoffset: 0, opacity: 1, strokeWidth: 3.5, offset: DRAW / len },
+          { strokeDashoffset: 0, opacity: 0.85, strokeWidth: 2, offset: (DRAW + HOLD) / len },
+          { strokeDashoffset: 0, opacity: 0.85, strokeWidth: 2, offset: (BOOM - st) / len, easing: 'cubic-bezier(.2, .8, .3, 1)' },
+          { strokeDashoffset: 0, opacity: 1, strokeWidth: 5, offset: (BOOM + 40 - st) / len, easing: 'ease-in' },
+          { strokeDashoffset: 0, opacity: 0, strokeWidth: 1 }],
+          { duration: len, delay: st, fill: 'both' }); });
       pieces.forEach(({ el, gx, gy }) => {
         const vx = gx - cx, vy = gy - cy, d = Math.hypot(vx, vy) || 1, ux = vx / d, uy = vy / d, dist = 0.6 * Math.max(W, H) + Math.random() * 200, rot = (Math.random() - 0.5) * 60;
         const kf = [{ offset: 0, transform: 'none', opacity: 1 }];

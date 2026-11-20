@@ -1811,7 +1811,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz.cz .cz-pane button[aria-selected="true"] { background: var(--ev-cell); color: var(--ink); box-shadow: inset 0 0 0 1px var(--ev-line-2); }
 
 /* 內容：細線分區，不用灰底區塊 */
-.cz .cz-body { background: transparent; padding: 14px 14px 24px; }
+.cz .cz-body { background: transparent; padding: 14px 14px 24px; scrollbar-width: none; }   /* 照常捲動，不顯示捲動軸 */
+.cz .cz-body::-webkit-scrollbar { display: none; }
 .cz.cz .cz-blk { background: transparent; border: 1px solid var(--ev-line); border-radius: 16px; }
 .cz.cz .cz-q { grid-template-columns: minmax(0, 1fr); gap: 10px; }
 .cz.cz .cz-q > * { grid-column: 1; }

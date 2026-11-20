@@ -1713,16 +1713,20 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .wand-spiral path { fill: none; stroke-linecap: round; }
 .wand-spiral .sp-core { stroke-width: 5; stroke-dasharray: .16 1.2; stroke-dashoffset: .16; }   /* 彗星亮頭 */
 .wand-spiral .sp-glow { stroke-width: 2; stroke-dasharray: 1; stroke-dashoffset: 1; }   /* 留下的光軌 */
-.lumos .wand-spiral path { stroke: #ffd36b; filter: drop-shadow(0 0 4px #ffe7a6) drop-shadow(0 0 12px rgb(255 200 90 / .75)); }
-.nox .wand-spiral path { stroke: #8aa4ff; filter: drop-shadow(0 0 4px #c3d2ff) drop-shadow(0 0 12px rgb(120 150 255 / .65)); }
+.wand-spiral .sp-glow { opacity: .55; }
+.wand-spiral .sp-core.halo { stroke-width: 18; stroke-opacity: .22; }   /* 光暈：粗的半透明同色線（不用濾鏡，每格不必重算） */
+.wand-spiral .sp-glow.halo { stroke-width: 9; stroke-opacity: .2; }
+.lumos .wand-spiral path { stroke: #ffd36b; }
+.lumos .wand-spiral .sp-core:not(.halo) { stroke: #fff2c6; }
+.nox .wand-spiral path { stroke: #8aa4ff; }
+.nox .wand-spiral .sp-core:not(.halo) { stroke: #e3eaff; }
 .wand-word text { font-family: Cinzel, 'Trajan Pro', 'Times New Roman', serif; font-weight: 700; fill: url(#ww-fill); fill-opacity: 0; stroke-width: 1.4; stroke-dasharray: 1; stroke-dashoffset: 1; paint-order: stroke; transform-box: fill-box; transform-origin: center; }
 .wand-word .ww-l { stroke-dasharray: 600; stroke-dashoffset: 600; }
 .wand-word .ww-s { fill: #fffbe8; fill-opacity: 1; stroke: none; }
 .wand-word .ww-shine { opacity: 0; mix-blend-mode: screen; }
-.lumos .wand-word .ww-l { stroke: #ffe9a8; }
-.nox .wand-word .ww-l { stroke: #e2eaff; }
-.lumos .ww-main { filter: drop-shadow(0 0 10px rgb(255 205 100 / .75)) drop-shadow(0 2px 2px rgb(70 45 10 / .55)); }
-.nox .ww-main { filter: drop-shadow(0 0 12px rgb(150 180 255 / .6)) drop-shadow(0 2px 3px rgb(0 0 0 / .55)); }
+.lumos .wand-word .ww-l { stroke: #b07a22; }
+.nox .wand-word .ww-l { stroke: #c7d3f2; }
+.wand-word .ww-glow { opacity: 0; }   /* 字後面的柔光（靜態漸層，只動透明度） */
 .wand-star { position: absolute; clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%); will-change: transform, opacity; }   /* 四芒星 */
 .lumos .wand-star { background: radial-gradient(circle, #fff 0 22%, #ffd36b 55%, #f0a92e 100%); }
 .nox .wand-star { background: radial-gradient(circle, #fff 0 22%, #9fb4ff 55%, #5a74e6 100%); }   /* 中心白、外圈帶色，淺色底上也看得到 */
@@ -2554,9 +2558,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const SN = 140, SR = Math.hypot(W, H) / 2 + 60, spiral = Array.from({ length: SN + 1 }, (_, k) => { const t = k / SN, a = -t * Math.PI * 3 - Math.PI / 2, r = SR * Math.pow(t, 0.85); return [C[0] + Math.cos(a) * r, C[1] + Math.sin(a) * r]; });
       const spD = 'M' + spiral.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join('L');
       // 光軌掉落的星耀：沿螺旋取點，光軌經過時從那裡掉落
-      const sheds = Array.from({ length: 30 }, (_, i) => { const k = Math.round(((i + 0.5) / 30) * SN), sz = 9 + Math.random() * 15;
+      const sheds = Array.from({ length: 20 }, (_, i) => { const k = Math.round(((i + 0.5) / 20) * SN), sz = 9 + Math.random() * 15;
         return { k, html: `<i class="wand-star shed" style="left:${(spiral[k][0] - sz / 2).toFixed(0)}px;top:${(spiral[k][1] - sz / 2).toFixed(0)}px;width:${sz.toFixed(0)}px;height:${sz.toFixed(0)}px"></i>` }; });
-      const twinkles = Array.from({ length: 22 }, () => { const sz = 10 + Math.random() * 20; return `<i class="wand-star tw" style="left:${(Math.random() * W).toFixed(0)}px;top:${(Math.random() * H).toFixed(0)}px;width:${sz.toFixed(0)}px;height:${sz.toFixed(0)}px"></i>`; }).join('');
+      const twinkles = Array.from({ length: 10 }, () => { const sz = 10 + Math.random() * 20; return `<i class="wand-star tw" style="left:${(Math.random() * W).toFixed(0)}px;top:${(Math.random() * H).toFixed(0)}px;width:${sz.toFixed(0)}px;height:${sz.toFixed(0)}px"></i>`; }).join('');
       // 咒語：每個字母一個 SVG 文字（先描邊再填色），用畫布量字寬排位置
       const word = lumos ? 'Lumos' : 'Nox', FS = Math.min(112, Math.max(52, W * 0.08)), GAP = FS * 0.08;
       const ctx = document.createElement('canvas').getContext('2d'); ctx.font = `700 ${FS}px Cinzel, 'Trajan Pro', 'Times New Roman', serif`;
@@ -2564,7 +2568,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       let cur = C[0] - total / 2; const xs = ws.map((w) => { const x = cur + w / 2; cur += w + GAP; return x; });
       const letters = (cls) => [...word].map((ch, i) => `<text class="${cls}" x="${xs[i].toFixed(1)}" y="${C[1]}" text-anchor="middle" dominant-baseline="central">${ch}</text>`).join('');
       const fx = document.createElement('div'); fx.className = 'wand-fx' + (lumos ? ' lumos' : ' nox'); fx.setAttribute('aria-hidden', 'true');
-      fx.innerHTML = `<svg class="wand-spiral" width="${W}" height="${H}" style="transform-origin:${C[0]}px ${C[1]}px"><path class="sp-glow" pathLength="1" d="${spD}"/><path class="sp-core" pathLength="1" d="${spD}"/></svg>
+      fx.innerHTML = `<svg class="wand-spiral" width="${W}" height="${H}" style="transform-origin:${C[0]}px ${C[1]}px"><path class="sp-glow halo" pathLength="1" d="${spD}"/><path class="sp-glow" pathLength="1" d="${spD}"/><path class="sp-core halo" pathLength="1" d="${spD}"/><path class="sp-core" pathLength="1" d="${spD}"/></svg>
         ${sheds.map((x) => x.html).join('')}${twinkles}
         <div class="wand-halo" style="left:${C[0]}px;top:${C[1]}px"></div>
         <div class="wand" style="left:${tip[0]}px;top:${(tip[1] - WH / 2).toFixed(1)}px;width:${WL.toFixed(0)}px;height:${WH.toFixed(1)}px;transform:rotate(${th}deg)">${ELDER}<i class="wand-tip"></i></div>
@@ -2572,9 +2576,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           <linearGradient id="ww-fill" x1="0" y1="${(C[1] - FS * 0.45).toFixed(0)}" x2="0" y2="${(C[1] + FS * 0.45).toFixed(0)}" gradientUnits="userSpaceOnUse">${lumos
             ? '<stop offset="0" stop-color="#fff6d2"/><stop offset=".45" stop-color="#f3c75e"/><stop offset=".55" stop-color="#d9a13c"/><stop offset="1" stop-color="#8e5f18"/>'
             : '<stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#cdd5e4"/><stop offset="1" stop-color="#8994aa"/>'}</linearGradient>
+          <radialGradient id="ww-g">${lumos ? '<stop offset="0" stop-color="#ffcf6a" stop-opacity=".55"/><stop offset=".55" stop-color="#ffb84a" stop-opacity=".18"/><stop offset="1" stop-color="#ffb84a" stop-opacity="0"/>' : '<stop offset="0" stop-color="#9db4ff" stop-opacity=".5"/><stop offset=".55" stop-color="#6f8cff" stop-opacity=".16"/><stop offset="1" stop-color="#6f8cff" stop-opacity="0"/>'}</radialGradient>
           <linearGradient id="ww-hl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
           <mask id="ww-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect class="ww-sweep" x="${(C[0] - total / 2 - 160).toFixed(0)}" y="0" width="140" height="${H}" fill="url(#ww-hl)"/></mask></defs>
-          <g class="ww-main">${letters('ww-l')}</g>${lumos ? `<g class="ww-shine" mask="url(#ww-mask)">${letters('ww-s')}</g>` : ''}</svg>`;
+          <ellipse class="ww-glow" cx="${C[0]}" cy="${C[1]}" rx="${(total / 2 + FS * 0.7).toFixed(0)}" ry="${(FS * 0.85).toFixed(0)}" fill="url(#ww-g)"/><g class="ww-main">${letters('ww-l')}</g>${lumos ? `<g class="ww-shine" mask="url(#ww-mask)">${letters('ww-s')}</g>` : ''}</svg>`;
       const de = document.documentElement;
       de.classList.add('vt-wand', lumos ? 'vt-lumos' : 'vt-nox');
       shBusy = true;
@@ -2603,8 +2608,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           { offset: 1, transform: T(1.05, 8) }], { duration: DUR, fill: 'both' });
         // 螺旋光軌：亮頭（彗星段）從中心沿螺旋往外跑，後面留下漸淡的光軌；整組同時逆時針轉一點
         const sp = { duration: SPIN, delay: HIT, easing: 'linear', fill: 'both' };
-        fx.querySelector('.sp-core').animate([{ strokeDashoffset: 0.16 }, { strokeDashoffset: -1 }], sp);
-        fx.querySelector('.sp-glow').animate([{ strokeDashoffset: 1, opacity: 0.55 }, { strokeDashoffset: 0, opacity: 0.4, offset: 0.85 }, { strokeDashoffset: 0, opacity: 0 }], { ...sp, duration: SPIN + 160 });
+        fx.querySelectorAll('.sp-core').forEach((el) => el.animate([{ strokeDashoffset: 0.16 }, { strokeDashoffset: -1 }], sp));
+        fx.querySelectorAll('.sp-glow').forEach((el) => el.animate([{ strokeDashoffset: 1, opacity: 1 }, { strokeDashoffset: 0, opacity: 0.75, offset: 0.85 }, { strokeDashoffset: 0, opacity: 0 }], { ...sp, duration: SPIN + 160 }));
         fx.querySelector('.wand-spiral').animate([{ transform: 'rotate(0deg)' }, { transform: 'rotate(-24deg)' }], { ...sp, duration: SPIN + 160, easing: 'cubic-bezier(.3, .5, .4, 1)' });
         // 掉落星耀：亮頭經過時從光軌上掉下（往下墜、閃一下、旋轉淡出）
         sheds.forEach(({ k }, i) => fx.querySelectorAll('.wand-star.shed')[i].animate([
@@ -2635,6 +2640,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
             { offset: 1, opacity: 0, transform: lumos ? `translate(${((i - mid) * FS * 0.22).toFixed(1)}px, -16px)` : `translateX(${((mid - i) * FS * 0.3).toFixed(1)}px) scale(.55)` }],
             { duration: span, delay: t0, fill: 'both' });
         });
+        { const g0 = HIT - 40, gIn = g0 + 600, gOut = lumos ? HIT + 640 : spellOut - 30, gEnd = lumos ? gOut + 400 : END;
+          fx.querySelector('.ww-glow').animate([{ opacity: 0 }, { opacity: 1, offset: (gIn - g0) / (gEnd - g0) }, { opacity: 1, offset: (gOut - g0) / (gEnd - g0) }, { opacity: 0 }], { duration: gEnd - g0, delay: g0, fill: 'both' }); }
         if (lumos) {
           fx.querySelector('.ww-sweep').animate([{ transform: 'translateX(0)' }, { transform: `translateX(${(total + 320).toFixed(0)}px)` }], { duration: 520, delay: HIT + 380, easing: 'cubic-bezier(.4, 0, .3, 1)', fill: 'both' });
           fx.querySelector('.ww-shine').animate([{ opacity: 0 }, { opacity: 1, offset: 0.1 }, { opacity: 1, offset: 0.9 }, { opacity: 0 }], { duration: 520, delay: HIT + 380, fill: 'both' });

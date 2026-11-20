@@ -1695,10 +1695,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 /* 深淺色轉場：亂刀（slashSwap）——碎片層蓋在最上面 */
 /* 深淺色轉場：魔杖（wandSwap）——舊畫面挖柔邊圓洞（--wr），魔杖、光暈、咒語在 .wand-fx */
 @property --wr { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --wf { syntax: '<length>'; inherits: false; initial-value: 160px; }
 .vt-wand::view-transition-old(root), .vt-wand::view-transition-new(root), ::view-transition-group(wand), ::view-transition-old(wand), ::view-transition-new(wand) { animation: none; mix-blend-mode: normal; }
 .vt-wand::view-transition-old(root) { z-index: 2; }
-.vt-lumos::view-transition-old(root) { -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--wr) - 160px), #000 var(--wr)); mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--wr) - 160px), #000 var(--wr)); }   /* 中央挖洞往外擴 */
-.vt-nox::view-transition-old(root) { -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--wr) - 220px), transparent var(--wr)); mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--wr) - 220px), transparent var(--wr)); }   /* 亮的只剩中央圓，往內收合 */
+.vt-lumos::view-transition-old(root) { -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--wr) - var(--wf)), #000 var(--wr)); mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--wr) - var(--wf)), #000 var(--wr)); }   /* 中央挖洞往外擴 */
+.vt-nox::view-transition-old(root) { -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--wr) - var(--wf)), transparent var(--wr)); mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--wr) - var(--wf)), transparent var(--wr)); }   /* 亮的只剩中央圓，往內收合 */
 .vt-wand * { transition: none !important; }
 ::view-transition-group(wand) { z-index: 3; }
 .wand-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; view-transition-name: wand; }
@@ -2405,7 +2406,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
        · 咒語：中央用古典襯線字（Cinzel）逐字從模糊浮現、帶微光，停一下後散成光點消失；魔杖施咒後縮回
        · 做法：View Transitions；舊畫面用徑向遮罩挖出一個柔邊圓洞（--wr 半徑由 0 放大），露出底下的新畫面；
          魔杖、光暈、咒語放在一個暫時的元素裡（自己的 view-transition-name，疊在最上面）
-       · 時間軸：0–0.45 秒魔杖伸入揮動 → 0.45–1.15 秒暈開 → 0.4–1.3 秒咒語 → 1.05–1.4 秒魔杖縮回 */
+       · 時間軸：0–0.42 秒魔杖伸入、杖尖點下 → 0.42–1.18 秒暈開／收合（從點下那一刻開始）→ 0.4–1.2 秒咒語 → 0.7–1.2 秒魔杖縮回 */
     if (!document.getElementById('gf-cinzel')) document.head.insertAdjacentHTML('beforeend', '<link id="gf-cinzel" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap">');
     // 接骨木魔杖：杖身由尖到粗、沿途一節節的瘤結（越靠握把越大），握把有兩圈雕刻膨起與尾端圓頭；灰褐木色、上緣受光
     const ELDER = (() => {
@@ -2441,9 +2442,15 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const vt = document.startViewTransition(() => { apply(); document.body.append(fx); });
       vt.ready.then(() => {
         // 暈開：舊畫面挖出柔邊圓洞，半徑 0 → 蓋過整個畫面
-        // Lumos：光從中央往外漾開（先快後慢）；Nox：黑暗從四周往中央收合（先慢後快，像被吞沒）
-        de.animate(lumos ? [{ '--wr': '0px' }, { '--wr': `${R.toFixed(0)}px` }] : [{ '--wr': `${R.toFixed(0)}px` }, { '--wr': '0px' }],
-          { duration: 700, delay: 450, easing: lumos ? 'cubic-bezier(.45, .05, .25, 1)' : 'cubic-bezier(.55, 0, .75, .4)', fill: 'both', pseudoElement: '::view-transition-old(root)' });
+        // 暈開／收合從杖尖點下的瞬間（420ms）開始。Lumos：光從中央往外漾開（先快後慢）
+        // Nox：黑暗從四周往中央收合——先慢、中間快、縮到小光點時輕輕停約 80ms 再熄滅（像燭火被吹熄）；柔邊由寬（220px）收窄（40px），最後的光點才不糊
+        const HIT = 420, SPREAD = 760, PT = (t) => Math.round(HIT + t * SPREAD);
+        if (lumos) de.animate([{ '--wr': '0px' }, { '--wr': `${R.toFixed(0)}px` }], { duration: 700, delay: HIT, easing: 'cubic-bezier(.45, .05, .25, 1)', fill: 'both', pseudoElement: '::view-transition-old(root)' });
+        else de.animate([
+          { offset: 0, '--wr': `${R.toFixed(0)}px`, '--wf': '220px', easing: 'cubic-bezier(.45, 0, .55, 1)' },
+          { offset: 0.78, '--wr': '90px', '--wf': '70px', easing: 'cubic-bezier(.25, .6, .4, 1)' },
+          { offset: 0.88, '--wr': '64px', '--wf': '50px', easing: 'cubic-bezier(.5, 0, .9, .4)' },
+          { offset: 1, '--wr': '0px', '--wf': '40px' }], { duration: SPREAD, delay: HIT, fill: 'both', pseudoElement: '::view-transition-old(root)' });
         // 魔杖：沿杖身方向從畫面外伸入 → 揚起 → 點下指向中央 → 施咒後縮回
         const wand = fx.querySelector('.wand'), out = WL * 0.75, rad = th * Math.PI / 180, ox = Math.cos(rad) * out, oy = Math.sin(rad) * out;
         const T = (d, r) => `translate(${(ox * d).toFixed(0)}px, ${(oy * d).toFixed(0)}px) rotate(${(th + r).toFixed(1)}deg)`;
@@ -2452,7 +2459,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           { offset: 0.24, transform: T(0, 0), easing: 'cubic-bezier(.5, 0, .2, 1)' },
           { offset: 0.3, transform: T(-0.035, 0), easing: 'cubic-bezier(.3, 0, .3, 1)' },   // 施咒：杖尖往前點一下
           { offset: 0.37, transform: T(0, 0) },
-          { offset: 0.75, transform: T(0, 0), easing: 'cubic-bezier(.5, 0, .75, .2)' },
+          { offset: 0.5, transform: T(0, 0), easing: 'cubic-bezier(.5, 0, .75, .2)' },   // 施咒完就縮回，焦點留給暈開／收合
+          { offset: 0.85, transform: T(1.05, 8) },
           { offset: 1, transform: T(1.05, 8) }], { duration: 1400, fill: 'both' });
         // 杖尖：Lumos 施咒時亮起；Nox 先亮著、施咒時熄滅
         fx.querySelector('.wand-tip').animate(lumos
@@ -2461,14 +2469,25 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           { duration: 1400, fill: 'both' });
         // 中央光暈（Lumos 白光爆開／Nox 暗色墨暈）
         fx.querySelector('.wand-halo').animate([{ opacity: 0, transform: 'translate(-50%, -50%) scale(.1)' }, { opacity: lumos ? 1 : 0.8, transform: 'translate(-50%, -50%) scale(1)', offset: 0.25 }, { opacity: 0, transform: 'translate(-50%, -50%) scale(2.6)' }],
-          { duration: 760, delay: 440, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'both' });
-        // 咒語：逐字從模糊浮現 → 停留 → 散開淡出
-        fx.querySelectorAll('.wand-spell span').forEach((sp, i) => sp.animate([
-          { opacity: 0, filter: 'blur(10px)', transform: 'translateY(12px) scale(.9)' },
-          { opacity: 1, filter: 'blur(0px)', transform: 'none', offset: 0.28 },
-          { opacity: 1, filter: 'blur(0px)', transform: 'none', offset: 0.7 },
-          { opacity: 0, filter: 'blur(6px)', transform: `translate(${((i - 2) * 10).toFixed(0)}px, -18px) scale(1.15)` }],
-          { duration: 820 - i * 40, delay: 400 + i * 60, easing: 'cubic-bezier(.3, .6, .3, 1)', fill: 'both' }));
+          { duration: 760, delay: HIT, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'both' });
+        // 咒語：逐字從模糊浮現 → 停留 → Lumos 往上散開淡出；Nox 等亮圓縮到字的大小時（約收合 64%）才跟著往中央收進去
+        const spellOut = PT(0.64), END = PT(0.95);
+        fx.querySelectorAll('.wand-spell span').forEach((sp, i, all) => {
+          const delay = 400 + i * 60;
+          if (lumos) { sp.animate([
+            { opacity: 0, filter: 'blur(10px)', transform: 'translateY(12px) scale(.9)' },
+            { opacity: 1, filter: 'blur(0px)', transform: 'none', offset: 0.28 },
+            { opacity: 1, filter: 'blur(0px)', transform: 'none', offset: 0.7 },
+            { opacity: 0, filter: 'blur(6px)', transform: `translate(${((i - 2) * 10).toFixed(0)}px, -18px) scale(1.15)` }],
+            { duration: 820 - i * 40, delay, easing: 'cubic-bezier(.3, .6, .3, 1)', fill: 'both' }); return; }
+          const dur = END - delay, mid = (all.length - 1) / 2;
+          sp.animate([
+            { opacity: 0, filter: 'blur(10px)', transform: 'translateY(12px) scale(.9)' },
+            { opacity: 1, filter: 'blur(0px)', transform: 'none', offset: Math.min(0.9, 230 / dur), easing: 'linear' },
+            { opacity: 1, filter: 'blur(0px)', transform: 'none', offset: (spellOut + Math.abs(i - mid) * -15 - delay) / dur, easing: 'cubic-bezier(.5, 0, .8, .4)' },
+            { opacity: 0, filter: 'blur(5px)', transform: `translateX(${((mid - i) * 22).toFixed(0)}px) scale(.55)` }],
+            { duration: dur, delay, fill: 'both' });
+        });
       }).catch(() => {});
       vt.finished.finally(() => { fx.remove(); de.classList.remove('vt-wand', 'vt-lumos', 'vt-nox'); shBusy = false; });
     }

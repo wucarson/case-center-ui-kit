@@ -2352,14 +2352,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           { offset: 1, transform: `perspective(1200px) translate(${(ux * dist).toFixed(0)}px, ${(uy * dist).toFixed(0)}px) rotateX(${rx.toFixed(0)}deg) rotateY(${ry.toFixed(0)}deg) rotate(${rz.toFixed(0)}deg) scale(${(sc * 0.9).toFixed(2)})`, opacity: 0 }],
           { duration: TOTAL, easing: 'linear', fill: 'both' });
       });
-      // 細小碎屑：從三刀交叉點與切口噴出 30 片三角形碎屑（9–23px、不透明、帶陰影與光暈，深淺底都看得到）
+      // 細小碎屑：從三刀交叉點與切口噴出 55 片三角形碎屑（9–23px、不透明、帶陰影與光暈，深淺底都看得到）
       const spots = [];
       cuts.forEach((c, i) => cuts.slice(i + 1).forEach((e) => { const den = c.dx * e.dy - c.dy * e.dx; if (Math.abs(den) < 1e-6) return;
         const t = ((e.px - c.px) * e.dy - (e.py - c.py) * e.dx) / den, x = c.px + c.dx * t, y = c.py + c.dy * t; if (x > 0 && x < W && y > 0 && y < H) spots.push([x, y]); }));
-      cuts.forEach((c) => { for (let k = 0; k < 3; k++) { const t = (Math.random() - 0.5) * Math.min(W, H) * 0.8, x = c.px + c.dx * t, y = c.py + c.dy * t; if (x > 0 && x < W && y > 0 && y < H) spots.push([x, y]); } });
+      cuts.forEach((c) => { for (let k = 0; k < 7; k++) { const t = (Math.random() - 0.5) * Math.min(W, H) * 0.8, x = c.px + c.dx * t, y = c.py + c.dy * t; if (x > 0 && x < W && y > 0 && y < H) spots.push([x, y]); } });
       const cols = ['#ffffff', '#ffffff', getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#2f6bff', '#dfe6f2'];   // 不透明，加主色點綴
       const dwrap = document.createElement('div'); dwrap.className = 'slash-debris-wrap'; layer.append(dwrap);
-      for (let k = 0; k < 30; k++) {
+      for (let k = 0; k < 55; k++) {
         const [x, y] = spots[k % spots.length], sz = 9 + Math.random() * 14, a0 = Math.random() * Math.PI * 2, v = 160 + Math.random() * 320;
         const dbr = document.createElement('i'); dbr.className = 'slash-debris';
         dbr.style.cssText = `left:${(x - sz / 2).toFixed(0)}px;top:${(y - sz / 2).toFixed(0)}px;width:${sz.toFixed(0)}px;height:${sz.toFixed(0)}px;background:${cols[k % cols.length]}`;

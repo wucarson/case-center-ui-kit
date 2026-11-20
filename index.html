@@ -2260,7 +2260,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       return pts; };
     const SH_L = shOval(SH_LC[0], false), SH_R = shOval(SH_LC[1], false);   // 兩片同一個繞行方向：重疊處是聯集（不是洞）
     const shD = (pts) => pts.map(([m, c, e]) => (m ? `M${m[0].toFixed(2)} ${m[1].toFixed(2)}` : '') + `Q${c[0].toFixed(2)} ${c[1].toFixed(2)} ${e[0].toFixed(2)} ${e[1].toFixed(2)}`).join('') + 'Z';
-    /* 深淺色轉場（亂刀，1 秒）：3 刀白色刀光依序劃過畫面（固定刀位），把畫面切成大小不一的碎塊，最後碎塊從中央往外炸開，露出新版面
+    /* 深淺色轉場（亂刀，1 秒）：3 刀白色刀光依序劃過畫面（固定刀位），把畫面切成大小不一的碎塊，最後碎塊靜止一拍後順著刀口滑開，露出新版面
        · 做法：把目前畫面（.shell）複製到每一塊碎片裡（碎片用 clip-path 多邊形裁切，聯集剛好是整個畫面），蓋在最上層後立刻切換深淺色；
          複製品帶著切換前的顏色變數，所以碎片保持舊配色。刀光結束後碎片各自往外飛、旋轉、縮小淡出，底下就是新版面
        · 3 刀都切開畫面（碎片固定 5 塊）
@@ -2315,11 +2315,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       // 換配色的重算很重：等兩個畫格（重算完成）才開始動畫，時間軸才不會一開始就被吃掉
       requestAnimationFrame(() => requestAnimationFrame(() => run(layer, cuts, pieces, cx, cy, W, H)));
     }
-    /* 打擊感：① 每刀劃到底時停頓 40ms（卡肉），刀口的光保留到炸開 ② 炸開前碎片先往內縮（蓄力 70ms），再猛力往外炸。全長 1 秒 */
+    /* 打擊感：每刀劃到底時停頓 40ms（卡肉），刀口的光保留到碎片滑開。全長 1 秒 */
     function run(layer, cuts, pieces, cx, cy, W, H) {
       const DRAW = 100, HOLD = 40, GAP = 30, STEP = DRAW + HOLD + GAP;   // 每刀間隔 0.17 秒，看得出順序
-      const HIT = cuts.map((_, i) => i * STEP + DRAW), CUT_END = HIT[HIT.length - 1] + HOLD + 20, CHARGE = 70, TOTAL = 1000, FLY = TOTAL - CUT_END - CHARGE;
-      // 刀光：劃到底（100ms）→ 刀口的光一直留著 → 炸開瞬間 80ms 內淡掉（不加亮、不留殘影）
+      const HIT = cuts.map((_, i) => i * STEP + DRAW), CUT_END = HIT[HIT.length - 1] + HOLD + 20, CHARGE = 100, TOTAL = 1000;   // CHARGE：砍完靜止一拍
+      // 刀光：劃到底（100ms）→ 刀口的光一直留著 → 碎片滑開瞬間 80ms 內淡掉（不加亮、不留殘影）
       const BOOM = CUT_END + CHARGE;
       layer.querySelectorAll('.slash-lines line').forEach((ln, i) => { const st = i * STEP, len = BOOM + 80 - st;
         ln.animate([
@@ -2329,15 +2329,17 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           { strokeDashoffset: 0, opacity: 0.85, strokeWidth: 2, offset: (BOOM - st) / len, easing: 'ease-out' },
           { strokeDashoffset: 0, opacity: 0, strokeWidth: 2 }],
           { duration: len, delay: st, fill: 'both' }); });
+      // 收尾（居合斬）：砍完靜止一拍，碎片才順著刀口錯開滑走——同一刀兩側的碎片往相反方向滑，越滑越快、同時淡出
       pieces.forEach(({ el, gx, gy }) => {
-        const vx = gx - cx, vy = gy - cy, d = Math.hypot(vx, vy) || 1, ux = vx / d, uy = vy / d, dist = 0.6 * Math.max(W, H) + Math.random() * 200, rot = (Math.random() - 0.5) * 60;
-        const kf = [{ offset: 0, transform: 'none', opacity: 1 }];
-        const ox = 0, oy = 0;   // 刀光期間碎片不動
-        // 蓄力：往中心縮一點；炸開：猛力往外
-        kf.push({ offset: CUT_END / TOTAL, transform: `translate(${ox.toFixed(1)}px, ${oy.toFixed(1)}px)`, easing: 'cubic-bezier(.4, 0, .6, 1)' });
-        kf.push({ offset: (CUT_END + CHARGE) / TOTAL, transform: `translate(${(ox - ux * 10).toFixed(1)}px, ${(oy - uy * 10).toFixed(1)}px) scale(.97)`, opacity: 1, easing: 'cubic-bezier(.15, .6, .25, 1)' });
-        kf.push({ offset: 1, transform: `translate(${(ux * dist).toFixed(0)}px, ${(uy * dist).toFixed(0)}px) rotate(${rot.toFixed(1)}deg) scale(.82)`, opacity: 0 });
-        el.animate(kf, { duration: TOTAL, easing: 'linear', fill: 'both' });
+        let dx = 0, dy = 0;
+        cuts.forEach((c) => { const nx = -c.dy, ny = c.dx, sd = Math.sign(nx * (gx - c.px) + ny * (gy - c.py)) || 1;
+          dx += c.dx * sd + nx * sd * 0.25; dy += c.dy * sd + ny * sd * 0.25; });   // 沿刀口滑＋往刀口外側微微分開
+        const dl = Math.hypot(dx, dy) || 1, dist = 0.45 * Math.max(W, H), rot = (Math.random() - 0.5) * 8;
+        el.animate([
+          { offset: 0, transform: 'none', opacity: 1 },
+          { offset: BOOM / TOTAL, transform: 'none', opacity: 1, easing: 'cubic-bezier(.55, 0, .85, .35)' },
+          { offset: 1, transform: `translate(${(dx / dl * dist).toFixed(0)}px, ${(dy / dl * dist).toFixed(0)}px) rotate(${rot.toFixed(1)}deg)`, opacity: 0 }],
+          { duration: TOTAL, easing: 'linear', fill: 'both' });
       });
       setTimeout(() => { layer.remove(); shBusy = false; }, TOTAL + 40);
     }

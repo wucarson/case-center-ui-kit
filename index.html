@@ -1693,6 +1693,25 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 ::view-transition-group(speed), ::view-transition-new(speed), ::view-transition-old(speed) { animation: none; mix-blend-mode: normal; }
 .vt-shades-off::view-transition-old(root) { z-index: 2; }
 /* 深淺色轉場：亂刀（slashSwap）——碎片層蓋在最上面 */
+/* 深淺色轉場：魔杖（wandSwap）——舊畫面挖柔邊圓洞（--wr），魔杖、光暈、咒語在 .wand-fx */
+@property --wr { syntax: '<length>'; inherits: false; initial-value: 0px; }
+.vt-wand::view-transition-old(root), .vt-wand::view-transition-new(root), ::view-transition-group(wand), ::view-transition-old(wand), ::view-transition-new(wand) { animation: none; mix-blend-mode: normal; }
+.vt-wand::view-transition-old(root) { z-index: 2; -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--wr) - 160px), #000 var(--wr)); mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--wr) - 160px), #000 var(--wr)); }
+.vt-wand * { transition: none !important; }
+::view-transition-group(wand) { z-index: 3; }
+.wand-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; view-transition-name: wand; }
+.wand { position: absolute; width: 420px; height: 18px; transform-origin: 0 9px; filter: drop-shadow(0 6px 10px rgb(0 0 0 / .35)); }
+.wand svg { display: block; overflow: visible; }
+.wand-tip { position: absolute; left: -14px; top: -5px; width: 28px; height: 28px; border-radius: 50%; }
+.lumos .wand-tip { background: radial-gradient(circle, #fff 0 22%, rgb(220 235 255 / .9) 38%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 24px 8px rgb(210 230 255 / .7); }
+.nox .wand-tip { background: radial-gradient(circle, #fff 0 18%, rgb(200 220 255 / .7) 40%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 14px 4px rgb(200 220 255 / .45); }
+.wand-halo { position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; }
+.lumos .wand-halo { background: radial-gradient(circle, rgb(255 255 255 / .95) 0, rgb(235 244 255 / .6) 30%, rgb(255 255 255 / 0) 65%); }
+.nox .wand-halo { background: radial-gradient(circle, rgb(4 6 14 / .85) 0, rgb(8 12 26 / .5) 35%, rgb(8 12 26 / 0) 68%); }
+.wand-spell { position: absolute; transform: translate(-50%, -50%); display: flex; gap: .04em; font: 700 clamp(52px, 8vw, 112px)/1 'Cinzel', 'Trajan Pro', 'Times New Roman', serif; letter-spacing: .08em; white-space: nowrap; }
+.wand-spell span { display: inline-block; }
+.lumos .wand-spell { color: #f6e6b4; text-shadow: 0 0 18px rgb(255 214 120 / .9), 0 0 42px rgb(255 190 80 / .55), 0 2px 3px rgb(60 40 10 / .5); }
+.nox .wand-spell { color: #dfe7f5; text-shadow: 0 0 16px rgb(150 180 255 / .7), 0 0 40px rgb(20 30 70 / .9), 0 2px 3px rgb(0 0 0 / .6); }
 .slash-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; }
 .slash-pc { position: absolute; inset: 0; overflow: hidden; will-change: transform, opacity; }
 .slash-pc * { transition: none !important; animation: none !important; }   /* 複製品不重播進場動畫（否則會停在透明的起點） */
@@ -2374,6 +2393,67 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       }
       setTimeout(() => { layer.remove(); shBusy = false; }, TOTAL + 40);
     }
+    /* 深淺色轉場（魔杖，約 1.4 秒）：魔杖從右下角伸入、杖尖指向畫面中央，輕輕一揮後施咒——
+       · Lumos（切到淺色）：杖尖亮起白光，光暈從中央漾開，光到的地方變成淺色版面
+       · Nox（切到深色）：杖尖的光熄滅，黑暗像墨一樣從中央暈開，暈到的地方變成深色版面
+       · 咒語：中央用古典襯線字（Cinzel）逐字從模糊浮現、帶微光，停一下後散成光點消失；魔杖施咒後縮回
+       · 做法：View Transitions；舊畫面用徑向遮罩挖出一個柔邊圓洞（--wr 半徑由 0 放大），露出底下的新畫面；
+         魔杖、光暈、咒語放在一個暫時的元素裡（自己的 view-transition-name，疊在最上面）
+       · 時間軸：0–0.45 秒魔杖伸入揮動 → 0.45–1.15 秒暈開 → 0.4–1.3 秒咒語 → 1.05–1.4 秒魔杖縮回 */
+    if (!document.getElementById('gf-cinzel')) document.head.insertAdjacentHTML('beforeend', '<link id="gf-cinzel" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap">');
+    function wandSwap(next, apply) {
+      if (shBusy) return;
+      if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) { apply(); return; }
+      const lumos = next === 'light', W = innerWidth, H = innerHeight, C = [W / 2, H / 2];
+      const tip = [C[0] + Math.min(150, W * 0.1), C[1] + Math.min(110, H * 0.12)];   // 杖尖停在中央右下一點，不擋住咒語
+      const th = Math.atan2(tip[1] - C[1], tip[0] - C[0]) * 180 / Math.PI;   // 杖身往右下延伸
+      const R = Math.hypot(W, H) / 2 + 180;
+      const fx = document.createElement('div'); fx.className = 'wand-fx' + (lumos ? ' lumos' : ' nox'); fx.setAttribute('aria-hidden', 'true');
+      fx.innerHTML = `<div class="wand-halo" style="left:${C[0]}px;top:${C[1]}px"></div>
+        <div class="wand" style="left:${tip[0]}px;top:${tip[1] - 9}px;transform:rotate(${th}deg)"><svg viewBox="0 0 420 18" width="420" height="18">
+          <defs><linearGradient id="wd-wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8a6446"/><stop offset=".45" stop-color="#5a3c27"/><stop offset="1" stop-color="#2e1d12"/></linearGradient>
+          <linearGradient id="wd-grip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b4130"/><stop offset=".5" stop-color="#2b1b11"/><stop offset="1" stop-color="#160d07"/></linearGradient></defs>
+          <path d="M0 8.4 Q4 8 12 7.8 L285 5.2 L285 12.8 L12 10.2 Q4 10 0 9.6 Z" fill="url(#wd-wood)"/>
+          <path d="M285 4.2 Q300 2.5 318 4 Q330 2 345 4.2 Q365 2.6 385 4.4 Q405 3 418 6 Q421 9 418 12 Q405 15 385 13.6 Q365 15.4 345 13.8 Q330 16 318 14 Q300 15.5 285 13.8 Z" fill="url(#wd-grip)"/>
+          <path d="M318 4.4V13.6M345 4.6V13.4M385 4.8V13.2" stroke="#8a6446" stroke-width="1.2" opacity=".55"/>
+          <path d="M14 8.1 L280 5.8" stroke="#fff" stroke-opacity=".22" stroke-width="1"/></svg><i class="wand-tip"></i></div>
+        <div class="wand-spell" style="left:${C[0]}px;top:${C[1]}px">${[...(lumos ? 'Lumos' : 'Nox')].map((ch) => `<span>${ch}</span>`).join('')}</div>`;
+      const de = document.documentElement;
+      de.classList.add('vt-wand');
+      shBusy = true;
+      const vt = document.startViewTransition(() => { apply(); document.body.append(fx); });
+      vt.ready.then(() => {
+        // 暈開：舊畫面挖出柔邊圓洞，半徑 0 → 蓋過整個畫面
+        de.animate([{ '--wr': '0px' }, { '--wr': `${R.toFixed(0)}px` }], { duration: 700, delay: 450, easing: 'cubic-bezier(.45, .05, .25, 1)', fill: 'both', pseudoElement: '::view-transition-old(root)' });
+        // 魔杖：沿杖身方向從畫面外伸入 → 揚起 → 點下指向中央 → 施咒後縮回
+        const wand = fx.querySelector('.wand'), out = 560, rad = th * Math.PI / 180, ox = Math.cos(rad) * out, oy = Math.sin(rad) * out;
+        const T = (d, r) => `translate(${(ox * d).toFixed(0)}px, ${(oy * d).toFixed(0)}px) rotate(${(th + r).toFixed(1)}deg)`;
+        wand.animate([
+          { offset: 0, transform: T(1, 6), easing: 'cubic-bezier(.2, .8, .3, 1)' },
+          { offset: 0.2, transform: T(0, 0), easing: 'cubic-bezier(.4, 0, .6, 1)' },
+          { offset: 0.27, transform: T(0, -9), easing: 'cubic-bezier(.5, 0, .2, 1)' },   // 揚起
+          { offset: 0.32, transform: T(-0.015, 2.5), easing: 'cubic-bezier(.3, 0, .3, 1)' },   // 點下
+          { offset: 0.38, transform: T(0, 0) },
+          { offset: 0.75, transform: T(0, 0), easing: 'cubic-bezier(.5, 0, .75, .2)' },
+          { offset: 1, transform: T(1.05, 8) }], { duration: 1400, fill: 'both' });
+        // 杖尖：Lumos 施咒時亮起；Nox 先亮著、施咒時熄滅
+        fx.querySelector('.wand-tip').animate(lumos
+          ? [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 0, transform: 'scale(.3)', offset: 0.3 }, { opacity: 1, transform: 'scale(1.8)', offset: 0.36 }, { opacity: 1, transform: 'scale(1)', offset: 0.6 }, { opacity: 0, transform: 'scale(.6)' }]
+          : [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1)', offset: 0.15 }, { opacity: 1, transform: 'scale(1.2)', offset: 0.31 }, { opacity: 0, transform: 'scale(0)', offset: 0.38 }, { opacity: 0, transform: 'scale(0)' }],
+          { duration: 1400, fill: 'both' });
+        // 中央光暈（Lumos 白光爆開／Nox 暗色墨暈）
+        fx.querySelector('.wand-halo').animate([{ opacity: 0, transform: 'translate(-50%, -50%) scale(.1)' }, { opacity: lumos ? 1 : 0.8, transform: 'translate(-50%, -50%) scale(1)', offset: 0.25 }, { opacity: 0, transform: 'translate(-50%, -50%) scale(2.6)' }],
+          { duration: 760, delay: 440, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'both' });
+        // 咒語：逐字從模糊浮現 → 停留 → 散開淡出
+        fx.querySelectorAll('.wand-spell span').forEach((sp, i) => sp.animate([
+          { opacity: 0, filter: 'blur(10px)', transform: 'translateY(12px) scale(.9)' },
+          { opacity: 1, filter: 'blur(0px)', transform: 'none', offset: 0.28 },
+          { opacity: 1, filter: 'blur(0px)', transform: 'none', offset: 0.7 },
+          { opacity: 0, filter: 'blur(6px)', transform: `translate(${((i - 2) * 10).toFixed(0)}px, -18px) scale(1.15)` }],
+          { duration: 820 - i * 40, delay: 400 + i * 60, easing: 'cubic-bezier(.3, .6, .3, 1)', fill: 'both' }));
+      }).catch(() => {});
+      vt.finished.finally(() => { fx.remove(); de.classList.remove('vt-wand'); shBusy = false; });
+    }
     let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途
     function shadesSwap(next, apply) {
       if (shBusy) return;
@@ -2435,7 +2515,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       }).catch(() => {});
       vt.finished.finally(() => { frame.remove(); speed?.remove(); de.classList.remove('vt-shades-on', 'vt-shades-off'); shBusy = false; });
     }
-    tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; (root.dataset.themeFx === 'shades' ? shadesSwap : slashSwap)(next, () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); }, tb); });
+    tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; ({ shades: shadesSwap, slash: slashSwap }[root.dataset.themeFx] || wandSwap)(next, () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); }, tb); });
     new MutationObserver(paint).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint);
     paint();
@@ -3609,7 +3689,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       color: { primary: '#1f6fff', darkPrimary: '', success: '#12b866', warn: '#f59e0b', danger: '#ef3340', info: '#1846c9', series: ['#1f6fff', '#00a3b8', '#8b5cf6', '#f59e0b'], neutral: 'cool' },
       shape: { card: 20, control: 10, pill: 'full' },
       depth: { shadow: 2, glow: 100, border: 'standard' },
-      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'line', themeFx: 'slash' },
+      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'line', themeFx: 'wand' },
       layout: { cols: 4, density: 'standard', hidden: [], order: [] },
     };
     const UI_KEYS = ['standard', 'flat', 'glass', 'contrast', 'neu', 'swiss', 'y2k'];
@@ -3840,7 +3920,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     let theme = clone(DEFAULT);
     let lastAuto = null;
     function apply() {
-      document.documentElement.dataset.themeFx = theme.motion.themeFx === 'shades' ? 'shades' : 'slash';   // 深淺色轉場：右上角按鈕讀這個
+      document.documentElement.dataset.themeFx = ['shades', 'slash'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'wand';   // 深淺色轉場：右上角按鈕讀這個
       // 舊版存過的風格（寫實、手繪）已移除：改回標準
       // 舊版的「緊湊」風格改成間距「緊」
       if (theme.style.ui === 'compact') { theme.style.ui = 'standard'; theme.layout.density = 'compact'; }
@@ -4388,7 +4468,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
         })),
           el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['line', '浮線'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter === 'fly' ? 'fly' : 'line') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '深淺色轉場' }, [['slash', '亂刀'], ['shades', '墨鏡']].map(([v, n]) => { const on = () => (theme.motion.themeFx === 'shades' ? 'shades' : 'slash') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.themeFx = v; changed(); renderAll(); } }, '深淺色 ' + n); quick.push([btn, on]); return btn; }))),
+          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '深淺色轉場' }, [['wand', '魔杖'], ['slash', '亂刀'], ['shades', '墨鏡']].map(([v, n]) => { const on = () => (['shades', 'slash'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'wand') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.themeFx = v; changed(); renderAll(); } }, '深淺色 ' + n); quick.push([btn, on]); return btn; }))),
       )];
     }
     function catsEl() {

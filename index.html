@@ -1487,10 +1487,10 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="neu"], :root[data-theme="dark"][data-ui="neu"], :root:not([data-theme="light"])[data-ui="neu"] {
   --card: var(--page); --tile: var(--page); --field: var(--page);
   --card-edge: transparent; --hi: transparent; --sheen: transparent;
-  --shadow: -3px -3px 8.5px var(--neu-hi), 3px 3px 8.5px var(--neu-lo);
-  --shadow-lift: -5px -5px 12px var(--neu-hi), 5px 5px 12px var(--neu-lo);
-  --raise: -2px -2px 4.25px var(--neu-hi), 2px 2px 4.25px var(--neu-lo);
-  --inset: inset 2px 2px 3.4px var(--neu-lo), inset -2px -2px 3.4px var(--neu-hi);
+  --shadow: -3px -3px 6px var(--neu-hi), 3px 3px 6px var(--neu-lo);
+  --shadow-lift: -5px -5px 8.4px var(--neu-hi), 5px 5px 8.4px var(--neu-lo);
+  --raise: -2px -2px 3px var(--neu-hi), 2px 2px 3px var(--neu-lo);
+  --inset: inset 2px 2px 2.4px var(--neu-lo), inset -2px -2px 2.4px var(--neu-hi);
 }
 :root[data-ui="neu"] { --neu-hi: color-mix(in srgb, color-mix(in srgb, var(--page) 12%, #ffffff) 96%, transparent); --neu-lo: color-mix(in srgb, color-mix(in srgb, var(--page) 74%, var(--ink)) 72%, transparent); }   /* 模糊半徑收小，顏色加深一點補回立體感 */
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --neu-hi: color-mix(in srgb, color-mix(in srgb, var(--page) 86%, #ffffff) 96%, transparent); --neu-lo: color-mix(in srgb, var(--page) 50%, #000000); } }
@@ -1501,7 +1501,7 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="neu"] :is(.btn, .top-a .ctl) { box-shadow: var(--raise); }
 :root[data-ui="neu"] .cell:hover { transform: none; }
 /* 卡片內緣：左上受光亮邊＋右下微暗，做出鼓起的立體感 */
-:root[data-ui="neu"] .cell { border: 0; padding: 17px 19px 19px; --neu-in: inset 3px 3px 8.5px var(--neu-hi), inset -3px -3px 8px color-mix(in srgb, var(--neu-lo) 35%, transparent); box-shadow: var(--shadow), var(--neu-in); }   /* 內亮與外亮同色同模糊、去掉 1px 邊框間隙，左上無縫接起來 */
+:root[data-ui="neu"] .cell { border: 0; padding: 17px 19px 19px; --neu-in: inset 3px 3px 6px var(--neu-hi), inset -3px -3px 5.6px color-mix(in srgb, var(--neu-lo) 35%, transparent); box-shadow: var(--shadow), var(--neu-in); }   /* 內亮與外亮同色同模糊、去掉 1px 邊框間隙，左上無縫接起來 */
 :root[data-ui="neu"] .cell:hover { box-shadow: var(--shadow-lift), var(--neu-in); }
 
 /* Swiss Style：無陰影、直角，卡片上方一條粗實線；Helvetica 系字型、標題加粗收字距、英文標示大寫 */
@@ -1574,14 +1574,14 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 /* 指南：光源固定左上；滑過上浮 1px、按下回到原位並翻成凹陷；轉場 160ms */
 :root[data-ui="neu"] :is(.btn, .b2) { transition: box-shadow 160ms ease, transform 160ms ease, background-color 160ms ease, color 160ms ease; }
 :root[data-ui="neu"] :is(.btn, .b2, .top-a .ctl):is(:hover, .hv) { transform: translateY(-1px); }
-:root[data-ui="neu"] :is(.btn, .b2, .top-a .ctl):is(:active, .is-press) { transform: translateY(0); box-shadow: inset 4px 4px 8px var(--neu-lo), inset -4px -4px 8px var(--neu-hi); }
+:root[data-ui="neu"] :is(.btn, .b2, .top-a .ctl):is(:active, .is-press) { transform: translateY(0); box-shadow: inset 4px 4px 5.6px var(--neu-lo), inset -4px -4px 5.6px var(--neu-hi); }
 /* 開關：軌道是凹槽、把手是凸起的圓 */
 :root[data-ui="neu"] .tg i { box-shadow: -1px -1px 3px var(--neu-hi), 2px 2px 4px var(--neu-lo); }
 /* 焦點：2px 主色實線環，不用柔和光暈（欄位維持凹陷再加外環） */
 :root[data-ui="neu"] :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 :root[data-ui="neu"] :is(.search.focus, .ff.focus .ff-i, .dd.open .dd-t, .ms.open .ms-t) { border-color: transparent; box-shadow: var(--inset), 0 0 0 2px var(--primary); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 8.5px var(--neu-hi), 3px 3px 8.5px var(--neu-lo); } }
-:root[data-theme="dark"][data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 8.5px var(--neu-hi), 3px 3px 8.5px var(--neu-lo); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 6px var(--neu-hi), 3px 3px 6px var(--neu-lo); } }
+:root[data-theme="dark"][data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 6px var(--neu-hi), 3px 3px 6px var(--neu-lo); }
 
 /* Swiss Style：字級拉開層次、卡片不填色只留頂線、互動用底線與色塊 */
 :root[data-ui="swiss"] body::before { display: none; }
@@ -4946,7 +4946,7 @@ void main(){
       standard: null,
       flat: { background: surface, border: `1px solid ${line}`, 'box-shadow': 'none' },
       glass: { background: `color-mix(in srgb, ${surface} 50%, transparent)`, border: `1px solid color-mix(in srgb, ${hi} 75%, transparent)`, 'backdrop-filter': 'blur(22px) saturate(170%)', 'box-shadow-extra': `inset 0 1px 0 ${hi}` },
-      neu: { background: page, border: '0', 'box-shadow': `-3px -3px 8.5px color-mix(in srgb, color-mix(in srgb, ${page} 12%, #ffffff) 96%, transparent), 3px 3px 8.5px color-mix(in srgb, color-mix(in srgb, ${page} 60%, #7d8ca8) 72%, transparent)` },
+      neu: { background: page, border: '0', 'box-shadow': `-3px -3px 6px color-mix(in srgb, color-mix(in srgb, ${page} 12%, #ffffff) 96%, transparent), 3px 3px 6px color-mix(in srgb, color-mix(in srgb, ${page} 60%, #7d8ca8) 72%, transparent)` },
       swiss: { border: `1px solid ${lineStrong}`, 'border-top': `3px solid ${ink}`, 'border-radius': '0', 'box-shadow': 'none' },
       y2k: { border: '1px solid transparent', background: `linear-gradient(180deg, rgb(255 255 255 / .75), rgb(255 255 255 / 0) 28%) padding-box, linear-gradient(180deg, ${surface} 0%, color-mix(in srgb, ${surface} 72%, ${page}) 100%) padding-box, linear-gradient(180deg, #ffffff, color-mix(in srgb, ${lineStrong} 55%, #ffffff) 45%, ${lineStrong}) border-box`, 'box-shadow': 'inset 0 1px 0 rgb(255 255 255 / .95), inset 0 0 0 1px rgb(255 255 255 / .4), 0 10px 28px -10px rgb(60 90 150 / .4)' },
     })[theme.style.ui];

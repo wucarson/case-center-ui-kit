@@ -1692,9 +1692,12 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 ::view-transition-group(shades), ::view-transition-new(shades), ::view-transition-old(shades),
 ::view-transition-group(speed), ::view-transition-new(speed), ::view-transition-old(speed) { animation: none; mix-blend-mode: normal; }
 .vt-shades-off::view-transition-old(root) { z-index: 2; }
-.vt-tiles::view-transition-old(root), .vt-tiles::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-.vt-tiles::view-transition-new(root) { clip-path: inset(50%); }   /* 動畫接手前先藏住新畫面 */
-.vt-tiles * { transition: none !important; }
+/* 深淺色轉場：亂刀（slashSwap）——碎片層蓋在最上面 */
+.slash-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; }
+.slash-pc { position: absolute; inset: 0; overflow: hidden; will-change: transform, opacity; }
+.slash-pc * { transition: none !important; animation: none !important; }   /* 複製品不重播進場動畫（否則會停在透明的起點） */
+.slash-lines { position: absolute; inset: 0; overflow: visible; }
+.slash-lines line { stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 1; filter: drop-shadow(0 0 6px rgb(255 255 255 / .9)) drop-shadow(0 0 2px rgb(120 170 255 / .9)); }
 .vt-shades-on::view-transition-new(root) { opacity: 0; }   /* 快照拍完到動畫開始前的空檔：深色新畫面先藏起來，不會整個閃出 */
 ::view-transition-group(shades), ::view-transition-group(speed) { opacity: 0; }   /* 拿掉：舊的深色在上、只留鏡片內 */
 .vt-shades-on *, .vt-shades-off * { transition: none !important; }   /* 切換期間停掉元件自己的顏色過渡，新畫面一次到位 */
@@ -2257,35 +2260,75 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       return pts; };
     const SH_L = shOval(SH_LC[0], false), SH_R = shOval(SH_LC[1], false);   // 兩片同一個繞行方向：重疊處是聯集（不是洞）
     const shD = (pts) => pts.map(([m, c, e]) => (m ? `M${m[0].toFixed(2)} ${m[1].toFixed(2)}` : '') + `Q${c[0].toFixed(2)} ${c[1].toFixed(2)} ${e[0].toFixed(2)} ${e[1].toFixed(2)}`).join('') + 'Z';
-    /* 深淺色轉場（方塊 Grid tiles，約 0.8 秒）：畫面切成約 48px 的格子，從切換按鈕開始依距離往外一格格擴散；
-       每格的新畫面從格子中心由 0 長到滿格，長的同時被水面漣漪帶動變形：一圈圈波峰、波谷從按鈕往外傳（波長約 170px、週期約 0.26 秒），
-       波峰處的格子順著漣漪方向拉長、往外推，波谷處壓扁、往回收，相鄰幾圈一拉一壓形成節奏；
-       長滿時變形歸零（漣漪在長出來的這一段就結束，之後不再晃動）。做法：新畫面快照的 clip-path 是所有格子的聯集，
-       預先算 40 個關鍵影格（每格的大小），交給 WAAPI 在影格之間內插。不支援 View Transitions 或減少動態效果時直接切換 */
-    function tilesSwap(next, apply, from) {
+    /* 深淺色轉場（亂刀，約 1.1 秒）：5 刀白色刀光依序亂向劃過畫面，把畫面切成大小不一的碎塊，最後碎塊從中央往外炸開，露出新版面
+       · 做法：把目前畫面（.shell）複製到每一塊碎片裡（碎片用 clip-path 多邊形裁切，聯集剛好是整個畫面），蓋在最上層後立刻切換深淺色；
+         複製品帶著切換前的顏色變數，所以碎片保持舊配色。刀光結束後碎片各自往外飛、旋轉、縮小淡出，底下就是新版面
+       · 前 3 刀真的切開畫面（碎片最多 7 塊，數量少才流暢），後 2 刀只有刀光
+       · 減少動態效果時直接切換 */
+    function slashSwap(next, apply) {
       if (shBusy) return;
-      if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) { apply(); return; }
-      const Wv = innerWidth, Hv = innerHeight, cols = Math.ceil(Wv / 48), rows = Math.ceil(Hv / 48), tw = Wv / cols, th = Hv / rows;
-      const r = from?.getBoundingClientRect(), ox = r ? r.left + r.width / 2 : Wv, oy = r ? r.top + r.height / 2 : 0;
-      const tiles = []; let maxD = 1;
-      for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) { const cx = (i + 0.5) * tw, cy = (j + 0.5) * th, d = Math.hypot(cx - ox, cy - oy); maxD = Math.max(maxD, d); tiles.push([cx, cy, d, (cx - ox) / (d || 1), (cy - oy) / (d || 1)]); }   // 後兩項：漣漪方向（單位向量）
-      const DUR = 800, LEN = 400, SPAN = DUR - LEN, N = 40;
-      const ease = (t) => 1 - Math.pow(1 - t, 3);
-      const LAMBDA = 170, PERIOD = 260;   // 漣漪：波長（px）、週期（ms）
-      const kf = Array.from({ length: N + 1 }, (_, k) => { const now = (k / N) * DUR;
-        const d = tiles.map(([cx0, cy0, dist, ux, uy]) => { const p = Math.min(1, Math.max(0, (now - (dist / maxD) * SPAN) / LEN)), e = ease(p),
-            wave = Math.sin((dist / LAMBDA - now / PERIOD) * Math.PI * 2), amp = Math.sin(p * Math.PI) * (1 - p * 0.4),   // 剛冒出與長滿時為 0
-            q = 0.28 * wave * amp * (Math.abs(ux) >= Math.abs(uy) ? 1 : -1),   // 拉長的軸：漣漪偏水平拉寬、偏垂直拉高
-            push = 7 * wave * amp, cx = cx0 + ux * push, cy = cy0 + uy * push,   // 波峰往外推、波谷往回收
-            hw = (tw / 2 + 1.5) * e * (1 + q), hh = (th / 2 + 1.5) * e * (1 - q);   // 每邊多 1.5px：相鄰格子重疊，長滿時不露格線
-          return `M${(cx - hw).toFixed(1)} ${(cy - hh).toFixed(1)}H${(cx + hw).toFixed(1)}V${(cy + hh).toFixed(1)}H${(cx - hw).toFixed(1)}Z`; }).join('');
-        return { offset: k / N, clipPath: `path("${d}")` }; });
-      const de = document.documentElement;
-      de.classList.add('vt-tiles');
+      const shell = document.querySelector('.shell');
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches || !shell) { apply(); return; }
       shBusy = true;
-      const vt = document.startViewTransition(apply);
-      vt.ready.then(() => de.animate(kf, { duration: DUR, easing: 'linear', fill: 'both', pseudoElement: '::view-transition-new(root)' })).catch(() => {});
-      vt.finished.finally(() => { de.classList.remove('vt-tiles'); shBusy = false; });
+      const W = innerWidth, H = innerHeight, cx = W / 2, cy = H / 2, de = document.documentElement;
+      // 刀線：通過畫面中間 60% 的隨機點、隨機角度（避免太接近前一刀）
+      const cuts = []; let lastA = Math.random() * Math.PI;
+      for (let i = 0; i < 5; i++) { const a = lastA + (0.5 + Math.random() * 1.6); lastA = a; cuts.push({ px: W * (0.2 + Math.random() * 0.6), py: H * (0.2 + Math.random() * 0.6), dx: Math.cos(a), dy: Math.sin(a) }); }
+      // 用前 3 刀把畫面矩形一路切開（凸多邊形對直線切割）
+      let polys = [[[0, 0], [W, 0], [W, H], [0, H]]];
+      const side = (c, [x, y]) => c.dx * (y - c.py) - c.dy * (x - c.px);
+      cuts.slice(0, 3).forEach((c) => {
+        const out = [];
+        polys.forEach((pg) => {
+          const A = [], B = [];
+          pg.forEach((p, i) => { const q = pg[(i + 1) % pg.length], sp = side(c, p), sq = side(c, q);
+            (sp >= 0 ? A : B).push(p);
+            if ((sp >= 0) !== (sq >= 0)) { const t = sp / (sp - sq), m = [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]; A.push(m); B.push(m); } });
+          [A, B].forEach((g) => { if (g.length >= 3) out.push(g); });
+        });
+        polys = out;
+      });
+      // 碎片：每塊一份畫面複製品；複製品帶著切換前的顏色變數（切換後也維持舊配色）
+      const cs = getComputedStyle(de), vars = [];
+      for (let i = 0; i < cs.length; i++) { const k = cs[i]; if (k.startsWith('--')) vars.push(`${k}:${cs.getPropertyValue(k)}`); }
+      const sr = shell.getBoundingClientRect(), bg = getComputedStyle(document.body).backgroundColor;
+      const layer = document.createElement('div'); layer.className = 'slash-fx'; layer.setAttribute('aria-hidden', 'true'); layer.inert = true;
+      // 先做一份精簡的複製品：只留畫面內看得到的卡片與區塊（每塊碎片再複製它，成本小很多）
+      const base = shell.cloneNode(true), oEls = shell.querySelectorAll('*'), cEls = base.querySelectorAll('*');
+      for (let i = oEls.length - 1; i >= 0; i--) { const o = oEls[i]; if (!o.classList.contains('cell') && o.id !== 'detail') continue;
+        const r = o.getBoundingClientRect(); if (r.bottom < 0 || r.top > H || r.width === 0) cEls[i].replaceChildren(); }
+      const pieces = polys.map((pg) => {
+        const el = document.createElement('div'); el.className = 'slash-pc';
+        el.style.cssText = vars.join(';') + `;background:${bg};clip-path:polygon(${pg.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`).join(',')})`;
+        const c = base.cloneNode(true); c.style.cssText = `position:absolute;left:${sr.left}px;top:${sr.top}px;width:${sr.width}px;margin:0`;
+        el.append(c); layer.append(el);
+        const gx = pg.reduce((s, p) => s + p[0], 0) / pg.length, gy = pg.reduce((s, p) => s + p[1], 0) / pg.length;
+        return { el, gx, gy };
+      });
+      // 刀光：從畫面一端劃到另一端
+      const L = Math.hypot(W, H);
+      const svg = `<svg class="slash-lines" width="${W}" height="${H}">${cuts.map((c) => `<line x1="${(c.px - c.dx * L).toFixed(1)}" y1="${(c.py - c.dy * L).toFixed(1)}" x2="${(c.px + c.dx * L).toFixed(1)}" y2="${(c.py + c.dy * L).toFixed(1)}" pathLength="1"/>`).join('')}</svg>`;
+      layer.insertAdjacentHTML('beforeend', svg);
+      document.body.append(layer);
+      apply();   // 底下的真實畫面立刻換成新配色；碎片蓋著，看到的仍是舊畫面
+      // 換配色的重算很重：等兩個畫格（重算完成）才開始動畫，時間軸才不會一開始就被吃掉
+      requestAnimationFrame(() => requestAnimationFrame(() => run(layer, cuts, pieces, cx, cy, W, H)));
+    }
+    function run(layer, cuts, pieces, cx, cy, W, H) {
+      const STEP = 85, CUT_END = 5 * STEP + 60, FLY = 620;
+      layer.querySelectorAll('.slash-lines line').forEach((ln, i) => ln.animate([
+        { strokeDashoffset: 1, opacity: 1 }, { strokeDashoffset: 0, opacity: 1, offset: 0.45 }, { strokeDashoffset: 0, opacity: 0 }],
+        { duration: 200, delay: i * STEP, easing: 'cubic-bezier(.2, .8, .3, 1)', fill: 'both' }));
+      // 每一刀劃過時，碎片沿著刀口抖一下（被砍的手感）
+      pieces.forEach(({ el, gx, gy }) => {
+        const vx = gx - cx, vy = gy - cy, d = Math.hypot(vx, vy) || 1, ux = vx / d, uy = vy / d, dist = 0.55 * Math.max(W, H) + Math.random() * 200, rot = (Math.random() - 0.5) * 50;
+        el.animate([
+          { transform: 'none', opacity: 1 },
+          { transform: `translate(${(ux * 6).toFixed(1)}px, ${(uy * 6).toFixed(1)}px)`, opacity: 1, offset: CUT_END / (CUT_END + FLY), easing: 'cubic-bezier(.3, .6, .4, 1)' },
+          { transform: `translate(${(ux * dist).toFixed(0)}px, ${(uy * dist).toFixed(0)}px) rotate(${rot.toFixed(1)}deg) scale(.85)`, opacity: 0 }],
+          { duration: CUT_END + FLY, easing: 'linear', fill: 'both' });
+      });
+      setTimeout(() => { layer.remove(); shBusy = false; }, CUT_END + FLY + 40);
     }
     let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途
     function shadesSwap(next, apply) {
@@ -2348,7 +2391,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       }).catch(() => {});
       vt.finished.finally(() => { frame.remove(); speed?.remove(); de.classList.remove('vt-shades-on', 'vt-shades-off'); shBusy = false; });
     }
-    tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; (root.dataset.themeFx === 'shades' ? shadesSwap : tilesSwap)(next, () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); }, tb); });
+    tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; (root.dataset.themeFx === 'shades' ? shadesSwap : slashSwap)(next, () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); }, tb); });
     new MutationObserver(paint).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint);
     paint();
@@ -3522,7 +3565,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       color: { primary: '#1f6fff', darkPrimary: '', success: '#12b866', warn: '#f59e0b', danger: '#ef3340', info: '#1846c9', series: ['#1f6fff', '#00a3b8', '#8b5cf6', '#f59e0b'], neutral: 'cool' },
       shape: { card: 20, control: 10, pill: 'full' },
       depth: { shadow: 2, glow: 100, border: 'standard' },
-      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'line', themeFx: 'tiles' },
+      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'line', themeFx: 'slash' },
       layout: { cols: 4, density: 'standard', hidden: [], order: [] },
     };
     const UI_KEYS = ['standard', 'flat', 'glass', 'contrast', 'neu', 'swiss', 'y2k'];
@@ -3753,7 +3796,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     let theme = clone(DEFAULT);
     let lastAuto = null;
     function apply() {
-      document.documentElement.dataset.themeFx = theme.motion.themeFx === 'shades' ? 'shades' : 'tiles';   // 深淺色轉場：右上角按鈕讀這個
+      document.documentElement.dataset.themeFx = theme.motion.themeFx === 'shades' ? 'shades' : 'slash';   // 深淺色轉場：右上角按鈕讀這個
       // 舊版存過的風格（寫實、手繪）已移除：改回標準
       // 舊版的「緊湊」風格改成間距「緊」
       if (theme.style.ui === 'compact') { theme.style.ui = 'standard'; theme.layout.density = 'compact'; }
@@ -4301,7 +4344,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
         })),
           el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['line', '浮線'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter === 'fly' ? 'fly' : 'line') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '深淺色轉場' }, [['tiles', '方塊'], ['shades', '墨鏡']].map(([v, n]) => { const on = () => (theme.motion.themeFx === 'shades' ? 'shades' : 'tiles') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.themeFx = v; changed(); renderAll(); } }, '深淺色 ' + n); quick.push([btn, on]); return btn; }))),
+          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '深淺色轉場' }, [['slash', '亂刀'], ['shades', '墨鏡']].map(([v, n]) => { const on = () => (theme.motion.themeFx === 'shades' ? 'shades' : 'slash') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.themeFx = v; changed(); renderAll(); } }, '深淺色 ' + n); quick.push([btn, on]); return btn; }))),
       )];
     }
     function catsEl() {

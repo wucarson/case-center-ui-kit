@@ -1555,21 +1555,18 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="y2k"] body::before {
   opacity: 1; -webkit-mask-image: none; mask-image: none;
   background:
-    var(--y2k-pin),
     radial-gradient(60vw 42vw at 12% 0%, color-mix(in srgb, rgb(186 218 255) 55%, var(--page)), transparent 70%),
     radial-gradient(50vw 40vw at 92% 18%, color-mix(in srgb, rgb(255 204 238) 50%, var(--page)), transparent 70%),
     radial-gradient(64vw 50vw at 50% 100%, color-mix(in srgb, rgb(206 196 255) 50%, var(--page)), transparent 70%);
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] body::before {
   background:
-    var(--y2k-pin),
     radial-gradient(60vw 42vw at 12% 0%, color-mix(in srgb, rgb(70 140 255 / .22) 60%, transparent), transparent 70%),
     radial-gradient(50vw 40vw at 92% 18%, color-mix(in srgb, rgb(255 90 200 / .14) 60%, transparent), transparent 70%),
     radial-gradient(64vw 50vw at 50% 100%, color-mix(in srgb, rgb(140 110 255 / .18) 60%, transparent), transparent 70%);
 } }
 :root[data-theme="dark"][data-ui="y2k"] body::before {
   background:
-    var(--y2k-pin),
     radial-gradient(60vw 42vw at 12% 0%, color-mix(in srgb, rgb(70 140 255 / .22) 60%, transparent), transparent 70%),
     radial-gradient(50vw 40vw at 92% 18%, color-mix(in srgb, rgb(255 90 200 / .14) 60%, transparent), transparent 70%),
     radial-gradient(64vw 50vw at 50% 100%, color-mix(in srgb, rgb(140 110 255 / .18) 60%, transparent), transparent 70%);
@@ -1616,42 +1613,39 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] :is(.dd-m, .ms-p, .mn-p, .ip-p, .dp-p, .toast, .dl-d) { border-color: rgb(255 255 255 / .14); box-shadow: inset 0 1px 0 rgb(255 255 255 / .08), var(--shadow-pop); } }
 :root[data-theme="dark"][data-ui="y2k"] :is(.dd-m, .ms-p, .mn-p, .ip-p, .dp-p, .toast, .dl-d) { border-color: rgb(255 255 255 / .14); box-shadow: inset 0 1px 0 rgb(255 255 255 / .08), var(--shadow-pop); }
 :root[data-ui="y2k"] { --y2k-sweep: linear-gradient(110deg, transparent 38%, rgb(255 255 255 / .5) 50%, transparent 62%); }
-/* 液態金屬（參考空山基 × 星宇 AIRSORAYAMA）：主色金屬＝選中狀態（跟主色切換）、銀＝次要操作；主按鈕改用 Aqua 果凍；只用在可操作元件，內容區維持平面。
+/* 液態金屬（參考空山基 × 星宇 AIRSORAYAMA）：主色金屬＝主按鈕與選中狀態（跟主色切換）、銀＝次要操作；只用在可操作元件，內容區維持平面。
    漸層高 130%，地平線暗帶落在約 60%（元件下緣附近），文字所在的中段是均勻亮區；滑過時反光往上移、按下時上下反轉 */
 :root[data-ui="y2k"] {
-  --y2k-pin: repeating-linear-gradient(180deg, rgb(255 255 255 / .28) 0 2px, rgb(110 130 165 / .035) 2px 4px);   /* Aqua 細條紋 */
-  --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 38%, #ffffff) 0%, color-mix(in srgb, var(--primary) 72%, #ffffff) 18%, var(--primary) 40%, color-mix(in srgb, var(--primary) 80%, #000000) 57.5%, color-mix(in srgb, var(--primary) 38%, #000000) 60%, color-mix(in srgb, var(--primary) 88%, #ffffff) 63%, color-mix(in srgb, var(--primary) 62%, #ffffff) 76%, color-mix(in srgb, var(--primary) 45%, #ffffff) 100%);
+  --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 42%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 90%, #000000) 50%, color-mix(in srgb, var(--primary) 66%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
   --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #ffffff 0%, #f1f4f8 30%, #dde3eb 56%, #9aa5b5 59.5%, #c6ced9 66%, #edf1f6 100%);
   --y2k-metal-rim: linear-gradient(180deg, color-mix(in srgb, var(--primary) 40%, #ffffff), var(--primary) 60%, color-mix(in srgb, var(--primary) 70%, #000000));
   --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .85), inset 0 -1px 0 rgb(0 0 0 / .08);
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] {
-  --y2k-pin: repeating-linear-gradient(180deg, rgb(255 255 255 / .03) 0 2px, transparent 2px 4px);
-  --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 58%, #ffffff) 0%, color-mix(in srgb, var(--primary) 72%, #ffffff) 18%, var(--primary) 40%, color-mix(in srgb, var(--primary) 80%, #000000) 57.5%, color-mix(in srgb, var(--primary) 38%, #000000) 60%, color-mix(in srgb, var(--primary) 88%, #ffffff) 63%, color-mix(in srgb, var(--primary) 62%, #ffffff) 76%, color-mix(in srgb, var(--primary) 45%, #ffffff) 100%);
+  --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 60%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 90%, #000000) 50%, color-mix(in srgb, var(--primary) 66%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
   --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #5a6577 0%, #3a4352 30%, #2b323d 56%, #0c1015 59.5%, #222934 66%, #3b4452 100%);
   --y2k-metal-rim: linear-gradient(180deg, color-mix(in srgb, var(--primary) 40%, #ffffff), var(--primary) 60%, color-mix(in srgb, var(--primary) 70%, #000000));
   --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .28), inset 0 -1px 0 rgb(0 0 0 / .3);
 } }
 :root[data-theme="dark"][data-ui="y2k"] {
-  --y2k-pin: repeating-linear-gradient(180deg, rgb(255 255 255 / .03) 0 2px, transparent 2px 4px);
-  --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 58%, #ffffff) 0%, color-mix(in srgb, var(--primary) 72%, #ffffff) 18%, var(--primary) 40%, color-mix(in srgb, var(--primary) 80%, #000000) 57.5%, color-mix(in srgb, var(--primary) 38%, #000000) 60%, color-mix(in srgb, var(--primary) 88%, #ffffff) 63%, color-mix(in srgb, var(--primary) 62%, #ffffff) 76%, color-mix(in srgb, var(--primary) 45%, #ffffff) 100%);
+  --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 60%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 90%, #000000) 50%, color-mix(in srgb, var(--primary) 66%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
   --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #5a6577 0%, #3a4352 30%, #2b323d 56%, #0c1015 59.5%, #222934 66%, #3b4452 100%);
   --y2k-metal-rim: linear-gradient(180deg, color-mix(in srgb, var(--primary) 40%, #ffffff), var(--primary) 60%, color-mix(in srgb, var(--primary) 70%, #000000));
   --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .28), inset 0 -1px 0 rgb(0 0 0 / .3);
 }
-/* 主按鈕：Aqua 果凍按鈕（跟主色）——上半部白色反光、下緣透光、深一階的外框 */
-:root[data-ui="y2k"] .btn:not(.is-off) {
-  border: 1px solid color-mix(in srgb, var(--primary) 70%, #000000);
-  background:
-    radial-gradient(ellipse 50% 100% at 50% 0%, rgb(255 255 255 / .72), rgb(255 255 255 / .12) 88%, transparent 90%) 50% 1px / calc(100% - 10px) 46% no-repeat,
-    radial-gradient(ellipse 70% 55% at 50% 100%, color-mix(in srgb, var(--primary) 30%, #ffffff), transparent 75%),
-    linear-gradient(180deg, color-mix(in srgb, var(--primary) 78%, #ffffff), var(--primary) 50%, color-mix(in srgb, var(--primary) 82%, #000000));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / .45), 0 2px 3px rgb(0 0 0 / .22), 0 8px 18px -8px var(--glow);
-  text-shadow: 0 -1px 0 rgb(0 0 0 / .22);
-  transition: filter calc(.2s * var(--dur)) var(--ease), box-shadow calc(.2s * var(--dur)) var(--ease);
+:root[data-ui="y2k"] {
+  --y2k-spec: linear-gradient(180deg, transparent 3%, rgb(255 255 255 / .5) 10%, rgb(255 255 255 / .12) 20%, transparent 30%);   /* 上緣鏡面高光：柔邊、慢慢淡出 */
+  --y2k-pearl: linear-gradient(90deg, rgb(255 214 170 / .14), transparent 22% 78%, rgb(170 210 255 / .16));   /* 珠光：左偏暖、右偏冷 */
 }
-:root[data-ui="y2k"] .btn:not(.is-off):is(:hover, .hv) { filter: brightness(1.07) saturate(1.06); }
-:root[data-ui="y2k"] .btn:not(.is-off):is(:active, .is-press) { filter: brightness(.9); box-shadow: inset 0 2px 5px rgb(0 0 0 / .3), 0 1px 2px rgb(0 0 0 / .2); }
+/* 主按鈕：主色液態金屬（空山基）——鏡面高光＋珠光偏色＋柔和暗帶；滑過反光往上滑、按下反轉 */
+:root[data-ui="y2k"] .btn:not(.is-off) {
+  border: 1px solid transparent;
+  background: var(--y2k-spec) padding-box, var(--y2k-pearl) padding-box, var(--y2k-metal) 0 0 / 100% 130% padding-box, var(--y2k-metal-rim) border-box;
+  box-shadow: var(--y2k-coat), 0 8px 18px -8px var(--glow);
+  transition: background-position calc(.6s * var(--dur)) var(--ease), box-shadow calc(.2s * var(--dur)) var(--ease);
+}
+:root[data-ui="y2k"] .btn:not(.is-off):is(:hover, .hv) { background-position: 0 0, 0 0, 0 45%, 0 0; }
+:root[data-ui="y2k"] .btn:not(.is-off):is(:active, .is-press) { --y2k-dir: 0deg; background-position: 0 0, 0 0, 0 100%, 0 0; box-shadow: inset 0 2px 5px rgb(0 0 0 / .22); }
 :root[data-ui="y2k"] .b2 { background: var(--y2k-silver) 0 0 / 100% 130% padding-box, var(--y2k-rim) border-box; box-shadow: var(--y2k-coat), 0 2px 6px -3px rgb(60 90 150 / .3); transition: background-position calc(.5s * var(--dur)) var(--ease), box-shadow calc(.2s * var(--dur)) var(--ease); }
 :root[data-ui="y2k"] .b2:is(:hover, .hv) { background-position: 0 45%, 0 0; }   /* 換個角度看：反光往上移，暗帶仍在文字下方 */
 :root[data-ui="y2k"] .b2:is(:active, .is-press) { --y2k-dir: 0deg; background-position: 0 100%, 0 0; box-shadow: inset 0 2px 5px rgb(0 0 0 / .22); }   /* 按下：漸層反轉，像凹進去 */
@@ -1699,12 +1693,12 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 /* 牆上卡片原本的轉場（#wall > .cell）權重較高，要在同一層補上鉻邊色標的過渡 */
 :root[data-ui="y2k"] #wall > .cell { transition: transform calc(.55s * var(--dur)) var(--spring-soft), box-shadow calc(.4s * var(--dur)) var(--ease), border-color calc(.25s * var(--dur)) var(--ease), --y2k-r1 calc(.5s * var(--dur)) var(--ease), --y2k-r2 calc(.5s * var(--dur)) var(--ease), --y2k-r3 calc(.5s * var(--dur)) var(--ease); }
 /* 選中狀態：鉻泡泡（分段、期間選擇、詳情頁籤） */
-:root[data-ui="y2k"][data-ui="y2k"] :is(.seg i, .ps > i), :root[data-ui="y2k"][data-ui="y2k"]:not([data-tabs="underline"]) .dt > .ind { background: var(--y2k-metal) 0 0 / 100% 130%; box-shadow: var(--y2k-coat), inset 0 0 0 1px color-mix(in srgb, var(--primary) 70%, #000000), 0 2px 6px -2px var(--glow); }
+:root[data-ui="y2k"][data-ui="y2k"] :is(.seg i, .ps > i), :root[data-ui="y2k"][data-ui="y2k"]:not([data-tabs="underline"]) .dt > .ind { background: var(--y2k-spec), var(--y2k-pearl), var(--y2k-metal) 0 0 / 100% 130%; box-shadow: var(--y2k-coat), inset 0 0 0 1px color-mix(in srgb, var(--primary) 70%, #000000), 0 2px 6px -2px var(--glow); }
 :root[data-ui="y2k"] :is(.seg span.on, .ps span.on), :root[data-ui="y2k"]:not([data-tabs="underline"]) :is(.dtab.on, .dtab.on svg) { color: var(--on-primary); }   /* 主色金屬上的字用主色配對的文字色 */
 :root[data-ui="y2k"]:not([data-tabs="underline"]) .dtab.on b { background: rgb(255 255 255 / .25); color: var(--on-primary); box-shadow: none; }
 /* 分類標籤、工具列：亮面＋鉻邊 */
 :root[data-ui="y2k"] :is(.wf button, .top-a .ctl) { border: 1px solid transparent; background: var(--y2k-gloss-s) padding-box, var(--y2k-btn) padding-box, var(--y2k-rim) border-box; box-shadow: inset 0 1px 0 var(--y2k-in1), 0 2px 6px -3px rgb(60 90 150 / .3); }
-:root[data-ui="y2k"] .wf button[aria-pressed="true"] { background: var(--y2k-metal) 0 0 / 100% 130% padding-box, var(--y2k-metal-rim) border-box; color: var(--on-primary); }
+:root[data-ui="y2k"] .wf button[aria-pressed="true"] { background: var(--y2k-spec) padding-box, var(--y2k-pearl) padding-box, var(--y2k-metal) 0 0 / 100% 130% padding-box, var(--y2k-metal-rim) border-box; color: var(--on-primary); }
 :root[data-ui="y2k"] .wf button[aria-pressed="true"] small { background: rgb(255 255 255 / .25); color: var(--on-primary); }
 :root[data-ui="y2k"] :is(.wf button, .top-a .ctl):hover { filter: brightness(1.05); }
 

@@ -1642,6 +1642,8 @@ body.reduce::before, body.reduce::after { animation: none !important; }
   --y2k-spec: linear-gradient(180deg, transparent 3%, rgb(255 255 255 / .5) 10%, rgb(255 255 255 / .12) 20%, transparent 30%);   /* 上緣鏡面高光：柔邊、慢慢淡出 */
   --y2k-pearl: linear-gradient(90deg, rgb(255 214 170 / .14), transparent 22% 78%, rgb(170 210 255 / .16));   /* 珠光：左偏暖、右偏冷 */
 --y2k-card-pearl: linear-gradient(135deg, rgb(255 214 170 / .05), transparent 38% 62%, rgb(170 210 255 / .06));   /* 卡片極淡珠光：左上偏暖、右下偏冷，約按鈕珠光的三分之一 */
+  --y2k-spot: radial-gradient(140px 70px at 28px 0, rgb(255 255 255 / .95), rgb(255 255 255 / 0) 70%);   /* 外框左上角鏡面高光，往兩側很快淡掉 */
+  --y2k-rim-pearl: linear-gradient(90deg, rgb(255 196 140 / .38), transparent 32% 68%, rgb(140 190 255 / .42));   /* 外框淡珠光：左暖右冷 */
 }
 /* 主按鈕：主色液態金屬（空山基）——鏡面高光＋珠光偏色＋柔和暗帶；滑過反光往上滑、按下反轉 */
 :root[data-ui="y2k"] .btn:not(.is-off) {
@@ -1673,6 +1675,7 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] {
   --y2k-in1: rgb(255 255 255 / .12); --y2k-in2: rgb(255 255 255 / .04);
+  --y2k-spot: radial-gradient(140px 70px at 28px 0, rgb(255 255 255 / .5), rgb(255 255 255 / 0) 70%); --y2k-rim-pearl: linear-gradient(90deg, rgb(255 196 140 / .2), transparent 32% 68%, rgb(140 190 255 / .24));
   --y2k-gloss-s: linear-gradient(180deg, rgb(255 255 255 / .12), rgb(255 255 255 / 0) 50%);
   --y2k-pill: linear-gradient(180deg, color-mix(in srgb, var(--surface) 72%, #ffffff) 0%, color-mix(in srgb, var(--surface) 86%, #ffffff) 48%, var(--surface) 52%, color-mix(in srgb, var(--surface) 80%, #ffffff) 100%);
   --y2k-pill-sh: inset 0 1px 0 rgb(255 255 255 / .22), inset 0 0 0 1px rgb(255 255 255 / .08), 0 2px 8px -2px rgb(from var(--sh-dk) r g b / .5);
@@ -1680,6 +1683,7 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 } }
 :root[data-theme="dark"][data-ui="y2k"] {
   --y2k-in1: rgb(255 255 255 / .12); --y2k-in2: rgb(255 255 255 / .04);
+  --y2k-spot: radial-gradient(140px 70px at 28px 0, rgb(255 255 255 / .5), rgb(255 255 255 / 0) 70%); --y2k-rim-pearl: linear-gradient(90deg, rgb(255 196 140 / .2), transparent 32% 68%, rgb(140 190 255 / .24));
   --y2k-gloss-s: linear-gradient(180deg, rgb(255 255 255 / .12), rgb(255 255 255 / 0) 50%);
   --y2k-pill: linear-gradient(180deg, color-mix(in srgb, var(--surface) 72%, #ffffff) 0%, color-mix(in srgb, var(--surface) 86%, #ffffff) 48%, var(--surface) 52%, color-mix(in srgb, var(--surface) 80%, #ffffff) 100%);
   --y2k-pill-sh: inset 0 1px 0 rgb(255 255 255 / .22), inset 0 0 0 1px rgb(255 255 255 / .08), 0 2px 8px -2px rgb(from var(--sh-dk) r g b / .5);
@@ -1687,9 +1691,9 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 }
 /* 卡片：均勻鉻邊（上亮下暗）＋內側白線 */
 :root[data-ui="y2k"] .cell {
-  --y2k-r1: #ffffff; --y2k-r2: color-mix(in srgb, var(--line-strong) 55%, #ffffff); --y2k-r3: var(--line-strong);
+  --y2k-r1: color-mix(in srgb, var(--line-strong) 22%, #ffffff); --y2k-r2: color-mix(in srgb, var(--line-strong) 55%, #ffffff); --y2k-r3: var(--line-strong);
   border: 1px solid transparent;
-  background: var(--y2k-gloss) padding-box, var(--y2k-card-pearl) padding-box, var(--y2k-fill) padding-box, linear-gradient(180deg, var(--y2k-r1), var(--y2k-r2) 45%, var(--y2k-r3)) border-box;
+  background: var(--y2k-gloss) padding-box, var(--y2k-card-pearl) padding-box, var(--y2k-fill) padding-box, var(--y2k-spot) border-box, var(--y2k-rim-pearl) border-box, linear-gradient(150deg, var(--y2k-r1), var(--y2k-r2) 45%, var(--y2k-r3)) border-box;   /* 外框：左上斜射光（150°）＋左上角一小段鏡面高光＋淡珠光，滑過珠光轉彩虹 */
   box-shadow: inset 0 1px 0 var(--y2k-in1), inset 0 0 0 1px var(--y2k-in2), var(--y2k-glow);
   transition: transform calc(.55s * var(--dur)) var(--spring-soft), box-shadow calc(.4s * var(--dur)) var(--ease), --y2k-r1 calc(.5s * var(--dur)) var(--ease), --y2k-r2 calc(.5s * var(--dur)) var(--ease), --y2k-r3 calc(.5s * var(--dur)) var(--ease);
 }

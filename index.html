@@ -162,6 +162,9 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 .tile { position: absolute; --tc: var(--c1); background: linear-gradient(160deg, color-mix(in srgb, var(--tc) 72%, #ffffff), var(--tc) 60%, color-mix(in srgb, var(--tc) 82%, #000000)); box-shadow: inset 0 1px 0 rgb(255 255 255 / .3); backface-visibility: visible; will-change: transform, opacity; }   /* 顏色跟色板（--c1～--c4 輪流），不加外陰影：上百塊同時動時陰影最吃效能 */
 .tile::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: #fff; opacity: 0; }   /* 落地閃光、光波 */
 .tile.out { background: var(--card); box-shadow: inset 0 0 0 1px var(--line); }   /* 離場：卡片本身碎開 */
+.wire-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.wire-svg .wl { fill: none; stroke: var(--primary); stroke-width: 1.2; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }   /* 疊放的線稿：元件外框 */
+.wire-svg .wt { stroke: color-mix(in srgb, var(--primary) 30%, var(--line-strong)); stroke-opacity: .55; stroke-linecap: round; }   /* 文字的骨架條（粗細依字高） */
 .tile-sweep { position: absolute; pointer-events: none; border-radius: var(--r-2xl); background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / .4) 50%, transparent 65%) no-repeat; background-size: 60% 100%; mix-blend-mode: overlay; }
 /* 進場：浮線（lineIn）以卡片中心展開；離場灰燼的顆粒畫在全畫面畫布 */
 .cell.lineup { transform-origin: 50% 50%; }
@@ -5049,10 +5052,10 @@ void main(){
       });
       return { out: outs, ms: dur };
     }
-    /* 進場（疊放）：卡片先以空白卡片飛入落定（沿用飛入），接著卡片裡的元件一件件從卡片上緣外面出現——
-       淡入、往下落到定位、微微回彈（疊放期間卡片暫時不裁切）；同一張卡由上而下錯開 60ms。整面牆進場時最後一道高光斜掃過整個畫面，
-       切換分類時每張卡疊完各自掃一道。元件＝標題＋內容區往下找到的第一層 2–8 個子元素（找不到就整塊算一件）。
-       位移用 composite: 'add' 疊在元件自己的 transform 上（滑塊、開關圓鈕位置不會跳）；透明度只給起點、終點回到元件自己的值（收起的選單不會閃出來） */
+    /* 進場（疊放）：空白卡片先飛入落定（沿用飛入）→ 卡片裡的元件線稿被描出來（有框線或底色的元件描圓角外框、文字畫佔位線，
+       由上而下錯開）→ 元件實際樣子由淡到清楚浮現、線稿淡出（不加收尾高光）。
+       元件＝標題＋內容區往下找到的第一層 2–8 個子元素（找不到就整塊算一件）；線稿畫在 SVG 疊層上（量好位置、結束即移除），
+       透明度只給起點、終點回到元件自己的值（收起的選單不會閃出來） */
     function stackParts(cell) {
       const vis = (e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
       const out = [];
@@ -5064,28 +5067,62 @@ void main(){
       }
       return out;
     }
+    // 一張卡片的線稿：有框線或底色的元素描外框（最多 16 個）、單行文字畫佔位線（最多 12 條）；依位置由上而下排
+    const alphaOf = (col) => { const m = /rgba?\(([^)]+)\)/.exec(col); if (!m) return col === 'transparent' ? 0 : 1; const p = m[1].split(/[\s,/]+/).filter(Boolean); return p.length > 3 ? parseFloat(p[3]) : 1; };
+    function wireShapes(cell, cr) {
+      const cbg = getComputedStyle(cell).backgroundColor, boxes = [], texts = [];
+      const shown = (e) => { for (let n = e; n && n !== cell; n = n.parentElement) { const s = getComputedStyle(n); if (s.visibility === 'hidden' || s.display === 'none' || parseFloat(s.opacity) < 0.2) return false; } return true; };
+      for (const e of cell.querySelectorAll('*')) {
+        const r = e.getBoundingClientRect();
+        if (r.width < 8 || r.height < 8 || r.bottom <= cr.top || r.top >= cr.bottom || r.right <= cr.left || r.left >= cr.right) continue;
+        const s = getComputedStyle(e);
+        const border = parseFloat(s.borderTopWidth) > 0 && s.borderTopStyle !== 'none' && alphaOf(s.borderTopColor) > 0.1;
+        const fill = alphaOf(s.backgroundColor) > 0.08 && s.backgroundColor !== cbg;
+        if ((border || fill || e.tagName === 'svg' || e.tagName === 'CANVAS') && boxes.length < 16 && !(e.tagName === 'svg' && r.width < 24)) {
+          if (!boxes.some((b) => Math.abs(b.r.left - r.left) < 3 && Math.abs(b.r.top - r.top) < 3 && Math.abs(b.r.width - r.width) < 4) && shown(e)) boxes.push({ r, rad: Math.min(parseFloat(s.borderTopLeftRadius) || 0, r.height / 2, r.width / 2) });
+          continue;
+        }
+        if (texts.length < 12 && r.height <= 34) {
+          const tn = [...e.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
+          if (tn && shown(e)) { const rg = document.createRange(); rg.selectNodeContents(tn); const tr = rg.getBoundingClientRect(); if (tr.width > 4) texts.push({ x1: tr.left + tr.height * 0.22, x2: Math.max(tr.left + tr.height * 0.22, Math.min(tr.right, cr.right - 6) - tr.height * 0.22), y: tr.top + tr.height / 2, w: Math.max(3, tr.height * 0.45) }); }   // 骨架條：粗、圓頭，蓋在文字位置
+        }
+      }
+      const items = [...boxes.map((b) => ({ kind: 'box', ...b, k: b.r.top + b.r.left * 0.02 })), ...texts.map((t) => ({ kind: 'text', ...t, k: t.y + t.x1 * 0.02 }))];
+      return items.sort((a, b) => a.k - b.k);
+    }
     function stackIn(list, scene) {
-      hushFor(D(1500));   // 轉場期間暫停卡片內的示範動畫，讓出運算
-      const cx = innerWidth / 2, cy = innerHeight / 2, md = Math.hypot(cx, cy) || 1;
+      hushFor(D(1600));   // 轉場期間暫停卡片內的示範動畫，讓出運算
+      const cx = innerWidth / 2, cy = innerHeight / 2, md = Math.hypot(cx, cy) || 1, NS = 'http://www.w3.org/2000/svg';
+      const L = tileLayer(), svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'wire-svg'); L.append(svg);
+      const mk = (tag, at) => { const n = document.createElementNS(NS, tag); for (const k in at) n.setAttribute(k, at[k]); svg.append(n); return n; };
       let end = 0;
       for (const [c, r] of list) {
         const d0 = Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md * 140;
+        const shapes = wireShapes(c.el, r), parts = stackParts(c.el);   // 先量（飛入前，位置是定位後的樣子）
         flyPlay(c.el, D(d0));   // ① 空白卡片飛入
-        const parts = stackParts(c.el), t0 = d0 + 380;
-        c.el.style.overflow = 'visible';   // 元件從卡片上緣外面落下：疊放期間不裁切
-        parts.forEach((e, i) => {   // ② 元件從卡片上緣外面出現、淡入落下、微微回彈
-          const at = t0 + i * 60, fall = e.getBoundingClientRect().top - r.top + 36 + i * 6;   // 起點在卡片上緣外 36px
-          e.animate([{ opacity: 0, offset: 0 }, { opacity: 0.35, offset: 0.4 }, { opacity: 1, offset: 0.8 }], { duration: D(480), delay: D(at), easing: 'ease-out', fill: 'backwards' });   // 終點不給＝回到元件自己的透明度；fill backwards：飛入期間先藏好
-          // 只給起點（offset: 0），終點＝元件自己的 transform；composite add 疊上去，滑塊、圓鈕位置不會跳
-          e.animate([{ transform: `translateY(${(-fall).toFixed(0)}px) scale(1.03)`, offset: 0 }], { duration: D(480), delay: D(at), easing: 'cubic-bezier(.3, 1.25, .6, 1)', composite: 'add', fill: 'backwards' });
+        const t0 = d0 + 460;
+        // ② 線稿描出：外框沿圓角繞一圈、文字佔位線由左往右，由上而下錯開 28ms
+        shapes.forEach((sh, i) => {
+          const at = t0 + i * 28;
+          const n = sh.kind === 'box'
+            ? mk('rect', { class: 'wl', x: (sh.r.left + 0.5).toFixed(1), y: (sh.r.top + 0.5).toFixed(1), width: Math.max(1, sh.r.width - 1).toFixed(1), height: Math.max(1, sh.r.height - 1).toFixed(1), rx: sh.rad.toFixed(1), pathLength: 1 })
+            : mk('line', { class: 'wl wt', x1: sh.x1.toFixed(1), x2: sh.x2.toFixed(1), y1: sh.y.toFixed(1), y2: sh.y.toFixed(1), pathLength: 1 });
+          if (sh.kind === 'text') n.style.strokeWidth = sh.w.toFixed(1) + 'px';   // 骨架條粗細依字高（CSS 的 stroke-width 會蓋過屬性，用 style 設）
+          n.animate([{ strokeDashoffset: 1, opacity: 1 }, { strokeDashoffset: 0, opacity: 1, offset: 0.5 }, { strokeDashoffset: 0, opacity: 1, offset: 0.68 }, { strokeDashoffset: 0, opacity: 0 }],   // 描完停一下，元件浮現時淡出
+            { duration: D(600), delay: D(at), fill: 'both', easing: 'cubic-bezier(.45, 0, .2, 1)' });
         });
-        const done = t0 + Math.max(0, parts.length - 1) * 60 + 480;
-        setTimeout(() => { c.el.style.overflow = ''; }, D(done + 30));
-        if (!scene) sweepOn(r, done - 160, 380);
+        // ③ 元件實際樣子浮現（線稿畫到它附近時開始，由淡到清楚）
+        parts.forEach((e, i) => {
+          const at = t0 + 300 + i * 50;   // 線稿畫完才浮現
+          // 只給起點（offset: 0）：終點回到元件自己的透明度與濾鏡，收起的選單不會被閃出來；fill backwards：飛入期間先藏好
+          e.animate([{ opacity: 0, offset: 0 }], { duration: D(320), delay: D(at), easing: 'ease-out', fill: 'backwards' });
+          e.animate([{ filter: 'blur(2px)', offset: 0 }], { duration: D(320), delay: D(at), easing: 'ease-out' });
+        });
+        const done = Math.max(t0 + Math.max(0, shapes.length - 1) * 28 + 600, t0 + 300 + Math.max(0, parts.length - 1) * 50 + 320);
         end = Math.max(end, done);
       }
-      if (scene) { flyScene(); sweepOn({ left: 0, top: 0, width: innerWidth, height: innerHeight }, end - 220, 520); }   // ③ 收尾高光
-      setTimeout(() => { const L = tileFx; if (!L) return; L.querySelectorAll('.tile-sweep').forEach((s) => s.remove()); if (!L.children.length) L.remove(); }, D(end + 700));
+      if (scene) flyScene();   // 背景、標題列一起進場（不加收尾高光）
+      setTimeout(() => { svg.remove(); if (!L.children.length) L.remove(); }, D(end + 300));
     }
     function ashOut(list) {
       const A = ensureAsh(), dur = D(600), rs = getComputedStyle(document.documentElement);

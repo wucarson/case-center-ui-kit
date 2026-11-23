@@ -2780,7 +2780,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const SPIN = dark ? 1 : -1;
       // 捲入進度 p：黑洞加速收進洞裡（先慢後快）、白洞從洞裡減速展開（先快後慢）
       const prog = (t) => cl((t - W0) / (W1 - W0)), ease = (p) => (dark ? Math.pow(p, 2.4) : 1 - Math.pow(1 - p, 2.4));
-      const fold = (t) => -SPIN * 140 * ease(prog(t)) * (dark ? 1 : -1) + (dark ? 0 : -SPIN * 140);   // 皺褶轉動角度：黑洞越收越轉、白洞攤開時轉回 0
+      const fold = (t) => -SPIN * 360 * ease(prog(t)) * (dark ? 1 : -1) + (dark ? 0 : -SPIN * 360);   // 皺褶轉一整圈（360°）：黑洞邊收邊轉、白洞攤開時反向轉回 0
       const pageR = (t) => { const e = ease(prog(t)); return dark ? far * (1 - e) : far * e; };   // 收合邊緣的半徑
       const wave = (t) => { const r = pageR(t) - BAND * 0.9; return r > 0 && r < maxD ? r : 0; };   // 光環畫在皺褶帶中間
       const r0 = M * 0.028, hole = (t) => r0 * (t < FORM ? io(t / FORM) : 1 - io(cl((t - FADE) / 260)));

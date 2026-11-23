@@ -2759,7 +2759,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       vt.finished.finally(() => { fx.remove(); de.classList.remove('vt-wand', 'vt-lumos', 'vt-nox'); shBusy = false; });
     }
     let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途
-    /* 深淺色轉場（黑洞／白洞，約 1.7 秒）：卡片全程留在畫面上，只有顏色隨著一道從中央擴散的波改變
+    /* 深淺色轉場（黑洞／白洞，兩個方向都約 1.45 秒）：卡片全程留在畫面上，只有顏色隨著一道從中央擴散的波改變
        · 做法：View Transitions 拍下舊畫面，舊畫面用柔邊圓形遮罩（--hr）由中央往外挖開，露出底下的新配色；
          柔邊帶（--hb）裡新舊兩層交疊＝變色過程，舊畫面同時微微放大、變糊，在帶裡和新畫面錯開＝殘影
        · 黑洞（切到深色）：中央一個小黑洞（彎曲的深空、閃爍的光子環），波的前緣是一圈光子環＋淡淡的透鏡暗帶，光塵沿螺旋往中央流
@@ -2776,10 +2776,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const K = parseFloat(getComputedStyle(de).getPropertyValue('--dur')) || 1;   // 動畫速度設定（時間軸整條跟著縮放）
       const io = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2), cl = (x) => Math.max(0, Math.min(1, x));
       // 時間軸（毫秒，速度 1 倍時）：洞成形 → 波從中央掃到畫面外 → 洞收起
-      const FORM = 200, W0 = 120, W1 = 1450, HIT = dark ? W1 : W0, FADE = dark ? W1 : 950, END = dark ? 1850 : 1700, BAND = Math.max(120, M * 0.22), far = maxD + BAND * 1.7;   // HIT：衝擊（黑洞＝收完、白洞＝爆開）；far：收合邊緣從畫面外開始
+      const FORM = 150, W0 = 80, W1 = 1150, HIT = dark ? W1 : W0, FADE = dark ? W1 : 800, END = 1450, BAND = Math.max(120, M * 0.22), far = maxD + BAND * 0.9;   // 兩個方向都在 1.45 秒內完成；收合邊緣從螢幕角落開始（一開始就看得到皺褶）；HIT：衝擊（黑洞＝收完、白洞＝爆開）
       const SPIN = dark ? 1 : -1;
       // 捲入進度 p：黑洞加速收進洞裡（先慢後快）、白洞從洞裡減速展開（先快後慢）
-      const prog = (t) => cl((t - W0) / (W1 - W0)), ease = (p) => (dark ? Math.pow(p, 2.4) : 1 - Math.pow(1 - p, 2.4));
+      const prog = (t) => cl((t - W0) / (W1 - W0)), ease = (p) => (dark ? Math.pow(p, 1.6) : 1 - Math.pow(1 - p, 1.6));   // 1.6 次方：吸入加速、放出減速，但不會整段擠在頭或尾，兩個方向感覺一樣快
       const fold = (t) => -SPIN * 360 * ease(prog(t)) * (dark ? 1 : -1) + (dark ? 0 : -SPIN * 360);   // 皺褶轉一整圈（360°）：黑洞邊收邊轉、白洞攤開時反向轉回 0
       const pageR = (t) => { const e = ease(prog(t)); return dark ? far * (1 - e) : far * e; };
       // 內容螺旋：那一層整個轉 360°。只在收合圓半徑 ≤ 畫面短邊一半時轉——這時看得到的是完全在畫面內的圓，怎麼轉都不會露出長方形的邊
@@ -2896,7 +2896,7 @@ void main(){
           const U = {}; for (const k of ['R', 'RS', 'CR', 'T', 'MODE', 'SHOCK', 'SHOCKA', 'LI', 'SP']) U[k] = gl.getUniformLocation(pr, k);
           gl.viewport(0, 0, glc.width, glc.height); gl.uniform2f(U.R, glc.width, glc.height); gl.uniform1f(U.MODE, dark ? 0 : 1);
           paintGl = (t, rs, cr) => {
-            const s = cl((t - HIT) / 450);   // 衝擊光環：黑洞吞完／白洞爆開時從中央擴散，0.45 秒到半個畫面
+            const s = cl((t - HIT) / 300);   // 衝擊光環：黑洞吞完／白洞爆開時從中央擴散，0.3 秒到半個畫面
             gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.uniform1f(U.RS, rs * DPR); gl.uniform1f(U.CR, cr * DPR); gl.uniform1f(U.T, t);
             gl.uniform1f(U.LI, lensI(t)); gl.uniform1f(U.SP, speed(t)); gl.uniform1f(U.SHOCK, s * M * 0.55 * DPR); gl.uniform1f(U.SHOCKA, t > HIT && s < 1 ? Math.pow(1 - s, 1.6) : 0); gl.drawArrays(gl.TRIANGLES, 0, 3);
           };
@@ -2927,14 +2927,14 @@ void main(){
         const page = { pseudoElement: dark ? '::view-transition-old(root)' : '::view-transition-new(root)', duration: (W1 - W0) * K, delay: W0 * K, fill: 'both', easing: 'linear' };
         const N = 72, kf = Array.from({ length: N + 1 }, (_, i) => { const t = W0 + (i / N) * (W1 - W0); return { offset: i / N, transform: `rotate(${spin(t).toFixed(2)}deg)`, '--hr': pageR(t).toFixed(0) + 'px', '--ha': fold(t).toFixed(1) + 'deg' }; });
         de.animate(kf, page);
-        // 衝擊震動：只平移、不旋轉，0.35 秒衰減（黑洞在吞完時、白洞在爆開時）；也讓轉場撐到震完
+        // 衝擊震動：只平移、不旋轉，0.3 秒衰減（黑洞在吞完時、白洞在爆開時）；也讓轉場撐到震完
         const shake = Array.from({ length: 13 }, (_, i) => { const amp = 8 * Math.pow(1 - i / 12, 2); return { transform: `translate(${(Math.sin(i * 2.3) * amp).toFixed(1)}px, ${(Math.cos(i * 1.7) * amp).toFixed(1)}px)` }; });
-        de.animate(shake, { pseudoElement: '::view-transition-group(root)', duration: 350 * K, delay: HIT * K, easing: 'linear' });
+        de.animate(shake, { pseudoElement: '::view-transition-group(root)', duration: 300 * K, delay: HIT * K, easing: 'linear' });
         const t0 = performance.now();
         const tick = (now) => { const t = (now - t0) / K; if (t >= END) return; frame(t); raf = requestAnimationFrame(tick); };
         raf = requestAnimationFrame(tick);
       }).catch(() => {});
-      vt.finished.finally(() => setTimeout(finish, Math.max(0, (END - HIT - 350) * K)));
+      vt.finished.finally(() => setTimeout(finish, Math.max(0, (END - HIT - 300) * K)));
       setTimeout(finish, (END + 800) * K);   // 保險
     }
     tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; ({ hole: holeSwap, slash: slashSwap }[root.dataset.themeFx] || wandSwap)(next, () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); }, tb); });

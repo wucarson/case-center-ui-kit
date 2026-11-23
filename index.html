@@ -5119,7 +5119,12 @@ void main(){
     const CONTROL = () => dens()?.control || { sm: '32px', md: '40px', lg: '48px' };
     const camel = (k) => k.replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
     const tsStr = (v) => JSON.stringify(v);
-    function pkgTokensTs(sn) {
+    // 深色陰影在頁面上寫成「底色混黑」的相對色；匯出檔改成算好的 rgb()，各框架與舊瀏覽器都能直接用
+    const flatColor = (t) => t.replace(/rgb\(from color-mix\(in srgb, (#[0-9a-f]{6}) (\d+(?:\.\d+)?)%, #000000\) r g b \/ ([\d.]+)\)/gi, (m, hex, p, a) => 'rgb(' + [1, 3, 5].map((i) => Math.round(parseInt(hex.substr(i, 2), 16) * p / 100)).join(' ') + ' / ' + a + ')');
+    function pkgTokensTs(sn) { return flatColor(pkgTokensTs0(sn)); }
+    function pkgTokensCss() { return flatColor(pkgTokensCss0()); }
+    function aiCss() { return flatColor(aiCss0()); }
+    function pkgTokensTs0(sn) {
       const col = (mode) => TOK.color.map((k) => `      ${camel(k)}: ${tsStr(sn[mode][k])},`).join('\n');
       const sh = (mode) => TOK.shadow.map((k) => `      ${camel(k)}: ${tsStr(sn[mode][k])},`).join('\n');
       const d = DUR(sn);
@@ -5190,7 +5195,7 @@ export type TypeLevel = keyof Tokens['typography']['levels'];
 export const easing = (name: keyof Tokens['motion']['easing']) => \`cubic-bezier(\${tokens.motion.easing[name].join(', ')})\`;
 `;
     }
-    function pkgTokensCss() {
+    function pkgTokensCss0() {
       const base = EXPORT.css()[1];
       const extra = `\n/* 間距、控件高度、動態（React／Vue 主題套件補充） */\n:root {\n${Object.entries(SPACE).map(([k, v]) => `  --space-${k}: ${v};`).join('\n')}\n${Object.entries(CONTROL).map(([k, v]) => `  --control-${k}: ${v};`).join('\n')}\n${Object.entries(DUR(snapshot())).map(([k, v]) => `  --duration-${k}: ${v};`).join('\n')}\n  --press-scale: 0.96;\n}\n\n@media (prefers-reduced-motion: reduce) {\n  :root {\n    --duration-fast: 0ms;\n    --duration-base: 0ms;\n    --duration-slow: 0ms;\n  }\n}\n`;
       return base + extra;
@@ -5535,7 +5540,7 @@ const { colors, setPreference } = useTheme();
 
     /* ---- AI／框架元件規格包：元件樣式（從畫面直接抽出、變數已解析）＋每個元件的結構與規格 ---- */
     // 頁面外框（展示牆自己的版面、面板、彈窗、詳細頁）不算元件，排除
-    const AI_EXCL = /^(\.cell\b|\.shell|\.top\b|\.top-a|\.ttl|\.wf\b|\.wall|\.cz|\.ck-|\.cmdk|\.sh\b|\.sh-|\.sp\b|\.sp-|\.dt-|\.doc|\.api|\.a11y|body|html|h1|\.ctl|\.body\b|\.sub\b|#|\*|\.ping|\.held|\.live|\.norise|\.ready|\.curtain|\.dd-k|\.ash-cv)/;
+    const AI_EXCL = /^(\.cell\b|\.shell|\.top\b|\.top-a|\.ttl|\.wf\b|\.wall|\.cz|\.ck-|\.cmdk|\.sh\b|\.sh-|\.sp\b|\.sp-|\.dt-|\.doc|\.api|\.a11y|body|html|h1|\.ctl|\.body\b|\.sub\b|#|\*|\.ping|\.held|\.live|\.norise|\.ready|\.curtain|\.dd-k|\.ash-cv|\.silk|\.vt-|\.wand|\.lumos|\.nox|\.slash|\.shades|::view-transition)/;   // 後段：展示牆頁面特效（絲綢背景、魔杖／墨鏡／斬擊轉場），不是元件
     const DARK_PRE = [':root[data-theme="dark"] ', ":root[data-theme='dark'] ", ':root:not([data-theme="light"]) '];
     function aiKeep(sel) {
       // 只切最外層的逗號：:is(a, b) 裡的逗號不能切，否則括號不成對、整段樣式失效
@@ -5567,11 +5572,11 @@ const { colors, setPreference } = useTheme();
           }
         }
         else if (r instanceof CSSMediaRule) { const inner = aiRules(r.cssRules, ind + '  '); if (inner.length) out.push(`${ind}@media ${r.conditionText} {\n${inner.join('\n')}\n${ind}}`); }
-        else if (r instanceof CSSKeyframesRule) out.push(ind + r.cssText);
+        else if (r instanceof CSSKeyframesRule) { if (!/^(sh-|wand|slash|silk)/.test(r.name)) out.push(ind + r.cssText); }   // 頁面特效的動畫不匯出
       }
       return out;
     }
-    function aiCss() {
+    function aiCss0() {
       const sheet = [...document.styleSheets].find((s) => { try { return s.cssRules && !s.href; } catch (e) { return false; } });
       const body = aiRules(sheet ? sheet.cssRules : []).join('\n');
       // 用到的變數全部解析成淺色、深色的實際值，這份檔案自己就能用

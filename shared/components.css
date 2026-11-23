@@ -1,4 +1,4 @@
-/* 元件樣式 —— 主題：案管中心預設・匯出自元件展示牆 2026-11-19
+/* 元件樣式 —— 主題：案管中心預設・匯出自元件展示牆 2026-11-23
    從元件展示牆畫面直接抽出：每個元件的所有狀態（滑過、聚焦、選中、展開、停用、錯誤）與動畫都在這裡，
    變數已解析成實際值。React／Vue 元件只要輸出 COMPONENTS.md 裡的 HTML 結構與 class，外觀就和展示牆一致。
    深色模式：<html data-theme="dark">，或跟隨系統。 */
@@ -101,7 +101,7 @@
     --info-bg: #1b3264;
     --info-fg: #9cc5ff;
     --ink: #f4f7fc;
-    --inset: inset 0 1px 3px rgb(0 0 0 / .5);
+    --inset: inset 0 1px 3px rgb(7 10 18 / .5);
     --label: #9dabc4;
     --line: #34425f;
     --line-strong: #52648a;
@@ -116,11 +116,11 @@
     --primary-dark: #9cc5ff;
     --q-bg: #2a3551;
     --q-fg: #bcc8dc;
-    --raise: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 2px rgb(0 0 0 / .4), 0 4px 10px -3px rgb(0 0 0 / .45);
+    --raise: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 2px rgb(7 10 18 / .4), 0 4px 10px -3px rgb(7 10 18 / .45);
     --selected-fg: #ffffff;
-    --shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 0 0 1px rgb(0 0 0 / .3), 0 12px 28px -8px rgb(0 0 0 / .5), 0 28px 56px -28px rgb(0 0 0 / .65);
-    --shadow-lift: inset 0 1px 0 rgb(255 255 255 / .1), 0 0 0 1px rgb(0 0 0 / .3), 0 20px 40px -10px rgb(0 0 0 / .6), 0 40px 72px -28px rgb(0 0 0 / .75);
-    --shadow-pop: 0 2px 6px rgb(0 0 0 / .45), 0 14px 30px -6px rgb(0 0 0 / .6);
+    --shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 0 0 1px rgb(7 10 18 / .3), 0 12px 28px -8px rgb(7 10 18 / .5), 0 28px 56px -28px rgb(7 10 18 / .65);
+    --shadow-lift: inset 0 1px 0 rgb(255 255 255 / .1), 0 0 0 1px rgb(7 10 18 / .3), 0 20px 40px -10px rgb(7 10 18 / .6), 0 40px 72px -28px rgb(7 10 18 / .75);
+    --shadow-pop: 0 2px 6px rgb(7 10 18 / .45), 0 14px 30px -6px rgb(7 10 18 / .6);
     --soft: #222d46;
     --star: #ffc233;
     --star-glow: rgb(255 194 51 / .45);
@@ -154,7 +154,7 @@
   --info-bg: #1b3264;
   --info-fg: #9cc5ff;
   --ink: #f4f7fc;
-  --inset: inset 0 1px 3px rgb(0 0 0 / .5);
+  --inset: inset 0 1px 3px rgb(7 10 18 / .5);
   --label: #9dabc4;
   --line: #34425f;
   --line-strong: #52648a;
@@ -169,11 +169,11 @@
   --primary-dark: #9cc5ff;
   --q-bg: #2a3551;
   --q-fg: #bcc8dc;
-  --raise: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 2px rgb(0 0 0 / .4), 0 4px 10px -3px rgb(0 0 0 / .45);
+  --raise: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 2px rgb(7 10 18 / .4), 0 4px 10px -3px rgb(7 10 18 / .45);
   --selected-fg: #ffffff;
-  --shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 0 0 1px rgb(0 0 0 / .3), 0 12px 28px -8px rgb(0 0 0 / .5), 0 28px 56px -28px rgb(0 0 0 / .65);
-  --shadow-lift: inset 0 1px 0 rgb(255 255 255 / .1), 0 0 0 1px rgb(0 0 0 / .3), 0 20px 40px -10px rgb(0 0 0 / .6), 0 40px 72px -28px rgb(0 0 0 / .75);
-  --shadow-pop: 0 2px 6px rgb(0 0 0 / .45), 0 14px 30px -6px rgb(0 0 0 / .6);
+  --shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 0 0 1px rgb(7 10 18 / .3), 0 12px 28px -8px rgb(7 10 18 / .5), 0 28px 56px -28px rgb(7 10 18 / .65);
+  --shadow-lift: inset 0 1px 0 rgb(255 255 255 / .1), 0 0 0 1px rgb(7 10 18 / .3), 0 20px 40px -10px rgb(7 10 18 / .6), 0 40px 72px -28px rgb(7 10 18 / .75);
+  --shadow-pop: 0 2px 6px rgb(7 10 18 / .45), 0 14px 30px -6px rgb(7 10 18 / .6);
   --soft: #222d46;
   --star: #ffc233;
   --star-glow: rgb(255 194 51 / .45);
@@ -471,7 +471,7 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentcolor; stroke-wid
 .ht { align-self: stretch; display: grid; grid-template-columns: minmax(48px, max-content) repeat(8, minmax(0px, 1fr)); gap: 3px; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); line-height: calc(18px * var(--fs-k) * var(--rk, 1)); }
 .ht > span { color: var(--label); text-align: center; font-variant-numeric: tabular-nums; }
 .ht > b { font-weight: 500; color: var(--muted); display: flex; align-items: center; white-space: nowrap; padding-right: 4px; }
-.hc { height: 24px; border-radius: var(--r-xs); background: color-mix(in srgb, var(--gb) calc(var(--v) * 1%), var(--soft)); display: flex; align-items: center; justify-content: center; font-weight: 600; font-variant-numeric: tabular-nums; transition: background calc(.7s * var(--dur)) var(--ease), color calc(.4s * var(--dur)); }
+.hc { height: 24px; border-radius: var(--r-xs); background: color-mix(in srgb, var(--gb) calc(var(--v) * 1%), var(--soft)); display: flex; align-items: center; justify-content: center; font-weight: 600; font-variant-numeric: tabular-nums; transition: color calc(.35s * var(--dur)) var(--ease), box-shadow calc(.35s * var(--dur)) var(--ease); }
 .hc.hi { color: var(--on-primary); box-shadow: rgba(255, 255, 255, 0.25) 0px 1px 0px inset; }
 .lg { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 12px; }
 .lg span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; transition: opacity calc(.3s * var(--dur)); }

@@ -1,5 +1,5 @@
 /**
- * 設計 token —— 主題：案管中心預設・匯出自元件展示牆 2026-11-19
+ * 設計 token —— 主題：案管中心預設・匯出自元件展示牆 2026-11-23
  * 和 tokens.css 同一份值：JS 端（圖表、動畫、行內樣式）讀這裡，樣式表讀 CSS 變數。
  */
 export const tokens = {
@@ -89,10 +89,10 @@ export const tokens = {
       shadowPop: "0 2px 6px rgb(16 24 40 / .1), 0 14px 30px -6px rgb(16 24 40 / .22)",
     },
     dark: {
-      inset: "inset 0 1px 3px rgb(0 0 0 / .5)",
-      raise: "inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 2px rgb(0 0 0 / .4), 0 4px 10px -3px rgb(0 0 0 / .45)",
-      shadow: "inset 0 1px 0 rgb(255 255 255 / .1), 0 0 0 1px rgb(0 0 0 / .3), 0 12px 28px -8px rgb(0 0 0 / .5), 0 28px 56px -28px rgb(0 0 0 / .65)",
-      shadowPop: "0 2px 6px rgb(0 0 0 / .45), 0 14px 30px -6px rgb(0 0 0 / .6)",
+      inset: "inset 0 1px 3px rgb(7 10 18 / .5)",
+      raise: "inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 2px rgb(7 10 18 / .4), 0 4px 10px -3px rgb(7 10 18 / .45)",
+      shadow: "inset 0 1px 0 rgb(255 255 255 / .1), 0 0 0 1px rgb(7 10 18 / .3), 0 12px 28px -8px rgb(7 10 18 / .5), 0 28px 56px -28px rgb(7 10 18 / .65)",
+      shadowPop: "0 2px 6px rgb(7 10 18 / .45), 0 14px 30px -6px rgb(7 10 18 / .6)",
     },
   },
   typography: {

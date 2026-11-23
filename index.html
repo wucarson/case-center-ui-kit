@@ -986,6 +986,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .dt-frame { display: block; justify-self: center; height: 480px; max-width: none; border: 0; border-left: 1px solid var(--line); border-right: 1px solid var(--line); border-radius: 0; background: var(--page); transition: width calc(.4s * var(--dur)) var(--spring-soft); }
 /* 單一元件預覽頁（?preview=slug）：只留那一張卡片，置中 */
 .pv-mode .shell > :not(#wall) { display: none !important; }
+.pv-mode :is(#cz, #ck, #sh, .ck-bd) { display: none !important; }   /* 外觀面板、搜尋、分享：預覽頁用不到；外觀面板平常藏在畫面外，預覽框從平板縮到手機時藏的方向會換（右→下），沒拿掉就會滑過畫面 */
 .pv-mode #wall { display: flex !important; justify-content: center; align-items: flex-start; padding: 24px 16px; min-height: 0; }
 .pv-mode #wall > .cell:not(.pv-on) { display: none !important; }
 .pv-mode .cell { animation: none !important; cursor: default; max-width: 100%; }

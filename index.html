@@ -460,7 +460,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .ht { align-self: stretch; display: grid; grid-template-columns: minmax(48px, max-content) repeat(8, minmax(0, 1fr)); gap: 3px; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); line-height: calc(18px * var(--fs-k) * var(--rk, 1)); }
 .ht > span { color: var(--label); text-align: center; font-variant-numeric: tabular-nums; }
 .ht > b { font-weight: 500; color: var(--muted); display: flex; align-items: center; white-space: nowrap; padding-right: 4px; }
-.hc { height: 24px; border-radius: var(--r-xs); background: color-mix(in srgb, var(--gb) calc(var(--v) * 1%), var(--soft)); display: flex; align-items: center; justify-content: center; font-weight: 600; font-variant-numeric: tabular-nums; transition: background calc(.7s * var(--dur)) var(--ease), color calc(.4s * var(--dur)); }
+.hc { height: 24px; border-radius: var(--r-xs); background: color-mix(in srgb, var(--gb) calc(var(--v) * 1%), var(--soft)); display: flex; align-items: center; justify-content: center; font-weight: 600; font-variant-numeric: tabular-nums; transition: color calc(.35s * var(--dur)) var(--ease), box-shadow calc(.35s * var(--dur)) var(--ease); }   /* 底色由 JS 逐格補間（數字同步），這裡只過渡文字色 */
 .hc.hi { color: var(--on-primary); box-shadow: inset 0 1px 0 rgb(255 255 255 / .25); }
 
 /* 圖例 */
@@ -3351,14 +3351,20 @@ void main(){
     ht.insertAdjacentHTML('beforeend', '<span></span>' + Array.from({ length: W }, (_, k) => `<span>W${40 + k}</span>`).join(''));
     const vals = ppl.map((_, r) => Array.from({ length: W }, (_, c) => Math.round(50 + 42 * Math.sin(r * 1.7 + c * .8))));
     const cells = ppl.map((p, r) => { ht.insertAdjacentHTML('beforeend', `<b>${p}</b>` + Array.from({ length: W }, () => '<span class="hc"></span>').join('')); return $$('.hc', ht).slice(r * W, r * W + W); });
-    const paint = (r, c) => { const v = vals[r][c], e = cells[r][c]; e.style.setProperty('--v', v); e.textContent = v; e.classList.toggle('hi', v >= 72); };
+    const shown = vals.map((row) => row.slice()), job = vals.map((row) => row.map(() => 0));
+    const set = (r, c, x) => { const e = cells[r][c]; shown[r][c] = x; e.style.setProperty('--v', x.toFixed(2)); e.textContent = Math.round(x); e.classList.toggle('hi', x >= 72); };
+    const paint = (r, c) => set(r, c, vals[r][c]);
+    const inOut = (t) => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    // 底色與數字用同一段補間一起變；同一格新動畫開始時舊的自動作廢
+    const glide = (r, c) => { const id = ++job[r][c], from = shown[r][c], to = vals[r][c]; if (from === to) return; tween(from, to, 900, (x) => { if (job[r][c] === id) set(r, c, x); }, inOut); };
     ppl.forEach((_, r) => { for (let c = 0; c < W; c++) paint(r, c); });
     let ph = 0;
     loop(2100, async () => {
       ph += 1.1;
-      for (let c = 0; c < W; c++) {
-        ppl.forEach((_, r) => { vals[r][c] = Math.max(8, Math.min(100, Math.round(52 + 44 * Math.sin(r * 1.7 + c * .8 + ph)))); paint(r, c); });
-        await sleep(70);
+      // 斜向波：每一條對角線晚 45ms 出發，前後補間重疊，看起來是一道連續的波
+      for (let d = 0; d < W + ppl.length - 1; d++) {
+        ppl.forEach((_, r) => { const c = d - r; if (c < 0 || c >= W) return; vals[r][c] = Math.max(8, Math.min(100, Math.round(52 + 44 * Math.sin(r * 1.7 + c * .8 + ph)))); glide(r, c); });
+        await sleep(45);
       }
       await sleep(2600);
     });

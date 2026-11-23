@@ -1759,7 +1759,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .bh-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; }
 .bh-fx canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .bh-flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
-.bh-on .cell { transition: none !important; }   /* 被吸入時不讓卡片自己的滑過、進場過渡搶 transform */
+.bh-on .cell { transition: none !important; }
+.bh-ghosts { position: absolute; inset: 0; }
+.bh-ghost { position: fixed !important; margin: 0 !important; pointer-events: none; will-change: opacity, transform, filter; }
+.bh-ghost, .bh-ghost * { transition: none !important; animation: none !important; }   /* 殘影是靜止的複製品，不重播自己的動畫 */   /* 被吸入時不讓卡片自己的滑過、進場過渡搶 transform */
 /* 深淺色轉場：亂刀（slashSwap）——碎片層蓋在最上面 */
 /* 深淺色轉場：魔杖（wandSwap）——舊畫面挖柔邊圓洞（--wr），魔杖、光暈、咒語在 .wand-fx */
 @property --wr { syntax: '<length>'; inherits: false; initial-value: 0px; }
@@ -2771,14 +2774,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const Wt = { IGNITE: 200, BURN: 850, FLASH: 760, APPLY: 880, END: 1420 };     // 白洞：點亮 → 白光燒過全畫面 → 換色、淡入
       const T = dark ? B : Wt, AP = T.APPLY;
       const fx = document.createElement('div'); fx.className = 'bh-fx'; fx.setAttribute('aria-hidden', 'true');
-      fx.innerHTML = '<canvas class="bh-gl"></canvas><canvas class="bh-dust"></canvas><i class="bh-flash"></i>';
+      fx.innerHTML = '<div class="bh-ghosts"></div><canvas class="bh-gl"></canvas><canvas class="bh-dust"></canvas><i class="bh-flash"></i>';
       document.body.append(fx); de.classList.add('bh-on');
-      const flash = fx.querySelector('.bh-flash');
+      const flash = fx.querySelector('.bh-flash'), ghosts = fx.querySelector('.bh-ghosts');
       // 畫面內看得到的卡片與區塊（詳細頁時是頁首、說明、規格區塊）
       const items = [...document.querySelectorAll('#wall > .cell, .ttl, .wf, .dt-hero, .dt-tabs, .dt-panel:not([hidden]) > *, .dt-pn')]
         .map((e) => ({ e, r: e.getBoundingClientRect() }))
         .filter(({ r }) => r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < H && r.right > 0 && r.left < W)
-        .map(({ e, r }) => { const x = r.left + r.width / 2, y = r.top + r.height / 2; return { e, x, y, d: Math.hypot(x - C[0], y - C[1]) }; });
+        .map(({ e, r }) => { const x = r.left + r.width / 2, y = r.top + r.height / 2; return { e, r, x, y, d: Math.hypot(x - C[0], y - C[1]) }; });
       let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 
       /* ---- 邊界半徑：黑洞＝視界、白洞＝白光邊界（先慢後快掃到畫面外）；白洞另有中央光核 ---- */
@@ -2813,14 +2816,26 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           ], { duration: (it.hit + 100 - s) * K, delay: s * K, fill: 'both', easing: 'ease-in' }));
         }
       }
-      // 換色後：卡片留在原位直接淡入
+      // 殘影：每張卡片複製一份留在原位，本體被拉走／燒白時殘影慢一拍淡出、散開
+      for (const it of items) {
+        const gh = it.e.cloneNode(true); gh.removeAttribute('id'); gh.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
+        gh.className += ' bh-ghost'; gh.setAttribute('aria-hidden', 'true');
+        Object.assign(gh.style, { left: it.r.left + 'px', top: it.r.top + 'px', width: it.r.width + 'px', height: it.r.height + 'px', opacity: '0' });   // 開始前完全透明：卡片內容還在動，殘影提早出現會跟本體疊字
+        ghosts.append(gh);
+        const ux = it.d > 1 ? (it.x - C[0]) / it.d : 0, uy = it.d > 1 ? (it.y - C[1]) / it.d : 0, s = Math.max(0, it.hit - (dark ? 300 : 240));
+        anims.push(gh.animate(dark
+          ? [{ opacity: 0, transform: 'none', filter: 'blur(0px)' }, { opacity: 0.55, transform: 'none', filter: 'blur(0px)', offset: 0.06 }, { opacity: 0, transform: `translate(${(-ux * 24).toFixed(1)}px, ${(-uy * 24).toFixed(1)}px) scale(.9)`, filter: 'blur(6px)' }]
+          : [{ opacity: 0, transform: 'none', filter: 'brightness(1.3) blur(0px)' }, { opacity: 0.55, transform: 'none', filter: 'brightness(1.3) blur(0px)', offset: 0.06 }, { opacity: 0, transform: 'scale(1.06)', filter: 'brightness(2.2) blur(8px)' }],
+          { duration: 520 * K, delay: s * K, fill: 'both', easing: 'ease-out' }));
+      }
+      // 換色後：卡片留在原位淡入（由微糊到清楚）
       const reveal = () => {
-        anims.splice(0).forEach((a) => a.cancel());
-        for (const it of items) anims.push(it.e.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 * K, delay: 40 * K, fill: 'backwards', easing: 'ease-out' }));
+        anims.splice(0).forEach((a) => a.cancel()); ghosts.remove();
+        for (const it of items) anims.push(it.e.animate([{ opacity: 0, filter: 'blur(3px)' }, { opacity: 1, filter: 'blur(0px)' }], { duration: 450 * K, delay: 40 * K, fill: 'backwards', easing: 'ease-out' }));
       };
 
       /* ---- 光塵：固定種子的粒子，位置只由 t 決定；黑洞往視界邊界流入，白洞從光核往外噴 ---- */
-      const dust = Array.from({ length: 120 }, () => ({ b: rnd() * (AP - (dark ? 450 : 350)), L: (dark ? 450 : 380) + rnd() * 300, r0: M * (0.06 + rnd() * 0.22), a0: rnd() * 6.28, w: 0.6 + rnd() * 1.2 }));
+      const dust = Array.from({ length: 200 }, () => ({ b: rnd() * (AP - (dark ? 450 : 350)), L: (dark ? 450 : 380) + rnd() * 300, r0: M * (0.06 + rnd() * 0.22), a0: rnd() * 6.28, w: 0.6 + rnd() * 1.2 }));
       const dustAt = (q, t, rs) => {   // rs：這一格的邊界半徑（拖尾的前一點用同一個，才不會拉成直線）
         const u = (t - q.b) / q.L; if (u <= 0 || u >= 1) return null;
         const rr = dark ? rs * 1.02 + q.r0 * Math.pow(1 - u, 1.5) : rs + q.r0 * Math.pow(u, 0.7) * 2.4;

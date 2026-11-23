@@ -1503,10 +1503,13 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 /* 大卡片：沒有內側陰影，外側亮暗依卡片尺寸放大，邊緣明暗落差清楚才顯立體 */
 :root[data-ui="neu"] .cell { border: 0; padding: 17px 19px 19px; box-shadow: -5px -5px 10px var(--neu-hi), 5px 5px 10px var(--neu-lo); }
 :root[data-ui="neu"] .cell:hover { box-shadow: -7px -7px 14px var(--neu-hi), 7px 7px 14px var(--neu-lo); }
-/* 詳細頁：底色全等於頁面，靠陰影分層——外框區塊（頁首、指南、規格）浮起，展示台與預覽、程式碼凹下 */
-:root[data-ui="neu"] :is(.dt-hero, .dt-box, .sp-sec) { box-shadow: -5px -5px 10px var(--neu-hi), 5px 5px 10px var(--neu-lo); }
-:root[data-ui="neu"] .dt-stage { border-color: transparent; background: radial-gradient(color-mix(in srgb, var(--line-strong) 45%, transparent) 1px, transparent 1.2px) 0 0 / 18px 18px, var(--page); box-shadow: inset 5px 5px 10px var(--neu-lo), inset -5px -5px 10px var(--neu-hi); }
-:root[data-ui="neu"] :is(.sp-pv, .sp-code) { background: var(--page); box-shadow: inset 3px 3px 6px var(--neu-lo), inset -3px -3px 6px var(--neu-hi); }
+/* 詳細頁：此風格破例不用陰影分層，改用底色深淺——外框區塊（頁首、指南、規格）比頁面亮一階，展示台與預覽、程式碼比頁面暗一階 */
+:root[data-ui="neu"] { --neu-blk: color-mix(in srgb, var(--page) 45%, #ffffff); --neu-well: color-mix(in srgb, var(--page) 94%, var(--ink)); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --neu-blk: color-mix(in srgb, var(--page) 93%, #ffffff); --neu-well: color-mix(in srgb, var(--page) 65%, #000000); } }
+:root[data-theme="dark"][data-ui="neu"] { --neu-blk: color-mix(in srgb, var(--page) 93%, #ffffff); --neu-well: color-mix(in srgb, var(--page) 65%, #000000); }
+:root[data-ui="neu"] :is(.dt-hero, .dt-box, .sp-sec) { background: var(--neu-blk); box-shadow: none; }
+:root[data-ui="neu"] .dt-stage { border-color: transparent; background: radial-gradient(color-mix(in srgb, var(--line-strong) 45%, transparent) 1px, transparent 1.2px) 0 0 / 18px 18px, var(--neu-well); box-shadow: none; }
+:root[data-ui="neu"] :is(.sp-pv, .sp-code) { background: var(--neu-well); box-shadow: none; }
 
 /* Swiss Style：無陰影、直角，卡片上方一條粗實線；Helvetica 系字型、標題加粗收字距、英文標示大寫 */
 :root[data-ui="swiss"], :root[data-theme="dark"][data-ui="swiss"], :root:not([data-theme="light"])[data-ui="swiss"] {

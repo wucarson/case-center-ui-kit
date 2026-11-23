@@ -2818,7 +2818,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
           const vx = (x - n / 2) / (n / 2), vy = (y - n / 2) / (n / 2), r = Math.hypot(vx, vy), a = Math.atan2(vy, vx);
           const edge = LOBE + (1 - LOBE) * Math.pow(0.5 + 0.5 * Math.cos(5 * (a + SPIN * 2.6 * Math.log(Math.max(r, 0.05)))), 0.7), i = (y * n + x) * 4;   // 5 條對數螺旋臂：臂尖在半徑 100%、臂間在 70%，越往內彎得越多
-          im.data[i] = im.data[i + 1] = im.data[i + 2] = 255; im.data[i + 3] = Math.round(255 * cl((edge - r) / 0.07));
+          im.data[i] = im.data[i + 1] = im.data[i + 2] = 255; im.data[i + 3] = Math.round(255 * cl((edge - r) / 0.14));   // 臂緣羽化（越寬越柔）
         }
         g.putImageData(im, 0, 0); return cv.toDataURL();
       })();
@@ -2838,8 +2838,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         <feComposite in="r" in2="g" operator="arithmetic" k2="1" k3="1" result="rg"/>
         <feComposite in="rg" in2="b" operator="arithmetic" k2="1" k3="1" result="col"/>
         <feComposite in="col" in2="arm" operator="in" result="cut"/>
-        <feGaussianBlur in="arm" stdDeviation="2.2" result="armb"/>
-        <feComposite in="armb" in2="arm" operator="arithmetic" k2="1.3" k3="-1.3" result="rim"/>
+        <feGaussianBlur in="arm" stdDeviation="6" result="armb"/>
+        <feComposite in="armb" in2="arm" operator="arithmetic" k2=".28" k3="-.28" result="rim"/>
         <feFlood flood-color="${dark ? '#fff1d6' : '#fffaf0'}" result="rc"/>
         <feComposite in="rc" in2="rim" operator="in" result="rimc"/>
         <feMerge><feMergeNode in="cut"/><feMergeNode in="rimc"/></feMerge>

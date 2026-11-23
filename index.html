@@ -1617,18 +1617,21 @@ body.reduce::before, body.reduce::after { animation: none !important; }
    漸層高 130%，地平線暗帶落在約 60%（元件下緣附近），文字所在的中段是均勻亮區；滑過時反光往上移、按下時上下反轉 */
 :root[data-ui="y2k"] {
   --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 42%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 95%, #000000) 50%, color-mix(in srgb, var(--primary) 82%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
+  --y2k-ok-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--ok-b) 42%, #ffffff) 0%, color-mix(in srgb, var(--ok-b) 70%, #ffffff) 14%, var(--ok-b) 34%, color-mix(in srgb, var(--ok-b) 95%, #000000) 50%, color-mix(in srgb, var(--ok-b) 82%, #000000) 60%, color-mix(in srgb, var(--ok-b) 92%, #ffffff) 70%, color-mix(in srgb, var(--ok-b) 68%, #ffffff) 84%, color-mix(in srgb, var(--ok-b) 55%, #ffffff) 100%);
   --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #ffffff 0%, #f1f4f8 30%, #dde3eb 56%, #9aa5b5 59.5%, #c6ced9 66%, #edf1f6 100%);
   --y2k-metal-rim: linear-gradient(180deg, color-mix(in srgb, var(--primary) 40%, #ffffff), var(--primary) 60%, color-mix(in srgb, var(--primary) 70%, #000000));
   --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .85), inset 0 -1px 0 rgb(0 0 0 / .08);
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] {
   --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 60%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 95%, #000000) 50%, color-mix(in srgb, var(--primary) 82%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
+  --y2k-ok-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--ok-b) 60%, #ffffff) 0%, color-mix(in srgb, var(--ok-b) 70%, #ffffff) 14%, var(--ok-b) 34%, color-mix(in srgb, var(--ok-b) 95%, #000000) 50%, color-mix(in srgb, var(--ok-b) 82%, #000000) 60%, color-mix(in srgb, var(--ok-b) 92%, #ffffff) 70%, color-mix(in srgb, var(--ok-b) 68%, #ffffff) 84%, color-mix(in srgb, var(--ok-b) 55%, #ffffff) 100%);
   --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #5a6577 0%, #3a4352 30%, #2b323d 56%, #0c1015 59.5%, #222934 66%, #3b4452 100%);
   --y2k-metal-rim: linear-gradient(180deg, color-mix(in srgb, var(--primary) 40%, #ffffff), var(--primary) 60%, color-mix(in srgb, var(--primary) 70%, #000000));
   --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .28), inset 0 -1px 0 rgb(0 0 0 / .3);
 } }
 :root[data-theme="dark"][data-ui="y2k"] {
   --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 60%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 95%, #000000) 50%, color-mix(in srgb, var(--primary) 82%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
+  --y2k-ok-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--ok-b) 60%, #ffffff) 0%, color-mix(in srgb, var(--ok-b) 70%, #ffffff) 14%, var(--ok-b) 34%, color-mix(in srgb, var(--ok-b) 95%, #000000) 50%, color-mix(in srgb, var(--ok-b) 82%, #000000) 60%, color-mix(in srgb, var(--ok-b) 92%, #ffffff) 70%, color-mix(in srgb, var(--ok-b) 68%, #ffffff) 84%, color-mix(in srgb, var(--ok-b) 55%, #ffffff) 100%);
   --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #5a6577 0%, #3a4352 30%, #2b323d 56%, #0c1015 59.5%, #222934 66%, #3b4452 100%);
   --y2k-metal-rim: linear-gradient(180deg, color-mix(in srgb, var(--primary) 40%, #ffffff), var(--primary) 60%, color-mix(in srgb, var(--primary) 70%, #000000));
   --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .28), inset 0 -1px 0 rgb(0 0 0 / .3);
@@ -1645,6 +1648,9 @@ body.reduce::before, body.reduce::after { animation: none !important; }
   box-shadow: var(--y2k-coat), 0 8px 18px -8px var(--glow);
   transition: background-position calc(.6s * var(--dur)) var(--ease), box-shadow calc(.2s * var(--dur)) var(--ease);
 }
+/* 成功狀態：同一塊金屬換成綠色（主色金屬淡出、綠色金屬淡入），保留鏡面高光、珠光與淡暗帶 */
+:root[data-ui="y2k"] .btn::after { background: var(--y2k-spec), var(--y2k-pearl), var(--y2k-ok-metal) 0 0 / 100% 130%; box-shadow: var(--y2k-coat); }
+:root[data-ui="y2k"] .btn.done:not(.is-off) { border-color: color-mix(in srgb, var(--ok-b) 75%, #000000); box-shadow: var(--y2k-coat), 0 8px 18px -8px var(--ok-glow); }
 :root[data-ui="y2k"] .btn:not(.is-off):is(:hover, .hv) { background-position: 0 0, 0 0, 0 45%, 0 0; }
 :root[data-ui="y2k"] .btn:not(.is-off):is(:active, .is-press) { --y2k-dir: 0deg; background-position: 0 0, 0 0, 0 100%, 0 0; box-shadow: inset 0 2px 5px rgb(0 0 0 / .22); }
 :root[data-ui="y2k"] .b2 { background: var(--y2k-silver) 0 0 / 100% 130% padding-box, var(--y2k-rim) border-box; box-shadow: var(--y2k-coat), 0 2px 6px -3px rgb(60 90 150 / .3); transition: background-position calc(.5s * var(--dur)) var(--ease), box-shadow calc(.2s * var(--dur)) var(--ease); }

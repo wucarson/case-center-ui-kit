@@ -4828,8 +4828,8 @@ void main(){
       if (wf.getBoundingClientRect().top < $('.top').offsetHeight) wf.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
       if (!out.length) return relayout(still);
       hushFor(D(1000));   // 轉場期間暫停卡片內的示範動畫，讓出運算
-      // 離場：拼塊＝拆成方塊飛散 0.45 秒；飛入＝原地淡出 0.22 秒；浮線＝由下往上碎成灰燼吹散 0.6 秒（畫面內離開的卡片同時進行）
-      const so = theme.motion.enter === 'tile' ? tileOut(out) : theme.motion.enter === 'fly' ? { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]), ms: D(220) } : ashOut(out);
+      // 離場：拼塊＝拆成方塊飛散 0.45 秒；飛入、疊放＝原地淡出 0.22 秒；浮線＝由下往上碎成灰燼吹散 0.6 秒（畫面內離開的卡片同時進行）
+      const so = theme.motion.enter === 'tile' ? tileOut(out) : ['fly', 'stack'].includes(theme.motion.enter) ? { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]), ms: D(220) } : ashOut(out);
       pending = { out: so.out };
       pending.t = setTimeout(() => { const p = pending; pending = null; relayout(false); p.out.forEach(([c, a]) => { a.cancel(); emergeStop(c.el); }); }, so.ms);
     }
@@ -4875,6 +4875,7 @@ void main(){
     function playEnter(list, scene) {
       if (!list.length || matchMedia('(prefers-reduced-motion: reduce)').matches || theme.motion.reduce) return;
       if (theme.motion.enter === 'tile') { tileIn(list, scene); return; }
+      if (theme.motion.enter === 'stack') { stackIn(list, scene); return; }
       if (theme.motion.enter === 'fly') {
         const cx = innerWidth / 2, cy = innerHeight / 2, md = Math.hypot(cx, cy) || 1;
         list.forEach(([c, r]) => flyPlay(c.el, D(Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md * 140)));
@@ -5048,6 +5049,41 @@ void main(){
       });
       return { out: outs, ms: dur };
     }
+    /* 進場（疊放）：卡片先以空白卡片飛入落定（沿用飛入），接著卡片裡的元件一件件從上方放下來——
+       略高、略大、透明 → 往下壓到定位、微微回彈；同一張卡由上而下錯開 45ms。整面牆進場時最後一道高光斜掃過整個畫面，
+       切換分類時每張卡疊完各自掃一道。元件＝標題＋內容區往下找到的第一層 2–8 個子元素（找不到就整塊算一件）。
+       位移用 composite: 'add' 疊在元件自己的 transform 上（滑塊、開關圓鈕位置不會跳）；透明度只給起點、終點回到元件自己的值（收起的選單不會閃出來） */
+    function stackParts(cell) {
+      const vis = (e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
+      const out = [];
+      for (const c of [...cell.children].filter(vis)) {
+        if (c.tagName === 'HEADER') { out.push(c); continue; }
+        let g = c; for (let d = 0; d < 3 && g.children.length === 1; d++) g = g.children[0];
+        const kids = [...g.children].filter(vis);
+        if (kids.length >= 2 && kids.length <= 8) out.push(...kids); else out.push(c);
+      }
+      return out;
+    }
+    function stackIn(list, scene) {
+      hushFor(D(1500));   // 轉場期間暫停卡片內的示範動畫，讓出運算
+      const cx = innerWidth / 2, cy = innerHeight / 2, md = Math.hypot(cx, cy) || 1;
+      let end = 0;
+      for (const [c, r] of list) {
+        const d0 = Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md * 140;
+        flyPlay(c.el, D(d0));   // ① 空白卡片飛入
+        const parts = stackParts(c.el), t0 = d0 + 380;
+        parts.forEach((e, i) => {   // ② 元件從上方放下來
+          const at = t0 + i * 45;
+          e.animate([{ opacity: 0, offset: 0 }], { duration: D(260), delay: D(at), easing: 'ease-out', fill: 'backwards' });   // fill backwards：飛入期間先藏好
+          e.animate([{ transform: 'translateY(-18px) scale(1.05)', offset: 0 }], {   /* 只給一個關鍵影格時要標 offset: 0，否則會被當成終點 */ duration: D(420), delay: D(at), easing: 'cubic-bezier(.3, 1.35, .6, 1)', composite: 'add', fill: 'backwards' });
+        });
+        const done = t0 + Math.max(0, parts.length - 1) * 45 + 420;
+        if (!scene) sweepOn(r, done - 160, 380);
+        end = Math.max(end, done);
+      }
+      if (scene) { flyScene(); sweepOn({ left: 0, top: 0, width: innerWidth, height: innerHeight }, end - 220, 520); }   // ③ 收尾高光
+      setTimeout(() => { const L = tileFx; if (!L) return; L.querySelectorAll('.tile-sweep').forEach((s) => s.remove()); if (!L.children.length) L.remove(); }, D(end + 700));
+    }
     function ashOut(list) {
       const A = ensureAsh(), dur = D(600), rs = getComputedStyle(document.documentElement);
       const ink = rs.getPropertyValue('--ink').trim(), ln = rs.getPropertyValue('--line-strong').trim();
@@ -5126,7 +5162,7 @@ void main(){
             on: () => (m ? !theme.motion.reduce && theme.motion.speed === m.speed && theme.motion.bounce === m.bounce : theme.motion.reduce),
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
         })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['line', '浮線'], ['fly', '飛入'], ['tile', '拼塊']].map(([v, n]) => { const on = () => (['fly', 'tile'].includes(theme.motion.enter) ? theme.motion.enter : 'line') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; })),
+          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['line', '浮線'], ['fly', '飛入'], ['tile', '拼塊'], ['stack', '疊放']].map(([v, n]) => { const on = () => (['fly', 'tile', 'stack'].includes(theme.motion.enter) ? theme.motion.enter : 'line') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; })),
           el('div', { class: 'cz-seg', role: 'group', 'aria-label': '深淺色轉場' }, [['wand', '魔杖'], ['slash', '亂刀'], ['hole', '黑洞']].map(([v, n]) => { const on = () => (['hole', 'slash'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'wand') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.themeFx = v; changed(); renderAll(); } }, '深淺色 ' + n); quick.push([btn, on]); return btn; }))),
       )];
     }

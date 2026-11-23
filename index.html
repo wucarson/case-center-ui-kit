@@ -2760,6 +2760,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
          柔邊帶（--hb）裡新舊兩層交疊＝變色過程，舊畫面同時微微放大、變糊，在帶裡和新畫面錯開＝殘影
        · 黑洞（切到深色）：中央一個小黑洞（彎曲的深空、閃爍的光子環），波的前緣是一圈光子環＋淡淡的透鏡暗帶，光塵沿螺旋往中央流
        · 白洞（切到淺色）：中央一個白洞光核，波的前緣是一圈白光＋往內的過曝光暈，光塵往外噴
+       · 旋轉：舊畫面被捲著轉、放大（四角蓋得住），波帶裡有旋轉的螺旋光臂；衝擊：波發射時畫面衰減震動 0.4 秒、中央爆出衝擊光環
        · WebGL、2D 畫布疊在最上面（自己的 view-transition-name）；每一格只由時間 t 決定；不支援或減少動態時直接切換 */
     function holeSwap(next, apply) {
       if (shBusy) return;
@@ -2794,13 +2795,16 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         const D = DPR.toFixed(2);
         const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
         const FS = `precision highp float;
-uniform vec2 R;uniform float RS,CR,T,MODE;
+uniform vec2 R;uniform float RS,CR,T,MODE,SHOCK,SHOCKA;
 float h1(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float stars(vec2 q){vec2 g=floor(q),f=fract(q);float h=h1(g);vec2 c=vec2(h1(g+1.3),h1(g+2.7));return smoothstep(.09,0.,length(f-c))*step(.8,h)*(.6+.4*sin(T*.004*(1.+h*5.)+h*40.));}
 void main(){
   vec2 p=vec2(gl_FragCoord.x,R.y-gl_FragCoord.y),d=p-.5*R;float r=length(d),ang=atan(d.y,d.x),cr=max(CR,.001),w=max(RS*.12,40.*${D});
   float fl=.75+.25*sin(T*.031+ang*7.)*sin(T*.017-ang*3.);
   float wring=RS>0.?exp(-pow((r-RS)/(1.6*${D}+w*.03),2.))*fl:0.;                     /* 波前緣的細環，閃爍 */
+  float band=RS>0.?smoothstep(RS-w*3.,RS-w*.3,r)*smoothstep(RS+w*.3,RS-w*.1,r):0.;
+  float arms=pow(.5+.5*sin(ang*3.+log(r+1.)*7.-T*(MODE<.5?.014:-.014)),6.)*band*.32;   /* 波帶裡旋轉的螺旋光臂 */
+  float sw=exp(-pow((r-SHOCK)/(10.*${D}),2.))*SHOCKA;                                  /* 洞爆開的衝擊光環 */
   vec3 col=vec3(0.);float a=0.;
   if(MODE<.5){
     float space=CR>0.?smoothstep(cr*4.2,cr*1.2,r):0.;                                  /* 中央小洞周圍彎曲的深空 */
@@ -2810,26 +2814,30 @@ void main(){
     float hor=CR>0.?smoothstep(cr*1.03,cr*.95,r):0.;
     float shade=RS>0.?smoothstep(RS+w*.5,RS,r)*smoothstep(RS-w*1.6,RS-w*.2,r)*.28:0.;  /* 前緣後方一道淡淡的透鏡暗帶 */
     float disk=RS>0.?exp(-pow((r-RS+w*.5)/(w*.6),2.))*(.5+.5*sin(ang*3.-T*.01+log(r+1.)*4.))*.22:0.;
-    a=max(max(space*.92,hor),max(max(hring,wring),shade+disk));
-    col=vec3(.015,.018,.028)+vec3(1.)*st+vec3(1.,.97,.92)*(hring+wring)*1.4+vec3(.96,.88,.76)*disk;
+    a=max(max(space*.92,hor),max(max(hring,wring),shade+disk+arms+sw));
+    col=vec3(.015,.018,.028)+vec3(1.)*st+vec3(1.,.97,.92)*(hring+wring+sw)*1.4+vec3(.96,.88,.76)*(disk+arms*1.6);
     col=mix(col,vec3(0.),hor);
   }else{
     float c=CR>0.?smoothstep(cr*1.05,cr*.9,r):0.;
     float glow=CR>0.?exp(-r/(cr*1.5+1.))*1.1+exp(-r/(cr*4.+1.))*.4:0.;
     float halo=RS>0.?smoothstep(RS-w*1.8,RS,r)*smoothstep(RS+w*.4,RS,r)*.42:0.;        /* 前緣往內的過曝光暈 */
-    a=clamp(c+glow+wring*.9+halo,0.,1.);col=vec3(1.,.97,.9);
+    a=clamp(c+glow+wring*.9+halo+arms+sw,0.,1.);col=vec3(1.,.97,.9);
   }
   gl_FragColor=vec4(col*a,a);
 }`;
-        const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+        const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error('holeSwap shader', gl.getShaderInfoLog(s)); return s; };
         const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
         if (gl.getProgramParameter(pr, gl.LINK_STATUS)) {
           gl.useProgram(pr);
           gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
           const al = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
-          const U = {}; for (const k of ['R', 'RS', 'CR', 'T', 'MODE']) U[k] = gl.getUniformLocation(pr, k);
+          const U = {}; for (const k of ['R', 'RS', 'CR', 'T', 'MODE', 'SHOCK', 'SHOCKA']) U[k] = gl.getUniformLocation(pr, k);
           gl.viewport(0, 0, glc.width, glc.height); gl.uniform2f(U.R, glc.width, glc.height); gl.uniform1f(U.MODE, dark ? 0 : 1);
-          paintGl = (t, rs, cr) => { gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.uniform1f(U.RS, rs * DPR); gl.uniform1f(U.CR, cr * DPR); gl.uniform1f(U.T, t); gl.drawArrays(gl.TRIANGLES, 0, 3); };
+          paintGl = (t, rs, cr) => {
+            const s = cl((t - W0) / 450);   // 衝擊光環：波發射時從中央爆開，0.45 秒擴到半個畫面
+            gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.uniform1f(U.RS, rs * DPR); gl.uniform1f(U.CR, cr * DPR); gl.uniform1f(U.T, t);
+            gl.uniform1f(U.SHOCK, s * M * 0.55 * DPR); gl.uniform1f(U.SHOCKA, t > W0 && s < 1 ? Math.pow(1 - s, 1.6) : 0); gl.drawArrays(gl.TRIANGLES, 0, 3);
+          };
         }
       }
       const g2 = dc.getContext('2d');
@@ -2855,8 +2863,12 @@ void main(){
         const old = { pseudoElement: '::view-transition-old(root)', duration: (W1 - W0) * K, delay: W0 * K, fill: 'both' };
         // 舊畫面：圓形遮罩由中央挖開（柔邊帶＝變色過程）
         de.animate([{ '--hr': '0px' }, { '--hr': far.toFixed(0) + 'px' }], { ...old, easing: 'cubic-bezier(.65, 0, .35, 1)' });
-        // 殘影：舊畫面微微放大、變糊，在柔邊帶裡和新畫面錯開（只放大不縮小：縮小會讓畫面四周先露出新配色的細框）
-        de.animate([{ transform: 'scale(1)', filter: 'blur(0px)' }, { transform: `scale(${dark ? 1.015 : 1.025})`, filter: 'blur(2.5px)' }], { ...old, easing: 'ease-in' });
+        // 旋轉殘影：舊畫面被捲著轉（黑洞逆時針、白洞順時針）、放大、變糊，在柔邊帶裡和新畫面錯開；放大量蓋得住轉動後的四角
+        const ROT = dark ? -3 : 3, cover = Math.cos(Math.abs(ROT) * Math.PI / 180) + Math.sin(Math.abs(ROT) * Math.PI / 180) * Math.max(W / H, H / W) + 0.01;
+        de.animate([{ transform: 'rotate(0deg) scale(1)', filter: 'blur(0px)' }, { transform: `rotate(${ROT}deg) scale(${cover.toFixed(3)})`, filter: 'blur(2.5px)' }], { ...old, easing: 'cubic-bezier(.5, 0, .75, .3)' });
+        // 衝擊震動：波發射的瞬間整個畫面震一下，0.4 秒內衰減
+        const shake = Array.from({ length: 13 }, (_, i) => { const k = i / 12, amp = 9 * Math.pow(1 - k, 2); return { transform: `translate(${(Math.sin(i * 2.3) * amp).toFixed(1)}px, ${(Math.cos(i * 1.7) * amp).toFixed(1)}px)` }; });
+        de.animate(shake, { pseudoElement: '::view-transition-group(root)', duration: 400 * K, delay: W0 * K, easing: 'linear' });
         const t0 = performance.now();
         const tick = (now) => { const t = (now - t0) / K; if (t >= END) return; frame(t); raf = requestAnimationFrame(tick); };
         raf = requestAnimationFrame(tick);

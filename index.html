@@ -1759,7 +1759,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 @property --hr { syntax: '<length>'; inherits: false; initial-value: 0px; }
 .vt-hole::view-transition-old(root), .vt-hole::view-transition-new(root), ::view-transition-group(bhole), ::view-transition-old(bhole), ::view-transition-new(bhole) { animation: none; mix-blend-mode: normal; }
 @property --ha { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
-.vt-hole-in::view-transition-old(root), .vt-hole-out::view-transition-new(root) { z-index: 2; filter: url(#bh-lens); -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--hr) - var(--hb, 200px) * 1.6), transparent calc(var(--hr) - var(--hb, 200px) * .8)), repeating-conic-gradient(from var(--ha) at 50% 50%, #000 0deg, rgb(0 0 0 / .18) 11.25deg, #000 22.5deg), radial-gradient(circle at 50% 50%, #000 calc(var(--hr) - var(--hb, 200px)), transparent var(--hr)); mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--hr) - var(--hb, 200px) * 1.6), transparent calc(var(--hr) - var(--hb, 200px) * .8)), repeating-conic-gradient(from var(--ha) at 50% 50%, #000 0deg, rgb(0 0 0 / .18) 11.25deg, #000 22.5deg), radial-gradient(circle at 50% 50%, #000 calc(var(--hr) - var(--hb, 200px)), transparent var(--hr)); -webkit-mask-composite: source-over, source-in; mask-composite: add, intersect; }   /* 被收進洞（黑洞）／從洞裡攤開（白洞）的那層：像綢布——內圈完整，外緣是旋轉的放射皺褶，畫面本身不縮放 */
+.vt-hole-in::view-transition-old(root), .vt-hole-out::view-transition-new(root) { z-index: 2; filter: url(#bh-lens); -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--hr) - var(--hb, 200px) * 1.6), transparent calc(var(--hr) - var(--hb, 200px) * .8)), repeating-conic-gradient(from var(--ha) at 50% 50%, #000 0deg, rgb(0 0 0 / .18) 11.25deg, #000 22.5deg), radial-gradient(circle at 50% 50%, #000 calc(var(--hr) - var(--hb, 200px)), transparent var(--hr)); mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--hr) - var(--hb, 200px) * 1.6), transparent calc(var(--hr) - var(--hb, 200px) * .8)), repeating-conic-gradient(from var(--ha) at 50% 50%, #000 0deg, rgb(0 0 0 / .18) 11.25deg, #000 22.5deg), radial-gradient(circle at 50% 50%, #000 calc(var(--hr) - var(--hb, 200px)), transparent var(--hr)); -webkit-mask-composite: source-over, source-in; mask-composite: add, intersect; transform-origin: 50% 50%; }   /* 被收進洞（黑洞）／從洞裡攤開（白洞）的那層：像綢布——內圈完整，外緣是旋轉的放射皺褶，畫面本身不縮放 */
 .vt-hole-out::view-transition-old(root) { z-index: 1; }
 ::view-transition-group(bhole) { z-index: 3; }
 .vt-hole::view-transition-group(root) { transform-origin: 50% 50%; }
@@ -2765,7 +2765,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
        · 黑洞（切到深色）：中央一個小黑洞（彎曲的深空、閃爍的光子環），波的前緣是一圈光子環＋淡淡的透鏡暗帶，光塵沿螺旋往中央流
        · 白洞（切到淺色）：中央一個白洞光核，波的前緣是一圈白光＋往內的過曝光暈，光塵往外噴
        · 旋轉：舊畫面被捲著轉、放大（四角蓋得住），波帶裡有旋轉的螺旋光臂；衝擊：波發射時畫面衰減震動 0.4 秒、中央爆出衝擊光環
-       · 綢布收合：黑洞把舊畫面像綢布一樣往洞裡收——畫面不縮放（看不到長方形外框），外緣是一圈旋轉的放射皺褶、內容被漩渦往中心拉，加速收進洞裡、露出新配色；白洞反過來，新畫面從洞裡攤開
+       · 綢布收合：黑洞把舊畫面像綢布一樣往洞裡收——畫面不縮放（看不到長方形外框），外緣是一圈旋轉的放射皺褶、內容被漩渦往中心拉、整層轉一圈 360°（只在圓小於畫面短邊一半時轉，不露邊），加速收進洞裡、露出新配色；白洞反過來，新畫面從洞裡轉一圈噴出再攤開
        · 鏡頭：SVG 濾鏡（#bh-lens）在轉場畫面上做魚眼＋螺旋折射、徑向模糊、色差；WebGL 疊上隨下落速度增強的光條紋、光暈、暗角、膠片顆粒
        · WebGL、2D 畫布疊在最上面（自己的 view-transition-name）；每一格只由時間 t 決定；不支援或減少動態時直接切換 */
     function holeSwap(next, apply) {
@@ -2781,7 +2781,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       // 捲入進度 p：黑洞加速收進洞裡（先慢後快）、白洞從洞裡減速展開（先快後慢）
       const prog = (t) => cl((t - W0) / (W1 - W0)), ease = (p) => (dark ? Math.pow(p, 2.4) : 1 - Math.pow(1 - p, 2.4));
       const fold = (t) => -SPIN * 360 * ease(prog(t)) * (dark ? 1 : -1) + (dark ? 0 : -SPIN * 360);   // 皺褶轉一整圈（360°）：黑洞邊收邊轉、白洞攤開時反向轉回 0
-      const pageR = (t) => { const e = ease(prog(t)); return dark ? far * (1 - e) : far * e; };   // 收合邊緣的半徑
+      const pageR = (t) => { const e = ease(prog(t)); return dark ? far * (1 - e) : far * e; };
+      // 內容螺旋：那一層整個轉 360°。只在收合圓半徑 ≤ 畫面短邊一半時轉——這時看得到的是完全在畫面內的圓，怎麼轉都不會露出長方形的邊
+      //   黑洞：圓縮進短邊一半後邊收邊加速轉滿一圈；白洞：剛噴出時快速轉一圈、圓長到短邊一半前轉完
+      const eIn = M * 0.5 / far;
+      const spin = (t) => { const e = ease(prog(t)), k = dark ? cl((e - (1 - eIn)) / eIn) : 1 - cl(e / eIn); return -SPIN * 360 * (dark ? Math.pow(k, 0.8) : k); };   // 收合邊緣的半徑
       const wave = (t) => { const r = pageR(t) - BAND * 0.9; return r > 0 && r < maxD ? r : 0; };   // 光環畫在皺褶帶中間
       const r0 = M * 0.028, hole = (t) => r0 * (t < FORM ? io(t / FORM) : 1 - io(cl((t - FADE) / 260)));
       // 鏡頭強度：像往洞裡下落——加速、最快、再減速落地；speed 是下落速度（給光條紋）
@@ -2817,7 +2821,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const dWarp = svg.querySelector('.d-warp'), dZoom = svg.querySelector('.d-zoom'), dCa1 = svg.querySelector('.d-ca1'), dCa2 = svg.querySelector('.d-ca2');
       const lens = (t) => {   // 魚眼＋螺旋折射、徑向模糊、色差：強度跟著下落曲線
         const p = prog(t), tw = dark ? Math.pow(p, 1.2) : Math.pow(1 - p, 1.2), v = speed(t);
-        dWarp.setAttribute('scale', (M * 0.34 * tw).toFixed(1)); dZoom.setAttribute('scale', (M * 0.07 * v).toFixed(1));
+        dWarp.setAttribute('scale', (M * 0.46 * tw).toFixed(1));   // 漩渦扭曲加強 dZoom.setAttribute('scale', (M * 0.07 * v).toFixed(1));
         dCa1.setAttribute('scale', (M * 0.022 * v).toFixed(1)); dCa2.setAttribute('scale', (-M * 0.022 * v).toFixed(1));
       };
       const fx = document.createElement('div'); fx.className = 'bh-fx'; fx.setAttribute('aria-hidden', 'true');
@@ -2921,7 +2925,7 @@ void main(){
       vt.ready.then(() => {
         // 被收進洞（黑洞＝舊畫面）／從洞裡攤開（白洞＝新畫面）的那一層：畫面不縮放，只有收合邊緣與皺褶轉動，扭轉與流動交給濾鏡
         const page = { pseudoElement: dark ? '::view-transition-old(root)' : '::view-transition-new(root)', duration: (W1 - W0) * K, delay: W0 * K, fill: 'both', easing: 'linear' };
-        const N = 36, kf = Array.from({ length: N + 1 }, (_, i) => { const t = W0 + (i / N) * (W1 - W0); return { offset: i / N, '--hr': pageR(t).toFixed(0) + 'px', '--ha': fold(t).toFixed(1) + 'deg' }; });
+        const N = 72, kf = Array.from({ length: N + 1 }, (_, i) => { const t = W0 + (i / N) * (W1 - W0); return { offset: i / N, transform: `rotate(${spin(t).toFixed(2)}deg)`, '--hr': pageR(t).toFixed(0) + 'px', '--ha': fold(t).toFixed(1) + 'deg' }; });
         de.animate(kf, page);
         // 衝擊震動：只平移、不旋轉，0.35 秒衰減（黑洞在吞完時、白洞在爆開時）；也讓轉場撐到震完
         const shake = Array.from({ length: 13 }, (_, i) => { const amp = 8 * Math.pow(1 - i / 12, 2); return { transform: `translate(${(Math.sin(i * 2.3) * amp).toFixed(1)}px, ${(Math.cos(i * 1.7) * amp).toFixed(1)}px)` }; });

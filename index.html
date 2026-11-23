@@ -1600,6 +1600,9 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="swiss"] .seg-p b { font-weight: 700; letter-spacing: -.03em; }
 :root[data-ui="swiss"] :is(.b2:hover, .b2.hv) { background: var(--soft); border-color: var(--ink); }
 :root[data-ui="swiss"] .tab:not(.on):hover { text-decoration: underline 2px; text-underline-offset: 6px; }
+/* 全直角：所有元件（含勾選框、單選、開關圓鈕、頭像、狀態點、徽章、提示框）一律 0 圓角；設定面板自有樣式不受影響。圖示維持原線條 */
+:root[data-ui="swiss"] :where(body *:not(#cz, #cz *)), :root[data-ui="swiss"] :where(body *:not(#cz, #cz *))::before, :root[data-ui="swiss"] :where(body *:not(#cz, #cz *))::after { border-radius: 0 !important; }
+:root[data-ui="swiss"] .lc .la { stroke-linecap: butt; stroke-linejoin: miter; }   /* 折線圖：線端、轉折也改直角 */
 
 /* Y2K 鉻金屬：元件也換成同材質（細鉻邊、內凹亮面）；彈出層霧面鉻；滑過按鈕亮面掃過一次 */
 :root[data-ui="y2k"] :where(.search, .dd-t, .tp-f, .dp-f, .ff-i) { background-image: linear-gradient(180deg, rgb(110 130 165 / .1), rgb(110 130 165 / 0) 45%); }

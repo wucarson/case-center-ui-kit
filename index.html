@@ -958,19 +958,25 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .dt-panel { display: flex; flex-direction: column; gap: 16px; }
 .dt-panel[hidden] { display: none; }
 /* 展示台左上：預覽尺寸（桌機／平板／手機）、在新分頁開啟。平板、手機用內嵌框架載入單一元件預覽頁，元件拿到的視窗寬度才是真的 768／375 */
-.dt-stage:has(> .dt-tools) { padding-top: 72px; }
-.dt-tools { position: absolute; top: 12px; left: 12px; z-index: 2; display: flex; align-items: center; gap: 8px; }
+.dt-stage:has(> .dt-bar) { padding-top: 84px; }
+.dt-bar { position: absolute; top: 0; left: 0; right: 0; z-index: 2; height: 52px; padding: 0 10px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line-subtle); border-radius: inherit; border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: color-mix(in srgb, var(--surface) 72%, transparent); }
+.dt-bar > .sp { flex: 1; }
 .dt-dev { display: inline-flex; gap: 2px; padding: 3px; border-radius: var(--r-md); background: var(--soft); box-shadow: var(--inset); }
-.dt-dev button, .dt-open { width: 34px; height: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: max(2px, calc(var(--r-md) - 3px)); background: none; color: var(--weak); cursor: pointer; transition: background calc(.2s * var(--dur)), color calc(.2s * var(--dur)); }
+.dt-dev button, .dt-open { width: 32px; height: 28px; display: grid; place-items: center; padding: 0; border: 0; border-radius: max(2px, calc(var(--r-md) - 3px)); background: none; color: var(--weak); cursor: pointer; transition: background calc(.2s * var(--dur)), color calc(.2s * var(--dur)); }
 .dt-dev button:hover, .dt-open:hover { color: var(--ink); }
-.dt-dev button[aria-pressed="true"] { background: var(--tile); box-shadow: var(--raise); color: var(--primary); }
-.dt-open { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--tile); box-shadow: var(--raise); }
+.dt-dev button[aria-pressed="true"] { background: var(--tile); box-shadow: var(--raise); color: var(--ink); }
 .dt-dev button:focus-visible, .dt-open:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
-.dt-tools svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.dt-dev-w { font-size: 12px; color: var(--weak); font-variant-numeric: tabular-nums; }
+.dt-bar svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.dt-dev-w { font: 500 12px/1 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--weak); font-variant-numeric: tabular-nums; }
+/* 工具列裡的播放／暫停：一直顯示、和新分頁鈕同尺寸 */
+.dt-bar .dt-play { position: static; opacity: 1; scale: 1; translate: 0 0; filter: none; pointer-events: auto; transition: none; }
+.dt-bar .dt-play button { width: 32px; height: 28px; border: 0; border-radius: var(--r-sm); background: none; box-shadow: none; color: var(--weak); }
+.dt-bar .dt-play button:hover { color: var(--ink); }
+.dt-bar .dt-play svg { width: 15px; height: 15px; fill: currentColor; stroke: none; }
+/* 平板／手機：無外框的窄欄撐滿預覽區高度，兩側斜線底紋 */
+.dt-stage.dev { padding: 53px 0 0; align-items: stretch; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--line-strong) 35%, transparent) 0 1px, transparent 1px 9px), color-mix(in srgb, var(--soft) 55%, var(--line-subtle)); }
 .dt-stage.dev > .cell { display: none !important; }
-.dt-stage.dev .dt-play { display: none; }
-.dt-frame { display: block; flex: none; height: 480px; max-width: none; border: 0; border-radius: 26px; background: var(--page); box-shadow: 0 0 0 1px var(--line-strong), 0 0 0 7px var(--tile), 0 0 0 8px var(--line), var(--shadow-lift); transition: width calc(.45s * var(--dur)) var(--spring-soft), height calc(.3s * var(--dur)) var(--ease); }
+.dt-frame { display: block; justify-self: center; height: 480px; max-width: none; border: 0; border-left: 1px solid var(--line); border-right: 1px solid var(--line); border-radius: 0; background: var(--page); transition: width calc(.4s * var(--dur)) var(--spring-soft); }
 /* 單一元件預覽頁（?preview=slug）：只留那一張卡片，置中 */
 .pv-mode .shell > :not(#wall) { display: none !important; }
 .pv-mode #wall { display: flex !important; justify-content: center; align-items: flex-start; padding: 24px 16px; min-height: 0; }
@@ -979,7 +985,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .pv-mode .cell-doc { display: none !important; }
 /* 互動示範：右上角播放／暫停（只控制這張）；暫停後可以直接操作 */
 .dt-play { position: absolute; top: 12px; right: 12px; z-index: 2; }
-.dt-stage:has(> .dt-play) { padding-top: 72px; }   /* 按鈕佔上方空白，不壓到卡片標題 */
+.dt-stage:has(> .dt-play) { padding-top: 72px; }   /* 按鈕佔上方空白，不壓到卡片標題（舊版；現在播放鈕在工具列裡） */
 /* 進場：從右上角彈出（縮放＋微位移＋去模糊，彈性曲線）；離場：稍等一下再快速收起，滑鼠短暫移開不閃爍 */
 .dt-play { opacity: 0; scale: .6; translate: 6px -6px; filter: blur(4px); pointer-events: none; transform-origin: 100% 0;
   transition: opacity calc(.16s * var(--dur)) ease-in calc(.12s * var(--dur)), scale calc(.2s * var(--dur)) ease-in calc(.12s * var(--dur)), translate calc(.2s * var(--dur)) ease-in calc(.12s * var(--dur)), filter calc(.16s * var(--dur)) ease-in calc(.12s * var(--dur)); }
@@ -7369,18 +7375,20 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
     const pvUrl = (id) => { const u = new URL(location.href); u.hash = ''; u.search = '?preview=' + SLUG[id]; return u.href; };
     let devW = 0;
     const syncFrame = (f) => { try { f.contentWindow?.postMessage({ type: 'wall-sync', ...window.__wallState?.() }, '*'); } catch (e) {} };
+    const paintDevW = () => { const st = dt && $('.dt-stage', dt), lb = st && $('.dt-dev-w', st); if (lb) lb.textContent = (devW || Math.round(st.clientWidth)) + 'px'; };
+    addEventListener('resize', paintDevW);
     function setDev(w) {
       const st = $('.dt-stage', dt); if (!st || !dtId) return;
       devW = w; st.classList.toggle('dev', !!w);
       $$('.dt-dev [data-dev]', st).forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.dev === w)));
-      $('.dt-dev-w', st).textContent = w ? w + ' px' : '';
+      paintDevW();
       let f = $('.dt-frame', st);
       if (!w) { f?.remove(); return; }
       if (!f) { f = document.createElement('iframe'); f.className = 'dt-frame'; f.title = TITLE[dtId] + '（預覽）'; f.loading = 'eager'; f.addEventListener('load', () => syncFrame(f)); f.src = pvUrl(dtId); st.append(f); }
       f.style.width = w + 'px';
     }
     // 預覽頁回報自己的高度；主題、語言、深淺色改了就再同步一次
-    addEventListener('message', (e) => { const m = e.data, f = dt && $('.dt-frame', dt); if (m?.type === 'wall-pv-h' && f && e.source === f.contentWindow) f.style.height = Math.max(240, Math.min(1400, m.h)) + 'px'; });
+    addEventListener('message', (e) => { const m = e.data, f = dt && $('.dt-frame', dt); if (m?.type === 'wall-pv-h' && f && e.source === f.contentWindow) f.style.height = Math.max(460, Math.min(1400, m.h)) + 'px'; });
     new MutationObserver(() => { const f = dt && $('.dt-frame', dt); if (f) syncFrame(f); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-ui', 'style', 'lang', 'class', 'data-tabs', 'data-density'] });
     function showDetail(id, tab = 'basic') {
       putBack();
@@ -7395,7 +7403,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
           <p class="dt-def">${esc(d.d)}</p>
           <div class="doc-code">${d.r.split('・').map((x) => `<code>${esc(x)}</code>`).join('')}</div>
         </header>
-        <section class="dt-stage" aria-label="互動示範"><div class="dt-tools"><div class="dt-dev" role="group" aria-label="預覽尺寸">${DEVS.map(([w, n, ic]) => `<button type="button" data-dev="${w}" aria-pressed="false" aria-label="${n}" title="${n}">${ic}</button>`).join('')}</div><span class="dt-dev-w" aria-live="polite"></span><a class="dt-open" href="${pvUrl(id)}" target="_blank" rel="noopener" aria-label="在新分頁開啟預覽" title="在新分頁開啟"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v4.5A1.5 1.5 0 0 1 16.5 20h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/></svg></a></div>${STATIC.has(id) ? '' : '<div class="dt-play"><button type="button" class="dt-pp"></button></div>'}</section>
+        <section class="dt-stage" aria-label="互動示範"><div class="dt-bar"><div class="dt-dev" role="group" aria-label="預覽尺寸">${DEVS.map(([w, n, ic]) => `<button type="button" data-dev="${w}" aria-pressed="false" aria-label="${n}" title="${n}">${ic}</button>`).join('')}</div><span class="dt-dev-w" aria-live="polite"></span><span class="sp"></span>${STATIC.has(id) ? '' : '<div class="dt-play"><button type="button" class="dt-pp"></button></div>'}<a class="dt-open" href="${pvUrl(id)}" target="_blank" rel="noopener" aria-label="在新分頁開啟預覽" title="在新分頁開啟"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v4.5A1.5 1.5 0 0 1 16.5 20h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/></svg></a></div></section>
         </div>
         ${SPEC[id] ? `<div class="tabs dt-tabs" role="tablist" aria-label="內容"><i></i><button class="tab" type="button" role="tab" id="dt-tab-basic" aria-controls="dt-pn-basic" data-tab="basic">指南</button><button class="tab" type="button" role="tab" id="dt-tab-variants" aria-controls="dt-pn-variants" data-tab="variants">規格</button></div>` : ''}
         <div class="dt-panel" data-panel="basic" id="dt-pn-basic" role="tabpanel" aria-labelledby="dt-tab-basic">${basicHtml(id, d)}</div>

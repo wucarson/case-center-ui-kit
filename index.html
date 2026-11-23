@@ -976,6 +976,13 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 /* 平板／手機：無外框的窄欄撐滿預覽區高度，兩側斜線底紋 */
 .dt-stage.dev { padding: 53px 0 0; align-items: stretch; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--line-strong) 35%, transparent) 0 1px, transparent 1px 9px), color-mix(in srgb, var(--soft) 55%, var(--line-subtle)); }
 .dt-stage.dev > .cell { display: none !important; }
+/* 寬度把手：預覽區右緣，拖曳自由縮放（雙擊回到全寬）；鍵盤 ←→ 調整、Home 最窄、End 全寬 */
+.dt-grip { position: absolute; top: 53px; bottom: 0; z-index: 3; width: 16px; margin-left: -8px; display: grid; place-items: center; cursor: ew-resize; touch-action: none; }
+.dt-grip i { width: 4px; height: 44px; border-radius: 2px; background: var(--line-strong); box-shadow: 0 0 0 1px color-mix(in srgb, var(--surface) 70%, transparent); transition: background calc(.2s * var(--dur)), height calc(.25s * var(--dur)) var(--spring-soft); }
+.dt-grip:hover i, .dt-grip:focus-visible i, .dt-stage.drag .dt-grip i { background: var(--primary); height: 64px; }
+.dt-grip:focus-visible { outline: none; }
+.dt-stage.drag { cursor: ew-resize; user-select: none; }
+.dt-stage.drag .dt-frame { pointer-events: none; transition: none; }
 .dt-frame { display: block; justify-self: center; height: 480px; max-width: none; border: 0; border-left: 1px solid var(--line); border-right: 1px solid var(--line); border-radius: 0; background: var(--page); transition: width calc(.4s * var(--dur)) var(--spring-soft); }
 /* 單一元件預覽頁（?preview=slug）：只留那一張卡片，置中 */
 .pv-mode .shell > :not(#wall) { display: none !important; }
@@ -7377,15 +7384,26 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
     const syncFrame = (f) => { try { f.contentWindow?.postMessage({ type: 'wall-sync', ...window.__wallState?.() }, '*'); } catch (e) {} };
     const paintDevW = () => { const st = dt && $('.dt-stage', dt), lb = st && $('.dt-dev-w', st); if (lb) lb.textContent = (devW || Math.round(st.clientWidth)) + 'px'; };
     addEventListener('resize', paintDevW);
+    const GRIP_MIN = 320;
+    function placeGrip() {
+      const st = dt && $('.dt-stage', dt), g = st && $('.dt-grip', st); if (!g) return;
+      const W = st.clientWidth, w = devW || W;
+      g.style.left = Math.min(W - 8, W / 2 + w / 2) + 'px';
+      g.setAttribute('aria-valuemin', GRIP_MIN); g.setAttribute('aria-valuemax', Math.round(W)); g.setAttribute('aria-valuenow', Math.round(w));
+    }
+    addEventListener('resize', placeGrip);
+    // 拖到接近全寬＝回到桌機（牆上的卡片直接展示）；其餘寬度用內嵌預覽頁
+    const setWidth = (w) => { const st = $('.dt-stage', dt), W = st.clientWidth; w = Math.round(Math.max(GRIP_MIN, Math.min(W, w))); setDev(w >= W - 12 ? 0 : w); };
     function setDev(w) {
       const st = $('.dt-stage', dt); if (!st || !dtId) return;
       devW = w; st.classList.toggle('dev', !!w);
-      $$('.dt-dev [data-dev]', st).forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.dev === w)));
+      $$('.dt-dev [data-dev]', st).forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.dev === w)));   // 拖出來的自訂寬度：三個都不亮
       paintDevW();
       let f = $('.dt-frame', st);
-      if (!w) { f?.remove(); return; }
+      if (!w) { f?.remove(); placeGrip(); return; }
       if (!f) { f = document.createElement('iframe'); f.className = 'dt-frame'; f.title = TITLE[dtId] + '（預覽）'; f.loading = 'eager'; f.addEventListener('load', () => syncFrame(f)); f.src = pvUrl(dtId); st.append(f); }
       f.style.width = w + 'px';
+      placeGrip();
     }
     // 預覽頁回報自己的高度；主題、語言、深淺色改了就再同步一次
     addEventListener('message', (e) => { const m = e.data, f = dt && $('.dt-frame', dt); if (m?.type === 'wall-pv-h' && f && e.source === f.contentWindow) f.style.height = Math.max(460, Math.min(1400, m.h)) + 'px'; });
@@ -7403,7 +7421,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
           <p class="dt-def">${esc(d.d)}</p>
           <div class="doc-code">${d.r.split('・').map((x) => `<code>${esc(x)}</code>`).join('')}</div>
         </header>
-        <section class="dt-stage" aria-label="互動示範"><div class="dt-bar"><div class="dt-dev" role="group" aria-label="預覽尺寸">${DEVS.map(([w, n, ic]) => `<button type="button" data-dev="${w}" aria-pressed="false" aria-label="${n}" title="${n}">${ic}</button>`).join('')}</div><span class="dt-dev-w" aria-live="polite"></span><span class="sp"></span>${STATIC.has(id) ? '' : '<div class="dt-play"><button type="button" class="dt-pp"></button></div>'}<a class="dt-open" href="${pvUrl(id)}" target="_blank" rel="noopener" aria-label="在新分頁開啟預覽" title="在新分頁開啟"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v4.5A1.5 1.5 0 0 1 16.5 20h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/></svg></a></div></section>
+        <section class="dt-stage" aria-label="互動示範"><div class="dt-bar"><div class="dt-dev" role="group" aria-label="預覽尺寸">${DEVS.map(([w, n, ic]) => `<button type="button" data-dev="${w}" aria-pressed="false" aria-label="${n}" title="${n}">${ic}</button>`).join('')}</div><span class="dt-dev-w" aria-live="polite"></span><span class="sp"></span>${STATIC.has(id) ? '' : '<div class="dt-play"><button type="button" class="dt-pp"></button></div>'}<a class="dt-open" href="${pvUrl(id)}" target="_blank" rel="noopener" aria-label="在新分頁開啟預覽" title="在新分頁開啟"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v4.5A1.5 1.5 0 0 1 16.5 20h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/></svg></a></div><div class="dt-grip" role="separator" aria-orientation="vertical" aria-label="預覽寬度（拖曳或用左右鍵調整，雙擊回到全寬）" tabindex="0"><i></i></div></section>
         </div>
         ${SPEC[id] ? `<div class="tabs dt-tabs" role="tablist" aria-label="內容"><i></i><button class="tab" type="button" role="tab" id="dt-tab-basic" aria-controls="dt-pn-basic" data-tab="basic">指南</button><button class="tab" type="button" role="tab" id="dt-tab-variants" aria-controls="dt-pn-variants" data-tab="variants">規格</button></div>` : ''}
         <div class="dt-panel" data-panel="basic" id="dt-pn-basic" role="tabpanel" aria-labelledby="dt-tab-basic">${basicHtml(id, d)}</div>
@@ -7423,7 +7441,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
       shell.classList.add('on-detail'); dt.hidden = false;
       document.title = `${TITLE[id]}・${BASE_TITLE}`;
       scroller().scrollTop = 0;
-      requestAnimationFrame(() => { dispatchEvent(new Event('resize')); moveTabBar(); });
+      requestAnimationFrame(() => { dispatchEvent(new Event('resize')); moveTabBar(); setDev(devW); });   // 詳細頁顯示後才量得到展示台寬度
       setTimeout(() => $('#dt-title')?.focus({ preventScroll: true }), 30);
     }
     function showWall() {
@@ -7490,6 +7508,22 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
       history.replaceState(null, '', tabHash(dtId, t)); setTab(t, true);
     });
     addEventListener('resize', moveTabBar);
+    // 寬度把手：拖曳（預覽置中，寬度＝游標到中心距離 × 2）、雙擊回全寬、鍵盤調整
+    dt.addEventListener('pointerdown', (e) => {
+      const g = e.target.closest('.dt-grip'); if (!g) return;
+      e.preventDefault(); g.setPointerCapture(e.pointerId);
+      const st = $('.dt-stage', dt); st.classList.add('drag');
+      const mv = (ev) => { const r = st.getBoundingClientRect(); setWidth(2 * (ev.clientX - (r.left + r.width / 2))); };
+      const up = () => { st.classList.remove('drag'); g.removeEventListener('pointermove', mv); g.removeEventListener('pointerup', up); g.removeEventListener('pointercancel', up); };
+      g.addEventListener('pointermove', mv); g.addEventListener('pointerup', up); g.addEventListener('pointercancel', up);
+    });
+    dt.addEventListener('dblclick', (e) => { if (e.target.closest('.dt-grip')) setDev(0); });
+    dt.addEventListener('keydown', (e) => {
+      if (!e.target.closest('.dt-grip')) return;
+      const W = $('.dt-stage', dt).clientWidth, cur = devW || W, step = e.shiftKey ? 64 : 16;
+      const to = { ArrowLeft: cur - step, ArrowRight: cur + step, Home: GRIP_MIN, End: W }[e.key];
+      if (to === undefined) return; e.preventDefault(); setWidth(to);
+    });
     // 點卡片進詳細頁；卡片裡本來就能操作的東西（拖移握把、開關、按鈕）照常運作
     wall.addEventListener('click', (e) => {
       const cell = e.target.closest('#wall > .cell'); if (!cell) return;

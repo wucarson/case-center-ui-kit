@@ -5049,8 +5049,8 @@ void main(){
       });
       return { out: outs, ms: dur };
     }
-    /* 進場（疊放）：卡片先以空白卡片飛入落定（沿用飛入），接著卡片裡的元件一件件從上方放下來——
-       略高、略大、透明 → 往下壓到定位、微微回彈；同一張卡由上而下錯開 45ms。整面牆進場時最後一道高光斜掃過整個畫面，
+    /* 進場（疊放）：卡片先以空白卡片飛入落定（沿用飛入），接著卡片裡的元件一件件從卡片上緣外面出現——
+       淡入、往下落到定位、微微回彈（疊放期間卡片暫時不裁切）；同一張卡由上而下錯開 60ms。整面牆進場時最後一道高光斜掃過整個畫面，
        切換分類時每張卡疊完各自掃一道。元件＝標題＋內容區往下找到的第一層 2–8 個子元素（找不到就整塊算一件）。
        位移用 composite: 'add' 疊在元件自己的 transform 上（滑塊、開關圓鈕位置不會跳）；透明度只給起點、終點回到元件自己的值（收起的選單不會閃出來） */
     function stackParts(cell) {
@@ -5072,12 +5072,15 @@ void main(){
         const d0 = Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md * 140;
         flyPlay(c.el, D(d0));   // ① 空白卡片飛入
         const parts = stackParts(c.el), t0 = d0 + 380;
-        parts.forEach((e, i) => {   // ② 元件從上方放下來
-          const at = t0 + i * 45;
-          e.animate([{ opacity: 0, offset: 0 }], { duration: D(260), delay: D(at), easing: 'ease-out', fill: 'backwards' });   // fill backwards：飛入期間先藏好
-          e.animate([{ transform: 'translateY(-18px) scale(1.05)', offset: 0 }], {   /* 只給一個關鍵影格時要標 offset: 0，否則會被當成終點 */ duration: D(420), delay: D(at), easing: 'cubic-bezier(.3, 1.35, .6, 1)', composite: 'add', fill: 'backwards' });
+        c.el.style.overflow = 'visible';   // 元件從卡片上緣外面落下：疊放期間不裁切
+        parts.forEach((e, i) => {   // ② 元件從卡片上緣外面出現、淡入落下、微微回彈
+          const at = t0 + i * 60, fall = e.getBoundingClientRect().top - r.top + 36 + i * 6;   // 起點在卡片上緣外 36px
+          e.animate([{ opacity: 0, offset: 0 }, { opacity: 0.35, offset: 0.4 }, { opacity: 1, offset: 0.8 }], { duration: D(480), delay: D(at), easing: 'ease-out', fill: 'backwards' });   // 終點不給＝回到元件自己的透明度；fill backwards：飛入期間先藏好
+          // 只給起點（offset: 0），終點＝元件自己的 transform；composite add 疊上去，滑塊、圓鈕位置不會跳
+          e.animate([{ transform: `translateY(${(-fall).toFixed(0)}px) scale(1.03)`, offset: 0 }], { duration: D(480), delay: D(at), easing: 'cubic-bezier(.3, 1.25, .6, 1)', composite: 'add', fill: 'backwards' });
         });
-        const done = t0 + Math.max(0, parts.length - 1) * 45 + 420;
+        const done = t0 + Math.max(0, parts.length - 1) * 60 + 480;
+        setTimeout(() => { c.el.style.overflow = ''; }, D(done + 30));
         if (!scene) sweepOn(r, done - 160, 380);
         end = Math.max(end, done);
       }

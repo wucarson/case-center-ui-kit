@@ -66,11 +66,12 @@
   --c1: #6aa8ff; --c2: #38d5e8; --c3: #b08cff; --c4: #ffb84d;
   --glow: rgb(106 168 255 / .5); --ok-glow: rgb(52 224 138 / .4); --star-glow: rgb(255 194 51 / .45);
   --hi: rgb(255 255 255 / .1); --sheen: rgb(255 255 255 / .06); --card-edge: rgb(255 255 255 / .09);
-  --inset: inset 0 1px 3px rgb(0 0 0 / .5);
-  --raise: inset 0 1px 0 var(--hi), 0 1px 2px rgb(0 0 0 / .4), 0 4px 10px -3px rgb(0 0 0 / .45);
-  --shadow: inset 0 1px 0 var(--hi), 0 0 0 1px rgb(0 0 0 / .3), 0 12px 28px -8px rgb(0 0 0 / .5), 0 28px 56px -28px rgb(0 0 0 / .65);
-  --shadow-lift: inset 0 1px 0 var(--hi), 0 0 0 1px rgb(0 0 0 / .3), 0 20px 40px -10px rgb(0 0 0 / .6), 0 40px 72px -28px rgb(0 0 0 / .75);
-  --shadow-pop: 0 2px 6px rgb(0 0 0 / .45), 0 14px 30px -6px rgb(0 0 0 / .6);
+  --sh-dk: color-mix(in srgb, var(--page) 55%, #000000);   /* 深色陰影跟著底色色相（偏藍／中性／偏暖），不再是純黑 */
+  --inset: inset 0 1px 3px rgb(from var(--sh-dk) r g b / .5);
+  --raise: inset 0 1px 0 var(--hi), 0 1px 2px rgb(from var(--sh-dk) r g b / .4), 0 4px 10px -3px rgb(from var(--sh-dk) r g b / .45);
+  --shadow: inset 0 1px 0 var(--hi), 0 0 0 1px rgb(from var(--sh-dk) r g b / .3), 0 12px 28px -8px rgb(from var(--sh-dk) r g b / .5), 0 28px 56px -28px rgb(from var(--sh-dk) r g b / .65);
+  --shadow-lift: inset 0 1px 0 var(--hi), 0 0 0 1px rgb(from var(--sh-dk) r g b / .3), 0 20px 40px -10px rgb(from var(--sh-dk) r g b / .6), 0 40px 72px -28px rgb(from var(--sh-dk) r g b / .75);
+  --shadow-pop: 0 2px 6px rgb(from var(--sh-dk) r g b / .45), 0 14px 30px -6px rgb(from var(--sh-dk) r g b / .6);
   color-scheme: dark;
 } }
 :root[data-theme="dark"] {
@@ -92,11 +93,12 @@
   --c1: #6aa8ff; --c2: #38d5e8; --c3: #b08cff; --c4: #ffb84d;
   --glow: rgb(106 168 255 / .5); --ok-glow: rgb(52 224 138 / .4); --star-glow: rgb(255 194 51 / .45);
   --hi: rgb(255 255 255 / .1); --sheen: rgb(255 255 255 / .06); --card-edge: rgb(255 255 255 / .09);
-  --inset: inset 0 1px 3px rgb(0 0 0 / .5);
-  --raise: inset 0 1px 0 var(--hi), 0 1px 2px rgb(0 0 0 / .4), 0 4px 10px -3px rgb(0 0 0 / .45);
-  --shadow: inset 0 1px 0 var(--hi), 0 0 0 1px rgb(0 0 0 / .3), 0 12px 28px -8px rgb(0 0 0 / .5), 0 28px 56px -28px rgb(0 0 0 / .65);
-  --shadow-lift: inset 0 1px 0 var(--hi), 0 0 0 1px rgb(0 0 0 / .3), 0 20px 40px -10px rgb(0 0 0 / .6), 0 40px 72px -28px rgb(0 0 0 / .75);
-  --shadow-pop: 0 2px 6px rgb(0 0 0 / .45), 0 14px 30px -6px rgb(0 0 0 / .6);
+  --sh-dk: color-mix(in srgb, var(--page) 55%, #000000);   /* 深色陰影跟著底色色相（偏藍／中性／偏暖），不再是純黑 */
+  --inset: inset 0 1px 3px rgb(from var(--sh-dk) r g b / .5);
+  --raise: inset 0 1px 0 var(--hi), 0 1px 2px rgb(from var(--sh-dk) r g b / .4), 0 4px 10px -3px rgb(from var(--sh-dk) r g b / .45);
+  --shadow: inset 0 1px 0 var(--hi), 0 0 0 1px rgb(from var(--sh-dk) r g b / .3), 0 12px 28px -8px rgb(from var(--sh-dk) r g b / .5), 0 28px 56px -28px rgb(from var(--sh-dk) r g b / .65);
+  --shadow-lift: inset 0 1px 0 var(--hi), 0 0 0 1px rgb(from var(--sh-dk) r g b / .3), 0 20px 40px -10px rgb(from var(--sh-dk) r g b / .6), 0 40px 72px -28px rgb(from var(--sh-dk) r g b / .75);
+  --shadow-pop: 0 2px 6px rgb(from var(--sh-dk) r g b / .45), 0 14px 30px -6px rgb(from var(--sh-dk) r g b / .6);
   color-scheme: dark;
 }
 
@@ -1541,14 +1543,14 @@ body.reduce::before, body.reduce::after { animation: none !important; }
   --y2k-gloss: linear-gradient(180deg, rgb(255 255 255 / .09), rgb(255 255 255 / 0) 28%);
   --y2k-rim: linear-gradient(180deg, color-mix(in srgb, var(--line-strong) 45%, #ffffff), var(--line-strong) 45%, var(--line));
   --y2k-btn: linear-gradient(180deg, color-mix(in srgb, var(--surface) 80%, #ffffff), var(--surface));
-  --y2k-glow: 0 0 26px -8px color-mix(in srgb, var(--primary) 55%, transparent);
+  --y2k-glow: 0 12px 30px -10px rgb(from var(--sh-dk) r g b / .8), 0 0 26px -8px color-mix(in srgb, var(--primary) 55%, transparent);   /* 深色：底色調的落影＋主色光暈 */
 } }
 :root[data-theme="dark"][data-ui="y2k"] {
   --y2k-fill: linear-gradient(180deg, color-mix(in srgb, var(--surface) 92%, #ffffff) 0%, var(--surface) 60%, color-mix(in srgb, var(--surface) 65%, var(--page)) 100%);
   --y2k-gloss: linear-gradient(180deg, rgb(255 255 255 / .09), rgb(255 255 255 / 0) 28%);
   --y2k-rim: linear-gradient(180deg, color-mix(in srgb, var(--line-strong) 45%, #ffffff), var(--line-strong) 45%, var(--line));
   --y2k-btn: linear-gradient(180deg, color-mix(in srgb, var(--surface) 80%, #ffffff), var(--surface));
-  --y2k-glow: 0 0 26px -8px color-mix(in srgb, var(--primary) 55%, transparent);
+  --y2k-glow: 0 12px 30px -10px rgb(from var(--sh-dk) r g b / .8), 0 0 26px -8px color-mix(in srgb, var(--primary) 55%, transparent);   /* 深色：底色調的落影＋主色光暈 */
 }
 :root[data-ui="y2k"] :is(.b2, .top-a .ctl) { border: 1px solid transparent; background: var(--y2k-btn) padding-box, var(--y2k-rim) border-box; }
 :root[data-ui="y2k"] .btn { box-shadow: inset 0 1px 0 rgb(255 255 255 / .65), 0 8px 18px -8px var(--glow); }
@@ -1627,14 +1629,14 @@ body.reduce::before, body.reduce::after { animation: none !important; }
   --y2k-ok-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--ok-b) 60%, #ffffff) 0%, color-mix(in srgb, var(--ok-b) 70%, #ffffff) 14%, var(--ok-b) 34%, color-mix(in srgb, var(--ok-b) 95%, #000000) 50%, color-mix(in srgb, var(--ok-b) 82%, #000000) 60%, color-mix(in srgb, var(--ok-b) 92%, #ffffff) 70%, color-mix(in srgb, var(--ok-b) 68%, #ffffff) 84%, color-mix(in srgb, var(--ok-b) 55%, #ffffff) 100%);
   --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #5a6577 0%, #3a4352 30%, #2b323d 56%, #0c1015 59.5%, #222934 66%, #3b4452 100%);
   --y2k-metal-rim: linear-gradient(180deg, color-mix(in srgb, var(--primary) 40%, #ffffff), var(--primary) 60%, color-mix(in srgb, var(--primary) 70%, #000000));
-  --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .28), inset 0 -1px 0 rgb(0 0 0 / .3);
+  --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .28), inset 0 -1px 0 rgb(from var(--sh-dk) r g b / .3);
 } }
 :root[data-theme="dark"][data-ui="y2k"] {
   --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 60%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 95%, #000000) 50%, color-mix(in srgb, var(--primary) 82%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
   --y2k-ok-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--ok-b) 60%, #ffffff) 0%, color-mix(in srgb, var(--ok-b) 70%, #ffffff) 14%, var(--ok-b) 34%, color-mix(in srgb, var(--ok-b) 95%, #000000) 50%, color-mix(in srgb, var(--ok-b) 82%, #000000) 60%, color-mix(in srgb, var(--ok-b) 92%, #ffffff) 70%, color-mix(in srgb, var(--ok-b) 68%, #ffffff) 84%, color-mix(in srgb, var(--ok-b) 55%, #ffffff) 100%);
   --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #5a6577 0%, #3a4352 30%, #2b323d 56%, #0c1015 59.5%, #222934 66%, #3b4452 100%);
   --y2k-metal-rim: linear-gradient(180deg, color-mix(in srgb, var(--primary) 40%, #ffffff), var(--primary) 60%, color-mix(in srgb, var(--primary) 70%, #000000));
-  --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .28), inset 0 -1px 0 rgb(0 0 0 / .3);
+  --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .28), inset 0 -1px 0 rgb(from var(--sh-dk) r g b / .3);
 }
 :root[data-ui="y2k"] {
   --y2k-spec: linear-gradient(180deg, transparent 3%, rgb(255 255 255 / .5) 10%, rgb(255 255 255 / .12) 20%, transparent 30%);   /* 上緣鏡面高光：柔邊、慢慢淡出 */
@@ -1673,14 +1675,14 @@ body.reduce::before, body.reduce::after { animation: none !important; }
   --y2k-in1: rgb(255 255 255 / .12); --y2k-in2: rgb(255 255 255 / .04);
   --y2k-gloss-s: linear-gradient(180deg, rgb(255 255 255 / .12), rgb(255 255 255 / 0) 50%);
   --y2k-pill: linear-gradient(180deg, color-mix(in srgb, var(--surface) 72%, #ffffff) 0%, color-mix(in srgb, var(--surface) 86%, #ffffff) 48%, var(--surface) 52%, color-mix(in srgb, var(--surface) 80%, #ffffff) 100%);
-  --y2k-pill-sh: inset 0 1px 0 rgb(255 255 255 / .22), inset 0 0 0 1px rgb(255 255 255 / .08), 0 2px 8px -2px rgb(0 0 0 / .5);
+  --y2k-pill-sh: inset 0 1px 0 rgb(255 255 255 / .22), inset 0 0 0 1px rgb(255 255 255 / .08), 0 2px 8px -2px rgb(from var(--sh-dk) r g b / .5);
   --y2k-sel: linear-gradient(180deg, color-mix(in srgb, var(--primary) 26%, #1a2133), color-mix(in srgb, var(--primary) 14%, #1a2133));
 } }
 :root[data-theme="dark"][data-ui="y2k"] {
   --y2k-in1: rgb(255 255 255 / .12); --y2k-in2: rgb(255 255 255 / .04);
   --y2k-gloss-s: linear-gradient(180deg, rgb(255 255 255 / .12), rgb(255 255 255 / 0) 50%);
   --y2k-pill: linear-gradient(180deg, color-mix(in srgb, var(--surface) 72%, #ffffff) 0%, color-mix(in srgb, var(--surface) 86%, #ffffff) 48%, var(--surface) 52%, color-mix(in srgb, var(--surface) 80%, #ffffff) 100%);
-  --y2k-pill-sh: inset 0 1px 0 rgb(255 255 255 / .22), inset 0 0 0 1px rgb(255 255 255 / .08), 0 2px 8px -2px rgb(0 0 0 / .5);
+  --y2k-pill-sh: inset 0 1px 0 rgb(255 255 255 / .22), inset 0 0 0 1px rgb(255 255 255 / .08), 0 2px 8px -2px rgb(from var(--sh-dk) r g b / .5);
   --y2k-sel: linear-gradient(180deg, color-mix(in srgb, var(--primary) 26%, #1a2133), color-mix(in srgb, var(--primary) 14%, #1a2133));
 }
 /* 卡片：均勻鉻邊（上亮下暗）＋內側白線 */
@@ -4246,11 +4248,11 @@ void main(){
         'shadow-pop': '0 2px 6px rgb(16 24 40 / .1), 0 14px 30px -6px rgb(16 24 40 / .22)',
       },
       dark: {
-        inset: 'inset 0 1px 3px rgb(0 0 0 / .5)',
-        raise: 'inset 0 1px 0 var(--hi), 0 1px 2px rgb(0 0 0 / .4), 0 4px 10px -3px rgb(0 0 0 / .45)',
-        shadow: 'inset 0 1px 0 var(--hi), 0 0 0 1px rgb(0 0 0 / .3), 0 12px 28px -8px rgb(0 0 0 / .5), 0 28px 56px -28px rgb(0 0 0 / .65)',
-        'shadow-lift': 'inset 0 1px 0 var(--hi), 0 0 0 1px rgb(0 0 0 / .3), 0 20px 40px -10px rgb(0 0 0 / .6), 0 40px 72px -28px rgb(0 0 0 / .75)',
-        'shadow-pop': '0 2px 6px rgb(0 0 0 / .45), 0 14px 30px -6px rgb(0 0 0 / .6)',
+        inset: 'inset 0 1px 3px rgb(from var(--sh-dk) r g b / .5)',
+        raise: 'inset 0 1px 0 var(--hi), 0 1px 2px rgb(from var(--sh-dk) r g b / .4), 0 4px 10px -3px rgb(from var(--sh-dk) r g b / .45)',
+        shadow: 'inset 0 1px 0 var(--hi), 0 0 0 1px rgb(from var(--sh-dk) r g b / .3), 0 12px 28px -8px rgb(from var(--sh-dk) r g b / .5), 0 28px 56px -28px rgb(from var(--sh-dk) r g b / .65)',
+        'shadow-lift': 'inset 0 1px 0 var(--hi), 0 0 0 1px rgb(from var(--sh-dk) r g b / .3), 0 20px 40px -10px rgb(from var(--sh-dk) r g b / .6), 0 40px 72px -28px rgb(from var(--sh-dk) r g b / .75)',
+        'shadow-pop': '0 2px 6px rgb(from var(--sh-dk) r g b / .45), 0 14px 30px -6px rgb(from var(--sh-dk) r g b / .6)',
       },
     };
     const DEPTH = [0, 0.55, 1, 1.5];
@@ -4309,7 +4311,7 @@ void main(){
       if (t.depth.shadow !== d.depth.shadow || neutralChanged) {
         const k = DEPTH[t.depth.shadow], depthChanged = t.depth.shadow !== d.depth.shadow;
         for (const [m, out] of [['light', L], ['dark', Dk]]) {
-          if (m === 'dark' && !depthChanged) continue;   // 深色陰影是黑色，不受色調影響
+          if (m === 'dark' && !depthChanged) continue;   // 深色陰影用 --sh-dk（底色混黑），換色調時 CSS 自己跟著變
           for (const [key, s0] of Object.entries(SHADOW[m])) {
             const s = m === 'light' ? tintShadow(s0, c.neutral) : s0;
             out[key] = k === 0 && key !== 'inset' ? 'none' : scaleShadow(s, k || 0.0001);

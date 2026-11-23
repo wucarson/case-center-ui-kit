@@ -1511,13 +1511,13 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="neu"] .dt-stage { border-color: transparent; background: radial-gradient(color-mix(in srgb, var(--line-strong) 45%, transparent) 1px, transparent 1.2px) 0 0 / 18px 18px, var(--neu-well); box-shadow: none; }
 :root[data-ui="neu"] :is(.sp-pv, .sp-code) { background: var(--neu-well); box-shadow: none; }
 
-/* Swiss Style：無陰影、直角，卡片上方一條粗實線；Helvetica 系字型、標題加粗收字距、英文標示大寫 */
+/* Swiss Style：無陰影、直角、細線框；Helvetica 系字型、標題加粗收字距、英文標示大寫 */
 :root[data-ui="swiss"], :root[data-theme="dark"][data-ui="swiss"], :root:not([data-theme="light"])[data-ui="swiss"] {
   --hi: transparent; --sheen: transparent; --card-edge: transparent;
   --shadow: none; --shadow-lift: none; --raise: none; --inset: none;
   --font: 'Helvetica Neue', Helvetica, Arial, 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
 }
-:root[data-ui="swiss"] .cell { border-style: solid; border-width: 3px 1px 1px; border-color: var(--ink) var(--line-strong) var(--line-strong); border-radius: 0; }   /* 細線框＋頂端粗線，卡片區塊清楚 */
+:root[data-ui="swiss"] .cell { border: 1px solid var(--line-strong); border-radius: 0; }   /* 細線框，卡片區塊清楚 */
 :root[data-ui="swiss"] .cell:hover { transform: none; }
 :root[data-ui="swiss"] .cell > header { font-weight: 700; }
 :root[data-ui="swiss"] .cell > header em { text-transform: uppercase; letter-spacing: .08em; font-size: 11px; }
@@ -1590,18 +1590,18 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 6px var(--neu-hi), 3px 3px 6px var(--neu-lo); } }
 :root[data-theme="dark"][data-ui="neu"] { --card-edge: rgb(255 255 255 / .05); --shadow: -3px -3px 6px var(--neu-hi), 3px 3px 6px var(--neu-lo); }
 
-/* Swiss Style：字級拉開層次、卡片不填色只留頂線、互動用底線與色塊 */
+/* Swiss Style：字級拉開層次、卡片細線框、互動用底線與色塊 */
 :root[data-ui="swiss"] body::before { display: none; }
 :root[data-ui="swiss"] .cell { background: var(--surface); transition: border-color calc(.2s * var(--dur)) var(--ease); }
-:root[data-ui="swiss"] .cell:hover { border-top-color: var(--primary); }
+:root[data-ui="swiss"] .cell:hover { border-color: var(--ink); }
 :root[data-ui="swiss"] .cell > header { font-size: calc(15px * var(--fs-k)); line-height: 1.3; letter-spacing: -.01em; color: var(--ink); }
 :root[data-ui="swiss"] .cell > header em { font-size: 10.5px; font-weight: 600; color: var(--weak); }
 :root[data-ui="swiss"] .stat b { font-size: calc(32px * var(--fs-k)); font-weight: 700; letter-spacing: -.03em; }
 :root[data-ui="swiss"] .seg-p b { font-weight: 700; letter-spacing: -.03em; }
 :root[data-ui="swiss"] :is(.b2:hover, .b2.hv) { background: var(--soft); border-color: var(--ink); }
 :root[data-ui="swiss"] .tab:not(.on):hover { text-decoration: underline 2px; text-underline-offset: 6px; }
-/* 全直角：所有元件（含勾選框、單選、開關圓鈕、頭像、狀態點、徽章、提示框）一律 0 圓角；設定面板自有樣式不受影響。圖示維持原線條 */
-:root[data-ui="swiss"] :where(body *:not(#cz, #cz *)), :root[data-ui="swiss"] :where(body *:not(#cz, #cz *))::before, :root[data-ui="swiss"] :where(body *:not(#cz, #cz *))::after { border-radius: 0 !important; }
+/* 全直角：所有元件（含勾選框、單選、開關圓鈕、頭像、狀態點、徽章、提示框）一律 0 圓角；設定面板自有樣式與載入轉圈（方形轉起來像缺角框）不受影響。圖示維持原線條 */
+:root[data-ui="swiss"] :where(body *:not(#cz, #cz *, .spin)), :root[data-ui="swiss"] :where(body *:not(#cz, #cz *, .spin))::before, :root[data-ui="swiss"] :where(body *:not(#cz, #cz *, .spin))::after { border-radius: 0 !important; }
 :root[data-ui="swiss"] .lc .la { stroke-linecap: butt; stroke-linejoin: miter; }   /* 折線圖：線端、轉折也改直角 */
 
 /* Y2K 鉻金屬：元件也換成同材質（細鉻邊、內凹亮面）；彈出層霧面鉻；滑過按鈕亮面掃過一次 */
@@ -1714,7 +1714,7 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 .cz-style i[data-ui="standard"] { border-radius: 8px; border-color: var(--line); box-shadow: 0 3px 8px rgb(30 70 150 / .25); }
 .cz-style i[data-ui="glass"] { border-radius: 9px; border-color: rgb(255 255 255 / .8); background: linear-gradient(135deg, rgb(255 255 255 / .75), rgb(255 255 255 / .25)), linear-gradient(135deg, var(--c1), var(--c3)); box-shadow: 0 3px 8px rgb(30 70 150 / .2); }
 .cz-style i[data-ui="neu"] { border: 0; border-radius: 8px; background: var(--page); box-shadow: -3px -3px 6px color-mix(in srgb, var(--page) 20%, #fff), 3px 3px 6px rgb(110 125 150 / .45); }
-.cz-style i[data-ui="swiss"] { border: 0; border-top: 4px solid var(--ink); border-radius: 0; background: var(--surface); box-shadow: none; }
+.cz-style i[data-ui="swiss"] { border: 1px solid var(--ink); border-radius: 0; background: var(--surface); box-shadow: none; }
 .cz-style i[data-ui="y2k"] { border: 1px solid #aeb9cb; border-radius: 11px; background: linear-gradient(180deg, rgb(255 255 255 / .9), transparent 50%), linear-gradient(135deg, #f4f7fb, #c3ccda 50%, #eef2f8); box-shadow: 0 3px 8px rgb(60 90 150 / .25); }
 .cz-style i[data-ui="flat"] { border-radius: 4px; border-color: var(--line-strong); background: var(--soft); box-shadow: none; }
 /* ==== 字型七級（對齊 Material 3）：大標 display、標題 headline、子標題 title、內文 body、標籤 label、說明 caption、數字 numeric ==== */

@@ -1715,7 +1715,9 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 /* 牆上卡片原本的轉場（#wall > .cell）權重較高，要在同一層補上鉻邊色標的過渡 */
 :root[data-ui="y2k"] #wall > .cell { transition: transform calc(.55s * var(--dur)) var(--spring-soft), box-shadow calc(.4s * var(--dur)) var(--ease), border-color calc(.25s * var(--dur)) var(--ease), --y2k-r1 calc(.5s * var(--dur)) var(--ease), --y2k-r2 calc(.5s * var(--dur)) var(--ease), --y2k-r3 calc(.5s * var(--dur)) var(--ease); }
 /* 選中狀態：鉻泡泡（分段、期間選擇、詳情頁籤） */
-:root[data-ui="y2k"][data-ui="y2k"] :is(.seg i, .ps > i), :root[data-ui="y2k"][data-ui="y2k"]:not([data-tabs="underline"]) .dt > .ind { background: var(--y2k-spec), var(--y2k-pearl), var(--y2k-metal) 0 0 / 100% 130%; box-shadow: var(--y2k-coat), inset 0 0 0 1px color-mix(in srgb, var(--primary) 70%, #000000), 0 2px 6px -2px var(--glow); }
+:root[data-ui="y2k"][data-ui="y2k"] :is(.seg i, .ps > i), :root[data-ui="y2k"][data-ui="y2k"]:not([data-tabs="underline"]) :is(.dt > .ind, .sp .dtab.on) { background: var(--y2k-spec), var(--y2k-pearl), var(--y2k-metal) 0 0 / 100% 130%; box-shadow: var(--y2k-coat), inset 0 0 0 1px color-mix(in srgb, var(--primary) 70%, #000000), 0 2px 6px -2px var(--glow); }
+/* ↑ 規格頁的頁籤範例沒有滑動指示條、選中項自己有底色：Y2K 也給它主色金屬底，否則深色底上配主色金屬用的深色字，圖示線條看不到 */
+:root[data-ui="y2k"]:not([data-tabs="underline"]) .dtab.on .ic.fl .k { stroke: var(--primary); }   /* 選中圖示是填滿版、細節以底色鏤空：金屬底上改用主色鏤空，深色版不會深配深、淺色版不會白配白 */
 :root[data-ui="y2k"] :is(.seg span.on, .ps span.on), :root[data-ui="y2k"]:not([data-tabs="underline"]) :is(.dtab.on, .dtab.on svg) { color: var(--on-primary); }   /* 主色金屬上的字用主色配對的文字色 */
 :root[data-ui="y2k"]:not([data-tabs="underline"]) .dtab.on b { background: rgb(255 255 255 / .25); color: var(--on-primary); box-shadow: none; }
 /* 分類標籤、工具列：亮面＋鉻邊 */

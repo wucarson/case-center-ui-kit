@@ -1,0 +1,35 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "data-table",
+  "title": "資料表格",
+  "tier": "logic",
+  "logic": "core/table.ts",
+  "description": "可排序的資料列表：點表頭切換升冪／降冪，換順序時各列滑到新位置；到期欄標逾期（紅）與今天、3 天內（琥珀），已結案只顯示日期。",
+  "use": "案件、工單、專案列表。",
+  "instead": [{ "when": "少於 5 筆且欄位少", "use": "卡片清單" }],
+  "parts": [
+    { "name": "root", "selector": ".tb", "element": "div", "classes": { "tb": "表格外框" }, "attrs": { "role": { "values": ["table"], "required": true }, "aria-label": { "required": true } } },
+    { "name": "row", "selector": ".tb > .tr", "element": "div", "classes": { "tr": "一列", "hd": "表頭列", "hv": "滑過（示範用）" }, "attrs": { "role": { "values": ["row"], "required": true } } },
+    {
+      "name": "sort-header",
+      "selector": ".th",
+      "element": "span",
+      "classes": { "th": "可排序的表頭" },
+      "attrs": {
+        "data-s": { "values": ["none", "asc", "desc"], "required": true },
+        "role": { "values": ["columnheader"] },
+        "aria-sort": { "values": ["none", "ascending", "descending"] },
+        "tabindex": { "values": ["0"] }
+      }
+    },
+    { "name": "header", "selector": ".tr.hd > span:not(.th)", "element": "span", "classes": { "nm": "名稱欄（手機版隱藏）" }, "attrs": { "role": { "values": ["columnheader"], "required": true } } },
+    { "name": "cell", "selector": ".tr:not(.hd) > span", "element": "span", "classes": { "id": "案號（主色、等寬數字）", "nm": "名稱（手機版隱藏）", "due": "到期欄" }, "attrs": { "role": { "values": ["cell"], "required": true } } },
+    { "name": "due", "selector": ".due-r", "element": "span", "classes": { "due-r": "單獨的到期日（表格外）" } },
+    { "name": "due-tag", "selector": ":is(.due, .due-r) > .tagx", "element": "span", "classes": { "tagx": "到期標籤", "d": "逾期（紅）", "w": "今天、3 天內（琥珀）" } }
+  ],
+  "keyboard": [
+    { "keys": "Tab", "action": "移到下一個可排序的表頭" },
+    { "keys": "Enter、Space（在表頭上）", "action": "切換排序；同一欄再按一次反向" }
+  ],
+  "example": "<div class=\"tb\" role=\"table\" aria-label=\"案件列表\"><div class=\"tr hd\" role=\"row\"><span class=\"th\" data-s=\"asc\" role=\"columnheader\" aria-sort=\"ascending\" tabindex=\"0\">到期日<svg viewBox=\"0 0 12 14\" aria-hidden=\"true\">…</svg></span>…</div><div class=\"tr\" role=\"row\" data-k=\"C-1042\"><span class=\"id\" role=\"cell\">C-1042</span>…<span class=\"due\" role=\"cell\">11-14<span class=\"tagx w\">2 天內</span></span></div></div>"
+}

@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 import type { ComponentType } from 'react';
 import { CASES, type Case } from '../../shared/cases';
 import '../../shared/case.css';
-import { AvatarGroup, Button, Callout, Checkbox, CheckboxList, Combo, ConfirmDialog, DatePicker, DetailTabs, EmptyState, FormField, InfoPopover, Menu, MenuPanel, MultiSelect, Pagination, PeriodPicker, RadioGroup, Segmented, Sidebar, Skeleton, StarToggle, StatusBadge, Stepper, Switch, Tabs, TextField, TimePicker, Timeline, Toast, DragSort, FilterChips, HoldConfirm, SegmentedBar, StatRow, TagSearch, Upload } from './components';
+import { AvatarGroup, Button, Callout, Checkbox, CheckboxList, Combo, ConfirmDialog, DatePicker, DetailTabs, EmptyState, FormField, InfoPopover, Menu, MenuPanel, MultiSelect, Pagination, PeriodPicker, RadioGroup, Segmented, Sidebar, Skeleton, StarToggle, StatusBadge, Stepper, Switch, Tabs, TextField, TimePicker, Timeline, Toast, DragSort, FilterChips, HoldConfirm, SegmentedBar, StatRow, TagSearch, Upload, DataTable, DueCell, SortTh } from './components';
 import { styleOf } from './components/util';
 
 /** 展示頁：把 shared/cases.ts 的每個案例用元件畫出來，給 tools/compare.mjs 截圖比對 */
@@ -42,6 +42,7 @@ const RENDER: Record<string, ComponentType<any>> = {
   'filter-chips': FilterChips,
   'stat-row': StatRow,
   'segmented-bar': SegmentedBar,
+  'data-table': (p: any) => (p.columns ? <DataTable {...p} /> : p.state ? <SortTh {...p} /> : <DueCell {...p} />),
 };
 
 function CaseView({ name, c }: { name: string; c: Case }) {

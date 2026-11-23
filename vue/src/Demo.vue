@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { h, type Component } from 'vue';
 import { CASES } from '../../shared/cases';
-import { AvatarGroup, Button, Callout, Checkbox, CheckboxList, Combo, ConfirmDialog, DatePicker, DetailTabs, EmptyState, FormField, InfoPopover, Menu, MenuPanel, MultiSelect, Pagination, PeriodPicker, RadioGroup, Segmented, Sidebar, Skeleton, StarToggle, StatusBadge, Stepper, Switch, Tabs, TextField, TimePicker, Timeline, Toast, DragSort, FilterChips, HoldConfirm, SegmentedBar, StatRow, TagSearch, Upload } from './components';
+import { AvatarGroup, Button, Callout, Checkbox, CheckboxList, Combo, ConfirmDialog, DatePicker, DetailTabs, EmptyState, FormField, InfoPopover, Menu, MenuPanel, MultiSelect, Pagination, PeriodPicker, RadioGroup, Segmented, Sidebar, Skeleton, StarToggle, StatusBadge, Stepper, Switch, Tabs, TextField, TimePicker, Timeline, Toast, DragSort, FilterChips, HoldConfirm, SegmentedBar, StatRow, TagSearch, Upload, DataTable, DueCell, SortTh } from './components';
 
 // 放在 FormField 裡的下拉／多選：field 是外框的設定
 const inField = (C: Component) => (p: Record<string, any>) => { const { field, ...rest } = p; return h(FormField, field, () => h(C, { ...rest, inField: true })); };
@@ -42,6 +42,7 @@ const RENDER: Record<string, (p: Record<string, unknown>) => Component> = {
   'filter-chips': () => FilterChips,
   'stat-row': () => StatRow,
   'segmented-bar': () => SegmentedBar,
+  'data-table': (p) => (p.columns ? DataTable : p.state ? SortTh : DueCell),
 };
 const only = new URLSearchParams(location.search).get('c');
 const list = Object.entries(CASES).filter(([n]) => (!only || n === only) && RENDER[n]).flatMap(([n, cs]) => cs.map((c) => ({ n, c })));

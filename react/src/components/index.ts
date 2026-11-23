@@ -34,3 +34,4 @@ export { HoldConfirm, type HoldConfirmProps } from './HoldConfirm';
 export { SegmentedBar, StatRow, type BarSegment, type SegmentedBarProps, type StatItem, type StatRowProps } from './Metrics';
 export { TagSearch, type TagSearchProps, type TagSuggestion } from './TagSearch';
 export { Upload, type UploadProps, type UploadStatus } from './Upload';
+export { DataTable, DueCell, SortTh, type DataTableProps, type DueCellProps, type SortThProps, type TableColumn, type TableRow, type TableSort, type ThState } from './DataTable';

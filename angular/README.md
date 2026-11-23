@@ -23,7 +23,10 @@
 <div ccHoldConfirm label="結案" (confirm)="close()"></div>
 <div ccDragSort [(items)]="columns" aria-label="欄位顯示順序"></div>
 <div ccStatRow [items]="stats"></div>
+<div ccDataTable label="案件列表" [columns]="cols" [rows]="cases" [(sort)]="sort"></div>
 ```
+
+資料表格：`columns` 設 `sortable` 的欄可點表頭排序（同一欄再點反向），換順序時各列滑到新位置；`cell: 'due'` 的欄自動標逾期（紅）與今天、3 天內（琥珀），列上 `closed: true` 只顯示日期。單獨用的到期日：`<span ccDueCell due="2026-11-14"></span>`。
 
 表單欄位：文字輸入加 `ccFieldControl`，必填、錯誤、唯讀、停用會從外框帶到輸入框；下拉、多選直接放進去，會自己變成輸入框區。
 

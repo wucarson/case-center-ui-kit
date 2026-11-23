@@ -39,3 +39,6 @@ export { default as SegmentedBar } from './SegmentedBar.vue';
 export { default as StatRow } from './StatRow.vue';
 export { default as TagSearch } from './TagSearch.vue';
 export { default as Upload } from './Upload.vue';
+export { default as DataTable } from './DataTable.vue';
+export { default as DueCell } from './DueCell.vue';
+export { default as SortTh } from './SortTh.vue';

@@ -41,6 +41,10 @@ const PEOPLE = [{ name: '陳大文', initial: '陳', color: 2 }, { name: '林小
 const TAGS = [{ label: '系統維護', count: '8 篇' }, { label: '系統升級', count: '3 篇' }, { label: '教育訓練', count: '12 篇' }, { label: '資安宣導', count: '6 篇' }];
 const SORT = [{ key: 'name', label: '名稱', locked: true, visible: true }, { key: 'status', label: '狀態', visible: true }, { key: 'owner', label: '負責人', visible: true }, { key: 'due', label: '到期日', visible: false }];
 const STAT3 = [{ label: '進行中案件', value: 42, unit: '件', hot: true }, { label: '本週工時', value: 316, unit: '小時' }, { label: '逾期工單', value: 7, unit: '件' }];
+// 資料表格：表頭（案號、名稱、到期日）、滑過列、到期欄（今天＝11-12）
+const TB_COLS = [{ key: 'id', label: '案號', sortable: true }, { key: 'nm', label: '名稱' }, { key: 'due', label: '到期日', sortable: true }];
+const TB_ROW = [{ key: 'id', label: '案號', cell: 'id' }, { key: 'nm', label: '名稱' }];
+const DUE = (due: string) => ({ due, today: '2026-11-12' });
 const SEG4 = [{ label: '進行中', value: 43 }, { label: '待審核', value: 18 }, { label: '已完成', value: 55 }, { label: '未開始', value: 12 }];
 
 export const CASES: Record<string, Case[]> = {
@@ -328,5 +332,16 @@ export const CASES: Record<string, Case[]> = {
   'segmented-bar': [
     { id: 'v0', props: { segments: SEG4, unit: '件工單' } },
     { id: 'v1', props: { segments: [{ label: '已完成', value: 32, color: 'var(--success)' }, { label: '未開始', value: 8, color: 'var(--line-strong)' }], unit: '件工單' } },
+  ],
+  // 資料表格：columns＝整張表、state＝單獨的排序表頭、due＝單獨的到期日
+  'data-table': [
+    { id: 'v0', props: { label: '案件列表', columns: TB_COLS, rows: [], sort: { key: 'due', dir: 'asc' }, cols: '1fr 1fr 1fr', style: 'width:100%' } },
+    { id: 'v1', group: [DUE('11-09'), DUE('11-12'), DUE('11-14'), DUE('11-28')], wrap: 'display:flex;flex-direction:column;gap:8px;align-self:center' },
+    { id: 's0', props: { label: '到期日', state: 'none' } },
+    { id: 's1', props: { label: '到期日', state: 'asc' } },
+    { id: 's2', props: { label: '到期日', state: 'desc' } },
+    { id: 's3', props: { label: '案件列表', columns: TB_ROW, rows: [{ id: 'C-1042', nm: '官網改版' }], header: false, cols: 'auto 1fr', style: 'width:100%' }, interact: { type: 'hover', selector: '.tr' } },
+    { id: 's4', props: DUE('11-09') },
+    { id: 's5', props: DUE('11-14') },
   ],
 };

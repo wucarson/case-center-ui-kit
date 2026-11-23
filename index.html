@@ -1755,11 +1755,11 @@ h1 { --rk: var(--k-display); font-weight: var(--t-display-w); line-height: var(-
 :is(.stat b, .sb-h b, .seg-p b, .pie-m b, .tp-col .v, .num) { --rk: var(--k-numeric); font-weight: var(--t-numeric-w); letter-spacing: var(--t-numeric-ls); font-variant-numeric: tabular-nums; }
 .cz { font-size: 14px; line-height: 22px; font-weight: 400; }
 body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration: 0s !important; animation-iteration-count: 1 !important; transition-duration: 0s !important; }
-/* 深淺色切換的墨鏡（shadesSwap）：關掉預設交叉淡入淡出，鏡片＝畫面快照的遮罩，鏡框是暫時元素 */
-.vt-shades-on::view-transition-old(root), .vt-shades-on::view-transition-new(root), .vt-shades-off::view-transition-old(root), .vt-shades-off::view-transition-new(root),
-::view-transition-group(shades), ::view-transition-new(shades), ::view-transition-old(shades),
-::view-transition-group(speed), ::view-transition-new(speed), ::view-transition-old(speed) { animation: none; mix-blend-mode: normal; }
-.vt-shades-off::view-transition-old(root) { z-index: 2; }
+/* 深淺色轉場：黑洞／白洞（holeSwap）——WebGL 畫黑洞、光環與衝擊波，2D 畫布畫光塵；卡片本身用 WAAPI 被吸入／噴出 */
+.bh-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; }
+.bh-fx canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.bh-flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+.bh-on .cell { transition: none !important; }   /* 被吸入時不讓卡片自己的滑過、進場過渡搶 transform */
 /* 深淺色轉場：亂刀（slashSwap）——碎片層蓋在最上面 */
 /* 深淺色轉場：魔杖（wandSwap）——舊畫面挖柔邊圓洞（--wr），魔杖、光暈、咒語在 .wand-fx */
 @property --wr { syntax: '<length>'; inherits: false; initial-value: 0px; }
@@ -1819,20 +1819,6 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .slash-debris { position: absolute; clip-path: polygon(50% 0, 100% 100%, 0 80%); will-change: transform, opacity; }
 .slash-fx > .slash-debris-wrap { position: absolute; inset: 0; filter: drop-shadow(0 1px 2px rgb(0 0 0 / .45)) drop-shadow(0 0 6px rgb(255 255 255 / .5)); }   /* 碎屑加陰影與光暈，深淺底都看得到 */
 .slash-lines line { stroke: #fff; stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 1; filter: drop-shadow(0 0 6px rgb(255 255 255 / .9)) drop-shadow(0 0 2px rgb(120 170 255 / .9)); }
-.vt-shades-on::view-transition-new(root) { opacity: 0; }   /* 快照拍完到動畫開始前的空檔：深色新畫面先藏起來，不會整個閃出 */
-::view-transition-group(shades), ::view-transition-group(speed) { opacity: 0; }   /* 拿掉：舊的深色在上、只留鏡片內 */
-.vt-shades-on *, .vt-shades-off * { transition: none !important; }   /* 切換期間停掉元件自己的顏色過渡，新畫面一次到位 */
-::view-transition-group(shades) { z-index: 3; }
-::view-transition-group(speed) { z-index: 4; }
-.shades, .shades-speed { position: fixed; z-index: 100; pointer-events: none; }
-.shades { view-transition-name: shades; }
-.shades-speed { inset: 0; view-transition-name: speed; }
-.shades svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 12px 16px rgb(0 0 0 / .28)); }
-.shades .sf { fill: none; stroke: var(--sh-edge, #0b1020); stroke-width: 12; }   /* 深色柔邊：模糊時蓋住裁切的硬邊 */
-.shades .rf { animation: sh-rf 1.2s cubic-bezier(.4, 0, .2, 1) both; }
-@keyframes sh-rf { from { transform: skewX(-22deg) translateX(0); } to { transform: skewX(-22deg) translateX(380px); } }
-.shades-speed svg { display: block; }
-.shades-speed line { stroke: rgb(255 255 255 / .6); stroke-linecap: round; }
 /* ================= 設定面板：電動車儀表風格 =================
    浮起的毛玻璃卡片，四邊留 24px；跟著深淺色。細線分隔（不用灰底區塊）、選中＝主色細框＋柔光、
    數值用等寬數字（儀表讀數）。不用左側垂直色條。 */
@@ -2468,21 +2454,6 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     const isDark = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
     const paint = () => { const d = isDark(); tb.querySelector('span').textContent = tb.title = d ? '淺色模式' : '深色模式'; tb.querySelector('path').setAttribute('d', d ? SUN : MOON); };
     try { const saved = localStorage.getItem('wall-theme'); if (saved === 'light' || saved === 'dark') root.dataset.theme = saved; } catch (e) {}
-    /* 深淺色切換的墨鏡動畫（View Transitions，約 1.2 秒）：只有兩片 Y2K 長橢圓鏡片（深黑亮面、上深下淺、一道反光，沒有框線），位在畫面正中央
-       · 戴上（→ 深色）：鏡片外維持淺色，只有鏡片內是深色，且隨著戴上由淡漸深（透明度 0 → 1）；鏡片在正中央由小出現（小 → 大），接著加速往兩側放大；中段到尾段兩片再往左右外擴拉長，鏡片裡的深色蓋滿畫面；
-         邊緣由清晰變得很模糊（越靠近眼睛越失焦）；同時從中央射出白色半透明的速度線
-       · 拿掉（→ 淺色）：深色從兩側往畫面中央縮回成兩片鏡片（大 → 小），邊緣由很模糊變清晰，再繼續縮小、淡出，露出淺色畫面（沒有速度線）
-       · 兩片的深色共用同一個裁切（聯集），重疊處不會疊出更深的一塊；邊緣的深色柔邊加模糊，蓋住裁切的硬邊
-       · 鏡片＝畫面快照的 clip-path（戴上裁新畫面、拿掉裁舊畫面）；鏡片外觀與速度線各是一個暫時元素，有自己的 view-transition-name
-       · 不支援 View Transitions 或減少動態效果時直接切換 */
-    const SH_LC = [80, 220], SH_LY = 54, SH_RX = 62, SH_RY = 20;   // 左右鏡片中心、半寬、半高（viewBox 300×108）
-    // 長橢圓：8 段二次曲線（只用 M／Q，路徑才能內插）；ccw＝反向繞行
-    const shOval = (cx, ccw) => { const n = 8, d = Math.PI * 2 / n, k = 1 / Math.cos(d / 2), pts = [];
-      for (let i = 0; i < n; i++) { const a0 = (ccw ? -1 : 1) * i * d, a1 = (ccw ? -1 : 1) * (i + 1) * d, m = (a0 + a1) / 2;
-        pts.push([i ? null : [cx + SH_RX * Math.cos(a0), SH_LY + SH_RY * Math.sin(a0)], [cx + SH_RX * k * Math.cos(m), SH_LY + SH_RY * k * Math.sin(m)], [cx + SH_RX * Math.cos(a1), SH_LY + SH_RY * Math.sin(a1)]]); }
-      return pts; };
-    const SH_L = shOval(SH_LC[0], false), SH_R = shOval(SH_LC[1], false);   // 兩片同一個繞行方向：重疊處是聯集（不是洞）
-    const shD = (pts) => pts.map(([m, c, e]) => (m ? `M${m[0].toFixed(2)} ${m[1].toFixed(2)}` : '') + `Q${c[0].toFixed(2)} ${c[1].toFixed(2)} ${e[0].toFixed(2)} ${e[1].toFixed(2)}`).join('') + 'Z';
     /* 深淺色轉場（亂刀，1 秒）：3 刀白色刀光依序劃過畫面（固定刀位），把畫面切成大小不一的碎塊，最後碎塊從中央往外炸開，露出新版面
        · 做法：把目前畫面（.shell）複製到每一塊碎片裡（碎片用 clip-path 多邊形裁切，聯集剛好是整個畫面），蓋在最上層後立刻切換深淺色；
          複製品帶著切換前的顏色變數，所以碎片保持舊配色。刀光結束後碎片各自往外飛、旋轉、縮小淡出，底下就是新版面
@@ -2781,67 +2752,186 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       vt.finished.finally(() => { fx.remove(); de.classList.remove('vt-wand', 'vt-lumos', 'vt-nox'); shBusy = false; });
     }
     let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途
-    function shadesSwap(next, apply) {
+    /* 深淺色轉場（黑洞／白洞，約 2.5–3 秒，全部從畫面中央發生）
+       · 切到深色＝黑洞：中央生出黑洞；卡片由近到遠先顫抖、往洞傾斜，再被拉長、繞軌道螺旋吸入，黑洞每吞一張就變大一點；
+         吞完塌縮成白光閃一下、衝擊波漾開，深色版面的卡片在原位淡入
+       · 切到淺色＝白洞：中央亮起白洞，舊卡片被往外推開、拉長淡出；白光爆滿畫面後換成淺色，卡片在原位淡入
+       · 洞周圍用 WebGL 畫：彎曲的深空（背景星點依透鏡偏折公式彎曲）、閃爍的細光子環、吸積光、衝擊波；光塵用 2D 畫布沿螺旋流入／噴出
+       · 每一格畫面只由時間 t 決定（frame(t)）；大小、時間點都在下面幾個常數；減少動態時直接切換 */
+    function holeSwap(next, apply, btn) {
       if (shBusy) return;
-      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (!document.startViewTransition || reduce) { apply(); return; }
-      const W = Math.min(innerWidth * 0.56, 760), H = W * 108 / 300, left = (innerWidth - W) / 2, top = innerHeight / 2 - H * SH_LY / 108;
-      const C = [innerWidth / 2, innerHeight / 2], G = 2.2, HX = 1.9;   // 放到最大時：每片以自己中心再放大 G 倍，水平再外擴 HX 倍
-      const S = Math.max(1.6 * (innerHeight / 2) / (G * SH_RY / 108 * H), 1.3 * (innerWidth / 2) / ((70 + SH_RX * G * HX) / 300 * W));
-      const on = next === 'dark';
-      // [時間點, 整組縮放（以畫面中央）, 每片放大（以各自中心）, 水平外擴, 鏡片內容透明度, 模糊px, easing]
-      const K = on
-        ? [[0, 0.55, 1, 1, 0, 0, 'cubic-bezier(.2, .7, .35, 1)'], [0.12, 0.8, 1, 1, 0.2, 0, 'cubic-bezier(.3, .6, .4, 1)'], [0.36, 1, 1, 1, 0.45, 0, 'cubic-bezier(.5, 0, .7, .3)'], [0.62, 1.9, 1.2, 1.35, 0.75, 10, 'cubic-bezier(.3, .2, .75, .7)'], [1, S, G, HX, 1, 44, 'linear']]
-        : [[0, S, G, HX, 1, 44, 'cubic-bezier(.25, .55, .35, 1)'], [0.45, 1.08, 1, 1.05, 1, 4, 'cubic-bezier(.3, .4, .45, 1)'], [0.6, 1, 1, 1, 1, 0, 'cubic-bezier(.5, 0, .75, .5)'], [1, 0.5, 1, 1, 0, 0, 'linear']];
-      const P = (x, y, s, g, hx, k) => { const vx = SH_LC[k] + g * hx * (x - SH_LC[k]), vy = SH_LY + g * (y - SH_LY);
-        return `${(C[0] + s * (left + vx / 300 * W - C[0])).toFixed(1)} ${(C[1] + s * (top + vy / 108 * H - C[1])).toFixed(1)}`; };
-      const lensPath = (pts, k, s, g, hx) => pts.map(([m, c, e]) => (m ? `M ${P(...m, s, g, hx, k)} ` : '') + `Q ${P(...c, s, g, hx, k)} ${P(...e, s, g, hx, k)} `).join('') + 'Z';
-      const clip = (s, g, hx) => `path("${lensPath(SH_L, 0, s, g, hx)} ${lensPath(SH_R, 1, s, g, hx)}")`;
-      // 鏡片外觀：兩片共用一個聯集裁切放色調與反光，外面再各自一圈深色柔邊
-      const frame = document.createElement('div');
-      frame.className = 'shades';
-      frame.style.cssText = `left:${left}px;top:${top}px;width:${W}px;height:${H}px`;
-      const dl = shD(SH_L), dr = shD(SH_R);
-      frame.innerHTML = `<svg viewBox="0 0 300 108" aria-hidden="true"><defs>
-        <linearGradient id="sh-tint" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#020306" stop-opacity=".62"/><stop offset=".6" stop-color="#020306" stop-opacity=".22"/><stop offset="1" stop-color="#020306" stop-opacity=".06"/></linearGradient>
-        <linearGradient id="sh-rf" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
-        <clipPath id="sh-u"><path class="ln-l" d="${dl}"/><path class="ln-r" d="${dr}"/></clipPath></defs>
-        <g clip-path="url(#sh-u)"><rect x="-300" y="-200" width="900" height="508" fill="url(#sh-tint)"/><rect class="rf" x="-60" y="-20" width="40" height="150" fill="url(#sh-rf)" transform="skewX(-22)"/></g>
-        <path class="sf ln-l" d="${dl}"/><path class="sf ln-r" d="${dr}"/></svg>`;
-      // 速度線（只在戴上時）：從中央往外射出的細線
-      let speed = null;
-      if (on) {
-        speed = document.createElement('div'); speed.className = 'shades-speed';
-        const R0 = Math.min(innerWidth, innerHeight) * 0.18;
-        speed.innerHTML = `<svg width="${innerWidth}" height="${innerHeight}" aria-hidden="true">${Array.from({ length: 40 }, (_, i) => { const a = (i / 40) * Math.PI * 2 + (Math.random() - 0.5) * 0.12, r = R0 * (0.8 + Math.random() * 0.6), len = 60 + Math.random() * 140, c = Math.cos(a), n = Math.sin(a);
-          return `<line x1="${(C[0] + c * r).toFixed(1)}" y1="${(C[1] + n * r).toFixed(1)}" x2="${(C[0] + c * (r + len)).toFixed(1)}" y2="${(C[1] + n * (r + len)).toFixed(1)}" stroke-width="${(1 + Math.random() * 1.6).toFixed(1)}" data-dx="${(c * innerWidth * 0.5).toFixed(0)}" data-dy="${(n * innerHeight * 0.5).toFixed(0)}"/>`; }).join('')}</svg>`;
-      }
-      const de = document.documentElement, cls = on ? 'vt-shades-on' : 'vt-shades-off';
-      de.classList.add(cls);   // 先加 class：關掉預設的交叉淡入淡出與元件自己的顏色過渡
-      // 柔邊顏色＝深色模式的頁面底色：拿掉時現在就是深色，先讀；戴上時切換後再讀
-      const edgeOf = () => getComputedStyle(de).getPropertyValue('--page').trim();
-      if (!on) frame.style.setProperty('--sh-edge', edgeOf());
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) { apply(); return; }
       shBusy = true;
-      const vt = document.startViewTransition(() => { apply(); if (on) frame.style.setProperty('--sh-edge', edgeOf()); document.body.append(frame); if (speed) document.body.append(speed); });
-      vt.ready.then(() => {
-        const o = { duration: 1200, fill: 'both' };
-        // 鏡片內的畫面：戴上裁新畫面（深色）、拿掉裁舊畫面（深色）
-        de.animate(K.map(([t, s, g, hx, op, , e]) => ({ offset: t, easing: e, opacity: op, clipPath: clip(s, g, hx) })), { ...o, pseudoElement: on ? '::view-transition-new(root)' : '::view-transition-old(root)' });
-        // 鏡片外觀：整組以畫面中央縮放＋模糊
-        de.animate(K.map(([t, s, , , , bl, e]) => ({ offset: t, easing: e, filter: bl ? `blur(${bl}px)` : 'none', transformOrigin: `${(C[0] - left).toFixed(1)}px ${(C[1] - top).toFixed(1)}px`, transform: `translate(${left.toFixed(1)}px, ${top.toFixed(1)}px) scale(${s})` })), { ...o, pseudoElement: '::view-transition-group(shades)' });
-        // 鏡片外觀的透明度：一直留到最後才淡掉（模糊的柔邊要蓋住接縫的硬邊）
-        de.animate((on ? [[0, 0], [0.12, 1], [0.9, 1], [1, 0]] : [[0, 1], [0.82, 1], [1, 0]]).map(([t, v]) => ({ offset: t, opacity: v })), { ...o, pseudoElement: '::view-transition-group(shades)', composite: 'replace' });
-        // 每片以自己的中心放大、水平外擴（和裁切的計算一致）
-        frame.querySelectorAll('.ln-l, .ln-r').forEach((el) => { const i = el.classList.contains('ln-r') ? 1 : 0; el.style.transformBox = 'view-box'; el.style.transformOrigin = `${SH_LC[i]}px ${SH_LY}px`;
-          el.animate(K.map(([t, , g, hx, , , e]) => ({ offset: t, easing: e, transform: `scale(${g * hx}, ${g})` })), o); });
-        // 深色柔邊只在模糊時出現（清晰時不要看起來像框線）
-        frame.querySelectorAll('.sf').forEach((el) => el.animate((on ? [[0, 0], [0.4, 0], [0.62, 1], [1, 1]] : [[0, 1], [0.4, 1], [0.58, 0], [1, 0]]).map(([t, v]) => ({ offset: t, opacity: v })), o));
-        // 速度線：約 0.56 秒起射出，每條略為錯開，往外飛、拉長後淡掉
-        if (speed) speed.querySelectorAll('line').forEach((ln, i) => ln.animate([{ opacity: 0, transform: 'translate(0, 0)' }, { opacity: 0.75, offset: 0.25 }, { opacity: 0, transform: `translate(${ln.dataset.dx}px, ${ln.dataset.dy}px)` }], { duration: 420, delay: 560 + (i % 7) * 14, easing: 'cubic-bezier(.3, .2, .7, 1)', fill: 'both' }));
-      }).catch(() => {});
-      vt.finished.finally(() => { frame.remove(); speed?.remove(); de.classList.remove('vt-shades-on', 'vt-shades-off'); shBusy = false; });
+      const de = document.documentElement, dark = next === 'dark', W = innerWidth, H = innerHeight, C = [W / 2, H / 2], M = Math.min(W, H), maxD = Math.hypot(W, H) / 2;
+      const K = parseFloat(getComputedStyle(de).getPropertyValue('--dur')) || 1;   // 動畫速度設定（時間軸整條跟著縮放）
+      const io = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2), cl = (x) => Math.max(0, Math.min(1, x));
+      // 時間軸（毫秒，速度 1 倍時）
+      const B = { FORM: 220, MOVE: 1750, COLLAPSE: 2400, APPLY: 2480, END: 3200 };   // 黑洞：中央成形 → 由近到遠吞掉卡片 → 塌縮 → 白光換色 → 卡片淡入
+      const Wt = { IGNITE: 450, FLARE: 1050, APPLY: 1300, END: 2500 };              // 白洞：中央點亮 → 推開舊卡片 → 爆光換色 → 卡片淡入
+      const fx = document.createElement('div'); fx.className = 'bh-fx'; fx.setAttribute('aria-hidden', 'true');
+      fx.innerHTML = '<canvas class="bh-gl"></canvas><canvas class="bh-dust"></canvas><i class="bh-flash"></i>';
+      document.body.append(fx); de.classList.add('bh-on');
+      const flash = fx.querySelector('.bh-flash');
+      // 被吞的對象：畫面內看得到的卡片與區塊（詳細頁時是頁首、說明、規格區塊）
+      const items = [...document.querySelectorAll('#wall > .cell, .ttl, .wf, .dt-hero, .dt-tabs, .dt-panel:not([hidden]) > *, .dt-pn')]
+        .map((e) => ({ e, r: e.getBoundingClientRect() }))
+        .filter(({ r }) => r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < H && r.right > 0 && r.left < W)
+        .map(({ e, r }, i) => ({ e, i, x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height, d: Math.hypot(r.left + r.width / 2 - C[0], r.top + r.height / 2 - C[1]) }));
+      let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+
+      /* ---- 洞一律在畫面中央 ---- */
+      const holeAt = () => C;
+
+      /* ---- 黑洞：由近到遠依序吞（離中央越遠越晚被抓住） ---- */
+      if (dark) items.slice().sort((p, q) => p.d - q.d).forEach((it, k, all) => { it.tc = B.FORM + 150 + (k / Math.max(1, all.length - 1)) * (B.MOVE - B.FORM - 150); it.eat = 600; });
+      const eaten = (t) => items.reduce((s, it) => s + (dark ? cl((t - (it.tc + it.eat * 0.75)) / 250) : 0), 0);
+      const radius = (t) => {
+        if (dark) {
+          const base = M * 0.024;
+          if (t < B.FORM) return base * io(t / B.FORM);
+          const r = base + M * 0.0055 * eaten(t);
+          return t < B.COLLAPSE - 200 ? r : r * (1 - io(cl((t - (B.COLLAPSE - 200)) / 200)));
+        }
+        const base = M * 0.03;
+        if (t < Wt.IGNITE) return base * io(t / Wt.IGNITE);
+        if (t < Wt.FLARE) return base * (1 + 0.12 * Math.sin(t * 0.02));
+        if (t < Wt.APPLY) return base * (1 + 5 * io((t - Wt.FLARE) / (Wt.APPLY - Wt.FLARE)));
+        return base * 1.2 * (1 - io(cl((t - Wt.APPLY - 100) / 1100)));
+      };
+
+      /* ---- 卡片動畫（WAAPI，一開始就排好；時間也是 t 的函式） ---- */
+      const anims = [], F = 22;
+      const tf = (dx, dy, rot, sx, sy) => `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) rotate(${rot.toFixed(2)}deg) scale(${sx.toFixed(3)}, ${sy.toFixed(3)})`;
+      if (dark) for (const it of items) {
+        const start = Math.max(0, it.tc - 450), D = it.tc + it.eat - start, hp0 = holeAt(it.tc), rel = [it.x - hp0[0], it.y - hp0[1]];
+        const spin = 1, ph = rnd() * 6.28;   // 全部同一個旋轉方向（像吸積盤）
+        const kf = [];
+        for (let k = 0; k <= F; k++) {
+          const tt = start + (k / F) * D;
+          if (tt < it.tc) {   // 顫抖、往洞傾斜
+            const q = cl((tt - start) / Math.max(1, it.tc - start)), hp = holeAt(tt), vx = hp[0] - it.x, vy = hp[1] - it.y, L = Math.hypot(vx, vy) || 1, j = Math.sin(tt * 0.09 + ph) * q;
+            kf.push({ offset: k / F, transform: tf((vx / L) * 12 * q * q - (vy / L) * j * 2, (vy / L) * 12 * q * q + (vx / L) * j * 2, j * 2.2 + spin * q * 3, 1, 1), opacity: 1 });
+          } else {           // 被拉長、繞軌道螺旋吸入
+            const p = cl((tt - it.tc) / it.eat), e = p * p, hp = holeAt(tt), a = spin * e * 2.2 * Math.PI, s = Math.pow(1 - e, 1.4);
+            const rx = (rel[0] * Math.cos(a) - rel[1] * Math.sin(a)) * s, ry = (rel[0] * Math.sin(a) + rel[1] * Math.cos(a)) * s, k2 = Math.pow(1 - e, 0.8);
+            kf.push({ offset: k / F, transform: tf(hp[0] + rx - it.x, hp[1] + ry - it.y, spin * (3 + e * 200), Math.max(0.02, (1 + 1.6 * e) * k2), Math.max(0.02, (1 - 0.85 * e) * k2)), opacity: 1 - cl((e - 0.7) / 0.3) });
+          }
+        }
+        anims.push(it.e.animate(kf, { duration: D * K, delay: start * K, fill: 'both', easing: 'linear' }));
+      }
+      else for (const it of items) {   // 白洞：舊卡片先往外傾，再被推開、拉長淡出
+        const ts = 300 + (it.d / maxD) * 450, D = ts + 600, ux = it.d > 1 ? (it.x - C[0]) / it.d : 0, uy = it.d > 1 ? (it.y - C[1]) / it.d : -1, push = (maxD - it.d) * 0.5 + 180, rot = (rnd() - 0.5) * 50, ph = rnd() * 6.28;
+        const kf = [];
+        for (let k = 0; k <= F; k++) {
+          const tt = (k / F) * D;
+          if (tt < ts) { const q = tt / ts, j = Math.sin(tt * 0.09 + ph) * q; kf.push({ offset: k / F, transform: tf(ux * 8 * q * q - uy * j * 2, uy * 8 * q * q + ux * j * 2, j * 2, 1, 1), opacity: 1 }); }
+          else { const p = (tt - ts) / 600, e = p * p; kf.push({ offset: k / F, transform: tf(ux * push * e, uy * push * e, rot * e, 1 + 0.35 * e, 1 - 0.3 * e), opacity: 1 - e }); }
+        }
+        anims.push(it.e.animate(kf, { duration: D * K, fill: 'both', easing: 'linear' }));
+      }
+      // 換色後：卡片留在原位直接淡入（不重新排列）
+      const reveal = () => {
+        anims.splice(0).forEach((a) => a.cancel());
+        for (const it of items) anims.push(it.e.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 500 * K, delay: 80 * K, fill: 'backwards', easing: 'ease-out' }));
+      };
+
+      /* ---- 光塵：固定種子的粒子，位置只由 t 決定 ---- */
+      const dust = Array.from({ length: dark ? 220 : 200 }, () => dark
+        ? { b: B.FORM + rnd() * (B.COLLAPSE - 350 - B.FORM), L: 700 + rnd() * 600, r0: M * (0.07 + rnd() * 0.25), a0: rnd() * 6.28, w: 0.6 + rnd() * 1.2 }
+        : { b: rnd() < 0.3 ? 150 + rnd() * 800 : Wt.APPLY - 50 + rnd() * 600, L: 700 + rnd() * 500, r0: M * (0.1 + rnd() * 0.35), a0: rnd() * 6.28, w: 0.6 + rnd() * 1.2 });
+      const dustAt = (q, t, hp, rh) => {   // hp、rh：這一格的洞位置與半徑（拖尾的前一點也用同一個洞，洞移動時才不會拉成直線）
+        const u = (t - q.b) / q.L; if (u <= 0 || u >= 1) return null;
+        const rr = dark ? rh * 1.1 + q.r0 * Math.pow(1 - u, 1.5) : rh + q.r0 * Math.pow(u, 0.7) * 2.4;
+        const a = q.a0 + (dark ? 6 * u * u : 2.5 * (1 - Math.pow(1 - u, 2)));
+        return [hp[0] + Math.cos(a) * rr, hp[1] + Math.sin(a) * rr, dark ? Math.pow(Math.sin(Math.PI * u), 0.7) : Math.pow(1 - u, 1.2)];
+      };
+
+      /* ---- WebGL：洞、光子環、吸積光、彎曲的深空、衝擊波 ---- */
+      const DPR = Math.min(1.5, devicePixelRatio || 1), glc = fx.querySelector('.bh-gl'), dc = fx.querySelector('.bh-dust');
+      for (const c of [glc, dc]) { c.width = Math.round(W * DPR); c.height = Math.round(H * DPR); }
+      const g2 = dc.getContext('2d');
+      let paintGl = () => {};
+      const gl = glc.getContext('webgl', { premultipliedAlpha: true, antialias: false });
+      if (gl) {
+        const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+        const FS = `precision highp float;
+uniform vec2 R,P;uniform float RS,T,MODE,SHOCK,SHOCKA,GLOW;
+float h1(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float stars(vec2 q){vec2 g=floor(q),f=fract(q);float h=h1(g);vec2 c=vec2(h1(g+1.3),h1(g+2.7));float s=smoothstep(.09,0.,length(f-c))*step(.8,h);return s*(.6+.4*sin(T*.004*(1.+h*5.)+h*40.));}
+void main(){
+  vec2 p=vec2(gl_FragCoord.x,R.y-gl_FragCoord.y),d=p-P;float r=length(d),rs=max(RS,.001),ang=atan(d.y,d.x);vec4 o=vec4(0.);
+  if(MODE<.5){
+    float space=smoothstep(rs*5.,rs*1.2,r);                         /* 洞周圍彎成深空 */
+    vec2 q=(d/max(r,.001))*(r-rs*rs*2.25/max(r,rs*.5));            /* 透鏡偏折：背景星點繞過洞、在 1.5rs 擠成環 */
+    float st=stars(q/(7.*${DPR.toFixed(2)}))+stars(q/(12.*${DPR.toFixed(2)})+19.)*.7;
+    float ring=exp(-pow((r-rs*1.5)/(rs*.06+1.),2.))*(.72+.28*sin(T*.031+ang*7.)*sin(T*.017-ang*3.));   /* 細光子環，閃爍 */
+    float disk=exp(-pow((r-rs*2.4)/(rs*.95),2.))*(.5+.5*sin(ang*2.-T*.006+log(r+1.)*5.))*.4;           /* 吸積光，沿螺旋轉 */
+    vec3 col=vec3(.015,.018,.028)+vec3(1.)*st*space+vec3(1.,.97,.92)*ring*1.5+vec3(.96,.88,.76)*disk;
+    float hor=smoothstep(rs*1.03,rs*.95,r),a=max(max(space*.94,hor),ring);
+    col=mix(col,vec3(0.),hor);o=vec4(col*a,a);
+  }else{
+    float core=smoothstep(rs*1.05,rs*.9,r);
+    float glow=(exp(-r/(rs*1.4+1.))*1.1+exp(-r/(rs*4.+1.))*.45)*GLOW;
+    float rays=pow(.5+.5*sin(ang*9.+T*.004),8.)*exp(-r/(rs*4.+1.))*.25*GLOW*smoothstep(rs*1.4,rs*2.2,r);   /* 光芒從光環外才開始，環內不切成齒輪 */
+    float ring=exp(-pow((r-rs*1.5)/(rs*.06+1.),2.))*(.88+.12*sin(T*.031+ang*3.));
+    float a=clamp(core+glow+rays+ring,0.,1.);o=vec4(mix(vec3(1.,.96,.88),vec3(1.),core)*a,a);
+  }
+  float sw=exp(-pow((length(p-.5*R)-SHOCK)/(16.*${DPR.toFixed(2)}),2.))*SHOCKA;   /* 衝擊波 */
+  o=vec4(o.rgb+vec3(sw*.85),max(o.a,sw*.85));
+  gl_FragColor=o;
+}`;
+        const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+        const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
+        if (gl.getProgramParameter(pr, gl.LINK_STATUS)) {
+          gl.useProgram(pr);
+          gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+          const al = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
+          const U = {}; for (const k of ['R', 'P', 'RS', 'T', 'MODE', 'SHOCK', 'SHOCKA', 'GLOW']) U[k] = gl.getUniformLocation(pr, k);
+          gl.viewport(0, 0, glc.width, glc.height); gl.uniform2f(U.R, glc.width, glc.height); gl.uniform1f(U.MODE, dark ? 0 : 1);
+          paintGl = (t, hp, rs, shock, shockA, glow) => {
+            gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.uniform2f(U.P, hp[0] * DPR, hp[1] * DPR); gl.uniform1f(U.RS, rs * DPR); gl.uniform1f(U.T, t);
+            gl.uniform1f(U.SHOCK, shock * DPR); gl.uniform1f(U.SHOCKA, shockA); gl.uniform1f(U.GLOW, glow);
+            gl.drawArrays(gl.TRIANGLES, 0, 3);
+          };
+        }
+      }
+
+      /* ---- 一格畫面：只由 t 決定 ---- */
+      const AP = dark ? B.APPLY : Wt.APPLY, END = dark ? B.END : Wt.END;
+      const frame = (t) => {
+        const hp = holeAt(t), rs = radius(t);
+        const fl = dark ? (t < 2300 ? 0 : t < AP ? io((t - 2300) / (AP - 2300)) : 1 - io(cl((t - AP - 80) / 420)))
+          : (t < Wt.FLARE ? 0 : t < AP ? io((t - Wt.FLARE) / (AP - Wt.FLARE)) : 1 - io(cl((t - AP - 80) / 450)));
+        const s = cl((t - AP) / (dark ? 700 : 800)), shockA = t > AP && s < 1 ? Math.pow(1 - s, 1.5) : 0;
+        const glow = dark ? 0 : t < Wt.IGNITE ? io(t / Wt.IGNITE) : t < AP ? 1 + io(cl((t - Wt.FLARE) / (AP - Wt.FLARE))) : Math.max(0, 1.2 - (t - AP) / 1000);
+        paintGl(t, hp, rs, s * maxD * 1.3, shockA, glow);
+        flash.style.opacity = fl.toFixed(3);
+        g2.setTransform(DPR, 0, 0, DPR, 0, 0); g2.clearRect(0, 0, W, H); g2.lineCap = 'round'; g2.strokeStyle = '#fff';
+        for (const q of dust) {
+          const a = dustAt(q, t, hp, rs), z = dustAt(q, t - 24, hp, rs); if (!a || !z) continue;
+          g2.globalAlpha = a[2] * 0.9; g2.lineWidth = q.w; g2.beginPath(); g2.moveTo(z[0], z[1]); g2.lineTo(a[0], a[1]); g2.stroke();
+        }
+      };
+      window.__holeFrame = frame;   // 逐格檢查用：__holeFrame(t)
+
+      let applied = false, done = false, raf = 0;
+      const t0 = performance.now();
+      const finish = () => {
+        if (done) return; done = true; cancelAnimationFrame(raf);
+        if (!applied) { applied = true; apply(); }
+        anims.forEach((a) => a.cancel()); fx.remove(); de.classList.remove('bh-on'); delete window.__holeFrame; shBusy = false;
+      };
+      const tick = (now) => {
+        const t = (now - t0) / K;
+        if (!applied && t >= AP) { applied = true; apply(); reveal(); }
+        if (t >= END) { finish(); return; }
+        frame(t); raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+      setTimeout(finish, (END + 800) * K);   // 分頁被切走、rAF 停住時的保險
     }
-    tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; ({ shades: shadesSwap, slash: slashSwap }[root.dataset.themeFx] || wandSwap)(next, () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); }, tb); });
+    tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; ({ hole: holeSwap, slash: slashSwap }[root.dataset.themeFx] || wandSwap)(next, () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); }, tb); });
     new MutationObserver(paint).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint);
     paint();
@@ -4372,7 +4462,7 @@ void main(){
     let theme = clone(DEFAULT);
     let lastAuto = null;
     function apply() {
-      document.documentElement.dataset.themeFx = ['shades', 'slash'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'wand';   // 深淺色轉場：右上角按鈕讀這個
+      document.documentElement.dataset.themeFx = ['hole', 'slash'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'wand';   // 深淺色轉場：右上角按鈕讀這個
       // 舊版存過的風格（寫實、手繪）已移除：改回標準
       // 舊版的「緊湊」風格改成間距「緊」
       if (theme.style.ui === 'compact') { theme.style.ui = 'standard'; theme.layout.density = 'compact'; }
@@ -4919,7 +5009,7 @@ void main(){
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
         })),
           el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['line', '浮線'], ['fly', '飛入']].map(([v, n]) => { const on = () => (theme.motion.enter === 'fly' ? 'fly' : 'line') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '深淺色轉場' }, [['wand', '魔杖'], ['slash', '亂刀'], ['shades', '墨鏡']].map(([v, n]) => { const on = () => (['shades', 'slash'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'wand') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.themeFx = v; changed(); renderAll(); } }, '深淺色 ' + n); quick.push([btn, on]); return btn; }))),
+          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '深淺色轉場' }, [['wand', '魔杖'], ['slash', '亂刀'], ['hole', '黑洞']].map(([v, n]) => { const on = () => (['hole', 'slash'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'wand') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.themeFx = v; changed(); renderAll(); } }, '深淺色 ' + n); quick.push([btn, on]); return btn; }))),
       )];
     }
     function catsEl() {
@@ -5540,7 +5630,7 @@ const { colors, setPreference } = useTheme();
 
     /* ---- AI／框架元件規格包：元件樣式（從畫面直接抽出、變數已解析）＋每個元件的結構與規格 ---- */
     // 頁面外框（展示牆自己的版面、面板、彈窗、詳細頁）不算元件，排除
-    const AI_EXCL = /^(\.cell\b|\.shell|\.top\b|\.top-a|\.ttl|\.wf\b|\.wall|\.cz|\.ck-|\.cmdk|\.sh\b|\.sh-|\.sp\b|\.sp-|\.dt-|\.doc|\.api|\.a11y|body|html|h1|\.ctl|\.body\b|\.sub\b|#|\*|\.ping|\.held|\.live|\.norise|\.ready|\.curtain|\.dd-k|\.ash-cv|\.silk|\.vt-|\.wand|\.lumos|\.nox|\.slash|\.shades|::view-transition)/;   // 後段：展示牆頁面特效（絲綢背景、魔杖／墨鏡／斬擊轉場），不是元件
+    const AI_EXCL = /^(\.cell\b|\.shell|\.top\b|\.top-a|\.ttl|\.wf\b|\.wall|\.cz|\.ck-|\.cmdk|\.sh\b|\.sh-|\.sp\b|\.sp-|\.dt-|\.doc|\.api|\.a11y|body|html|h1|\.ctl|\.body\b|\.sub\b|#|\*|\.ping|\.held|\.live|\.norise|\.ready|\.curtain|\.dd-k|\.ash-cv|\.silk|\.vt-|\.wand|\.lumos|\.nox|\.slash|\.shades|\.bh-|::view-transition)/;   // 後段：展示牆頁面特效（絲綢背景、魔杖／墨鏡／斬擊轉場），不是元件
     const DARK_PRE = [':root[data-theme="dark"] ', ":root[data-theme='dark'] ", ':root:not([data-theme="light"]) '];
     function aiKeep(sel) {
       // 只切最外層的逗號：:is(a, b) 裡的逗號不能切，否則括號不成對、整段樣式失效

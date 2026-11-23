@@ -1755,11 +1755,9 @@ h1 { --rk: var(--k-display); font-weight: var(--t-display-w); line-height: var(-
 :is(.stat b, .sb-h b, .seg-p b, .pie-m b, .tp-col .v, .num) { --rk: var(--k-numeric); font-weight: var(--t-numeric-w); letter-spacing: var(--t-numeric-ls); font-variant-numeric: tabular-nums; }
 .cz { font-size: 14px; line-height: 22px; font-weight: 400; }
 body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration: 0s !important; animation-iteration-count: 1 !important; transition-duration: 0s !important; }
-/* 深淺色轉場：黑洞／白洞（holeSwap）——舊畫面用柔邊圓形遮罩（--hr、帶寬 --hb）由中央挖開，洞與波前緣在 .bh-fx（自己的 view-transition-name，疊在最上面） */
-@property --hr { syntax: '<length>'; inherits: false; initial-value: 0px; }
+/* 深淺色轉場：黑洞／白洞（holeSwap）——被捲走的那一層套 SVG 濾鏡 #bh-lens（漩渦流場、螺旋臂形狀、色差），洞與疊加效果在 .bh-fx（自己的 view-transition-name，疊在最上面） */
 .vt-hole::view-transition-old(root), .vt-hole::view-transition-new(root), ::view-transition-group(bhole), ::view-transition-old(bhole), ::view-transition-new(bhole) { animation: none; mix-blend-mode: normal; }
-@property --ha { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
-.vt-hole-in::view-transition-old(root), .vt-hole-out::view-transition-new(root) { z-index: 2; filter: url(#bh-lens); -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--hr) - var(--hb, 200px) * 1.6), transparent calc(var(--hr) - var(--hb, 200px) * .8)), repeating-conic-gradient(from var(--ha) at 50% 50%, #000 0deg, rgb(0 0 0 / .18) 11.25deg, #000 22.5deg), radial-gradient(circle at 50% 50%, #000 calc(var(--hr) - var(--hb, 200px)), transparent var(--hr)); mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--hr) - var(--hb, 200px) * 1.6), transparent calc(var(--hr) - var(--hb, 200px) * .8)), repeating-conic-gradient(from var(--ha) at 50% 50%, #000 0deg, rgb(0 0 0 / .18) 11.25deg, #000 22.5deg), radial-gradient(circle at 50% 50%, #000 calc(var(--hr) - var(--hb, 200px)), transparent var(--hr)); -webkit-mask-composite: source-over, source-in; mask-composite: add, intersect; transform-origin: 50% 50%; }   /* 被收進洞（黑洞）／從洞裡攤開（白洞）的那層：像綢布——內圈完整，外緣是旋轉的放射皺褶，畫面本身不縮放 */
+.vt-hole-in::view-transition-old(root), .vt-hole-out::view-transition-new(root) { z-index: 2; filter: url(#bh-lens); transform-origin: 50% 50%; }   /* 被捲進洞（黑洞）／從洞裡湧出（白洞）的那一層 */
 .vt-hole-out::view-transition-old(root) { z-index: 1; }
 ::view-transition-group(bhole) { z-index: 3; }
 .vt-hole::view-transition-group(root) { transform-origin: 50% 50%; }
@@ -2759,15 +2757,16 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       vt.finished.finally(() => { fx.remove(); de.classList.remove('vt-wand', 'vt-lumos', 'vt-nox'); shBusy = false; });
     }
     let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途
-    /* 深淺色轉場（黑洞／白洞，兩個方向都約 1.45 秒）：卡片全程留在畫面上，只有顏色隨著一道從中央擴散的波改變
-       · 做法：View Transitions 拍下舊畫面，舊畫面用柔邊圓形遮罩（--hr）由中央往外挖開，露出底下的新配色；
-         柔邊帶（--hb）裡新舊兩層交疊＝變色過程，舊畫面同時微微放大、變糊，在帶裡和新畫面錯開＝殘影
-       · 黑洞（切到深色）：中央一個小黑洞（彎曲的深空、閃爍的光子環），波的前緣是一圈光子環＋淡淡的透鏡暗帶，光塵沿螺旋往中央流
-       · 白洞（切到淺色）：中央一個白洞光核，波的前緣是一圈白光＋往內的過曝光暈，光塵往外噴
-       · 旋轉：舊畫面被捲著轉、放大（四角蓋得住），波帶裡有旋轉的螺旋光臂；衝擊：波發射時畫面衰減震動 0.4 秒、中央爆出衝擊光環
-       · 綢布收合：黑洞把舊畫面像綢布一樣往洞裡收——畫面不縮放（看不到長方形外框），外緣是一圈旋轉的放射皺褶、內容被漩渦往中心拉、整層轉一圈 360°（只在圓小於畫面短邊一半時轉，不露邊），加速收進洞裡、露出新配色；白洞反過來，新畫面從洞裡轉一圈噴出再攤開
-       · 鏡頭：SVG 濾鏡（#bh-lens）在轉場畫面上做魚眼＋螺旋折射、徑向模糊、色差；WebGL 疊上隨下落速度增強的光條紋、光暈、暗角、膠片顆粒
-       · WebGL、2D 畫布疊在最上面（自己的 view-transition-name）；每一格只由時間 t 決定；不支援或減少動態時直接切換 */
+    /* 深淺色轉場（黑洞／白洞，兩個方向都約 1.45 秒）：黑洞的外觀不變，畫面像海水漩渦一樣被捲進洞裡（白洞反過來湧出）
+       · 做法：View Transitions 拍下舊畫面；被捲走的那一層（黑洞＝舊畫面、白洞＝新畫面）套 SVG 濾鏡 #bh-lens：
+         ① 漩渦流場：切線位移、越靠中心轉越快（差速），強度隨時間累加＝內圈一直比外圈多轉，畫面被拉成繞洞的流線
+         ② 螺旋揭開：一片 5 瓣的柔邊圓（形狀貼圖）跟著同一個流場扭成螺旋臂，舊畫面只留在臂裡，新配色從臂與臂的縫隙露出；
+            臂的外緣描一道光子環色的亮邊（發光的前緣）
+         ③ 鏡頭：徑向模糊、色差隨下落速度增強
+       · 黑洞（切到深色）：中央小黑洞（彎曲的深空、閃爍的光子環）；螺旋臂越收越緊、加速捲進洞裡；收完時衝擊光環＋平移震動
+       · 白洞（切到淺色）：中央白色光核；新畫面沿螺旋臂從洞裡湧出、漩渦解開攤平；爆開時衝擊光環＋震動
+       · WebGL 疊加：沿螺旋流進洞裡（白洞往外）的白色泡沫流線、光塵、光暈、暗角、膠片顆粒；每一格只由時間 t 決定
+       · 不支援 View Transitions 或減少動態時直接切換 */
     function holeSwap(next, apply) {
       if (shBusy) return;
       if (!document.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) { apply(); return; }
@@ -2775,23 +2774,21 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const de = document.documentElement, dark = next === 'dark', W = innerWidth, H = innerHeight, C = [W / 2, H / 2], M = Math.min(W, H), maxD = Math.hypot(W, H) / 2;
       const K = parseFloat(getComputedStyle(de).getPropertyValue('--dur')) || 1;   // 動畫速度設定（時間軸整條跟著縮放）
       const io = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2), cl = (x) => Math.max(0, Math.min(1, x));
-      // 時間軸（毫秒，速度 1 倍時）：洞成形 → 波從中央掃到畫面外 → 洞收起
-      const FORM = 150, W0 = 80, W1 = 1150, HIT = dark ? W1 : W0, FADE = dark ? W1 : 800, END = 1450, BAND = Math.max(120, M * 0.22), far = maxD + BAND * 0.9;   // 兩個方向都在 1.45 秒內完成；收合邊緣從螢幕角落開始（一開始就看得到皺褶）；HIT：衝擊（黑洞＝收完、白洞＝爆開）
-      const SPIN = dark ? 1 : -1;
-      // 捲入進度 p：黑洞加速收進洞裡（先慢後快）、白洞從洞裡減速展開（先快後慢）
-      const prog = (t) => cl((t - W0) / (W1 - W0)), ease = (p) => (dark ? Math.pow(p, 1.6) : 1 - Math.pow(1 - p, 1.6));   // 1.6 次方：吸入加速、放出減速，但不會整段擠在頭或尾，兩個方向感覺一樣快
-      const fold = (t) => -SPIN * 360 * ease(prog(t)) * (dark ? 1 : -1) + (dark ? 0 : -SPIN * 360);   // 皺褶轉一整圈（360°）：黑洞邊收邊轉、白洞攤開時反向轉回 0
-      const pageR = (t) => { const e = ease(prog(t)); return dark ? far * (1 - e) : far * e; };
-      // 內容螺旋：那一層整個轉 360°。只在收合圓半徑 ≤ 畫面短邊一半時轉——這時看得到的是完全在畫面內的圓，怎麼轉都不會露出長方形的邊
-      //   黑洞：圓縮進短邊一半後邊收邊加速轉滿一圈；白洞：剛噴出時快速轉一圈、圓長到短邊一半前轉完
+      // 時間軸（毫秒，速度 1 倍時）：兩個方向都在 1.45 秒內完成；HIT＝衝擊（黑洞收完、白洞爆開）
+      const FORM = 150, W0 = 80, W1 = 1150, HIT = dark ? W1 : W0, FADE = dark ? W1 : 800, END = 1450, SPIN = dark ? 1 : -1;
+      const LOBE = 0.7, far = maxD / LOBE + 30;   // 螺旋臂最內側在半徑的 70%；一開始最內側就在螢幕角落，馬上看得到縫隙
+      const prog = (t) => cl((t - W0) / (W1 - W0)), ease = (p) => (dark ? Math.pow(p, 1.6) : 1 - Math.pow(1 - p, 1.6));   // 吸入加速、放出減速
+      const armR = (t) => { const e = ease(prog(t)); return dark ? far * (1 - e) : far * e; };   // 螺旋臂外緣的半徑
+      const twist = (t) => { const p = prog(t); return t < W0 ? (dark ? 0 : 1) : dark ? Math.pow(p, 1.1) : Math.pow(1 - p, 1.1); };   // 漩渦累積量：黑洞越捲越緊、白洞漸漸解開
+      // 整層再轉一圈：只在螺旋臂外緣 ≤ 畫面短邊一半時轉（看得到的部分完全在畫面內，不露長方形的邊）
       const eIn = M * 0.5 / far;
-      const spin = (t) => { const e = ease(prog(t)), k = dark ? cl((e - (1 - eIn)) / eIn) : 1 - cl(e / eIn); return -SPIN * 360 * (dark ? Math.pow(k, 0.8) : k); };   // 收合邊緣的半徑
-      const wave = (t) => { const r = pageR(t) - BAND * 0.9; return r > 0 && r < maxD ? r : 0; };   // 光環畫在皺褶帶中間
+      const spin = (t) => { const e = ease(prog(t)), k = dark ? cl((e - (1 - eIn)) / eIn) : 1 - cl(e / eIn); return -SPIN * 360 * (dark ? Math.pow(k, 0.8) : k); };
+      const edgeR = (t) => { const r = armR(t) * 0.86; return r > 0 && r < maxD ? r : 0; };   // 給 WebGL：前緣的平均半徑
       const r0 = M * 0.028, hole = (t) => r0 * (t < FORM ? io(t / FORM) : 1 - io(cl((t - FADE) / 260)));
-      // 鏡頭強度：像往洞裡下落——加速、最快、再減速落地；speed 是下落速度（給光條紋）
-      const lensI = (t) => Math.pow(Math.sin(Math.PI * cl((t - W0) / (W1 - W0))), 1.3);   // 波掃完（轉場畫面結束）時正好回到 0
-      const speed = (t) => { const p = prog(t); return t < W0 || t > W1 ? 0 : dark ? Math.pow(p, 1.6) : Math.pow(1 - p, 1.6); };   // 下落速度：黑洞越接近洞越快、白洞剛噴出最快
-      // 位移貼圖（畫一次）：m1＝魚眼（往中央收）＋螺旋（切線方向，越靠中央越強）；m2＝徑向（給色差與徑向模糊）
+      const lensI = (t) => Math.pow(Math.sin(Math.PI * prog(t)), 1.3);   // 光暈、暗角、顆粒的強度
+      const speed = (t) => { const p = prog(t); return t < W0 || t > W1 ? 0 : dark ? Math.pow(p, 1.6) : Math.pow(1 - p, 1.6); };   // 下落速度：黑洞越接近洞越快、白洞剛湧出最快
+
+      /* ---- 貼圖（畫一次）：m1＝漩渦流場、m2＝徑向（色差、徑向模糊）、arm＝5 瓣柔邊圓（螺旋臂的形狀） ---- */
       const mapURL = (fn) => {
         const mw = 192, mh = Math.max(64, Math.round(mw * H / W)), cv = document.createElement('canvas'); cv.width = mw; cv.height = mh;
         const g = cv.getContext('2d'), im = g.createImageData(mw, mh), R = Math.hypot(mw, mh) / 2;
@@ -2801,13 +2798,26 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         }
         g.putImageData(im, 0, 0); return cv.toDataURL();
       };
-      const m1 = mapURL((vx, vy, r) => { const f = Math.pow(Math.max(0, 1 - r), 1.3); return [vx * f * 0.9 - vy * f * 2.4 * SPIN, vy * f * 0.9 + vx * f * 2.4 * SPIN]; });   // 漩渦＋往中心流（取樣往外＝內容往內走）   // 漩渦：越靠中心轉越多（邊緣幾乎不動，不會整片歪一邊）
+      // 漩渦：切線方向、內圈轉得比外圈快（像水往排水口），再帶一點往中心的流（取樣往外＝內容往內走）
+      const m1 = mapURL((vx, vy, r) => { const w = 1 / (1 + Math.pow(r / 0.2, 2)) * Math.min(1, r * 6); return [vx * w * 0.5 - vy * w * 2.6 * SPIN, vy * w * 0.5 + vx * w * 2.6 * SPIN]; });
       const m2 = mapURL((vx, vy, r) => [vx * Math.min(1, r * 1.4), vy * Math.min(1, r * 1.4)]);
+      const armURL = (() => {
+        const n = 256, cv = document.createElement('canvas'); cv.width = cv.height = n;
+        const g = cv.getContext('2d'), im = g.createImageData(n, n);
+        for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+          const vx = (x - n / 2) / (n / 2), vy = (y - n / 2) / (n / 2), r = Math.hypot(vx, vy), a = Math.atan2(vy, vx);
+          const edge = LOBE + (1 - LOBE) * Math.pow(0.5 + 0.5 * Math.cos(5 * (a + SPIN * 2.6 * Math.log(Math.max(r, 0.05)))), 0.7), i = (y * n + x) * 4;   // 5 條對數螺旋臂：臂尖在半徑 100%、臂間在 70%，越往內彎得越多
+          im.data[i] = im.data[i + 1] = im.data[i + 2] = 255; im.data[i + 3] = Math.round(255 * cl((edge - r) / 0.07));
+        }
+        g.putImageData(im, 0, 0); return cv.toDataURL();
+      })();
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'bh-svg'); svg.setAttribute('aria-hidden', 'true');
       const img = (href, id) => `<feImage href="${href}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none" result="${id}"/>`;
       const ch = (inp, k, out) => `<feColorMatrix in="${inp}" type="matrix" values="${[0, 1, 2].map((c) => [0, 1, 2, 3, 4].map((j) => (c === k && j === k ? 1 : 0)).join(' ')).join(' ')} 0 0 0 1 0" result="${out}"/>`;
       svg.innerHTML = `<filter id="bh-lens" x="0" y="0" width="${W}" height="${H}" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
         ${img(m1, 'm1')}${img(m2, 'm2')}
+        <feImage class="a-img" href="${armURL}" x="${C[0]}" y="${C[1]}" width="1" height="1" preserveAspectRatio="none" result="a0"/>
+        <feDisplacementMap class="d-arm" in="a0" in2="m1" scale="0" xChannelSelector="R" yChannelSelector="G" result="arm"/>
         <feDisplacementMap class="d-warp" in="SourceGraphic" in2="m1" scale="0" xChannelSelector="R" yChannelSelector="G" result="warp"/>
         <feDisplacementMap class="d-zoom" in="warp" in2="m2" scale="0" xChannelSelector="R" yChannelSelector="G" result="zoom"/>
         <feComposite in="warp" in2="zoom" operator="arithmetic" k2=".55" k3=".45" result="rb"/>
@@ -2815,14 +2825,23 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         <feDisplacementMap class="d-ca2" in="rb" in2="m2" scale="0" xChannelSelector="R" yChannelSelector="G" result="cb"/>
         ${ch('cr', 0, 'r')}${ch('rb', 1, 'g')}${ch('cb', 2, 'b')}
         <feComposite in="r" in2="g" operator="arithmetic" k2="1" k3="1" result="rg"/>
-        <feComposite in="rg" in2="b" operator="arithmetic" k2="1" k3="1"/>
+        <feComposite in="rg" in2="b" operator="arithmetic" k2="1" k3="1" result="col"/>
+        <feComposite in="col" in2="arm" operator="in" result="cut"/>
+        <feGaussianBlur in="arm" stdDeviation="2.2" result="armb"/>
+        <feComposite in="armb" in2="arm" operator="arithmetic" k2="1.3" k3="-1.3" result="rim"/>
+        <feFlood flood-color="${dark ? '#fff1d6' : '#fffaf0'}" result="rc"/>
+        <feComposite in="rc" in2="rim" operator="in" result="rimc"/>
+        <feMerge><feMergeNode in="cut"/><feMergeNode in="rimc"/></feMerge>
       </filter>`;
       document.body.append(svg);
-      const dWarp = svg.querySelector('.d-warp'), dZoom = svg.querySelector('.d-zoom'), dCa1 = svg.querySelector('.d-ca1'), dCa2 = svg.querySelector('.d-ca2');
-      const lens = (t) => {   // 魚眼＋螺旋折射、徑向模糊、色差：強度跟著下落曲線
-        const p = prog(t), tw = dark ? Math.pow(p, 1.2) : Math.pow(1 - p, 1.2), v = speed(t);
-        dWarp.setAttribute('scale', (M * 0.46 * tw).toFixed(1));   // 漩渦扭曲加強 dZoom.setAttribute('scale', (M * 0.07 * v).toFixed(1));
+      const q = (c) => svg.querySelector(c), aImg = q('.a-img'), dArm = q('.d-arm'), dWarp = q('.d-warp'), dZoom = q('.d-zoom'), dCa1 = q('.d-ca1'), dCa2 = q('.d-ca2');
+      const lens = (t) => {   // 漩渦（流場累積）、螺旋臂、徑向模糊、色差
+        const tw = (M * 0.6 * twist(t)).toFixed(1), v = speed(t), r = Math.max(0.5, armR(t));
+        dWarp.setAttribute('scale', tw); dArm.setAttribute('scale', tw);
+        dZoom.setAttribute('scale', (M * 0.07 * v).toFixed(1));
         dCa1.setAttribute('scale', (M * 0.022 * v).toFixed(1)); dCa2.setAttribute('scale', (-M * 0.022 * v).toFixed(1));
+        aImg.setAttribute('x', (C[0] - r).toFixed(1)); aImg.setAttribute('y', (C[1] - r).toFixed(1));
+        aImg.setAttribute('width', (2 * r).toFixed(1)); aImg.setAttribute('height', (2 * r).toFixed(1));
       };
       const fx = document.createElement('div'); fx.className = 'bh-fx'; fx.setAttribute('aria-hidden', 'true');
       fx.innerHTML = '<canvas class="bh-gl"></canvas><canvas class="bh-dust"></canvas>';
@@ -2830,60 +2849,56 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       for (const c of [glc, dc]) { c.width = Math.round(W * DPR); c.height = Math.round(H * DPR); }
       let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 
-      /* ---- 光塵：固定種子，位置只由 t 決定；沿著波前緣，黑洞往中央流、白洞往外噴 ---- */
+      /* ---- 光塵：固定種子，位置只由 t 決定；沿螺旋前緣，黑洞往中央流、白洞往外噴 ---- */
       const dust = Array.from({ length: 200 }, () => ({ b: rnd() * (W1 - 350), L: 420 + rnd() * 380, k: 0.2 + rnd() * 0.8, a0: rnd() * 6.28, w: 0.6 + rnd() * 1.2 }));
-      const dustAt = (q, t, R) => {   // R：這一格的波半徑（拖尾的前一點也用同一個，才不會拉成直線）
+      const dustAt = (q, t, R) => {   // R：這一格的前緣半徑（拖尾的前一點也用同一個，才不會拉成直線）
         const u = (t - q.b) / q.L; if (u <= 0 || u >= 1) return null;
-        const rr = dark ? R * (1 - q.k * 0.35 * u * u) + q.k * 30 * (1 - u) : R * (1 + q.k * 0.25 * u);
-        const a = q.a0 + (dark ? 2.6 : 1.6) * u * u;
+        const rr = dark ? R * (1 - q.k * 0.45 * u * u) + q.k * 30 * (1 - u) : R * (1 + q.k * 0.25 * u);
+        const a = q.a0 + SPIN * (dark ? 3.2 : 2) * u * u;
         return [C[0] + Math.cos(a) * rr, C[1] + Math.sin(a) * rr, Math.pow(Math.sin(Math.PI * u), 0.8)];
       };
 
-      /* ---- WebGL：中央的洞＋波前緣（光子環、透鏡暗帶或過曝光暈） ---- */
+      /* ---- WebGL：中央的洞、前緣光環、泡沫流線、衝擊光環、光暈、暗角、顆粒 ---- */
       let paintGl = () => {};
       const gl = glc.getContext('webgl', { premultipliedAlpha: true, antialias: false });
       if (gl) {
         const D = DPR.toFixed(2);
         const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
         const FS = `precision highp float;
-uniform vec2 R;uniform float RS,CR,T,MODE,SHOCK,SHOCKA,LI,SP;
+uniform vec2 R;uniform float RS,CR,T,MODE,SHOCK,SHOCKA,LI,SP,SPIN;
 float h1(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float stars(vec2 q){vec2 g=floor(q),f=fract(q);float h=h1(g);vec2 c=vec2(h1(g+1.3),h1(g+2.7));return smoothstep(.09,0.,length(f-c))*step(.8,h)*(.6+.4*sin(T*.004*(1.+h*5.)+h*40.));}
 void main(){
-  vec2 p=vec2(gl_FragCoord.x,R.y-gl_FragCoord.y),d=p-.5*R;float r=length(d),ang=atan(d.y,d.x),cr=max(CR,.001),w=max(RS*.12,40.*${D});
+  vec2 p=vec2(gl_FragCoord.x,R.y-gl_FragCoord.y),d=p-.5*R;float r=length(d),ang=atan(d.y,d.x),cr=max(CR,.001),L=.5*length(R),rn=r/L;
   float fl=.75+.25*sin(T*.031+ang*7.)*sin(T*.017-ang*3.);
-  float wring=RS>0.?exp(-pow((r-RS)/(1.6*${D}+w*.03),2.))*fl:0.;                     /* 波前緣的細環，閃爍 */
-  float band=RS>0.?smoothstep(RS-w*3.,RS-w*.3,r)*smoothstep(RS+w*.3,RS-w*.1,r):0.;
-  float arms=pow(.5+.5*sin(ang*3.+log(r+1.)*7.-T*(MODE<.5?.014:-.014)),6.)*band*.32;   /* 波帶裡旋轉的螺旋光臂 */
-  float sw=exp(-pow((r-SHOCK)/(10.*${D}),2.))*SHOCKA;                                  /* 洞爆開的衝擊光環 */
+  float sw=exp(-pow((r-SHOCK)/(10.*${D}),2.))*SHOCKA;                                    /* 衝擊光環 */
+  /* 泡沫流線：沿對數螺旋、內圈流得比外圈快（差速），斷斷續續的細白線，隨下落速度變亮；只在前緣以內 */
+  float u=ang+SPIN*log(rn+.03)*2.4-SPIN*T*.006*(1.+.9/(rn+.12));
+  float lane=pow(.5+.5*sin(u*9.),14.)*step(.35,h1(vec2(floor(u*9./6.2832+.5),floor(rn*14.-T*.02*SPIN))));
+  float inside=RS>0.?smoothstep(RS*1.08,RS*.7,r):smoothstep(.75,.45,rn);
+  float foam=lane*inside*smoothstep(.04,.14,rn)*SP*.55;
   vec3 col=vec3(0.);float a=0.;
   if(MODE<.5){
-    float space=CR>0.?smoothstep(cr*4.2,cr*1.2,r):0.;                                  /* 中央小洞周圍彎曲的深空 */
+    float space=CR>0.?smoothstep(cr*4.2,cr*1.2,r):0.;                                       /* 中央小洞周圍彎曲的深空 */
     vec2 q=(d/max(r,.001))*(r-cr*cr*2.25/max(r,cr*.5));
     float st=(stars(q/(6.*${D}))+stars(q/(10.*${D})+19.)*.7)*space;
     float hring=CR>0.?exp(-pow((r-cr*1.5)/(cr*.06+1.),2.))*fl:0.;
     float hor=CR>0.?smoothstep(cr*1.03,cr*.95,r):0.;
-    float shade=RS>0.?smoothstep(RS+w*.5,RS,r)*smoothstep(RS-w*1.6,RS-w*.2,r)*.28:0.;  /* 前緣後方一道淡淡的透鏡暗帶 */
-    float disk=RS>0.?exp(-pow((r-RS+w*.5)/(w*.6),2.))*(.5+.5*sin(ang*3.-T*.01+log(r+1.)*4.))*.22:0.;
-    a=max(max(space*.92,hor),max(max(hring,wring),shade+disk+arms+sw));
-    col=vec3(.015,.018,.028)+vec3(1.)*st+vec3(1.,.97,.92)*(hring+wring+sw)*1.4+vec3(.96,.88,.76)*(disk+arms*1.6);
+    a=max(max(space*.92,hor),max(hring,sw));
+    col=vec3(.015,.018,.028)+vec3(1.)*st+vec3(1.,.97,.92)*(hring+sw)*1.4;
     col=mix(col,vec3(0.),hor);
   }else{
     float c=CR>0.?smoothstep(cr*1.05,cr*.9,r):0.;
     float glow=CR>0.?exp(-r/(cr*1.5+1.))*1.1+exp(-r/(cr*4.+1.))*.4:0.;
-    float halo=RS>0.?smoothstep(RS-w*1.8,RS,r)*smoothstep(RS+w*.4,RS,r)*.42:0.;        /* 前緣往內的過曝光暈 */
-    a=clamp(c+glow+wring*.9+halo+arms+sw,0.,1.);col=vec3(1.,.97,.9);
+    a=clamp(c+glow+sw,0.,1.);col=vec3(1.,.97,.9);
   }
   vec4 o=vec4(col*a,a);
-  float L=.5*length(R),rn=r/L;
-  float lane=pow(h1(vec2(floor(ang*70.),3.)),7.);                                                        /* 光條紋：細窄的徑向光線，隨下落速度變亮、往中央流 */
-  float streak=lane*smoothstep(.12,.55,rn)*(.55+.45*sin(rn*40.+T*(MODE<.5?.05:-.05)))*SP*.75;
-  float bloom=exp(-rn*3.2)*.22*LI;                                                                     /* 光暈 */
-  vec3 lc=MODE<.5?vec3(.85,.92,1.):vec3(1.,.95,.85);
-  o=vec4(o.rgb+lc*(streak+bloom),max(o.a,streak+bloom));
-  float vg=smoothstep(.55,1.3,rn)*.5*LI;                                                               /* 暗角 */
+  float bloom=exp(-rn*3.2)*.22*LI;                                                          /* 光暈 */
+  vec3 lc=MODE<.5?vec3(.9,.95,1.):vec3(1.,.95,.85);
+  o=vec4(o.rgb+lc*(foam+bloom),max(o.a,foam+bloom));
+  float vg=smoothstep(.55,1.3,rn)*.5*LI;                                                    /* 暗角 */
   o=vec4(o.rgb*(1.-vg),o.a+vg*(1.-o.a));
-  float n=h1(p*.73+floor(T*.06)*vec2(13.1,7.7));                                                       /* 膠片顆粒 */
+  float n=h1(p*.73+floor(T*.06)*vec2(13.1,7.7));                                            /* 膠片顆粒 */
   float ga=abs(n-.5)*.14*LI;o=vec4(o.rgb*(1.-ga)+vec3(step(.5,n))*ga,o.a+ga*(1.-o.a));
   gl_FragColor=o;
 }`;
@@ -2893,21 +2908,21 @@ void main(){
           gl.useProgram(pr);
           gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
           const al = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
-          const U = {}; for (const k of ['R', 'RS', 'CR', 'T', 'MODE', 'SHOCK', 'SHOCKA', 'LI', 'SP']) U[k] = gl.getUniformLocation(pr, k);
-          gl.viewport(0, 0, glc.width, glc.height); gl.uniform2f(U.R, glc.width, glc.height); gl.uniform1f(U.MODE, dark ? 0 : 1);
+          const U = {}; for (const k of ['R', 'RS', 'CR', 'T', 'MODE', 'SHOCK', 'SHOCKA', 'LI', 'SP', 'SPIN']) U[k] = gl.getUniformLocation(pr, k);
+          gl.viewport(0, 0, glc.width, glc.height); gl.uniform2f(U.R, glc.width, glc.height); gl.uniform1f(U.MODE, dark ? 0 : 1); gl.uniform1f(U.SPIN, SPIN);
           paintGl = (t, rs, cr) => {
-            const s = cl((t - HIT) / 300);   // 衝擊光環：黑洞吞完／白洞爆開時從中央擴散，0.3 秒到半個畫面
+            const s = cl((t - HIT) / 300);   // 衝擊光環：黑洞收完／白洞爆開時從中央擴散，0.3 秒到半個畫面
             gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.uniform1f(U.RS, rs * DPR); gl.uniform1f(U.CR, cr * DPR); gl.uniform1f(U.T, t);
             gl.uniform1f(U.LI, lensI(t)); gl.uniform1f(U.SP, speed(t)); gl.uniform1f(U.SHOCK, s * M * 0.55 * DPR); gl.uniform1f(U.SHOCKA, t > HIT && s < 1 ? Math.pow(1 - s, 1.6) : 0); gl.drawArrays(gl.TRIANGLES, 0, 3);
           };
         }
       }
       const g2 = dc.getContext('2d');
-      /* ---- 一格畫面：只由 t 決定（波前緣＝遮罩的外緣） ---- */
+      /* ---- 一格畫面：只由 t 決定 ---- */
       const frame = (t) => {
         lens(t);
-        const R = wave(t), fade = 1 - cl((t - FADE) / (END - FADE));
-        paintGl(t, R > 0 && R < far - 20 ? Math.max(0, R - BAND * 0.15) : 0, hole(t));
+        const R = edgeR(t), fade = 1 - cl((t - FADE) / (END - FADE));
+        paintGl(t, R, hole(t));
         glc.style.opacity = dc.style.opacity = fade.toFixed(3);
         g2.setTransform(DPR, 0, 0, DPR, 0, 0); g2.clearRect(0, 0, W, H); g2.lineCap = 'round'; g2.strokeStyle = dark ? '#fff' : '#fff7e6';
         if (R > 0) for (const q of dust) {
@@ -2917,17 +2932,17 @@ void main(){
       };
       window.__holeFrame = frame;   // 逐格檢查用：__holeFrame(t)
 
-      de.style.setProperty('--hb', BAND.toFixed(0) + 'px');   // 圓形頁面邊緣的柔邊寬度
       de.classList.add('vt-hole', dark ? 'vt-hole-in' : 'vt-hole-out');
+      lens(0);
       const vt = document.startViewTransition(() => { apply(); document.body.append(fx); });
       let raf = 0, done = false;
-      const finish = () => { if (done) return; done = true; cancelAnimationFrame(raf); fx.remove(); svg.remove(); de.classList.remove('vt-hole', 'vt-hole-in', 'vt-hole-out'); de.style.removeProperty('--hb'); delete window.__holeFrame; shBusy = false; };
+      const finish = () => { if (done) return; done = true; cancelAnimationFrame(raf); fx.remove(); svg.remove(); de.classList.remove('vt-hole', 'vt-hole-in', 'vt-hole-out'); delete window.__holeFrame; shBusy = false; };
       vt.ready.then(() => {
-        // 被收進洞（黑洞＝舊畫面）／從洞裡攤開（白洞＝新畫面）的那一層：畫面不縮放，只有收合邊緣與皺褶轉動，扭轉與流動交給濾鏡
+        // 被捲走的那一層：整層轉一圈（只在看得到的部分完全落在畫面內時）；形狀、漩渦交給濾鏡（frame 每格更新）
         const page = { pseudoElement: dark ? '::view-transition-old(root)' : '::view-transition-new(root)', duration: (W1 - W0) * K, delay: W0 * K, fill: 'both', easing: 'linear' };
-        const N = 72, kf = Array.from({ length: N + 1 }, (_, i) => { const t = W0 + (i / N) * (W1 - W0); return { offset: i / N, transform: `rotate(${spin(t).toFixed(2)}deg)`, '--hr': pageR(t).toFixed(0) + 'px', '--ha': fold(t).toFixed(1) + 'deg' }; });
+        const N = 72, kf = Array.from({ length: N + 1 }, (_, i) => { const t = W0 + (i / N) * (W1 - W0); return { offset: i / N, transform: `rotate(${spin(t).toFixed(2)}deg)` }; });
         de.animate(kf, page);
-        // 衝擊震動：只平移、不旋轉，0.3 秒衰減（黑洞在吞完時、白洞在爆開時）；也讓轉場撐到震完
+        // 衝擊震動：只平移、不旋轉，0.3 秒衰減（黑洞在收完時、白洞在爆開時）；也讓轉場撐到震完
         const shake = Array.from({ length: 13 }, (_, i) => { const amp = 8 * Math.pow(1 - i / 12, 2); return { transform: `translate(${(Math.sin(i * 2.3) * amp).toFixed(1)}px, ${(Math.cos(i * 1.7) * amp).toFixed(1)}px)` }; });
         de.animate(shake, { pseudoElement: '::view-transition-group(root)', duration: 300 * K, delay: HIT * K, easing: 'linear' });
         const t0 = performance.now();

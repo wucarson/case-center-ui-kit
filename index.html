@@ -1616,19 +1616,19 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 /* 液態金屬（參考空山基 × 星宇 AIRSORAYAMA）：主色金屬＝主按鈕與選中狀態（跟主色切換）、銀＝次要操作；只用在可操作元件，內容區維持平面。
    漸層高 130%，地平線暗帶落在約 60%（元件下緣附近），文字所在的中段是均勻亮區；滑過時反光往上移、按下時上下反轉 */
 :root[data-ui="y2k"] {
-  --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 42%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 90%, #000000) 50%, color-mix(in srgb, var(--primary) 66%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
+  --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 42%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 95%, #000000) 50%, color-mix(in srgb, var(--primary) 82%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
   --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #ffffff 0%, #f1f4f8 30%, #dde3eb 56%, #9aa5b5 59.5%, #c6ced9 66%, #edf1f6 100%);
   --y2k-metal-rim: linear-gradient(180deg, color-mix(in srgb, var(--primary) 40%, #ffffff), var(--primary) 60%, color-mix(in srgb, var(--primary) 70%, #000000));
   --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .85), inset 0 -1px 0 rgb(0 0 0 / .08);
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] {
-  --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 60%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 90%, #000000) 50%, color-mix(in srgb, var(--primary) 66%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
+  --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 60%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 95%, #000000) 50%, color-mix(in srgb, var(--primary) 82%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
   --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #5a6577 0%, #3a4352 30%, #2b323d 56%, #0c1015 59.5%, #222934 66%, #3b4452 100%);
   --y2k-metal-rim: linear-gradient(180deg, color-mix(in srgb, var(--primary) 40%, #ffffff), var(--primary) 60%, color-mix(in srgb, var(--primary) 70%, #000000));
   --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .28), inset 0 -1px 0 rgb(0 0 0 / .3);
 } }
 :root[data-theme="dark"][data-ui="y2k"] {
-  --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 60%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 90%, #000000) 50%, color-mix(in srgb, var(--primary) 66%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
+  --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 60%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 95%, #000000) 50%, color-mix(in srgb, var(--primary) 82%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
   --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #5a6577 0%, #3a4352 30%, #2b323d 56%, #0c1015 59.5%, #222934 66%, #3b4452 100%);
   --y2k-metal-rim: linear-gradient(180deg, color-mix(in srgb, var(--primary) 40%, #ffffff), var(--primary) 60%, color-mix(in srgb, var(--primary) 70%, #000000));
   --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .28), inset 0 -1px 0 rgb(0 0 0 / .3);

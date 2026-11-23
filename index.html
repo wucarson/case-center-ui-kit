@@ -1758,9 +1758,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 /* 深淺色轉場：黑洞／白洞（holeSwap）——舊畫面用柔邊圓形遮罩（--hr、帶寬 --hb）由中央挖開，洞與波前緣在 .bh-fx（自己的 view-transition-name，疊在最上面） */
 @property --hr { syntax: '<length>'; inherits: false; initial-value: 0px; }
 .vt-hole::view-transition-old(root), .vt-hole::view-transition-new(root), ::view-transition-group(bhole), ::view-transition-old(bhole), ::view-transition-new(bhole) { animation: none; mix-blend-mode: normal; }
-.vt-hole::view-transition-old(root) { z-index: 2; transform-origin: 50% 50%; -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--hr) - var(--hb, 200px)), #000 var(--hr)); mask-image: radial-gradient(circle at 50% 50%, transparent calc(var(--hr) - var(--hb, 200px)), #000 var(--hr)); }
+.vt-hole-in::view-transition-old(root), .vt-hole-out::view-transition-new(root) { z-index: 2; transform-origin: 50% 50%; filter: url(#bh-lens); -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--hr) - var(--hb, 80px)), transparent var(--hr)); mask-image: radial-gradient(circle at 50% 50%, #000 calc(var(--hr) - var(--hb, 80px)), transparent var(--hr)); }   /* 被捲入／展開的那一頁：邊緣收成圓、扭轉、縮放 */
+.vt-hole-out::view-transition-old(root) { z-index: 1; }
 ::view-transition-group(bhole) { z-index: 3; }
-.vt-hole::view-transition-group(root) { filter: url(#bh-lens); transform-origin: 50% 50%; }   /* 魚眼、螺旋折射、色差、徑向模糊 */
+.vt-hole::view-transition-group(root) { transform-origin: 50% 50%; }
 .bh-svg { position: absolute; width: 0; height: 0; overflow: hidden; }
 .vt-hole * { transition: none !important; }   /* 新畫面直接是新配色，不跑元件自己的顏色過渡 */
 .bh-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; view-transition-name: bhole; }
@@ -2763,7 +2764,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
        · 黑洞（切到深色）：中央一個小黑洞（彎曲的深空、閃爍的光子環），波的前緣是一圈光子環＋淡淡的透鏡暗帶，光塵沿螺旋往中央流
        · 白洞（切到淺色）：中央一個白洞光核，波的前緣是一圈白光＋往內的過曝光暈，光塵往外噴
        · 旋轉：舊畫面被捲著轉、放大（四角蓋得住），波帶裡有旋轉的螺旋光臂；衝擊：波發射時畫面衰減震動 0.4 秒、中央爆出衝擊光環
-       · 鏡頭：漏斗旋轉整個視圖；SVG 濾鏡（#bh-lens）在轉場畫面上做魚眼＋螺旋折射、徑向模糊、色差；WebGL 疊上隨下落速度增強的光條紋、光暈、暗角、膠片顆粒
+       · 整頁捲入：黑洞把舊畫面整頁收成圓、越轉越緊、加速縮進洞裡，露出底下的新配色；白洞反過來，新畫面從洞裡由小展開、漩渦解開（視圖本身不傾斜）
+       · 鏡頭：SVG 濾鏡（#bh-lens）在轉場畫面上做魚眼＋螺旋折射、徑向模糊、色差；WebGL 疊上隨下落速度增強的光條紋、光暈、暗角、膠片顆粒
        · WebGL、2D 畫布疊在最上面（自己的 view-transition-name）；每一格只由時間 t 決定；不支援或減少動態時直接切換 */
     function holeSwap(next, apply) {
       if (shBusy) return;
@@ -2773,12 +2775,16 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const K = parseFloat(getComputedStyle(de).getPropertyValue('--dur')) || 1;   // 動畫速度設定（時間軸整條跟著縮放）
       const io = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2), cl = (x) => Math.max(0, Math.min(1, x));
       // 時間軸（毫秒，速度 1 倍時）：洞成形 → 波從中央掃到畫面外 → 洞收起
-      const FORM = 200, W0 = 120, W1 = 1450, FADE = 1250, END = 1700, BAND = Math.max(180, M * 0.28), far = maxD + BAND + 40;
-      const wave = (t) => (t < W0 ? 0 : far * io(cl((t - W0) / (W1 - W0))));
-      const r0 = M * 0.028, hole = (t) => r0 * (t < FORM ? io(t / FORM) : 1 - io(cl((t - FADE) / (END - 60 - FADE))));
+      const FORM = 200, W0 = 120, W1 = 1450, HIT = dark ? W1 : W0, FADE = dark ? W1 : 950, END = dark ? 1850 : 1700, BAND = Math.max(70, M * 0.1), far = maxD * 1.05;   // HIT：衝擊（黑洞＝吞完、白洞＝爆開）
+      // 捲入進度 p：黑洞加速收進洞裡（先慢後快）、白洞從洞裡減速展開（先快後慢）
+      const prog = (t) => cl((t - W0) / (W1 - W0)), ease = (p) => (dark ? Math.pow(p, 2.4) : 1 - Math.pow(1 - p, 2.4));
+      const pageScale = (t) => (dark ? 1 - 0.985 * ease(prog(t)) : 0.015 + 0.985 * ease(prog(t)));   // 那一頁的縮放
+      const pageR = (t) => { const e = ease(prog(t)); return dark ? far + (M * 0.42 - far) * e : M * 0.42 + (far - M * 0.42) * e; };   // 遮罩半徑（頁面自己的座標）
+      const wave = (t) => { const r = pageR(t) * pageScale(t); return r < maxD ? r : 0; };   // 圓形頁面的邊緣在畫面上的半徑（光環畫在這）
+      const r0 = M * 0.028, hole = (t) => r0 * (t < FORM ? io(t / FORM) : 1 - io(cl((t - FADE) / 260)));
       // 鏡頭強度：像往洞裡下落——加速、最快、再減速落地；speed 是下落速度（給光條紋）
       const lensI = (t) => Math.pow(Math.sin(Math.PI * cl((t - W0) / (W1 - W0))), 1.3);   // 波掃完（轉場畫面結束）時正好回到 0
-      const speed = (t) => Math.min(1, Math.abs(lensI(t + 16) - lensI(t - 16)) * 22);
+      const speed = (t) => { const p = prog(t); return t < W0 || t > W1 ? 0 : dark ? Math.pow(p, 1.6) : Math.pow(1 - p, 1.6); };   // 下落速度：黑洞越接近洞越快、白洞剛噴出最快
       // 位移貼圖（畫一次）：m1＝魚眼（往中央收）＋螺旋（切線方向，越靠中央越強）；m2＝徑向（給色差與徑向模糊）
       const mapURL = (fn) => {
         const mw = 192, mh = Math.max(64, Math.round(mw * H / W)), cv = document.createElement('canvas'); cv.width = mw; cv.height = mh;
@@ -2790,7 +2796,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         g.putImageData(im, 0, 0); return cv.toDataURL();
       };
       const SPIN = dark ? 1 : -1;
-      const m1 = mapURL((vx, vy, r) => { const f = Math.pow(Math.max(0, 1 - r), 2); return [-vx * f * 1.4 - vy * f * 1.8 * SPIN, -vy * f * 1.4 + vx * f * 1.8 * SPIN]; });
+      const m1 = mapURL((vx, vy, r) => { const f = Math.pow(Math.max(0, 1 - r), 1.6); return [-vx * f * 0.8 - vy * f * 2.2 * SPIN, -vy * f * 0.8 + vx * f * 2.2 * SPIN]; });   // 漩渦：越靠中心轉越多（邊緣幾乎不動，不會整片歪一邊）
       const m2 = mapURL((vx, vy, r) => [vx * Math.min(1, r * 1.4), vy * Math.min(1, r * 1.4)]);
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'bh-svg'); svg.setAttribute('aria-hidden', 'true');
       const img = (href, id) => `<feImage href="${href}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none" result="${id}"/>`;
@@ -2809,9 +2815,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       document.body.append(svg);
       const dWarp = svg.querySelector('.d-warp'), dZoom = svg.querySelector('.d-zoom'), dCa1 = svg.querySelector('.d-ca1'), dCa2 = svg.querySelector('.d-ca2');
       const lens = (t) => {   // 魚眼＋螺旋折射、徑向模糊、色差：強度跟著下落曲線
-        const k = lensI(t), sz = M * 0.22 * k;
-        dWarp.setAttribute('scale', sz.toFixed(1)); dZoom.setAttribute('scale', (M * 0.05 * k).toFixed(1));
-        dCa1.setAttribute('scale', (M * 0.018 * k).toFixed(1)); dCa2.setAttribute('scale', (-M * 0.018 * k).toFixed(1));
+        const p = prog(t), tw = dark ? Math.pow(p, 1.2) : Math.pow(1 - p, 1.2), v = speed(t);
+        dWarp.setAttribute('scale', (M * 0.34 * tw).toFixed(1)); dZoom.setAttribute('scale', (M * 0.07 * v).toFixed(1));
+        dCa1.setAttribute('scale', (M * 0.022 * v).toFixed(1)); dCa2.setAttribute('scale', (-M * 0.022 * v).toFixed(1));
       };
       const fx = document.createElement('div'); fx.className = 'bh-fx'; fx.setAttribute('aria-hidden', 'true');
       fx.innerHTML = '<canvas class="bh-gl"></canvas><canvas class="bh-dust"></canvas>';
@@ -2885,9 +2891,9 @@ void main(){
           const U = {}; for (const k of ['R', 'RS', 'CR', 'T', 'MODE', 'SHOCK', 'SHOCKA', 'LI', 'SP']) U[k] = gl.getUniformLocation(pr, k);
           gl.viewport(0, 0, glc.width, glc.height); gl.uniform2f(U.R, glc.width, glc.height); gl.uniform1f(U.MODE, dark ? 0 : 1);
           paintGl = (t, rs, cr) => {
-            const s = cl((t - W0) / 450);   // 衝擊光環：波發射時從中央爆開，0.45 秒擴到半個畫面
+            const s = cl((t - HIT) / 450);   // 衝擊光環：黑洞吞完／白洞爆開時從中央擴散，0.45 秒到半個畫面
             gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.uniform1f(U.RS, rs * DPR); gl.uniform1f(U.CR, cr * DPR); gl.uniform1f(U.T, t);
-            gl.uniform1f(U.LI, lensI(t)); gl.uniform1f(U.SP, speed(t)); gl.uniform1f(U.SHOCK, s * M * 0.55 * DPR); gl.uniform1f(U.SHOCKA, t > W0 && s < 1 ? Math.pow(1 - s, 1.6) : 0); gl.drawArrays(gl.TRIANGLES, 0, 3);
+            gl.uniform1f(U.LI, lensI(t)); gl.uniform1f(U.SP, speed(t)); gl.uniform1f(U.SHOCK, s * M * 0.55 * DPR); gl.uniform1f(U.SHOCKA, t > HIT && s < 1 ? Math.pow(1 - s, 1.6) : 0); gl.drawArrays(gl.TRIANGLES, 0, 3);
           };
         }
       }
@@ -2906,31 +2912,24 @@ void main(){
       };
       window.__holeFrame = frame;   // 逐格檢查用：__holeFrame(t)
 
-      de.style.setProperty('--hb', BAND.toFixed(0) + 'px');
+      de.style.setProperty('--hb', BAND.toFixed(0) + 'px');   // 圓形頁面邊緣的柔邊寬度
       de.classList.add('vt-hole', dark ? 'vt-hole-in' : 'vt-hole-out');
       const vt = document.startViewTransition(() => { apply(); document.body.append(fx); });
       let raf = 0, done = false;
       const finish = () => { if (done) return; done = true; cancelAnimationFrame(raf); fx.remove(); svg.remove(); de.classList.remove('vt-hole', 'vt-hole-in', 'vt-hole-out'); de.style.removeProperty('--hb'); delete window.__holeFrame; shBusy = false; };
       vt.ready.then(() => {
-        const old = { pseudoElement: '::view-transition-old(root)', duration: (W1 - W0) * K, delay: W0 * K, fill: 'both' };
-        // 舊畫面：圓形遮罩由中央挖開（柔邊帶＝變色過程）
-        de.animate([{ '--hr': '0px' }, { '--hr': far.toFixed(0) + 'px' }], { ...old, easing: 'cubic-bezier(.65, 0, .35, 1)' });
-        // 旋轉殘影：舊畫面被捲著轉（黑洞逆時針、白洞順時針）、放大、變糊，在柔邊帶裡和新畫面錯開；放大量蓋得住轉動後的四角
-        const ROT = dark ? -3 : 3, cover = Math.cos(Math.abs(ROT) * Math.PI / 180) + Math.sin(Math.abs(ROT) * Math.PI / 180) * Math.max(W / H, H / W) + 0.01;
-        de.animate([{ transform: 'rotate(0deg) scale(1)', filter: 'blur(0px)' }, { transform: `rotate(${ROT}deg) scale(${cover.toFixed(3)})`, filter: 'blur(2.5px)' }], { ...old, easing: 'cubic-bezier(.5, 0, .75, .3)' });
-        // 漏斗旋轉＋衝擊震動：整個視圖隨下落轉進去（黑洞逆時針、白洞順時針，最多 10 度）、放大蓋住四角，結尾回正；波發射時先震一下
-        const VT = W1, N = 48;
-        const funnel = Array.from({ length: N + 1 }, (_, i) => {
-          const t = (i / N) * VT, k = lensI(t), th = -SPIN * 10 * k, a = Math.abs(th) * Math.PI / 180;
-          const cov = Math.cos(a) + Math.sin(a) * Math.max(W / H, H / W) + 0.12 * k, sh = t > W0 && t < W0 + 400 ? 9 * Math.pow(1 - (t - W0) / 400, 2) : 0;
-          return { offset: i / N, transform: `translate(${(Math.sin(i * 2.3) * sh).toFixed(1)}px, ${(Math.cos(i * 1.7) * sh).toFixed(1)}px) rotate(${th.toFixed(2)}deg) scale(${cov.toFixed(3)})` };
-        });
-        de.animate(funnel, { pseudoElement: '::view-transition-group(root)', duration: VT * K, easing: 'linear', fill: 'both' });
+        // 被捲入（黑洞＝舊畫面）／展開（白洞＝新畫面）的那一頁：整頁縮放＋邊緣收成圓，扭轉交給濾鏡
+        const page = { pseudoElement: dark ? '::view-transition-old(root)' : '::view-transition-new(root)', duration: (W1 - W0) * K, delay: W0 * K, fill: 'both', easing: 'linear' };
+        const N = 36, kf = Array.from({ length: N + 1 }, (_, i) => { const t = W0 + (i / N) * (W1 - W0); return { offset: i / N, transform: `scale(${pageScale(t).toFixed(4)})`, '--hr': pageR(t).toFixed(0) + 'px' }; });
+        de.animate(kf, page);
+        // 衝擊震動：只平移、不旋轉，0.35 秒衰減（黑洞在吞完時、白洞在爆開時）；也讓轉場撐到震完
+        const shake = Array.from({ length: 13 }, (_, i) => { const amp = 8 * Math.pow(1 - i / 12, 2); return { transform: `translate(${(Math.sin(i * 2.3) * amp).toFixed(1)}px, ${(Math.cos(i * 1.7) * amp).toFixed(1)}px)` }; });
+        de.animate(shake, { pseudoElement: '::view-transition-group(root)', duration: 350 * K, delay: HIT * K, easing: 'linear' });
         const t0 = performance.now();
         const tick = (now) => { const t = (now - t0) / K; if (t >= END) return; frame(t); raf = requestAnimationFrame(tick); };
         raf = requestAnimationFrame(tick);
       }).catch(() => {});
-      vt.finished.finally(() => setTimeout(finish, Math.max(0, (END - W1) * K)));
+      vt.finished.finally(() => setTimeout(finish, Math.max(0, (END - HIT - 350) * K)));
       setTimeout(finish, (END + 800) * K);   // 保險
     }
     tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; ({ hole: holeSwap, slash: slashSwap }[root.dataset.themeFx] || wandSwap)(next, () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); }, tb); });

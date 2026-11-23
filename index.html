@@ -5572,7 +5572,7 @@ const { colors, setPreference } = useTheme();
           }
         }
         else if (r instanceof CSSMediaRule) { const inner = aiRules(r.cssRules, ind + '  '); if (inner.length) out.push(`${ind}@media ${r.conditionText} {\n${inner.join('\n')}\n${ind}}`); }
-        else if (r instanceof CSSKeyframesRule) { if (!/^(sh-|wand|slash|silk)/.test(r.name)) out.push(ind + r.cssText); }   // 頁面特效的動畫不匯出
+        else if (r instanceof CSSKeyframesRule) { if (!/^(sh-rf|wand|slash|silk)/.test(r.name)) out.push(ind + r.cssText); }   // 頁面特效的動畫不匯出
       }
       return out;
     }

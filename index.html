@@ -5502,7 +5502,7 @@ void main(){
       const vis = inViewport(shown), seen = new Set(vis.map(([c]) => c));
       const step = stepOf(vis.length);
       vis.forEach(([c, r], k) => { c.el.style.setProperty('--i', (k * step / 55).toFixed(3)); c.el.style.setProperty('--sd', scanMs(r.height) + 'ms'); });
-      playEnter(vis, true);   // --i：CSS 以 55ms 為單位
+      if (location.hash.length < 2) playEnter(vis, true);   // --i：CSS 以 55ms 為單位；直接開詳細頁網址（#switch）時不播：元件牆看不到，那張卡片還會被搬進展示台，進場會演在詳細頁上
       shown.forEach(([c]) => { if (!seen.has(c)) c.el.classList.add('norise'); });
     }
     const isDarkNow = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;

@@ -19,7 +19,7 @@ const contracts = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && !f.in
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml' };
 const srv = await new Promise((ok) => {
   const s = http.createServer((req, res) => {
-    const p = path.join(root, fw, 'dist', decodeURIComponent(new URL(req.url, 'http://x').pathname).replace(/\/$/, '/index.html'));
+    const p = path.join(root, 'apps', fw + '-demo', 'dist', decodeURIComponent(new URL(req.url, 'http://x').pathname).replace(/\/$/, '/index.html'));
     fs.readFile(p, (err, data) => { if (err) { res.writeHead(404); res.end(); return; } res.writeHead(200, { 'content-type': TYPES[path.extname(p)] || 'application/octet-stream' }); res.end(data); });
   }).listen(0, () => ok(s));
 });

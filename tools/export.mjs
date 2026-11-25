@@ -9,7 +9,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import puppeteer from 'puppeteer-core';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const out = path.join(root, 'shared');
+// 匯出到套件：樣式 → packages/styles、token → packages/tokens、比對樣本 → apps/shared
+const at = (...p) => path.join(root, ...p);
 export const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 
 const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--hide-scrollbars'] });
@@ -19,12 +20,11 @@ try {
   await page.waitForFunction(() => typeof window.__wallExport === 'function');
   // 以淺色模式匯出（深色值由 aiCss 自己切換讀取）
   const data = await page.evaluate(() => { document.documentElement.removeAttribute('data-theme'); return window.__wallExport(); });
-  fs.mkdirSync(out, { recursive: true });
-  fs.writeFileSync(path.join(out, 'components.css'), data.css);
-  fs.writeFileSync(path.join(out, 'tokens.ts'), data.tokensTs);
-  fs.writeFileSync(path.join(out, 'tokens.css'), data.tokensCss);
-  fs.writeFileSync(path.join(out, 'fixtures.json'), JSON.stringify(data.fixtures, null, 2));
-  console.log('已匯出 shared/：components.css、tokens.ts、tokens.css、fixtures.json（' + Object.keys(data.fixtures).length + ' 個元件的樣本）');
+  fs.writeFileSync(at('packages', 'styles', 'components.css'), data.css);
+  fs.writeFileSync(at('packages', 'tokens', 'src', 'index.ts'), data.tokensTs);
+  fs.writeFileSync(at('packages', 'tokens', 'tokens.css'), data.tokensCss);
+  fs.writeFileSync(at('apps', 'shared', 'fixtures.json'), JSON.stringify(data.fixtures, null, 2));
+  console.log('已匯出 packages/styles/components.css、packages/tokens（index.ts、tokens.css）、apps/shared/fixtures.json（' + Object.keys(data.fixtures).length + ' 個元件的樣本）');
 } finally {
   await browser.close();
 }

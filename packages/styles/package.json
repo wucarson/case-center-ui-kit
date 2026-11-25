@@ -1,0 +1,12 @@
+{
+  "name": "@case-center/styles",
+  "version": "0.1.0",
+  "description": "元件樣式（components.css，含預設 token），三個框架共用",
+  "style": "components.css",
+  "sideEffects": ["*.css"],
+  "files": ["components.css"],
+  "exports": {
+    ".": { "style": "./components.css", "default": "./components.css" },
+    "./components.css": "./components.css"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@case-center/core",
+  "version": "0.1.0",
+  "description": "元件共用邏輯（class、aria、鍵盤規則、圖示），不依賴任何框架",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.0",
+    "typescript": "~6.0.2"
+  }
+}

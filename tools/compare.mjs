@@ -19,7 +19,7 @@ fs.rmSync(outDir, { recursive: true, force: true });
 fs.mkdirSync(outDir, { recursive: true });
 
 // 參考頁
-const fixtures = JSON.parse(fs.readFileSync(path.join(root, 'shared', 'fixtures.json'), 'utf8'));
+const fixtures = JSON.parse(fs.readFileSync(path.join(root, 'apps', 'shared', 'fixtures.json'), 'utf8'));
 const refDir = path.join(root, 'tools', 'out', 'ref');
 fs.mkdirSync(refDir, { recursive: true });
 const refCases = Object.entries(fixtures).flatMap(([name, f]) => [
@@ -30,8 +30,8 @@ fs.writeFileSync(path.join(refDir, 'index.html'), `<!doctype html><html lang="zh
 <link rel="stylesheet" href="components.css"><link rel="stylesheet" href="case.css"></head><body><main class="cases">
 ${refCases.map(([n, id, h]) => `<div class="case" data-c="${n}" data-id="${id}">${h}</div>`).join('\n')}
 </main></body></html>`);
-fs.copyFileSync(path.join(root, 'shared', 'components.css'), path.join(refDir, 'components.css'));
-fs.copyFileSync(path.join(root, 'shared', 'case.css'), path.join(refDir, 'case.css'));
+fs.copyFileSync(path.join(root, 'packages', 'styles', 'components.css'), path.join(refDir, 'components.css'));
+fs.copyFileSync(path.join(root, 'apps', 'shared', 'case.css'), path.join(refDir, 'case.css'));
 
 // 靜態伺服器（module script 不能用 file:// 開）
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml' };
@@ -44,7 +44,7 @@ function serve(dir) {
   });
 }
 const refSrv = await serve(refDir);
-const implSrv = await serve(path.join(root, fw, 'dist'));
+const implSrv = await serve(path.join(root, 'apps', fw + '-demo', 'dist'));
 
 const FREEZE = `*, *::before, *::after { animation: none !important; transition: none !important; caret-color: transparent !important; }
   /* 樣本裡的 <i class="caret"> 是示意游標；實作是瀏覽器原生游標（會閃爍、不能逐點比），兩邊都不畫 */

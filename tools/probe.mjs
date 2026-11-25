@@ -8,7 +8,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [fw = 'react', c, id, sels = '*'] = process.argv.slice(2);
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css' };
 const serve = (dir) => new Promise((ok) => { const s = http.createServer((q, r) => { const p = path.join(dir, decodeURIComponent(new URL(q.url, 'http://x').pathname).replace(/\/$/, '/index.html')); fs.readFile(p, (e, d) => { if (e) { r.writeHead(404); r.end(); return; } r.writeHead(200, { 'content-type': TYPES[path.extname(p)] || 'application/octet-stream' }); r.end(d); }); }).listen(0, () => ok(s)); });
-const a = await serve(path.join(root, 'tools/out/ref')), b = await serve(path.join(root, fw, 'dist'));
+const a = await serve(path.join(root, 'tools/out/ref')), b = await serve(path.join(root, 'apps', fw + '-demo', 'dist'));
 const br = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
 const measure = async (url) => {
   const p = await br.newPage(); await p.setViewport({ width: 1400, height: 900 }); await p.goto(url, { waitUntil: 'networkidle0' });

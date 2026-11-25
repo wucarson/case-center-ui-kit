@@ -1,0 +1,39 @@
+import type { CSSProperties, ReactNode } from 'react';
+import type { IconName } from '@case-center/core/icons';
+import { Button } from './Button';
+import { Icon } from './Icon';
+import { cx, styleOf } from './util';
+
+export type CalloutTone = 'info' | 'success' | 'warn' | 'danger' | 'neutral';
+const CLS: Record<CalloutTone, string> = { info: 'info', success: 'ok', warn: 'warn', danger: 'dng', neutral: 'neu' };
+const ICON: Record<CalloutTone, IconName> = { info: 'info', success: 'ok', warn: 'warn', danger: 'error', neutral: 'info' };
+
+export interface CalloutProps {
+  tone: CalloutTone;
+  /** 標題：一句話講完 */
+  heading: string;
+  /** 內文：補細節（選用） */
+  children?: ReactNode;
+  /** 需要更醒目時加圖示 */
+  icon?: boolean;
+  /** 彈窗底部等空間有限處 */
+  compact?: boolean;
+  /** 明確的下一步，例：{ label: '重試', onClick } */
+  action?: { label: string; onClick: () => void };
+  /** 操作後才出現、要讓讀屏念出來（danger 一律念） */
+  live?: boolean;
+  className?: string;
+  style?: string | CSSProperties;
+}
+
+/** 提示訊息：頁面內的提示框，不擋操作。操作結果回饋請用 Toast。 */
+export function Callout({ tone, heading, children, icon, compact, action, live, className, style }: CalloutProps) {
+  const role = tone === 'danger' ? 'alert' : live ? 'status' : undefined;
+  return (
+    <div className={cx('co', CLS[tone], compact && 'cpt', className)} style={styleOf(style)} role={role}>
+      {icon && <Icon name={ICON[tone]} />}
+      <div><strong>{heading}</strong>{children != null && children !== '' && <p>{children}</p>}</div>
+      {action && <Button variant="outline" onClick={action.onClick}>{action.label}</Button>}
+    </div>
+  );
+}

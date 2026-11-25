@@ -17,11 +17,62 @@
 - 淺色／深色主題、多國語言切換
 - 自訂面板（基本／進階／顯示）：調整風格、字型、主色、圓角、動畫，並匯出 `case-center.css`
 
+## 元件套件
+
+展示牆的元件打包成 6 個 npm 套件，React、Vue、Angular 專案直接安裝使用。外觀以展示牆為準，用逐像素比對驗證一致。
+
+| 套件 | 內容 |
+| --- | --- |
+| `@case-center/styles` | 元件樣式（含預設 token），三個框架都要引入 |
+| `@case-center/tokens` | 設計 token：TS 物件與 CSS 變數（圖表、行內樣式用） |
+| `@case-center/core` | 共用邏輯（class、aria、鍵盤規則、圖示），不依賴框架；框架套件會自動帶入 |
+| `@case-center/react` | React 18 以上 |
+| `@case-center/vue` | Vue 3.3 以上 |
+| `@case-center/angular` | Angular 22（standalone 元件，屬性選擇器 `<button ccButton>`） |
+
+> 套件名稱的範圍（`@case-center`）暫定，發佈前會改成公司組織名稱。
+
+```ts
+// React
+import '@case-center/styles/components.css';
+import { Button, DataTable } from '@case-center/react';
+
+// Vue
+import '@case-center/styles/components.css';
+import { Button, DataTable } from '@case-center/vue';
+```
+
+```css
+/* Angular：styles.css */
+@import '@case-center/styles';
+```
+
+```ts
+// Angular：元件裡
+import { Button, DataTable } from '@case-center/angular';
+@Component({ imports: [Button, DataTable], template: `<button ccButton variant="outline">取消</button>` })
+```
+
+### 開發
+
+```sh
+npm install                # 根目錄，一次裝好全部（npm workspaces）
+npm run build:packages     # 建置 6 個套件
+npm run build:apps         # 建置三個展示頁（比對工具截圖用）
+npm run pack:check         # 安裝測試：打包後裝進全新專案，檢查載入與 React／Vue／Angular 型別
+cd tools && node export.mjs          # 展示牆改了之後：匯出樣式、token、比對樣本到套件
+cd tools && node compare.mjs react   # 逐像素比對（react｜vue｜angular）
+```
+
 ## 檔案
 
-| 檔案 | 說明 |
+| 路徑 | 說明 |
 | --- | --- |
 | `index.html` | 展示牆本體，CSS 與 JS 都在檔案內 |
+| `packages/` | 6 個套件的原始碼 |
+| `apps/` | 三個框架的展示頁與共用測試案例（`apps/shared`） |
+| `contracts/` | JSON 契約：每個元件的標籤、class、aria、鍵盤 |
+| `tools/` | 匯出、像素比對、契約檢查、安裝測試 |
 
 ## 備註
 

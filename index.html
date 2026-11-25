@@ -1,4 +1,5 @@
 <title>元件展示牆</title>
+<script>if (location.hash.length > 1 && !/[?&]preview=/.test(location.search)) document.documentElement.classList.add('boot-dt');</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/l/font?kit=co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_iE9GnbciL93RJXSJcQ&amp;skey=a863d1376a24bd7a&amp;v=v21">
@@ -832,6 +833,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 @keyframes cell-ping { 0%, 40% { box-shadow: 0 0 0 4px var(--focus), var(--shadow-lift); } }
 
 .shell.on-detail > .wall { display: none; }
+.boot-dt .shell > :is(.wf, .wall), .boot-dt #toggle-play { visibility: hidden; }   /* 直接開詳細頁網址：路由切好前不畫元件牆 */
 /* 詳細頁有自己的播放／暫停（會連動整體），頂部列的整體播放鈕先隱藏，避免兩顆打架 */
 .shell.on-detail #toggle-play { display: none; }
 /* 進場動畫只播第一次：牆從詳細頁回來時 display 由 none 變回 grid，瀏覽器會把 rise 重播，排後面的卡片空白最久 2 秒多（2026-11-16 修正）。ping 是返回時的提示，要留著 */
@@ -7860,8 +7862,9 @@ ${aiComponents(id)}`;
     const route = () => {
       const [pth] = decodeURIComponent(location.hash.slice(1)).split('?'), [slug, sub] = pth.split('/'), id = BY_SLUG[slug];
       const tab = sub === 'specs' || sub === 'variants' ? 'variants' : 'basic';
-      if (!id) return showWall();
+      if (!id) { document.documentElement.classList.remove('boot-dt'); return showWall(); }
       if (id === dtId) setTab(tab); else showDetail(id, tab);
+      document.documentElement.classList.remove('boot-dt');
     };
     function goDetail(id) {
       if (!DOC[id]) return;

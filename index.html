@@ -2073,11 +2073,6 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz-set:not(.block) .cz-seg button { flex: none; min-width: 40px; padding: 0 9px; }
 .cz-set.changed .cz-rl .cz-dot { display: inline-block; }
 .cz-set.changed:is(:hover, .cur, :focus-within) .cz-rl .cz-undo1 { display: inline-flex; }   /* 改過的列：滑過或選到才出現單項還原 */
-/* 說明：常駐在名稱下方；一般列的控制項跨兩列靠右，寬的控制項放在說明下方 */
-.cz-desc { grid-column: 1; margin: -6px 0 0; font-size: 12px; line-height: 17px; color: var(--weak); }
-.cz-set:not(.block) .cz-ctl { grid-column: 2; grid-row: 1 / span 2; }
-.cz-set.block .cz-desc { grid-row: 2; }
-.cz-set.block .cz-ctl { grid-row: 3; }
 
 .cz-stack { display: flex; flex-direction: column; gap: 10px; }
 .cz-inl { display: flex; align-items: center; gap: 10px; }
@@ -5736,59 +5731,59 @@ void main(){
       })));
     }
     const SETTINGS = [
-      { cat: 'common', key: 'mode', label: '深淺色', hint: '跟系統＝依裝置設定切換。', paths: [],
+      { cat: 'common', key: 'mode', label: '深淺色', paths: [],
         ui: () => pick('深淺色', [['auto', '跟系統'], ['light', '淺色'], ['dark', '深色']], (v) => (root.dataset.theme || 'auto') === v, (v) => setMode(v)) },
-      { cat: 'style', pin: true, key: 'ui', label: '風格', hint: '一次換掉整體質感。', paths: ['style.ui'], block: true, ui: stylesEl },
-      { cat: 'style', key: 'tabs', label: '頁籤樣式', hint: '頁籤選中時的樣子。', paths: ['style.tabs'], aff: '#c-tabs, #c-dtab',
+      { cat: 'style', pin: true, key: 'ui', label: '風格', paths: ['style.ui'], block: true, ui: stylesEl },
+      { cat: 'style', key: 'tabs', label: '頁籤樣式', paths: ['style.tabs'], aff: '#c-tabs, #c-dtab',
         ui: () => seg('style.tabs', [['auto', '自動'], ['underline', '底線'], ['pill', '膠囊'], ['block', '區塊']], '頁籤樣式') },
-      { cat: 'style', key: 'depth', label: '層次', hint: '陰影、光暈和邊框的強弱。', paths: ['depth.shadow', 'depth.glow', 'depth.border'],
+      { cat: 'style', key: 'depth', label: '層次', paths: ['depth.shadow', 'depth.glow', 'depth.border'],
         ui: () => pick('層次', [[0, '無'], [1, '淡'], [2, '標準'], [3, '強']], (v) => theme.depth.shadow === v, (v) => { theme.depth = depthOf(v); }, flash) },
-      { cat: 'color', pin: true, key: 'primary', label: '主色', hint: '按鈕、選中和連結的顏色。', paths: ['color.primary'], block: true, ui: primaryEl },
-      { cat: 'color', key: 'neutral', label: '底色色調', hint: '底色和文字的冷暖。', paths: ['color.neutral'], block: true,
+      { cat: 'color', pin: true, key: 'primary', label: '主色', paths: ['color.primary'], block: true, ui: primaryEl },
+      { cat: 'color', key: 'neutral', label: '底色色調', paths: ['color.neutral'], block: true,
         ui: () => opts('底色色調', [['cool', '偏藍'], ['neutral', '中性'], ['warm', '偏暖']].map(([k, name]) => {
           const p = (k === 'cool' ? COOL : NEUTRAL[k]).light;
           return { name, thumb: thumb('tone', `background:linear-gradient(90deg, ${p.page} 0 34%, ${p['line-strong']} 34% 67%, ${p.muted} 67%);border-color:${p['line-strong']}`), on: () => theme.color.neutral === k, pick: () => { theme.color.neutral = k; } };
         })) },
-      { cat: 'color', key: 'darkPrimary', label: '深色模式主色', hint: '深色背景另用較亮的主色。', paths: ['color.darkPrimary'],
+      { cat: 'color', key: 'darkPrimary', label: '深色模式主色', paths: ['color.darkPrimary'],
         ui: () => { const c = theme.color; return el('div', { class: 'cz-inl' }, c.darkPrimary ? el('label', { class: 'cz-pick on', title: '深色模式主色', style: `--c:${c.darkPrimary}` }, colorInput('color.darkPrimary', '深色模式主色')) : null, sw(c.darkPrimary, (on) => { c.darkPrimary = on ? tone(c.primary, 0.74, 0.9) : ''; }, '深色模式另選主色')); } },
-      { cat: 'color', key: 'status', label: '狀態顏色', hint: '成功、提醒、錯誤、資訊。', paths: ['color.success', 'color.warn', 'color.danger', 'color.info'], block: true, aff: '#c-bdg, #c-co, #c-toast',
+      { cat: 'color', key: 'status', label: '狀態顏色', paths: ['color.success', 'color.warn', 'color.danger', 'color.info'], block: true, aff: '#c-bdg, #c-co, #c-toast',
         ui: () => el('div', { class: 'cz-tiles' }, [['success', '成功'], ['warn', '提醒'], ['danger', '錯誤'], ['info', '資訊']].map(([k, n]) => el('label', { class: 'cz-tile', 'data-path': 'color.' + k, title: '點色塊換色' }, colorInput('color.' + k, n + '顏色'), n))) },
-      { cat: 'color', key: 'series', label: '圖表顏色', hint: '圖表依序使用的顏色。', paths: ['color.series'], block: true, aff: '#c-bars, #c-pie, #c-line, #c-stk, #c-ht',
+      { cat: 'color', key: 'series', label: '圖表顏色', paths: ['color.series'], block: true, aff: '#c-bars, #c-pie, #c-line, #c-stk, #c-ht',
         ui: () => el('div', { class: 'cz-series' }, theme.color.series.map((v, i) => el('input', { type: 'color', value: v, 'aria-label': `圖表第 ${i + 1} 色`, oninput: (e) => { theme.color.series[i] = e.target.value; changed(false); }, onchange: () => record() }))) },
-      { cat: 'type', key: 'family', label: '字型', hint: '自訂可選 Google Fonts。', paths: ['type.family', 'type.custom'], block: true,
+      { cat: 'type', key: 'family', label: '字型', paths: ['type.family', 'type.custom'], block: true,
         ui: () => el('div', { class: 'cz-stack' }, opts('字型', [['system', '系統'], ['sans', '黑體'], ['custom', '自訂']].map(([k, name]) => ({ name, thumb: Object.assign(el('i', { class: 'cz-th ft', style: `font-family:${fontStack(k)}`, 'aria-hidden': 'true' }), { textContent: 'Aa字' }), on: () => theme.type.family === k, pick: () => { theme.type.family = k; } }))), theme.type.family === 'custom' ? fontPicker() : null) },
-      { cat: 'type', key: 'scale', label: '字級', hint: '全部文字一起放大縮小。', paths: ['type.scale'],
+      { cat: 'type', key: 'scale', label: '字級', paths: ['type.scale'],
         ui: () => pick('字級', [[0.92, '小'], [1, '標準'], [1.08, '大']], (v) => theme.type.scale === v, (v) => { theme.type.scale = v; }, flash) },
-      { cat: 'type', key: 'ratio', label: '標題與內文差距', hint: '標題比內文大多少。', paths: [],
+      { cat: 'type', key: 'ratio', label: '標題與內文差距', paths: [],
         ui: () => pick('標題與內文差距', RATIOS.map(([n, r]) => [r, n]), (r) => sizesMatch(r), (r) => { theme.type.levels = levelsFor(r); }, flash) },
-      { cat: 'type', key: 'levels', label: '各層級字級', hint: '行高、字距自動計算。', paths: ['type.levels'], block: true, lr: false,
+      { cat: 'type', key: 'levels', label: '各層級字級', paths: ['type.levels'], block: true, lr: false,
         ui: () => el('div', { class: 'cz-lv' }, LEVELS.map(([k, n, en]) => { const lv = theme.type.levels[k];
           return el('div', { class: 'cz-lvr' }, el('span', { class: 'cz-lvn', style: `font-family:${fontStack(theme.type.family)};font-size:${Math.min(18, lv.size)}px;font-weight:${lv.weight}` }, n, el('small', {}, en)), sizeStep(k, n),
             seg(`type.levels.${k}.weight`, [[400, '一般'], [500, '中等'], [600, '半粗'], [700, '粗']], n + '粗細')); })) },
-      { cat: 'shape', pin: true, key: 'radius', label: '圓角', hint: '卡片、按鈕和欄位的弧度。', paths: ['shape'], block: true,
+      { cat: 'shape', pin: true, key: 'radius', label: '圓角', paths: ['shape'], block: true,
         ui: () => lockShape(opts('圓角', RADIUS.map(([name, sh, r]) => ({ name, thumb: thumb('r', `border-top-left-radius:${r}`), on: () => same(theme.shape, sh), pick: () => { theme.shape = clone(sh); } })))) },
-      { cat: 'shape', key: 'card', label: '卡片圓角', hint: '卡片、對話框的圓角。', paths: ['shape.card'], block: true, ui: () => lockShape(range('shape.card', 0, 32, 1, (v) => v + 'px', '卡片圓角', ['直角', '圓']), false) },
-      { cat: 'shape', key: 'control', label: '按鈕與欄位圓角', hint: '按鈕、輸入框、下拉的圓角。', paths: ['shape.control'], block: true, aff: '#c-btn, #c-ff, #c-dd, #c-search',
+      { cat: 'shape', key: 'card', label: '卡片圓角', paths: ['shape.card'], block: true, ui: () => lockShape(range('shape.card', 0, 32, 1, (v) => v + 'px', '卡片圓角', ['直角', '圓']), false) },
+      { cat: 'shape', key: 'control', label: '按鈕與欄位圓角', paths: ['shape.control'], block: true, aff: '#c-btn, #c-ff, #c-dd, #c-search',
         ui: () => lockShape(range('shape.control', 0, 20, 1, (v) => v + 'px', '按鈕與欄位圓角', ['直角', '圓']), false) },
-      { cat: 'shape', key: 'pill', label: '標籤形狀', hint: '徽章、篩選標籤的外形。', paths: ['shape.pill'], aff: '#c-bdg, #c-chips',
+      { cat: 'shape', key: 'pill', label: '標籤形狀', paths: ['shape.pill'], aff: '#c-bdg, #c-chips',
         ui: () => lockShape(seg('shape.pill', [['full', '膠囊'], ['soft', '方塊']], '標籤形狀'), false) },
-      { cat: 'motion', pin: true, key: 'anim', label: '動畫', hint: '少＝較慢、不回彈。', paths: ['motion.reduce', 'motion.speed', 'motion.bounce'], block: true,
+      { cat: 'motion', pin: true, key: 'anim', label: '動畫', paths: ['motion.reduce', 'motion.speed', 'motion.bounce'], block: true,
         ui: () => opts('動畫', MOTION.map(([name, m, d]) => {
           const t = thumb('mo'); t.innerHTML = `<svg viewBox="0 0 24 24"><path d="${d}"/></svg>`;
           return { name, thumb: t,
             on: () => (m ? !theme.motion.reduce && theme.motion.speed === m.speed && theme.motion.bounce === m.bounce : theme.motion.reduce),
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
         })) },
-      { cat: 'motion', key: 'speed', label: '動畫速度', hint: '1× 為標準，往右越慢。', paths: ['motion.speed'], block: true, ui: () => range('motion.speed', 0.5, 2, 0.25, (v) => v + '×', '動畫速度', ['快', '慢']) },
-      { cat: 'motion', key: 'bounce', label: '動畫回彈', hint: '到定位時的回彈幅度。', paths: ['motion.bounce'],
+      { cat: 'motion', key: 'speed', label: '動畫速度', paths: ['motion.speed'], block: true, ui: () => range('motion.speed', 0.5, 2, 0.25, (v) => v + '×', '動畫速度', ['快', '慢']) },
+      { cat: 'motion', key: 'bounce', label: '動畫回彈', paths: ['motion.bounce'],
         ui: () => seg('motion.bounce', [['none', '無'], ['soft', '柔和'], ['standard', '標準'], ['strong', '強']], '動畫回彈') },
-      { cat: 'motion', key: 'enter', label: '進場效果', hint: '選了會重播一次。', paths: ['motion.enter'],
+      { cat: 'motion', key: 'enter', label: '進場效果', paths: ['motion.enter'],
         ui: () => pick('進場效果', [['line', '浮線'], ['fly', '飛入'], ['tile', '拼塊'], ['stack', '疊放']], (v) => (['fly', 'tile', 'stack'].includes(theme.motion.enter) ? theme.motion.enter : 'line') === v, (v) => { theme.motion.enter = v; }, () => requestAnimationFrame(() => replayEnter())) },
-      { cat: 'motion', key: 'themeFx', label: '深淺色轉場', hint: '切換深淺色時的效果。', paths: ['motion.themeFx'],
+      { cat: 'motion', key: 'themeFx', label: '深淺色轉場', paths: ['motion.themeFx'],
         ui: () => pick('深淺色轉場', [['dim', '亮度'], ['wand', '魔杖'], ['slash', '亂刀'], ['hole', '黑洞']], (v) => (['hole', 'slash', 'wand'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'dim') === v, (v) => { theme.motion.themeFx = v; }) },
-      { cat: 'layout', key: 'cols', label: '每列卡片數', hint: '寬螢幕每列最多幾張。', paths: ['layout.cols'], ui: () => seg('layout.cols', [[2, '2'], [3, '3'], [4, '4'], [5, '5']], '每列卡片數') },
-      { cat: 'layout', key: 'density', label: '疏密', hint: '卡片之間和元件內的間距。', paths: ['layout.density'], ui: () => seg('layout.density', [['compact', '緊'], ['standard', '標準'], ['relaxed', '鬆']], '疏密') },
-      { cat: 'layout', key: 'shown', label: '顯示的元件', hint: '依類別或逐一勾選。', paths: ['layout.hidden'], block: true, lr: false, ui: shownEl },
+      { cat: 'layout', key: 'cols', label: '每列卡片數', paths: ['layout.cols'], ui: () => seg('layout.cols', [[2, '2'], [3, '3'], [4, '4'], [5, '5']], '每列卡片數') },
+      { cat: 'layout', key: 'density', label: '疏密', paths: ['layout.density'], ui: () => seg('layout.density', [['compact', '緊'], ['standard', '標準'], ['relaxed', '鬆']], '疏密') },
+      { cat: 'layout', key: 'shown', label: '顯示的元件', paths: ['layout.hidden'], block: true, lr: false, ui: shownEl },
     ];
 
     /* ---- 外觀面板：分類、列、改過標記 ---- */
@@ -5813,8 +5808,7 @@ void main(){
       reset.innerHTML = RESET_ICON;
       const r = el('div', { class: 'cz-set' + (x.block ? ' block' : ''), 'data-key': x.key, 'data-paths': x.paths.join(' ') },
         el('div', { class: 'cz-rl' }, el('span', { class: 'cz-dot', 'aria-hidden': 'true' }), el('span', { class: 'cz-lab' }, x.label), reset),
-        el('div', { class: 'cz-ctl' }, x.ui()),
-        el('p', { class: 'cz-desc' }, x.hint));
+        el('div', { class: 'cz-ctl' }, x.ui()));
       if (x.aff) r.dataset.aff = x.aff;
       if (x.lr === false) r.dataset.nolr = '';
       rows.push(r); return r;

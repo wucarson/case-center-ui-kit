@@ -18,5 +18,8 @@ for (const dir of DIRS) {
   try { exists = execSync(`npm view ${name}@${version} version`, { cwd, stdio: ['ignore', 'pipe', 'ignore'], encoding: 'utf8' }).trim() === version; } catch {}
   if (exists) { console.log(`略過 ${name}@${version}（已發佈）`); continue; }
   execSync(`npm publish${dry ? ' --dry-run' : ''}`, { cwd, stdio: 'inherit' });
+  if (dry) continue;
+  // changesets/action 讀到「New tag:」會推送這個標籤並建立 GitHub Release，所以標籤要先在本機建好
+  execSync(`git tag "${name}@${version}"`, { cwd: root, stdio: 'inherit' });
   console.log(`New tag: ${name}@${version}`);
 }

@@ -187,6 +187,9 @@ body.hush :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .w2 { grid-column: span 2; } .h2 { grid-row: span 2; }
 .cell > header { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); line-height: calc(18px * var(--fs-k) * var(--rk, 1)); font-weight: 600; color: var(--label); }
 .cell > header em { font-style: normal; font-weight: 500; color: var(--weak); }
+/* 卡片標題不換行：右側英文名稱放不下時截斷加省略號，中文標題保持一行 */
+.cell > header { white-space: nowrap; }
+.cell > header em { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .body { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; }
 .body.c { align-items: center; }
 .body.t { justify-content: flex-start; }
@@ -398,6 +401,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .pg nav { position: relative; display: flex; gap: 4px; }
 .pg nav span { width: 32px; height: 32px; border-radius: var(--r-xs); display: flex; align-items: center; justify-content: center; font-weight: 600; font-variant-numeric: tabular-nums; position: relative; z-index: 1; transition: color calc(.25s * var(--dur)); }
 .pg nav span.on { color: var(--selected-fg); }
+.pg nav .ell { width: 18px; color: var(--weak); font-weight: 500; }   /* 手機：精簡頁碼的省略號 */
+.pg nav span.far, .pg nav .ell[hidden] { display: none; }
 .pg nav > i { position: absolute; top: 0; left: 0; width: 32px; height: 32px; border-radius: var(--r-xs); background: var(--tint); border: 1px solid var(--primary); box-shadow: 0 6px 12px -6px var(--glow); transition: transform calc(.55s * var(--dur)) var(--spring-soft); }
 .pg-s { margin-top: 12px; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); color: var(--weak); }
 
@@ -419,6 +424,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 :root:not([lang="zh-Hant"]) .dtab { padding: 0 8px; gap: 5px; }
 :root:not([lang="zh-Hant"]) .dt { gap: 2px; }
 @media (max-width: 540px) { .tr { grid-template-columns: 70px 84px minmax(0, 1fr); } .tr .nm { display: none; } }
+@media (max-width: 400px) { .tr { grid-template-columns: 64px minmax(0, 1fr); } .tr > span:nth-child(3) { display: none; } .tr .due { gap: 4px; } }   /* 小手機：再收掉狀態欄，只留案號與到期日 */
 
 /* 追蹤星號 star-toggle */
 .starb { position: relative; width: 48px; height: 48px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; background: var(--tile); border: 1px solid var(--line-subtle); box-shadow: var(--raise); }
@@ -565,6 +571,17 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .dp-g span.hv { background: var(--hover); }
 .dp-g span.on { color: var(--on-primary); font-weight: 600; box-shadow: none; background: transparent; }
 .dp-sel { position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: var(--r-sm); background: var(--primary); box-shadow: 0 6px 12px -4px var(--glow); transition: transform calc(.6s * var(--dur)) var(--spring-soft); }
+@media (max-width: 540px) {
+  .tabs, .ps { overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+  .tabs::-webkit-scrollbar, .ps::-webkit-scrollbar { display: none; }
+  :is(.tabs, .ps, .dt).ovf { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
+  :is(.tabs, .ps, .dt).ovf.end { -webkit-mask-image: none; mask-image: none; }   /* 捲到最右就不用淡出 */
+}
+@media (max-width: 360px) {   /* 小手機：半寬卡片太窄（按住確認的按鈕放不下），一律撐滿；圓餅圖圖例收窄 */
+  .cell.half { grid-column: span 2; }
+  .pie { gap: 12px; } .pie-r { gap: 6px; padding: 0 4px; } .pie-r em { width: 30px; }
+  .ps-r { font-size: calc(12px * var(--fs-k) * var(--rk, 1)); }   /* 期間的日期文字不貼邊 */
+}
 @media (max-width: 540px) { .dp-pre { display: none; } .dp-g { grid-template-columns: repeat(7, minmax(30px, 36px)); } }
 
 /* 期間選擇（period-picker） */
@@ -2488,6 +2505,16 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   }
 
   $$('.cell').forEach((c, i) => c.style.setProperty('--i', i));
+  // 頁籤、詳情頁籤、期間選擇：內容比寬度長時加 .ovf（右緣淡出），捲到最右加 .end
+  {
+    const ovf = (el) => { el.classList.toggle('ovf', el.scrollWidth > el.clientWidth + 1); el.classList.toggle('end', el.scrollLeft + el.clientWidth >= el.scrollWidth - 2); };
+    const scan = () => $$('.tabs, .ps, .dt').forEach(ovf);
+    document.addEventListener('scroll', (e) => { if (e.target instanceof Element && e.target.matches('.tabs, .ps, .dt')) ovf(e.target); }, true);
+    addEventListener('resize', scan); requestAnimationFrame(scan); setTimeout(scan, 1200);
+    // 選中項換了：在可捲動的列裡捲到看得見（置中）
+    const follow = new MutationObserver((ms) => { for (const m of ms) { const el = m.target, box = el.parentElement; if (!el.classList.contains('on') || !box || box.scrollWidth <= box.clientWidth + 1) continue; const x = el.offsetLeft - (box.clientWidth - el.offsetWidth) / 2; if (el.offsetLeft < box.scrollLeft || el.offsetLeft + el.offsetWidth > box.scrollLeft + box.clientWidth) box.scrollTo({ left: Math.max(0, x), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); } });
+    $$('.tabs, .ps, .dt').forEach((b) => follow.observe(b, { subtree: true, attributes: true, attributeFilter: ['class'] }));
+  }
   const btn = $('#toggle-play');
   const paintBtn = () => {
     btn.querySelector('span').textContent = btn.title = paused ? '播放' : '暫停';
@@ -3749,8 +3776,16 @@ void main(){
     const nav = $('#c-pg nav'), hl = $('i', nav), info = $('#c-pg .pg-s .roll'), N = 7, total = 128;
     nav.insertAdjacentHTML('beforeend', '<span>‹</span>' + Array.from({ length: N }, (_, k) => `<span>${k + 1}</span>`).join('') + '<span>›</span>');
     const all = $$('span', nav), prev = all[0], next = all[N + 1], pages = all.slice(1, N + 1);
+    // 手機寬度：精簡頁碼「‹ 1 … 4 5 6 … 7 ›」（第一頁、最後一頁、目前頁前後各一頁）
+    const ell = ['<span class="ell" aria-hidden="true">…</span>', '<span class="ell" aria-hidden="true">…</span>'].map((h, k) => { (k ? pages[N - 1] : pages[0]).insertAdjacentHTML(k ? 'beforebegin' : 'afterend', h); return (k ? pages[N - 1] : pages[0])[k ? 'previousElementSibling' : 'nextElementSibling']; });
+    const narrow = matchMedia('(max-width: 540px)'), tiny = matchMedia('(max-width: 360px)');   // 小手機只留目前頁：「‹ 1 … 4 … 7 ›」
     let cur = 0, dir = 1;
-    const place = () => { hl.style.transform = `translateX(${pages[cur].offsetLeft}px)`; pages.forEach((p, k) => p.classList.toggle('on', k === cur)); };
+    const place = () => {
+      const n = narrow.matches, rad = tiny.matches ? 0 : 1;
+      pages.forEach((p, k) => { p.classList.toggle('on', k === cur); p.classList.toggle('far', n && k > 0 && k < N - 1 && Math.abs(k - cur) > rad); });
+      ell[0].hidden = !(n && cur > rad + 1); ell[1].hidden = !(n && cur < N - 2 - rad);
+      hl.style.transform = `translateX(${pages[cur].offsetLeft}px)`;
+    };
     hl.style.transition = 'none'; place(); requestAnimationFrame(() => hl.style.transition = '');
     addEventListener('resize', place);
     loop(1000, async () => {

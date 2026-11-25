@@ -503,15 +503,11 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .pie { align-self: stretch; display: flex; align-items: center; gap: 20px; }
 .pie-c { position: relative; width: 124px; height: 124px; flex: none; }
 .pie-c svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
-.pie-c circle { fill: none; stroke-width: 16; transition: stroke-width calc(.5s * var(--dur)) var(--spring), opacity calc(.3s * var(--dur)); }
-.pie-c circle.trk { stroke: var(--soft); }
-.pie-c circle.on { stroke-width: 22; }
-/* 扇區 focus：沿這一塊扇區的形狀繞一圈同色外框（內緣、外緣、兩端，隔 3px），並和扇區一起沿中線外推 4px */
-.pie-c .fr { fill: none; stroke-width: 3; stroke-linejoin: round; opacity: 0; pointer-events: none; transition: opacity calc(.3s * var(--dur)), transform calc(.5s * var(--dur)) var(--spring); }
-.pie-c .fr.on { opacity: .45; }
-.pie-c :is(circle.sg, .fr) { transition-property: stroke-width, opacity, transform; }
-.pie-c :is(circle.sg, .fr).on { transform: translate(var(--dx, 0), var(--dy, 0)); }
-.pie.focus circle.sg:not(.on) { opacity: .35; }
+/* 扇區用實心環狀扇形畫：縫隙固定 3px 寬、兩邊平行，透出卡片底色（不露灰色軌道）
+   聚焦：扇區加粗（JS 補間半徑）＋沿中線外推 4px＋同色柔光暈；其他扇區淡化 */
+.pie-c .sg { --gl: transparent; filter: drop-shadow(0 0 0 var(--gl)); transition: transform calc(.5s * var(--dur)) var(--spring), opacity calc(.3s * var(--dur)), filter calc(.4s * var(--dur)) var(--ease); }
+.pie-c .sg.on { --gl: color-mix(in srgb, var(--c) 60%, transparent); filter: drop-shadow(0 1px 7px var(--gl)); transform: translate(var(--dx, 0), var(--dy, 0)); }
+.pie.focus .sg:not(.on) { opacity: .35; }
 .pie-m { position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 .pie-m b { font-size: calc(22px * var(--fs-k) * var(--rk, 1)); line-height: calc(28px * var(--fs-k) * var(--rk, 1)); font-weight: 600; }
 .pie-m small { max-width: 76px; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); line-height: calc(15px * var(--fs-k) * var(--rk, 1)); color: var(--weak); hyphens: auto; overflow-wrap: break-word; }
@@ -3957,35 +3953,41 @@ void main(){
   {
     const sleep = own('c-pie'), loop = (d, fn) => loopOn(sleep, d, fn);
     const pie = $('#c-pie .pie'), svg = $('svg', pie), [mb, ms] = $$('.pie-m .roll', pie), list = $('.pie-l', pie);
-    const R = 48, C = 2 * Math.PI * R, FD = 3 + 1.5, PUSH = 4;   // FD：外框離扇區（加粗後）的距離＋外框半寬
+    const R = 48, W0 = 8, W1 = 11, HG = 1.5, PUSH = 4;   // 環寬一半：平常 8、聚焦 11；HG：縫隙一半寬（縫隙兩邊平行）
     const cats = [['設計部', 'var(--c1)'], ['研發部', 'var(--c3)'], ['客服部', 'var(--c2)'], ['業務部', 'var(--c4)']];
     const sets = [[312, 214, 148, 146], [248, 296, 170, 118], [196, 236, 254, 150]];
-    svg.innerHTML = `<defs>${cats.map(([, c], k) => `<linearGradient id="pg${k}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:color-mix(in srgb, ${c} 55%, #fff)"/><stop offset="1" style="stop-color:${c}"/></linearGradient>`).join('')}</defs>`
-      + `<circle class="trk" cx="60" cy="60" r="${R}"/>` + cats.map((_, k) => `<circle class="sg" cx="60" cy="60" r="${R}" stroke="url(#pg${k})"/>`).join('')
-      + cats.map(([, c]) => `<path class="fr" style="stroke:${c}"/>`).join('');
-    const segs = $$('.sg', svg), frames = $$('.fr', svg);
-    // 扇區外框：環狀扇形往外平移 FD（內外半徑各加減、兩端用 asin 做平行偏移）
-    const frameD = (a0, a1) => { const ro = R + 11 + FD, ri = R - 11 - FD, P = (r, a) => `${(60 + r * Math.cos(a)).toFixed(2)} ${(60 + r * Math.sin(a)).toFixed(2)}`;
-      const o0 = a0 - Math.asin(FD / ro), o1 = a1 + Math.asin(FD / ro), i0 = a0 - Math.asin(FD / ri), i1 = a1 + Math.asin(FD / ri);
-      return `M${P(ro, o0)}A${ro} ${ro} 0 ${o1 - o0 > Math.PI ? 1 : 0} 1 ${P(ro, o1)}L${P(ri, i1)}A${ri} ${ri} 0 ${i1 - i0 > Math.PI ? 1 : 0} 0 ${P(ri, i0)}Z`; };
+    svg.innerHTML = `<defs>${cats.map(([, c], k) => `<linearGradient id="pg${k}" gradientUnits="userSpaceOnUse" x1="12" y1="12" x2="108" y2="108"><stop offset="0" style="stop-color:color-mix(in srgb, ${c} 55%, #fff)"/><stop offset="1" style="stop-color:${c}"/></linearGradient>`).join('')}</defs>`
+      + cats.map(([, c], k) => `<path class="sg" fill="url(#pg${k})" style="--c:${c}"/>`).join('');
+    const segs = $$('.sg', svg);
+    // 環狀扇形：兩端各往內平移 HG（用 asin 換算成各半徑上的角度），縫隙才會等寬
+    const P = (r, a) => `${(60 + r * Math.cos(a)).toFixed(2)} ${(60 + r * Math.sin(a)).toFixed(2)}`;
+    const sector = (a0, a1, w) => { const ro = R + w, ri = R - w, o = Math.asin(HG / ro), n = Math.asin(HG / ri);
+      if (a1 - a0 <= 2 * n) return '';
+      return `M${P(ro, a0 + o)}A${ro} ${ro} 0 ${a1 - a0 - 2 * o > Math.PI ? 1 : 0} 1 ${P(ro, a1 - o)}L${P(ri, a1 - n)}A${ri} ${ri} 0 ${a1 - a0 - 2 * n > Math.PI ? 1 : 0} 0 ${P(ri, a0 + n)}Z`; };
+    // 每段的加粗程度 0–1，聚焦時補間過去（彈性收尾）
+    const gv = cats.map(() => 0), gt = cats.map(() => 0); let lastV = null, raf = 0;
+    const grow = () => { raf = 0; let moving = false;
+      gv.forEach((v, k) => { const d = gt[k] - v; if (Math.abs(d) < 0.002) gv[k] = gt[k]; else { gv[k] = v + d * 0.22; moving = true; } });
+      if (lastV) shape(lastV); if (moving) raf = requestAnimationFrame(grow); };
+    const setOn = (k) => { segs.forEach((s0, j) => s0.classList.toggle('on', j === k)); rows.forEach((r0, j) => r0.classList.toggle('on', j === k));
+      gt.forEach((_, j) => (gt[j] = j === k ? 1 : 0)); if (!raf) raf = requestAnimationFrame(grow); };
+    const shape = (v) => { const tot = sum(v); let a = 0;
+      v.forEach((x, k) => { const sp = (x / tot) * 2 * Math.PI, mid = a + sp / 2;
+        segs[k].setAttribute('d', sector(a, a + sp, W0 + (W1 - W0) * gv[k]));
+        segs[k].style.setProperty('--dx', (Math.cos(mid) * PUSH).toFixed(2) + 'px'); segs[k].style.setProperty('--dy', (Math.sin(mid) * PUSH).toFixed(2) + 'px');
+        a += sp; }); };
     cats.forEach(([n, c]) => list.insertAdjacentHTML('beforeend', `<div class="pie-r"><i style="--c:${c}"></i><span>${n}</span><b></b><em></em></div>`));
     const rows = $$('.pie-r', list), sum = v => v.reduce((a, b) => a + b, 0);
     const draw = v => {
-      const tot = sum(v); let s = 0;
+      const tot = sum(v); lastV = v; shape(v);
       v.forEach((x, k) => {
         const f = x / tot;
-        segs[k].setAttribute('stroke-dasharray', `${Math.max(0, f * C - 3)} ${C}`);
-        segs[k].setAttribute('stroke-dashoffset', -(s * C + 1.5));
-        const a0 = (s * C + 1.5) / R, a1 = a0 + Math.max(0, f * C - 3) / R, mid = (a0 + a1) / 2;
-        frames[k].setAttribute('d', frameD(a0, a1));
-        for (const el of [segs[k], frames[k]]) { el.style.setProperty('--dx', (Math.cos(mid) * PUSH).toFixed(2) + 'px'); el.style.setProperty('--dy', (Math.sin(mid) * PUSH).toFixed(2) + 'px'); }
-        s += f;
         rows[k].children[2].textContent = Math.round(x);
         rows[k].children[3].textContent = Math.round(f * 100) + '%';
       });
     };
     let cur = sets[0], i = 0; draw(cur);
-    const clear = () => { pie.classList.remove('focus'); segs.forEach(s => s.classList.remove('on')); frames.forEach(s => s.classList.remove('on')); rows.forEach(r => r.classList.remove('on')); };
+    const clear = () => { pie.classList.remove('focus'); setOn(-1); };
     loop(1300, async () => {
       const from = cur, to = sets[++i % sets.length], tot = sum(to); cur = to;
       roll(mb, tot);
@@ -3993,7 +3995,7 @@ void main(){
       await sleep(900);
       for (const k of [...to.keys()].sort((a, b) => to[b] - to[a]).slice(0, 2)) {
         pie.classList.add('focus');
-        segs.forEach((s, j) => s.classList.toggle('on', j === k)); frames.forEach((s, j) => s.classList.toggle('on', j === k)); rows.forEach((r, j) => r.classList.toggle('on', j === k));
+        setOn(k);
         roll(mb, Math.round(to[k] / tot * 100) + '%'); roll(ms, cats[k][0]);
         await sleep(1300);
       }
@@ -4003,7 +4005,7 @@ void main(){
     // 暫停後：滑過扇形或圖例，聚焦那個部門並顯示佔比
     live('c-pie', (signal) => {
       const tot = sum(cur);
-      const focus = (k) => { pie.classList.add('focus'); segs.forEach((s0, j) => s0.classList.toggle('on', j === k)); frames.forEach((s0, j) => s0.classList.toggle('on', j === k)); rows.forEach((r0, j) => r0.classList.toggle('on', j === k)); roll(mb, Math.round(cur[k] / tot * 100) + '%'); roll(ms, cats[k][0]); };
+      const focus = (k) => { pie.classList.add('focus'); setOn(k); roll(mb, Math.round(cur[k] / tot * 100) + '%'); roll(ms, cats[k][0]); };
       const off = () => { clear(); roll(mb, Math.round(tot), -1); roll(ms, '總工時（小時）', -1); };
       clear(); roll(mb, Math.round(tot), -1); roll(ms, '總工時（小時）', -1);
       segs.forEach((s0, k) => { s0.addEventListener('mouseenter', () => focus(k), { signal }); s0.addEventListener('mouseleave', off, { signal }); });

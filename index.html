@@ -517,10 +517,16 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .pie-r b { font-weight: 600; font-variant-numeric: tabular-nums; }
 .pie-r em { font-style: normal; color: var(--weak); font-size: calc(12px * var(--fs-k) * var(--rk, 1)); width: 36px; text-align: right; font-variant-numeric: tabular-nums; }
 .pie-r.on { background: var(--soft); }
-@media (max-width: 540px) {   /* 手機：圓環縮小、間距收窄，圖例名稱才放得下 */
-  .pie { gap: 14px; } .pie-c { width: 96px; height: 96px; } .pie-m b { font-size: calc(18px * var(--fs-k) * var(--rk, 1)); line-height: calc(22px * var(--fs-k) * var(--rk, 1)); } .pie-m small { max-width: 60px; }
-  .pie-r { gap: 6px; padding: 0 4px; } .pie-r em { width: 30px; }
+/* 手機：上下排——圓環在上（148px，中央說明字、百分比都保留），圖例兩欄兩列在下；卡片在手機上佔兩列高（.ph2） */
+@media (max-width: 540px) {
+  .cell.ph2 { grid-row: span 2; }
+  .pie { flex-direction: column; align-items: stretch; gap: 14px; }
+  .pie-c { align-self: center; width: 148px; height: 148px; } :is(.pie-m small, .pie-m small.roll > span) { max-width: 100px; }
+  .pie-l { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 8px; }
+  .pie-r { gap: 6px; padding: 0 6px; }
+  .pie-r em { width: auto; }
 }
+@media (max-width: 360px) { .pie-r em { display: none; } }   /* 小手機：兩欄放不下百分比，收掉（數字仍在） */
 
 /* 折線圖 */
 .lc { flex: 1; min-height: 0; position: relative; }
@@ -583,7 +589,6 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 }
 @media (max-width: 360px) {   /* 小手機：半寬卡片太窄（按住確認的按鈕放不下），一律撐滿；圓餅圖圖例收窄 */
   .cell.half { grid-column: span 2; }
-  .pie-c { width: 84px; height: 84px; } .pie-r em, .pie-m small { display: none; }   /* 小手機：圓環再縮、收掉百分比欄與圓環中央的說明字（只留數字，名稱看右側圖例） */
   .ps-r { font-size: calc(12px * var(--fs-k) * var(--rk, 1)); }   /* 期間的日期文字不貼邊 */
 }
 @media (max-width: 540px) { .dp-pre { display: none; } .dp-g { grid-template-columns: repeat(7, minmax(30px, 36px)); } }
@@ -2242,7 +2247,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       <div class="body"><div class="bars"></div></div>
     </section>
 
-    <section class="cell w2" id="c-pie">
+    <section class="cell w2 ph2" id="c-pie">
       <header>圓餅圖<em>各部門工時</em></header>
       <div class="body"><div class="pie">
         <div class="pie-c"><svg viewBox="0 0 120 120"></svg><div class="pie-m"><b class="roll num"><span>820</span></b><small class="roll"><span>總工時（小時）</span></small></div></div>
@@ -7570,7 +7575,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
       const cs = getComputedStyle(wall), cols = +cs.getPropertyValue('--cols') || 4, gap = parseFloat(cs.getPropertyValue('--gap')) || 16, row = parseFloat(cs.getPropertyValue('--row')) || 196;
       const colW = (shell.clientWidth - gap * (cols - 1)) / cols;
       const phone = matchMedia('(max-width: 540px)').matches;   // 手機：詳細頁的示範卡片一律撐滿（半寬卡片也是）
-      const cs2 = phone ? cols : Math.min(cols, cell.classList.contains('w2') ? 2 : 1), rs = cell.classList.contains('h2') ? 2 : 1;
+      const cs2 = phone ? cols : Math.min(cols, cell.classList.contains('w2') ? 2 : 1), rs = cell.classList.contains('h2') || (phone && cell.classList.contains('ph2')) ? 2 : 1;   // ph2：只在手機佔兩列
       return [Math.round(colW * cs2 + gap * (cs2 - 1)), Math.round(row * rs + gap * (rs - 1))];
     };
     const I_PAUSE = '<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>', I_PLAY = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';

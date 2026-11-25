@@ -1612,21 +1612,21 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="y2k"] {
   --y2k-fill: linear-gradient(180deg, var(--surface) 0%, color-mix(in srgb, var(--surface) 88%, var(--page)) 60%, color-mix(in srgb, var(--surface) 72%, var(--page)) 100%);   /* 下緣仍比頁面亮 */
   --y2k-gloss: linear-gradient(180deg, rgb(255 255 255 / .75), rgb(255 255 255 / 0) 28%);
-  --y2k-rim: linear-gradient(180deg, #ffffff, color-mix(in srgb, var(--line-strong) 55%, #ffffff) 45%, var(--line-strong));
+  --y2k-rim: linear-gradient(180deg, #ffffff, #cfd3d8 45%, #9aa0a8);   /* 中性銀色鉻邊 */
   --y2k-btn: linear-gradient(180deg, var(--surface), color-mix(in srgb, var(--surface) 70%, var(--page)));
   --y2k-glow: 0 10px 28px -10px rgb(var(--sh-rgb, 60 90 150) / .4);
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] {
   --y2k-fill: linear-gradient(135deg, color-mix(in srgb, var(--surface) 92%, #ffffff) 0%, var(--surface) 55%, color-mix(in srgb, var(--surface) 65%, var(--page)) 100%);   /* 深色：左上亮、右下暗，和左上斜射光一致 */
   --y2k-gloss: linear-gradient(180deg, rgb(255 255 255 / .09), rgb(255 255 255 / 0) 28%);
-  --y2k-rim: linear-gradient(180deg, color-mix(in srgb, var(--line-strong) 45%, #ffffff), var(--line-strong) 45%, var(--line));
+  --y2k-rim: linear-gradient(180deg, #d9dce0, #7d828a 45%, #3f434a);
   --y2k-btn: linear-gradient(180deg, color-mix(in srgb, var(--surface) 80%, #ffffff), var(--surface));
   --y2k-glow: 0 12px 30px -10px rgb(from var(--sh-dk) r g b / .85);   /* 深色：只用底色調落影（不帶主色光暈） */
 } }
 :root[data-theme="dark"][data-ui="y2k"] {
   --y2k-fill: linear-gradient(135deg, color-mix(in srgb, var(--surface) 92%, #ffffff) 0%, var(--surface) 55%, color-mix(in srgb, var(--surface) 65%, var(--page)) 100%);   /* 深色：左上亮、右下暗，和左上斜射光一致 */
   --y2k-gloss: linear-gradient(180deg, rgb(255 255 255 / .09), rgb(255 255 255 / 0) 28%);
-  --y2k-rim: linear-gradient(180deg, color-mix(in srgb, var(--line-strong) 45%, #ffffff), var(--line-strong) 45%, var(--line));
+  --y2k-rim: linear-gradient(180deg, #d9dce0, #7d828a 45%, #3f434a);
   --y2k-btn: linear-gradient(180deg, color-mix(in srgb, var(--surface) 80%, #ffffff), var(--surface));
   --y2k-glow: 0 12px 30px -10px rgb(from var(--sh-dk) r g b / .85);   /* 深色：只用底色調落影（不帶主色光暈） */
 }
@@ -1687,8 +1687,10 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 
 /* Y2K 鉻金屬：元件也換成同材質（細鉻邊、內凹亮面）；彈出層霧面鉻；滑過按鈕亮面掃過一次 */
 :root[data-ui="y2k"] :where(.search, .dd-t, .tp-f, .dp-f, .ff-i) { background-image: linear-gradient(180deg, rgb(var(--sh-rgb-2, 110 130 165) / .1), rgb(var(--sh-rgb-2, 110 130 165) / 0) 45%); }
-:root[data-ui="y2k"] :where(.search, .dd-t, .tp-f, .dp-f, .ff-i):not(.focus):not(.open):not(:focus-within) { border-color: color-mix(in srgb, var(--line-strong) 70%, #ffffff); }
-:root[data-ui="y2k"] :is(.tab, .dtab):not(.on) b { background: var(--y2k-btn); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--line-strong) 70%, transparent), inset 0 1px 0 rgb(255 255 255 / .5); }
+:root[data-ui="y2k"] :where(.search, .dd-t, .tp-f, .dp-f, .ff-i):not(.focus):not(.open):not(:focus-within) { border-color: #c3c7cc; }   /* 輸入框：銀灰邊 */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] :where(.search, .dd-t, .tp-f, .dp-f, .ff-i):not(.focus):not(.open):not(:focus-within) { border-color: #5f6369; } }
+:root[data-theme="dark"][data-ui="y2k"] :where(.search, .dd-t, .tp-f, .dp-f, .ff-i):not(.focus):not(.open):not(:focus-within) { border-color: #5f6369; }
+:root[data-ui="y2k"] :is(.tab, .dtab):not(.on) b { background: var(--y2k-btn); box-shadow: inset 0 0 0 1px rgb(150 155 162 / .6), inset 0 1px 0 rgb(255 255 255 / .5); }
 :root[data-ui="y2k"] :is(.dd-m, .ms-p, .mn-p, .ip-p, .dp-p, .toast, .dl-d) { background: color-mix(in srgb, var(--surface) 70%, transparent); -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6); border-color: color-mix(in srgb, #ffffff 65%, var(--line)); box-shadow: inset 0 1px 0 rgb(255 255 255 / .55), var(--shadow-pop); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] :is(.dd-m, .ms-p, .mn-p, .ip-p, .dp-p, .toast, .dl-d) { border-color: rgb(255 255 255 / .14); box-shadow: inset 0 1px 0 rgb(255 255 255 / .08), var(--shadow-pop); } }
 :root[data-theme="dark"][data-ui="y2k"] :is(.dd-m, .ms-p, .mn-p, .ip-p, .dp-p, .toast, .dl-d) { border-color: rgb(255 255 255 / .14); box-shadow: inset 0 1px 0 rgb(255 255 255 / .08), var(--shadow-pop); }
@@ -1698,21 +1700,21 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="y2k"] {
   --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 42%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 95%, #000000) 50%, color-mix(in srgb, var(--primary) 82%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
   --y2k-ok-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--ok-b) 42%, #ffffff) 0%, color-mix(in srgb, var(--ok-b) 70%, #ffffff) 14%, var(--ok-b) 34%, color-mix(in srgb, var(--ok-b) 95%, #000000) 50%, color-mix(in srgb, var(--ok-b) 82%, #000000) 60%, color-mix(in srgb, var(--ok-b) 92%, #ffffff) 70%, color-mix(in srgb, var(--ok-b) 68%, #ffffff) 84%, color-mix(in srgb, var(--ok-b) 55%, #ffffff) 100%);
-  --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #ffffff 0%, #f1f4f8 30%, #dde3eb 56%, #9aa5b5 59.5%, #c6ced9 66%, #edf1f6 100%);
+  --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #ffffff 0%, #f3f4f6 30%, #e1e3e7 56%, #a3a7ad 59.5%, #cbced3 66%, #eff0f2 100%);   /* 中性銀（不帶藍） */
   --y2k-metal-rim: linear-gradient(180deg, color-mix(in srgb, var(--primary) 40%, #ffffff), var(--primary) 60%, color-mix(in srgb, var(--primary) 70%, #000000));
   --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .85), inset 0 -1px 0 rgb(0 0 0 / .08);
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] {
   --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 60%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 95%, #000000) 50%, color-mix(in srgb, var(--primary) 82%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
   --y2k-ok-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--ok-b) 60%, #ffffff) 0%, color-mix(in srgb, var(--ok-b) 70%, #ffffff) 14%, var(--ok-b) 34%, color-mix(in srgb, var(--ok-b) 95%, #000000) 50%, color-mix(in srgb, var(--ok-b) 82%, #000000) 60%, color-mix(in srgb, var(--ok-b) 92%, #ffffff) 70%, color-mix(in srgb, var(--ok-b) 68%, #ffffff) 84%, color-mix(in srgb, var(--ok-b) 55%, #ffffff) 100%);
-  --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #5a6577 0%, #3a4352 30%, #2b323d 56%, #0c1015 59.5%, #222934 66%, #3b4452 100%);
+  --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #63666b 0%, #424549 30%, #313337 56%, #0e0f11 59.5%, #26282b 66%, #43464a 100%);
   --y2k-metal-rim: linear-gradient(180deg, color-mix(in srgb, var(--primary) 40%, #ffffff), var(--primary) 60%, color-mix(in srgb, var(--primary) 70%, #000000));
   --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .28), inset 0 -1px 0 rgb(from var(--sh-dk) r g b / .3);
 } }
 :root[data-theme="dark"][data-ui="y2k"] {
   --y2k-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--primary) 60%, #ffffff) 0%, color-mix(in srgb, var(--primary) 70%, #ffffff) 14%, var(--primary) 34%, color-mix(in srgb, var(--primary) 95%, #000000) 50%, color-mix(in srgb, var(--primary) 82%, #000000) 60%, color-mix(in srgb, var(--primary) 92%, #ffffff) 70%, color-mix(in srgb, var(--primary) 68%, #ffffff) 84%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
   --y2k-ok-metal: linear-gradient(var(--y2k-dir, 180deg), color-mix(in srgb, var(--ok-b) 60%, #ffffff) 0%, color-mix(in srgb, var(--ok-b) 70%, #ffffff) 14%, var(--ok-b) 34%, color-mix(in srgb, var(--ok-b) 95%, #000000) 50%, color-mix(in srgb, var(--ok-b) 82%, #000000) 60%, color-mix(in srgb, var(--ok-b) 92%, #ffffff) 70%, color-mix(in srgb, var(--ok-b) 68%, #ffffff) 84%, color-mix(in srgb, var(--ok-b) 55%, #ffffff) 100%);
-  --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #5a6577 0%, #3a4352 30%, #2b323d 56%, #0c1015 59.5%, #222934 66%, #3b4452 100%);
+  --y2k-silver: linear-gradient(var(--y2k-dir, 180deg), #63666b 0%, #424549 30%, #313337 56%, #0e0f11 59.5%, #26282b 66%, #43464a 100%);
   --y2k-metal-rim: linear-gradient(180deg, color-mix(in srgb, var(--primary) 40%, #ffffff), var(--primary) 60%, color-mix(in srgb, var(--primary) 70%, #000000));
   --y2k-coat: inset 0 1px 0 rgb(255 255 255 / .28), inset 0 -1px 0 rgb(from var(--sh-dk) r g b / .3);
 }

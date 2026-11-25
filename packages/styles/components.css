@@ -367,7 +367,7 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentcolor; stroke-wid
 .fs p svg { width: 14px; height: 14px; stroke-width: 3; color: var(--ok-fg); display: none; }
 .fs small > .roll { display: grid; max-width: 100%; }
 .fs small > .roll > span { display: block; min-width: 0px; overflow: hidden; text-overflow: ellipsis; }
-.pie-m small.roll > span { display: block; max-width: 76px; overflow: hidden; text-overflow: ellipsis; }
+.pie-m small.roll > span { display: block; max-width: 80px; overflow: hidden; text-overflow: ellipsis; }
 .fs small { font-size: calc(12px * var(--fs-k) * var(--rk, 1)); line-height: calc(18px * var(--fs-k) * var(--rk, 1)); color: var(--weak); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .fs.done { background: var(--soft); color: var(--muted); }
 .fs.done p svg { display: block; }
@@ -494,11 +494,9 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentcolor; stroke-wid
 .pie { align-self: stretch; display: flex; align-items: center; gap: 20px; }
 .pie-c { position: relative; width: 124px; height: 124px; flex: 0 0 auto; }
 .pie-c svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
-.pie-c circle { fill: none; stroke-width: 16; transition: stroke-width calc(.5s * var(--dur)) var(--spring), opacity calc(.3s * var(--dur)); }
-.pie-c circle.trk { stroke: var(--soft); }
-.pie-c circle.on { stroke-width: 22; }
-.pie.focus circle.sg:not(.on) { opacity: 0.35; }
-.pie-m { position: absolute; inset: 0px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.pie-c .sg { transition: opacity calc(.3s * var(--dur)); }
+.pie.focus .sg:not(.on) { opacity: 0.35; }
+.pie-m { position: absolute; inset: 0px; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 .pie-m b { font-size: calc(22px * var(--fs-k) * var(--rk, 1)); line-height: calc(28px * var(--fs-k) * var(--rk, 1)); font-weight: 600; }
 .pie-m small { max-width: 76px; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); line-height: calc(15px * var(--fs-k) * var(--rk, 1)); color: var(--weak); hyphens: auto; overflow-wrap: break-word; }
 .pie-l { flex: 1 1 0%; min-width: 0px; display: flex; flex-direction: column; gap: 2px; }
@@ -898,6 +896,17 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentcolor; stroke-wid
 @keyframes sh-ok { 
   0% { scale: 0.4; opacity: 0; }
 }
+.lang-w { position: relative; display: flex; flex: 0 0 auto; }
+.lang-m { position: absolute; z-index: 40; top: calc(100% + 6px); left: 0px; min-width: 148px; padding: 4px; display: flex; flex-direction: column; gap: 1px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-pop); transform-origin: left top; animation: langIn calc(320ms * var(--dur)) var(--spring-soft); }
+.lang-m[hidden] { display: none; }
+@keyframes langIn { 
+  0% { opacity: 0; transform: translateY(-4px) scale(0.96); }
+}
+.lang-m button { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 32px; padding: 0px 10px; border: 0px; border-radius: max(2px, calc(var(--r-lg) - 5px)); background: none; color: var(--ink); font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; font-language-override: inherit; font-size: 13px; text-align: left; white-space: nowrap; cursor: pointer; transition: background calc(.15s * var(--dur)); }
+.lang-m button:hover,
+.lang-m button:focus-visible { background: var(--hover); outline: none; }
+.lang-m button[aria-selected="true"] { color: var(--selected-fg); font-weight: 600; }
+.lang-m button[aria-selected="true"]::after { content: ""; width: 9px; height: 5px; margin: -3px 2px 0px 0px; border-top-color: ; border-top-style: ; border-right-color: ; border-right-style: ; border-bottom-color: ; border-bottom-style: ; border-left-color: ; border-left-style: ; border-image-source: ; border-image-slice: ; border-image-width: ; border-image-outset: ; border-image-repeat: ; border-width: 0px 0px 2px 2px; rotate: -45deg; }
 @keyframes czIn { 
   0% { opacity: 0; transform: translateY(6px) scale(0.96); }
 }

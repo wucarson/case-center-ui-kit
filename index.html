@@ -517,16 +517,14 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .pie-r b { font-weight: 600; font-variant-numeric: tabular-nums; }
 .pie-r em { font-style: normal; color: var(--weak); font-size: calc(12px * var(--fs-k) * var(--rk, 1)); width: 36px; text-align: right; font-variant-numeric: tabular-nums; }
 .pie-r.on { background: var(--soft); }
-/* 手機：上下排——圓環在上（148px，中央說明字、百分比都保留），圖例兩欄兩列在下；卡片在手機上佔兩列高（.ph2） */
+/* 手機：上下排——圓環在上（148px，中央說明字、百分比都保留），圖例一項一列在下；卡片在手機上佔兩列高（.ph2） */
 @media (max-width: 540px) {
   .cell.ph2 { grid-row: span 2; }
   .pie { flex-direction: column; align-items: stretch; gap: 14px; }
   .pie-c { align-self: center; width: 148px; height: 148px; } :is(.pie-m small, .pie-m small.roll > span) { max-width: 100px; }
-  .pie-l { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 8px; }
-  .pie-r { gap: 6px; padding: 0 6px; }
-  .pie-r em { width: auto; }
+  .pie-l { gap: 2px; }   /* 一項一列：名稱有整列寬度，不會被擠掉 */
+  .pie-r { padding: 0 8px; }
 }
-@media (max-width: 360px) { .pie-r em { display: none; } }   /* 小手機：兩欄放不下百分比，收掉（數字仍在） */
 
 /* 折線圖 */
 .lc { flex: 1; min-height: 0; position: relative; }

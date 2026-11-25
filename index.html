@@ -846,6 +846,23 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .dt-back:active, .dt-share:active { transform: scale(.96); }
 .dt-share { margin-left: auto; height: 32px; padding: 0 12px 0 10px; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--tile); box-shadow: var(--raise); color: var(--ink); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; transition: transform calc(.2s * var(--dur)) var(--spring), color calc(.2s * var(--dur)), border-color calc(.2s * var(--dur)), background calc(.2s * var(--dur)); }
 .dt-share svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.dt-nav .dt-ai { margin-left: 0; }
+/* 也稱為：搜尋關鍵字當別名標籤，點了用那個詞打開搜尋 */
+.dt-aka { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.dt-aka > b { margin-right: 2px; font-size: 12px; font-weight: 600; color: var(--weak); }
+.dt-aka button { height: 26px; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--tile); color: var(--muted); font-size: 12.5px; cursor: pointer; transition: border-color calc(.2s * var(--dur)), color calc(.2s * var(--dur)); }
+.dt-aka button:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); color: var(--ink); }
+.dt-aka button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+/* 相關元件：同類或「禁止使用」裡建議改用的元件 */
+.dt-rel h3 { margin: 0 0 10px; font-size: 13px; line-height: 20px; font-weight: 600; color: var(--label); }
+.dt-rel-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.dt-rel-g button { min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--tile); box-shadow: var(--raise); text-align: left; cursor: pointer; transition: border-color calc(.2s * var(--dur)), transform calc(.2s * var(--dur)) var(--spring); }
+.dt-rel-g button:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
+.dt-rel-g button:active { transform: scale(.98); }
+.dt-rel-g button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.dt-rel-g b { font-size: 14px; font-weight: 600; color: var(--ink); }
+.dt-rel-g em { font-style: normal; font-size: 12px; color: var(--weak); }
+.dt-rel-g span { font-size: 13px; line-height: 20px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .dt-share.done { color: var(--ok-fg); border-color: color-mix(in srgb, var(--ok-fg) 40%, transparent); background: var(--ok-bg); }
 .dt-back svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .cdp button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
@@ -6189,8 +6206,8 @@ ${body}
 `;
     }
     // 每個元件：說明、用法、狀態、無障礙、HTML 結構（目前畫面上的實際結構）、規格頁籤的變體程式碼
-    function aiComponents() {
-      const cellsNow = $$('#wall > .cell');
+    function aiComponents(only) {
+      const cellsNow = only ? [document.getElementById(only)].filter(Boolean) : $$('#wall > .cell');
       const parts = cellsNow.filter((c) => DOC[c.id]).map((c) => {
         const d = DOC[c.id], clone = c.cloneNode(true);
         clone.querySelectorAll('header, .cell-doc').forEach((x) => x.remove());
@@ -6215,6 +6232,7 @@ ${html}
 \`\`\`
 ${code ? `\n### 變體（Angular 寫法，換成 React／Vue 時保留同樣的 class 與 aria）\n\`\`\`html\n${code}\n\`\`\`\n` : ''}${api ? `\n### 參數\n| 參數 | 型別 | 預設 | 說明 |\n|---|---|---|---|\n${api}\n` : ''}`;
       });
+      if (only) return parts[0] || '';
       return `# 元件規格
 
 ${stamp()}
@@ -7554,6 +7572,46 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
     }
     const ICON_LINK = '<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>';
     // 複製這一頁的網址（含 #元件）；剪貼簿被擋時退回選取文字的舊做法
+    const ICON_AI = '<svg viewBox="0 0 24 24"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>';
+    // 也稱為：搜尋關鍵字（DOC.k）去掉和名稱、程式名稱重複的
+    const akaHtml = (id, d) => {
+      const skip = new Set([TITLE[id], SLUG[id]].map((x) => String(x).toLowerCase()));
+      const words = [...new Set(String(d.k || '').split(/\s+/).filter(Boolean))].filter((w) => !skip.has(w.toLowerCase()));
+      return words.length ? `<div class="dt-aka" aria-label="也稱為"><b>也稱為</b>${words.map((w) => `<button type="button" data-aka="${esc(w)}">${esc(w)}</button>`).join('')}</div>` : '';
+    };
+    // 相關元件：「禁止使用」「使用時機」裡提到的元件優先，其餘補同類（照展示牆順序、離這個最近的），最多 4 個
+    const relOf = (id) => {
+      const d = DOC[id], txt = [...(d.x || []), ...(d.u || [])].join(' '), out = [];
+      const add = (k) => { if (k !== id && DOC[k] && !out.includes(k) && out.length < 4) out.push(k); };
+      Object.keys(DOC).filter((k) => TITLE[k] && txt.includes(TITLE[k])).forEach(add);
+      const same = (CAT[catOf(id)] || []).filter((k) => k !== id), at = (CAT[catOf(id)] || []).indexOf(id);
+      same.sort((a, b) => Math.abs(CAT[catOf(id)].indexOf(a) - at) - Math.abs(CAT[catOf(id)].indexOf(b) - at)).forEach(add);
+      return out;
+    };
+    const relHtml = (id) => { const r = relOf(id); return r.length ? `<section class="dt-rel" aria-label="相關元件"><h3>相關元件</h3><div class="dt-rel-g">${r.map((k) => `<button type="button" data-go="${k}"><b>${esc(TITLE[k])}</b><em>${esc(SLUG[k])}</em><span>${esc(DOC[k].d)}</span></button>`).join('')}</div></section>` : ''; };
+    // 複製給 AI：這個元件的規格（說明、使用時機、不要用、狀態、無障礙、HTML 結構、變體、參數）＋實作指令，一次貼給 AI
+    const aiCopyText = (id) => `# 實作元件：${TITLE[id]}（${SLUG[id]}）
+
+請用專案現有的框架（React／Vue／Angular）實作下面這個元件：
+1. 外觀照元件展示牆：引入 components.css，輸出的 HTML 結構、class 名稱和下方「HTML 結構」相同，不另外寫樣式。
+2. 狀態用 class 切換（選中 .on、展開 .open、停用 .dis、錯誤 .bad）；滑過、聚焦用 :hover、:focus-visible。
+3. 鍵盤操作、role、aria-* 照「無障礙」欄位；文字與數字是示意資料，改成 props 或插槽。
+4. 有「參數」表就照表定義 props；沒有就照「使用時機」設計最少的 props。
+
+展示牆：${location.href.split('#')[0]}#${SLUG[id]}
+
+${aiComponents(id)}`;
+    async function copyAiText(text) {
+      try { await navigator.clipboard.writeText(text); return true; } catch (e) {
+        const t = document.createElement('textarea'); t.value = text; t.style.cssText = 'position:fixed;opacity:0'; document.body.append(t); t.select();
+        let ok = false; try { ok = document.execCommand('copy'); } catch (e2) {} t.remove(); return ok;
+      }
+    }
+    async function copyAi(btn) {
+      const ok = await copyAiText(aiCopyText(dtId));
+      btn.classList.toggle('done', ok); btn.innerHTML = (ok ? ICON_YES : ICON_AI) + `<span>${ok ? '已複製，貼給 AI' : '無法複製'}</span>`;
+      clearTimeout(btn._t); btn._t = setTimeout(() => { if (!btn.isConnected) return; btn.classList.remove('done'); btn.innerHTML = ICON_AI + '<span>複製給 AI</span>'; }, 2200);
+    }
     async function copyLink(btn) {
       const url = location.href;
       let ok = false;
@@ -7646,11 +7704,11 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
       const ids = seq(), i = ids.indexOf(id), prev = i > 0 ? ids[i - 1] : null, next = i >= 0 && i < ids.length - 1 ? ids[i + 1] : null;
       dt.innerHTML = `
         <div class="dt-hero">
-        <nav class="dt-nav" aria-label="位置"><button class="dt-back" type="button"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>元件展示牆</button><i>/</i><span>${esc(cat)}</span><button class="dt-share" type="button" aria-live="polite">${ICON_LINK}<span>複製連結</span></button></nav>
+        <nav class="dt-nav" aria-label="位置"><button class="dt-back" type="button"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>元件展示牆</button><i>/</i><span>${esc(cat)}</span><button class="dt-share" type="button" aria-live="polite">${ICON_LINK}<span>複製連結</span></button><button class="dt-share dt-ai" type="button" aria-live="polite" title="複製這個元件的規格與實作指令，貼給 Claude Code、Cursor 等 AI">${ICON_AI}<span>複製給 AI</span></button></nav>
         <header class="dt-hd">
           <div class="dt-tags"><span class="${d.s === '提案' ? 'prop' : 'ok'}">${esc(d.s)}</span><span>${esc(cat)}</span></div>
           <h2 id="dt-title" tabindex="-1">${esc(TITLE[id])}</h2>
-          <p class="dt-def">${esc(d.d)}</p>
+          <p class="dt-def">${esc(d.d)}</p>${akaHtml(id, d)}
           <div class="doc-code">${d.r.split('・').map((x) => `<code>${esc(x)}</code>`).join('')}</div>
         </header>
         <section class="dt-stage" aria-label="互動示範"><div class="dt-bar"><div class="dt-dev" role="group" aria-label="預覽尺寸">${DEVS.map(([w, n, ic]) => `<button type="button" data-dev="${w}" aria-pressed="false" aria-label="${n}" title="${n}">${ic}</button>`).join('')}</div><span class="dt-dev-w" aria-live="polite"></span><span class="sp"></span>${STATIC.has(id) ? '' : '<div class="dt-play"><button type="button" class="dt-pp"></button></div>'}<a class="dt-open" href="${pvUrl(id)}" target="_blank" rel="noopener" aria-label="在新分頁開啟預覽" title="在新分頁開啟"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v4.5A1.5 1.5 0 0 1 16.5 20h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/></svg></a></div><div class="dt-grip" role="separator" aria-orientation="vertical" aria-label="預覽寬度（拖曳或用左右鍵調整，雙擊回到全寬）" tabindex="0"><i></i></div></section>
@@ -7658,6 +7716,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
         ${SPEC[id] ? `<div class="tabs dt-tabs" role="tablist" aria-label="內容"><i></i><button class="tab" type="button" role="tab" id="dt-tab-basic" aria-controls="dt-pn-basic" data-tab="basic">指南</button><button class="tab" type="button" role="tab" id="dt-tab-variants" aria-controls="dt-pn-variants" data-tab="variants">規格</button></div>` : ''}
         <div class="dt-panel" data-panel="basic" id="dt-pn-basic" role="tabpanel" aria-labelledby="dt-tab-basic">${basicHtml(id, d)}</div>
         ${SPEC[id] ? `<div class="dt-panel" data-panel="variants" id="dt-pn-variants" role="tabpanel" aria-labelledby="dt-tab-variants" hidden>${specHtml(id)}</div>` : ''}
+        ${relHtml(id)}
         <nav class="dt-pn" aria-label="其他元件">
           <button class="pv" type="button"${prev ? ` data-go="${prev}" aria-label="上一個：${esc(TITLE[prev])}"` : ' hidden'}><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><b>${prev ? esc(TITLE[prev]) : ''}</b></button>
           <button class="nx" type="button"${next ? ` data-go="${next}" aria-label="下一個：${esc(TITLE[next])}"` : ' hidden'}><b>${next ? esc(TITLE[next]) : ''}</b><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
@@ -7725,6 +7784,8 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
     }
     dt.addEventListener('click', (e) => {
       if (e.target.closest('.dt-back')) return goWall();
+      const ai = e.target.closest('.dt-ai'); if (ai) return copyAi(ai);
+      const ak = e.target.closest('[data-aka]'); if (ak) { openCk(); ckQ.value = ak.dataset.aka; ckQ.dispatchEvent(new Event('input')); return; }
       const sh = e.target.closest('.dt-share'); if (sh) return copyLink(sh);
       const cp = e.target.closest('.sp-copy'); if (cp) return copyCode(cp);
       const md = e.target.closest('.sp-seg [data-mode]'); if (md) return setSpMode(md.dataset.mode);

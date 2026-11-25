@@ -505,6 +505,9 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .pie-c svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
 .pie-c circle { fill: none; stroke-width: 16; transition: stroke-width calc(.5s * var(--dur)) var(--spring), opacity calc(.3s * var(--dur)); }
 .pie-c circle.trk { stroke: var(--soft); }
+/* 滑過圓圈：整個圓環外側出現主色淡外環（和輸入框 focus 同語彙）；位置留給扇區加粗後的外緣再隔 3px */
+.pie-c::after { content: ""; position: absolute; inset: -1.6%; border-radius: 50%; box-shadow: 0 0 0 3px var(--focus); opacity: 0; pointer-events: none; transition: opacity calc(.3s * var(--dur)); }
+.cell.held.live .pie-c:hover::after { opacity: 1; }
 .pie-c circle.on { stroke-width: 22; }
 .pie.focus circle.sg:not(.on) { opacity: .35; }
 .pie-m { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }

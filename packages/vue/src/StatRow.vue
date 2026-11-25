@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { statClass, statsStyle, type StatItem } from '@case-center/core/metrics';
+import { statClass, statsStyle, type StatItem } from '@wucarson/facet-core/metrics';
 import MetricNum from './MetricNum.vue';
 import type { StyleProp } from './util';
 

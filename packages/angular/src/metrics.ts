@@ -1,11 +1,11 @@
 import { Component, Directive, ElementRef, computed, effect, inject, input, model, untracked } from '@angular/core';
-import { focusNth } from '@case-center/core/choice';
-import { chipExit, chipFocusAfter, chipRemoveLabel, chipsLabel, withoutAt } from '@case-center/core/chips';
-import { isActivateKey } from '@case-center/core/dom';
+import { focusNth } from '@wucarson/facet-core/choice';
+import { chipExit, chipFocusAfter, chipRemoveLabel, chipsLabel, withoutAt } from '@wucarson/facet-core/chips';
+import { isActivateKey } from '@wucarson/facet-core/dom';
 import {
   countUp, legendDotStyle, segmentBarLabel, segmentStyle, segmentTotal, statClass, statsStyle, type BarSegment, type StatItem,
-} from '@case-center/core/metrics';
-import { fileTone, uploadBarLabel, uploadClass, uploadText, uploadWidth, type UploadStatus } from '@case-center/core/upload';
+} from '@wucarson/facet-core/metrics';
+import { fileTone, uploadBarLabel, uploadClass, uploadText, uploadWidth, type UploadStatus } from '@wucarson/facet-core/upload';
 import { SvgPath } from './icon';
 
 export type { BarSegment, StatItem, UploadStatus };

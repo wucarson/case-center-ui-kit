@@ -1,6 +1,6 @@
 import { useEffect, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
-import { TOASTER_STYLE, TOAST_ICON, dismiss, getToasts, isToastActionKey, subscribeToasts, toast, toastClass, type ToastData } from '@case-center/core/toast';
+import { TOASTER_STYLE, TOAST_ICON, dismiss, getToasts, isToastActionKey, subscribeToasts, toast, toastClass, type ToastData } from '@wucarson/facet-core/toast';
 import { Icon } from './Icon';
 
 export { toast, dismiss, type ToastData };

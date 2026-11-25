@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { onOutsidePointer } from '@case-center/core/dom';
-import { POPOVER_DELAY, PopoverControl, placePopoverArrow, popoverButtonLabel, popoverId, popoverKey } from '@case-center/core/overlay';
+import { onOutsidePointer } from '@wucarson/facet-core/dom';
+import { POPOVER_DELAY, PopoverControl, placePopoverArrow, popoverButtonLabel, popoverId, popoverKey } from '@wucarson/facet-core/overlay';
 import { Icon } from './Icon';
 import { cx, styleOf, useFocusVisible } from './util';
 

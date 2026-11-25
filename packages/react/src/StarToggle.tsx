@@ -1,6 +1,6 @@
 import { useRef, type CSSProperties, type KeyboardEvent } from 'react';
-import { STAR_PATH, isStarToggleKey, starClass } from '@case-center/core/choice';
-import { burst } from '@case-center/core/burst';
+import { STAR_PATH, isStarToggleKey, starClass } from '@wucarson/facet-core/choice';
+import { burst } from '@wucarson/facet-core/burst';
 import { cx, styleOf } from './util';
 
 export interface StarToggleProps {

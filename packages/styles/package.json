@@ -1,12 +1,28 @@
 {
-  "name": "@case-center/styles",
+  "name": "@wucarson/facet-styles",
   "version": "0.1.0",
   "description": "元件樣式（components.css，含預設 token），三個框架共用",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wucarson/case-center-ui-kit.git",
+    "directory": "packages/styles"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "style": "components.css",
-  "sideEffects": ["*.css"],
-  "files": ["components.css"],
+  "sideEffects": [
+    "*.css"
+  ],
+  "files": [
+    "components.css"
+  ],
   "exports": {
-    ".": { "style": "./components.css", "default": "./components.css" },
+    ".": {
+      "style": "./components.css",
+      "default": "./components.css"
+    },
     "./components.css": "./components.css"
   }
 }

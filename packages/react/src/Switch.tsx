@@ -1,5 +1,5 @@
 import type { CSSProperties, KeyboardEvent } from 'react';
-import { isSwitchToggleKey, switchNext, switchRootAttrs, switchRootClass, switchTrackClass, type SwitchState } from '@case-center/core/switch';
+import { isSwitchToggleKey, switchNext, switchRootAttrs, switchRootClass, switchTrackClass, type SwitchState } from '@wucarson/facet-core/switch';
 import { cx, styleOf, useFocusVisible } from './util';
 
 export interface SwitchProps {

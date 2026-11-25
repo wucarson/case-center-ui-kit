@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IconName } from '@case-center/core/icons';
+import type { IconName } from '@wucarson/facet-core/icons';
 import Icon from './Icon.vue';
 import type { StyleProp } from './util';
 

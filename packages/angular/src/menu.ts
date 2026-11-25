@@ -1,9 +1,9 @@
 import { Component, ElementRef, computed, effect, inject, input, model, output, signal, viewChild } from '@angular/core';
-import { onOutsidePointer } from '@case-center/core/dom';
+import { onOutsidePointer } from '@wucarson/facet-core/dom';
 import {
   MENU_FLOAT_STYLE, focusFirstMenuItem, focusMenuItem, isMenuItemOff, menuItemClass, menuKey, menuSelect, menuTriggerClass,
   type MenuItem,
-} from '@case-center/core/menu';
+} from '@wucarson/facet-core/menu';
 import { Icon } from './icon';
 
 export type { MenuItem };

@@ -1,9 +1,9 @@
 import { createRoot } from 'react-dom/client';
 import type { ComponentType } from 'react';
 import { CASES, type Case } from '../../shared/cases';
-import '@case-center/styles/components.css';
+import '@wucarson/facet-styles/components.css';
 import '../../shared/case.css';
-import { AvatarGroup, Button, Callout, Checkbox, CheckboxList, Combo, ConfirmDialog, DatePicker, DetailTabs, EmptyState, FormField, InfoPopover, Menu, MenuPanel, MultiSelect, Pagination, PeriodPicker, RadioGroup, Segmented, Sidebar, Skeleton, StarToggle, StatusBadge, Stepper, Switch, Tabs, TextField, TimePicker, Timeline, Toast, DragSort, FilterChips, HoldConfirm, SegmentedBar, StatRow, TagSearch, Upload, DataTable, DueCell, SortTh } from '@case-center/react';
+import { AvatarGroup, Button, Callout, Checkbox, CheckboxList, Combo, ConfirmDialog, DatePicker, DetailTabs, EmptyState, FormField, InfoPopover, Menu, MenuPanel, MultiSelect, Pagination, PeriodPicker, RadioGroup, Segmented, Sidebar, Skeleton, StarToggle, StatusBadge, Stepper, Switch, Tabs, TextField, TimePicker, Timeline, Toast, DragSort, FilterChips, HoldConfirm, SegmentedBar, StatRow, TagSearch, Upload, DataTable, DueCell, SortTh } from '@wucarson/facet-react';
 import { styleOf } from './style';
 
 /** 展示頁：把 shared/cases.ts 的每個案例用元件畫出來，給 tools/compare.mjs 截圖比對 */

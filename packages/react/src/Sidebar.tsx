@@ -1,9 +1,9 @@
 import { Fragment, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
-import { isActivateKey } from '@case-center/core/dom';
+import { isActivateKey } from '@wucarson/facet-core/dom';
 import {
   SIDEBAR_CHEVRON, placeSidebarIndicator, sidebarBrandLabel, sidebarClass, sidebarGroupToggleClass, sidebarHasActive, sidebarInitialOpen,
   sidebarItemClass, sidebarSubClass, sidebarTipTop, toggleAt, type SidebarGroup, type SidebarItem,
-} from '@case-center/core/sidebar';
+} from '@wucarson/facet-core/sidebar';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
 

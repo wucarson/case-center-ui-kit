@@ -1,5 +1,5 @@
 import type { CSSProperties, KeyboardEvent } from 'react';
-import { TIME_COLS, pad2, parseTime, timeKey, timeStep, type TimePart } from '@case-center/core/time';
+import { TIME_COLS, pad2, parseTime, timeKey, timeStep, type TimePart } from '@wucarson/facet-core/time';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
 

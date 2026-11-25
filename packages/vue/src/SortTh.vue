@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { isSortKey, thLabel, type ThState } from '@case-center/core/table';
+import { isSortKey, thLabel, type ThState } from '@wucarson/facet-core/table';
 
 /** 排序表頭：顯示升冪／降冪箭頭；表格裡是 columnheader，可聚焦，點擊或 Enter／Space 觸發 sort。 */
 const props = defineProps<{ label: string; state: ThState }>();

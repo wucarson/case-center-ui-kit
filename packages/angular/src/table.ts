@@ -2,7 +2,7 @@ import { Component, ElementRef, Injector, afterNextRender, computed, inject, inp
 import {
   dueTag, dueText, flipRows, isSortKey, measureRows, nextSort, rowClass, sortRows, tagClass, thLabel, thState, todayIso,
   type TableColumn, type TableSort, type ThState,
-} from '@case-center/core/table';
+} from '@wucarson/facet-core/table';
 
 export type { TableColumn, TableSort, ThState };
 export type TableRow = Record<string, string | number | boolean | undefined> & { key?: string; closed?: boolean };

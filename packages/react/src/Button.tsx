@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
-import type { IconName } from '@case-center/core/icons';
+import type { IconName } from '@wucarson/facet-core/icons';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
 

@@ -6158,7 +6158,7 @@ const { colors, setPreference } = useTheme();
 
     /* ---- AI／框架元件規格包：元件樣式（從畫面直接抽出、變數已解析）＋每個元件的結構與規格 ---- */
     // 頁面外框（展示牆自己的版面、面板、彈窗、詳細頁）不算元件，排除
-    const AI_EXCL = /^(\.cell\b|\.shell|\.top\b|\.top-a|\.ttl|\.wf\b|\.wall|\.cz|\.ck-|\.cmdk|\.sh\b|\.sh-|\.sp\b|\.sp-|\.dt-|\.doc|\.api|\.a11y|body|html|h1|\.ctl|\.body\b|\.sub\b|#|\*|\.ping|\.held|\.live|\.norise|\.ready|\.curtain|\.dd-k|\.ash-cv|\.silk|\.vt-|\.wand|\.lumos|\.nox|\.slash|\.shades|\.bh-|\.tile|::view-transition)/;   // 後段：展示牆頁面特效（絲綢背景、魔杖／墨鏡／斬擊轉場），不是元件
+    const AI_EXCL = /^(\.cell\b|\.shell|\.top\b|\.top-a|\.ttl|\.wf\b|\.wall|\.cz|\.ck-|\.cmdk|\.sh\b|\.sh-|\.sp\b|\.sp-|\.dt-|\.doc|\.api|\.a11y|body|html|h1|\.ctl|\.body\b|\.sub\b|#|\*|\.ping|\.held|\.live|\.norise|\.ready|\.curtain|\.dd-k|\.ash-cv|\.silk|\.vt-|\.wand|\.lumos|\.nox|\.slash|\.shades|\.bh-|\.tile|\.lang-|::view-transition)/;   // 後段：展示牆頁面特效（絲綢背景、魔杖／墨鏡／斬擊轉場），不是元件
     const DARK_PRE = [':root[data-theme="dark"] ', ":root[data-theme='dark'] ", ':root:not([data-theme="light"]) '];
     function aiKeep(sel) {
       // 只切最外層的逗號：:is(a, b) 裡的逗號不能切，否則括號不成對、整段樣式失效
@@ -6190,7 +6190,7 @@ const { colors, setPreference } = useTheme();
           }
         }
         else if (r instanceof CSSMediaRule) { const inner = aiRules(r.cssRules, ind + '  '); if (inner.length) out.push(`${ind}@media ${r.conditionText} {\n${inner.join('\n')}\n${ind}}`); }
-        else if (r instanceof CSSKeyframesRule) { if (!/^(sh-rf|wand|slash|silk)/.test(r.name)) out.push(ind + r.cssText); }   // 頁面特效的動畫不匯出
+        else if (r instanceof CSSKeyframesRule) { if (!/^(sh-rf|wand|slash|silk|langIn)/.test(r.name)) out.push(ind + r.cssText); }   // 頁面特效的動畫不匯出
       }
       return out;
     }

@@ -1,5 +1,5 @@
 import { Component, computed, effect, input, output, signal } from '@angular/core';
-import { HOLD_MS, HoldControl, holdClass, holdFill, holdHint, holdText, isHoldKey, type HoldPhase } from '@case-center/core/hold';
+import { HOLD_MS, HoldControl, holdClass, holdFill, holdHint, holdText, isHoldKey, type HoldPhase } from '@wucarson/facet-core/hold';
 import { Icon } from './icon';
 
 let seq = 0;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, useSlots } from 'vue';
-import type { IconName } from '@case-center/core/icons';
+import type { IconName } from '@wucarson/facet-core/icons';
 import Icon from './Icon.vue';
 import { cx, type StyleProp } from './util';
 

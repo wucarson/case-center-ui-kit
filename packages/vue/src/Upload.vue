@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { fileTone, uploadBarLabel, uploadClass, uploadText, uploadWidth, type UploadStatus } from '@case-center/core/upload';
+import { fileTone, uploadBarLabel, uploadClass, uploadText, uploadWidth, type UploadStatus } from '@wucarson/facet-core/upload';
 import type { StyleProp } from './util';
 
 /** 檔案上傳：一個附件的進度、完成或失敗；圖示顏色依檔案類型。規則在 core/upload.ts。 */

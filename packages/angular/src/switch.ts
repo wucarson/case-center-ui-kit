@@ -1,6 +1,6 @@
 import { Component, ElementRef, computed, inject, input, model, signal } from '@angular/core';
-import { isFocusVisible } from '@case-center/core/dom';
-import { isSwitchToggleKey, switchNext, switchRootAttrs, switchRootClass, switchTrackClass, type SwitchState } from '@case-center/core/switch';
+import { isFocusVisible } from '@wucarson/facet-core/dom';
+import { isSwitchToggleKey, switchNext, switchRootAttrs, switchRootClass, switchTrackClass, type SwitchState } from '@wucarson/facet-core/switch';
 
 /**
  * 開關：立即生效，不用再按儲存。Space／Enter 切換。

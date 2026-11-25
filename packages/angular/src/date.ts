@@ -2,10 +2,10 @@ import { Component, ElementRef, afterRenderEffect, computed, effect, inject, inp
 import {
   MONTH_NEXT, MONTH_PREV, canPickDay, dateFieldLabel, dateGridKey, dayClass, isDateOpenKey, monthTitle, periodIndex, periodKey, periodText,
   placeDaySel, placePeriodPill, shiftView, viewOf, type MonthView,
-} from '@case-center/core/date';
-import { focusNth } from '@case-center/core/choice';
-import { cx, onOutsidePointer } from '@case-center/core/dom';
-import { PERIODS, PRESETS, WEEK, fmtDay, fromISO, monthCells, todayISO, type PeriodKey } from '@case-center/core/dates';
+} from '@wucarson/facet-core/date';
+import { focusNth } from '@wucarson/facet-core/choice';
+import { cx, onOutsidePointer } from '@wucarson/facet-core/dom';
+import { PERIODS, PRESETS, WEEK, fmtDay, fromISO, monthCells, todayISO, type PeriodKey } from '@wucarson/facet-core/dates';
 import { Icon, SvgPath } from './icon';
 
 /**

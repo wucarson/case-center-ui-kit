@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { focusNth } from '@case-center/core/choice';
-import { tabClass, tabsKey } from '@case-center/core/tabs';
+import { focusNth } from '@wucarson/facet-core/choice';
+import { tabClass, tabsKey } from '@wucarson/facet-core/tabs';
 import type { StyleProp } from './util';
 
 /** 頁籤：同一頁內切換平行內容，可帶數量。左右鍵切換、Home／End 跳頭尾。v-model:value（選中的 key）。規則在 core/tabs.ts。 */

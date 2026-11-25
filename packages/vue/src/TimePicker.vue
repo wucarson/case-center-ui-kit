@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { TIME_COLS, pad2, parseTime, timeKey, timeStep, type TimePart } from '@case-center/core/time';
+import { TIME_COLS, pad2, parseTime, timeKey, timeStep, type TimePart } from '@wucarson/facet-core/time';
 import Icon from './Icon.vue';
 import type { StyleProp } from './util';
 

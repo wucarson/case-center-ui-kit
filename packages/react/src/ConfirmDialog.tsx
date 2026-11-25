@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type CSSProperties, type FocusEvent, type KeyboardEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { isActivateKey } from '@case-center/core/dom';
+import { isActivateKey } from '@wucarson/facet-core/dom';
 import {
   DIALOG_OVERLAY_STYLE, dialogCancelClass, dialogClass, dialogFocusKey, dialogKey, dialogOkClass, dialogTitleId, focusDialogButton,
   type DialogButton, type DialogFocus,
-} from '@case-center/core/overlay';
+} from '@wucarson/facet-core/overlay';
 
 export interface ConfirmDialogProps {
   open: boolean;

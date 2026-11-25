@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
-import { MONTH_NEXT, MONTH_PREV, canPickDay, dateFieldLabel, dateGridKey, dayClass, isDateOpenKey, monthTitle, placeDaySel, shiftView, viewOf } from '@case-center/core/date';
-import { onOutsidePointer } from '@case-center/core/dom';
-import { PRESETS, WEEK, fmtDay, fromISO, monthCells, todayISO } from '@case-center/core/dates';
+import { MONTH_NEXT, MONTH_PREV, canPickDay, dateFieldLabel, dateGridKey, dayClass, isDateOpenKey, monthTitle, placeDaySel, shiftView, viewOf } from '@wucarson/facet-core/date';
+import { onOutsidePointer } from '@wucarson/facet-core/dom';
+import { PRESETS, WEEK, fmtDay, fromISO, monthCells, todayISO } from '@wucarson/facet-core/dates';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
 

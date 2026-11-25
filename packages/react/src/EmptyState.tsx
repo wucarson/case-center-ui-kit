@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import type { IconName } from '@case-center/core/icons';
+import type { IconName } from '@wucarson/facet-core/icons';
 import { Button } from './Button';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';

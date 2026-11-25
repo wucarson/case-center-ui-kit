@@ -13,7 +13,7 @@
       "dom"
     ],
     "paths": {
-      "@case-center/angular": [
+      "@wucarson/facet-angular": [
         "../../packages/angular/dist"
       ]
     }

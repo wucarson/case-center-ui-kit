@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { checkboxAttrs, checkboxClass, checkboxNext, isCheckboxToggleKey } from '@case-center/core/choice';
-import { ICONS } from '@case-center/core/icons';
+import { checkboxAttrs, checkboxClass, checkboxNext, isCheckboxToggleKey } from '@wucarson/facet-core/choice';
+import { ICONS } from '@wucarson/facet-core/icons';
 import { useFocusVisible, type StyleProp } from './util';
 
 /** 核取方塊：要按儲存才生效的多選。Space 切換。v-model:checked。規則在 core/choice.ts。 */

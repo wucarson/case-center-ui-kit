@@ -1,7 +1,16 @@
 {
-  "name": "@case-center/angular",
+  "name": "@wucarson/facet-angular",
   "version": "0.1.0",
   "description": "案管中心元件（Angular，standalone 元件）",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wucarson/case-center-ui-kit.git",
+    "directory": "packages/angular"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "sideEffects": false,
   "scripts": {
     "build": "ng-packagr -p ng-package.json -c tsconfig.lib.json"
@@ -10,10 +19,10 @@
     "@angular/common": "^22.0.0",
     "@angular/core": "^22.0.0",
     "@angular/platform-browser": "^22.0.0",
-    "@case-center/styles": "0.1.0"
+    "@wucarson/facet-styles": "0.1.0"
   },
   "dependencies": {
-    "@case-center/core": "0.1.0",
+    "@wucarson/facet-core": "0.1.0",
     "tslib": "^2.3.0"
   },
   "devDependencies": {

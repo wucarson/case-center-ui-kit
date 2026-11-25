@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { STAR_PATH, isStarToggleKey, starClass } from '@case-center/core/choice';
-import { burst } from '@case-center/core/burst';
+import { STAR_PATH, isStarToggleKey, starClass } from '@wucarson/facet-core/choice';
+import { burst } from '@wucarson/facet-core/burst';
 import type { StyleProp } from './util';
 
 /** 追蹤星號：點一下追蹤（填滿＋星光）、再點取消。Enter／空白鍵切換。v-model:on。規則在 core/choice.ts。 */

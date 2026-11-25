@@ -1,6 +1,6 @@
 import { useRef, type CSSProperties, type KeyboardEvent } from 'react';
-import { focusNth } from '@case-center/core/choice';
-import { tabClass, tabsKey } from '@case-center/core/tabs';
+import { focusNth } from '@wucarson/facet-core/choice';
+import { tabClass, tabsKey } from '@wucarson/facet-core/tabs';
 import { cx, styleOf } from './util';
 
 export interface TabItem {

@@ -51,7 +51,7 @@ function check(contract) {
   return out;
 }
 
-const browser = await puppeteer.launch({ executablePath: CHROME, headless: true });
+const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4'] });   // 宣告有滑鼠：Linux 無頭瀏覽器（CI）預設沒有，@media (hover: hover) 的滑過樣式會不生效
 let errors = 0, warns = 0;
 try {
   const page = await browser.newPage();

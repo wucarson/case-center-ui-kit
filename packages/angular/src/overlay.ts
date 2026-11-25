@@ -1,13 +1,13 @@
 import { Component, ElementRef, afterNextRender, afterRenderEffect, computed, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cx, isActivateKey, isFocusVisible, onOutsidePointer } from '@case-center/core/dom';
+import { cx, isActivateKey, isFocusVisible, onOutsidePointer } from '@wucarson/facet-core/dom';
 import {
   DIALOG_OVERLAY_STYLE, POPOVER_DELAY, PopoverControl, dialogCancelClass, dialogClass, dialogFocusKey, dialogKey, dialogOkClass, dialogTitleId,
   focusDialogButton, placePopoverArrow, popoverButtonLabel, popoverId, popoverKey, type DialogButton, type DialogFocus,
-} from '@case-center/core/overlay';
+} from '@wucarson/facet-core/overlay';
 import {
   TOASTER_STYLE, TOAST_ICON, dismiss, getToasts, isToastActionKey, subscribeToasts, toast, toastClass, type ToastData, type ToastTone,
-} from '@case-center/core/toast';
+} from '@wucarson/facet-core/toast';
 import { Icon } from './icon';
 
 export { toast, dismiss, type ToastData };

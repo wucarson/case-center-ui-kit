@@ -1,4 +1,4 @@
-/* @case-center/angular 對外匯出 */
+/* @wucarson/facet-angular 對外匯出 */
 export * from './button';
 export * from './choice';
 export * from './date';

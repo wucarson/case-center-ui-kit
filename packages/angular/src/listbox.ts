@@ -1,10 +1,10 @@
 import { Component, ElementRef, computed, effect, inject, input, model, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { isActivateKey, onOutsidePointer } from '@case-center/core/dom';
+import { isActivateKey, onOutsidePointer } from '@wucarson/facet-core/dom';
 import {
   COMBO_EMPTY, comboClass, comboIcon, comboKey, comboListId, comboOptionClass, comboOptionId, filterItems, multiClass, multiFooter, multiKey,
   multiSearchLabel, multiShowCount, multiText, multiTextClass, multiToggle, multiTriggerLabel,
-} from '@case-center/core/listbox';
+} from '@wucarson/facet-core/listbox';
 import { Checkbox } from './choice';
 import { FIELD_BOX, FormField } from './field';
 import { Icon } from './icon';

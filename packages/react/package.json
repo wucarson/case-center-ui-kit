@@ -1,7 +1,16 @@
 {
-  "name": "@case-center/react",
+  "name": "@wucarson/facet-react",
   "version": "0.1.0",
   "description": "案管中心元件（React）",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wucarson/case-center-ui-kit.git",
+    "directory": "packages/react"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "type": "module",
   "sideEffects": false,
   "files": [
@@ -19,10 +28,10 @@
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18",
-    "@case-center/styles": "0.1.0"
+    "@wucarson/facet-styles": "0.1.0"
   },
   "dependencies": {
-    "@case-center/core": "0.1.0"
+    "@wucarson/facet-core": "0.1.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",

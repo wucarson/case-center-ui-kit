@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { SR_ONLY_STYLE, fieldClass, fieldInputClass, fieldMark, leftField } from '@case-center/core/field';
+import { SR_ONLY_STYLE, fieldClass, fieldInputClass, fieldMark, leftField } from '@wucarson/facet-core/field';
 import type { StyleProp } from './util';
 
 /** 表單欄位外框：標籤＋輸入框＋說明／錯誤。輸入框聚焦時整框換主色並加光圈。輸入框區用預設插槽。規則在 core/field.ts。 */

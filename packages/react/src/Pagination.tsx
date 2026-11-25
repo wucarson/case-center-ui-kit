@@ -1,5 +1,5 @@
 import type { CSSProperties, KeyboardEvent } from 'react';
-import { PAGE_ARROW, isPageKey, pageArrowOff, pageCount, pageItems, pageLabel, pageTarget } from '@case-center/core/pagination';
+import { PAGE_ARROW, isPageKey, pageArrowOff, pageCount, pageItems, pageLabel, pageTarget } from '@wucarson/facet-core/pagination';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
 

@@ -1,0 +1,69 @@
+# 每個 PR 與 main 的推送：建置、安裝測試、契約檢查、逐像素比對。任何一項失敗就不能合併。
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: 建置與安裝測試
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build:packages
+      - run: npm run build:apps
+      - run: npm run pack:check
+
+  visual:
+    name: 契約與像素比對（${{ matrix.fw }}）
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        fw: [react, vue, angular]
+    env:
+      CHROME: /usr/bin/google-chrome
+      PIXEL_TOLERANCE: 8   # Linux 字型在輸入框的反鋸齒色差（個位數、肉眼不可見）；超過 8 仍算失敗
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            tools/package-lock.json
+      - name: 安裝中文字型
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
+      - run: npm ci
+      - run: npm ci
+        working-directory: tools
+      # 參考樣本在這台機器重新匯出：樣本裡的寬度、位置是照字型量的，要和比對時用同一套字型
+      - name: 從展示牆匯出樣本
+        run: node export.mjs
+        working-directory: tools
+      - run: npm run build:packages
+      - run: npm run build -w apps/${{ matrix.fw }}-demo
+      - name: 契約檢查
+        run: node check-contracts.mjs ${{ matrix.fw }}
+        working-directory: tools
+      - name: 逐像素比對
+        run: node compare.mjs ${{ matrix.fw }}
+        working-directory: tools
+      - name: 上傳差異圖
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diff-${{ matrix.fw }}
+          path: tools/out/

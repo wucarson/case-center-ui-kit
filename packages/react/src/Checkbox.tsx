@@ -1,6 +1,6 @@
 import type { CSSProperties, KeyboardEvent } from 'react';
-import { checkboxAttrs, checkboxClass, checkboxNext, isCheckboxToggleKey } from '@case-center/core/choice';
-import { ICONS } from '@case-center/core/icons';
+import { checkboxAttrs, checkboxClass, checkboxNext, isCheckboxToggleKey } from '@wucarson/facet-core/choice';
+import { ICONS } from '@wucarson/facet-core/icons';
 import { cx, styleOf, useFocusVisible } from './util';
 
 export interface CheckboxProps {

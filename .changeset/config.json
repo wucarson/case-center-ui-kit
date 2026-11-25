@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [
+    [
+      "@wucarson/facet-core",
+      "@wucarson/facet-tokens",
+      "@wucarson/facet-styles",
+      "@wucarson/facet-react",
+      "@wucarson/facet-vue",
+      "@wucarson/facet-angular"
+    ]
+  ],
+  "linked": [],
+  "access": "restricted",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [],
+  "privatePackages": {
+    "version": false,
+    "tag": false
+  }
+}

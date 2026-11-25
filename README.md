@@ -17,39 +17,52 @@
 - 淺色／深色主題、多國語言切換
 - 自訂面板（基本／進階／顯示）：調整風格、字型、主色、圓角、動畫，並匯出 `case-center.css`
 
-## 元件套件
+## 元件套件（Facet）
 
-展示牆的元件打包成 6 個 npm 套件，React、Vue、Angular 專案直接安裝使用。外觀以展示牆為準，用逐像素比對驗證一致。
+展示牆的元件打包成 6 個 npm 套件，統稱 **Facet**，React、Vue、Angular 專案直接安裝使用。外觀以展示牆為準，用逐像素比對驗證一致。
 
 | 套件 | 內容 |
 | --- | --- |
-| `@case-center/styles` | 元件樣式（含預設 token），三個框架都要引入 |
-| `@case-center/tokens` | 設計 token：TS 物件與 CSS 變數（圖表、行內樣式用） |
-| `@case-center/core` | 共用邏輯（class、aria、鍵盤規則、圖示），不依賴框架；框架套件會自動帶入 |
-| `@case-center/react` | React 18 以上 |
-| `@case-center/vue` | Vue 3.3 以上 |
-| `@case-center/angular` | Angular 22（standalone 元件，屬性選擇器 `<button ccButton>`） |
+| `@wucarson/facet-styles` | 元件樣式（含預設 token），三個框架都要引入 |
+| `@wucarson/facet-tokens` | 設計 token：TS 物件與 CSS 變數（圖表、行內樣式用） |
+| `@wucarson/facet-core` | 共用邏輯（class、aria、鍵盤規則、圖示），不依賴框架；框架套件會自動帶入 |
+| `@wucarson/facet-react` | React 18 以上 |
+| `@wucarson/facet-vue` | Vue 3.3 以上 |
+| `@wucarson/facet-angular` | Angular 22（standalone 元件，屬性選擇器 `<button ccButton>`） |
 
-> 套件名稱的範圍（`@case-center`）暫定，發佈前會改成公司組織名稱。
+### 安裝
+
+套件發佈在 GitHub Packages。使用的專案根目錄加 `.npmrc`，並準備一組有 `read:packages` 權限的 GitHub token：
+
+```
+@wucarson:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+```sh
+npm i @wucarson/facet-react @wucarson/facet-styles     # Vue、Angular 換成 facet-vue、facet-angular
+```
+
+### 使用
 
 ```ts
 // React
-import '@case-center/styles/components.css';
-import { Button, DataTable } from '@case-center/react';
+import '@wucarson/facet-styles/components.css';
+import { Button, DataTable } from '@wucarson/facet-react';
 
 // Vue
-import '@case-center/styles/components.css';
-import { Button, DataTable } from '@case-center/vue';
+import '@wucarson/facet-styles/components.css';
+import { Button, DataTable } from '@wucarson/facet-vue';
 ```
 
 ```css
 /* Angular：styles.css */
-@import '@case-center/styles';
+@import '@wucarson/facet-styles';
 ```
 
 ```ts
 // Angular：元件裡
-import { Button, DataTable } from '@case-center/angular';
+import { Button, DataTable } from '@wucarson/facet-angular';
 @Component({ imports: [Button, DataTable], template: `<button ccButton variant="outline">取消</button>` })
 ```
 

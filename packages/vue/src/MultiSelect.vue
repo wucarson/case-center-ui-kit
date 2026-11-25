@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, useId, watch } from 'vue';
-import { onOutsidePointer } from '@case-center/core/dom';
-import { filterItems, multiClass, multiFooter, multiKey, multiSearchLabel, multiShowCount, multiText, multiTextClass, multiToggle, multiTriggerLabel } from '@case-center/core/listbox';
+import { onOutsidePointer } from '@wucarson/facet-core/dom';
+import { filterItems, multiClass, multiFooter, multiKey, multiSearchLabel, multiShowCount, multiText, multiTextClass, multiToggle, multiTriggerLabel } from '@wucarson/facet-core/listbox';
 import Checkbox from './Checkbox.vue';
 import Icon from './Icon.vue';
 import type { StyleProp } from './util';

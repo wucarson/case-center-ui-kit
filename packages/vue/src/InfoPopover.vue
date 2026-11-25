@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue';
-import { cx, onOutsidePointer } from '@case-center/core/dom';
-import { PopoverControl, placePopoverArrow, popoverButtonLabel, popoverId, popoverKey } from '@case-center/core/overlay';
+import { cx, onOutsidePointer } from '@wucarson/facet-core/dom';
+import { PopoverControl, placePopoverArrow, popoverButtonLabel, popoverId, popoverKey } from '@wucarson/facet-core/overlay';
 import Icon from './Icon.vue';
 import { useFocusVisible, type StyleProp } from './util';
 

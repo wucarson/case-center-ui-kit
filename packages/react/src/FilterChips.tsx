@@ -1,7 +1,7 @@
 import { useRef, type CSSProperties, type KeyboardEvent } from 'react';
-import { focusNth } from '@case-center/core/choice';
-import { chipExit, chipFocusAfter, chipRemoveLabel, chipsLabel, withoutAt } from '@case-center/core/chips';
-import { isActivateKey } from '@case-center/core/dom';
+import { focusNth } from '@wucarson/facet-core/choice';
+import { chipExit, chipFocusAfter, chipRemoveLabel, chipsLabel, withoutAt } from '@wucarson/facet-core/chips';
+import { isActivateKey } from '@wucarson/facet-core/dom';
 import { cx, styleOf } from './util';
 
 export interface FilterChipsProps {

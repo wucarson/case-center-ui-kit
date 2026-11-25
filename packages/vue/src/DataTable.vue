@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
-import { flipRows, measureRows, nextSort, rowClass, sortRows, thState, type TableColumn, type TableSort } from '@case-center/core/table';
+import { flipRows, measureRows, nextSort, rowClass, sortRows, thState, type TableColumn, type TableSort } from '@wucarson/facet-core/table';
 import DueCell from './DueCell.vue';
 import SortTh from './SortTh.vue';
 import type { StyleProp } from './util';

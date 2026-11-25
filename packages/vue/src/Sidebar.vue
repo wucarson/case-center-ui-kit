@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
-import { cx, isActivateKey } from '@case-center/core/dom';
+import { cx, isActivateKey } from '@wucarson/facet-core/dom';
 import {
   SIDEBAR_CHEVRON, placeSidebarIndicator, sidebarBrandLabel, sidebarClass, sidebarGroupToggleClass, sidebarHasActive, sidebarInitialOpen,
   sidebarItemClass, sidebarSubClass, sidebarTipTop, toggleAt, type SidebarGroup,
-} from '@case-center/core/sidebar';
+} from '@wucarson/facet-core/sidebar';
 import Icon from './Icon.vue';
 import type { StyleProp } from './util';
 
-export type { SidebarGroup, SidebarItem } from '@case-center/core/sidebar';
+export type { SidebarGroup, SidebarItem } from '@wucarson/facet-core/sidebar';
 
 /** 側邊選單：選中＝淡主色底＋填滿圖示，選中片彈性滑動；群組可收合；可收合成圖示列（滑過顯示名稱）。v-model:value、v-model:collapsed。規則在 core/sidebar.ts。 */
 const props = defineProps<{

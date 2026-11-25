@@ -1,5 +1,5 @@
 {
-  "name": "@case-center/angular-demo",
+  "name": "@wucarson/facet-angular-demo",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -8,9 +8,9 @@
     "build": "ng build"
   },
   "dependencies": {
-    "@case-center/angular": "0.1.0",
-    "@case-center/core": "0.1.0",
-    "@case-center/styles": "0.1.0",
+    "@wucarson/facet-angular": "0.1.0",
+    "@wucarson/facet-core": "0.1.0",
+    "@wucarson/facet-styles": "0.1.0",
     "@angular/common": "^22.1.0",
     "@angular/compiler": "^22.1.0",
     "@angular/core": "^22.1.0",

@@ -1,5 +1,5 @@
 {
-  "name": "@case-center/react-demo",
+  "name": "@wucarson/facet-react-demo",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -9,8 +9,8 @@
     "preview": "vite preview --port 5181"
   },
   "dependencies": {
-    "@case-center/react": "0.1.0",
-    "@case-center/styles": "0.1.0",
+    "@wucarson/facet-react": "0.1.0",
+    "@wucarson/facet-styles": "0.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

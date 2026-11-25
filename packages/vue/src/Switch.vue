@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { isSwitchToggleKey, switchNext, switchRootAttrs, switchRootClass, switchTrackClass } from '@case-center/core/switch';
+import { isSwitchToggleKey, switchNext, switchRootAttrs, switchRootClass, switchTrackClass } from '@wucarson/facet-core/switch';
 import { useFocusVisible, type StyleProp } from './util';
 
 /** 開關：立即生效，不用再按儲存。Space／Enter 切換。v-model:checked。規則在 core/switch.ts。 */

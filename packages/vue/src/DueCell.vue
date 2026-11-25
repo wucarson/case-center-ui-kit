@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { dueTag, dueText, tagClass, todayIso } from '@case-center/core/table';
+import { dueTag, dueText, tagClass, todayIso } from '@wucarson/facet-core/table';
 
 /** 到期欄：逾期紅、今天與 3 天內琥珀；已結案只顯示日期。規則在 core/table.ts。 */
 const props = defineProps<{

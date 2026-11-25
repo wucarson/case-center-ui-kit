@@ -1,6 +1,6 @@
 import { useId, useState, type CSSProperties, type InputHTMLAttributes, type ReactNode } from 'react';
-import { SR_ONLY_STYLE, fieldClass, fieldCount, fieldInputClass, fieldMark, leftField } from '@case-center/core/field';
-import type { IconName } from '@case-center/core/icons';
+import { SR_ONLY_STYLE, fieldClass, fieldCount, fieldInputClass, fieldMark, leftField } from '@wucarson/facet-core/field';
+import type { IconName } from '@wucarson/facet-core/icons';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
 

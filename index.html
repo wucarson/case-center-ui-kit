@@ -621,7 +621,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .drg-ph.show { opacity: .7; }
 .drg-r.landed { animation: drg-land calc(1.6s * var(--dur)) ease-out; }
 @keyframes drg-land { 0%, 25% { background: var(--tint); } }
-.drg-s { flex: none; padding: 0; border: 0; background: none; border-radius: var(--r-pill); cursor: pointer; }
+.drg-s { position: relative; flex: none; padding: 0; border: 0; background: none; border-radius: var(--r-pill); cursor: pointer; }
+.drg-s::after { content: ""; position: absolute; inset: -2px 0; }   /* 點擊範圍補到 24px 高，外觀不變 */
 .drg-s:disabled { cursor: default; opacity: .5; }
 .drg .tg { width: 32px; height: 20px; display: block; }
 .drg .tg i { width: 16px; height: 16px; }
@@ -820,7 +821,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 /* 滑過：外框轉淡主色，提示「點了會進詳細頁」；鍵盤聚焦 ⓘ 時同樣亮起 */
 #wall > .cell:hover, #wall > .cell:has(.cell-doc:focus-visible) { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
 /* ⓘ 緊跟在標題後面（右上角留給程式名稱與圖例）；平常隱藏，滑過卡片或鍵盤聚焦才出現 */
-.cell-doc { width: 20px; height: 20px; margin: -2px auto -2px -4px; flex: none; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--label); cursor: pointer; opacity: 0; scale: .7; transition: opacity calc(.2s * var(--dur)) var(--ease), scale calc(.35s * var(--dur)) var(--spring), color calc(.2s * var(--dur)), background calc(.2s * var(--dur)); }
+.cell-doc { width: 24px; height: 24px; margin: -4px auto -4px -6px;   /* 點擊範圍 24px（WCAG 2.5.8），圖示仍 15px、位置不變 */
+  flex: none; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--label); cursor: pointer; opacity: 0; scale: .7; transition: opacity calc(.2s * var(--dur)) var(--ease), scale calc(.35s * var(--dur)) var(--spring), color calc(.2s * var(--dur)), background calc(.2s * var(--dur)); }
 .cell-doc svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .cell:hover .cell-doc, .cell-doc:focus-visible { opacity: 1; scale: 1; }
 .cell-doc:hover { color: var(--primary); background: var(--tint); }

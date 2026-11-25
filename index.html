@@ -1879,6 +1879,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 @property --wr { syntax: '<length>'; inherits: false; initial-value: 0px; }
 @property --wf { syntax: '<length>'; inherits: false; initial-value: 160px; }
 .vt-wand::view-transition-old(root), .vt-wand::view-transition-new(root), ::view-transition-group(wand), ::view-transition-old(wand), ::view-transition-new(wand) { animation: none; mix-blend-mode: normal; }
+.vt-dim::view-transition-old(root), .vt-dim::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 .vt-wand::view-transition-old(root) { z-index: 2; }
 /* 徑向遮罩是墨流遮罩無法使用時的備援。 */
 .vt-wand::view-transition-old(root) { mask-image: radial-gradient(circle, transparent calc(var(--wr) - var(--wf)), #000 var(--wr)); }
@@ -3047,6 +3048,25 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       };
       vt.finished.then(cleanUp, cleanUp);
     }
+    /* 深淺色轉場「亮度」（預設，約 0.45 秒）：像調螢幕亮度
+       · 切到深色：舊畫面整片變暗（亮度 100% → 35%），深色畫面從偏暗浮現到正常亮度
+       · 切到淺色：舊畫面整片提亮（→ 160%），淺色畫面從稍微過曝回到正常亮度
+       · 只動兩張快照的 filter: brightness 與透明度（顯示卡處理），不支援 View Transitions 或減少動態時直接切換 */
+    function dimSwap(next, apply) {
+      if (shBusy) return;
+      if (!document.startViewTransition || document.hidden || document.body.classList.contains('reduce') || matchMedia('(prefers-reduced-motion: reduce)').matches) { apply(); return; }
+      shBusy = true;
+      const de = document.documentElement, dark = next === 'dark', K = parseFloat(getComputedStyle(de).getPropertyValue('--dur')) || 1;
+      de.classList.add('vt-dim');
+      const vt = document.startViewTransition(apply);
+      vt.ready.then(() => {
+        const T = 450 * K, ease = 'cubic-bezier(.45, 0, .55, 1)', o = { duration: T, fill: 'both' };
+        const out = dark ? 'brightness(.35)' : 'brightness(1.6)', from = dark ? 'brightness(.35)' : 'brightness(1.3)';
+        de.animate([{ filter: 'brightness(1)', easing: ease }, { filter: out, offset: 0.55 }, { filter: out }], { ...o, pseudoElement: '::view-transition-old(root)' });
+        de.animate([{ opacity: 0, filter: from }, { opacity: 0, filter: from, offset: 0.33, easing: ease }, { opacity: 1, filter: 'brightness(1)' }], { ...o, pseudoElement: '::view-transition-new(root)' });
+      }).catch(() => {});
+      vt.finished.finally(() => { de.classList.remove('vt-dim'); shBusy = false; });
+    }
     let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途
     if ('requestIdleCallback' in window && document.startViewTransition
         && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -3247,7 +3267,7 @@ void main(){
       vt.finished.finally(() => setTimeout(finish, Math.max(0, (END - HIT - 300) * K)));
       setTimeout(finish, (END + 800) * K);   // 保險
     }
-    tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; ({ hole: holeSwap, slash: slashSwap }[root.dataset.themeFx] || wandSwap)(next, () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); }, tb); });
+    tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; ({ hole: holeSwap, slash: slashSwap, wand: wandSwap }[root.dataset.themeFx] || dimSwap)(next, () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); }, tb); });
     new MutationObserver(paint).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint);
     paint();
@@ -4583,7 +4603,7 @@ void main(){
       color: { primary: '#1f6fff', darkPrimary: '', success: '#12b866', warn: '#f59e0b', danger: '#ef3340', info: '#1846c9', series: ['#1f6fff', '#00a3b8', '#8b5cf6', '#f59e0b'], neutral: 'cool' },
       shape: { card: 20, control: 10, pill: 'full' },
       depth: { shadow: 2, glow: 100, border: 'standard' },
-      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'line', themeFx: 'wand' },
+      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'line', themeFx: 'dim' },
       layout: { cols: 4, density: 'standard', hidden: [], order: [] },
     };
     const UI_KEYS = ['standard', 'flat', 'glass', 'neu', 'swiss', 'y2k'];   // 已移除的風格（例：高對比）載入時改回標準
@@ -4804,7 +4824,7 @@ void main(){
     let theme = clone(DEFAULT);
     let lastAuto = null;
     function apply() {
-      document.documentElement.dataset.themeFx = ['hole', 'slash'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'wand';   // 深淺色轉場：右上角按鈕讀這個
+      document.documentElement.dataset.themeFx = ['hole', 'slash', 'wand'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'dim';   // 深淺色轉場：右上角按鈕讀這個
       // 舊版存過的風格（寫實、手繪）已移除：改回標準
       // 舊版的「緊湊」風格改成間距「緊」
       if (theme.style.ui === 'compact') { theme.style.ui = 'standard'; theme.layout.density = 'compact'; }
@@ -5539,7 +5559,7 @@ void main(){
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
         })),
           el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['line', '浮線'], ['fly', '飛入'], ['tile', '拼塊'], ['stack', '疊放']].map(([v, n]) => { const on = () => (['fly', 'tile', 'stack'].includes(theme.motion.enter) ? theme.motion.enter : 'line') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '深淺色轉場' }, [['wand', '魔杖'], ['slash', '亂刀'], ['hole', '黑洞']].map(([v, n]) => { const on = () => (['hole', 'slash'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'wand') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.themeFx = v; changed(); renderAll(); } }, '深淺色 ' + n); quick.push([btn, on]); return btn; }))),
+          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '深淺色轉場' }, [['dim', '亮度'], ['wand', '魔杖'], ['slash', '亂刀'], ['hole', '黑洞']].map(([v, n]) => { const on = () => (['hole', 'slash', 'wand'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'dim') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.themeFx = v; changed(); renderAll(); } }, '深淺色 ' + n); quick.push([btn, on]); return btn; }))),
       )];
     }
     function catsEl() {

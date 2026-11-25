@@ -1366,8 +1366,27 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 :root[data-theme="dark"] :is(.cz-seg button[aria-pressed="true"], .cz-pane button[aria-selected="true"], .cz-style[aria-pressed="true"], .cz-opt[aria-pressed="true"]) { background: var(--hover); color: var(--ink); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); }
 :root[data-theme="dark"] .cz-seg button[aria-pressed="true"] { font-weight: 600; }
 .cz-range { display: flex; align-items: center; gap: 10px; }
-.cz-range input { flex: 1; accent-color: var(--primary); }
-.cz-range output { min-width: 40px; text-align: right; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+/* 滑桿：軌道 6px、已選範圍主色填滿；圓鈕 20px，拖動時放大並顯示數值氣泡；兩端寫意義；右邊可直接輸入數值或用 − ＋ 微調 */
+.cz-end { flex: none; font-size: 12px; color: var(--weak); white-space: nowrap; }
+.cz-trk { position: relative; flex: 1; min-width: 80px; height: 28px; display: flex; align-items: center; }
+.cz-trk input[type="range"] { -webkit-appearance: none; appearance: none; flex: 1; height: 6px; margin: 0; border-radius: 3px; background: linear-gradient(90deg, var(--primary) 0 var(--p, 50%), var(--ev-line-2, var(--line-strong)) var(--p, 50%)); cursor: pointer; }
+.cz-trk input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgb(0 0 0 / .3), 0 0 0 1px rgb(0 0 0 / .06); transition: transform calc(.15s * var(--dur)); }
+.cz-trk input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: 0; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgb(0 0 0 / .3), 0 0 0 1px rgb(0 0 0 / .06); transition: transform calc(.15s * var(--dur)); }
+.cz-trk input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.15); }
+.cz-trk input[type="range"]:active::-moz-range-thumb { transform: scale(1.15); }
+.cz-trk input[type="range"]:focus-visible { outline: 3px solid var(--focus); outline-offset: 6px; }
+.cz-trk input[type="range"]:disabled { opacity: .45; cursor: default; }
+.cz-bub { position: absolute; bottom: calc(100% + 2px); left: calc(10px + (100% - 20px) * var(--pf, .5)); padding: 2px 7px; border-radius: 7px; background: var(--ink); color: var(--surface); font-size: 11.5px; font-weight: 600; line-height: 18px; font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none; opacity: 0; transform: translate(-50%, 4px); transition: opacity calc(.15s * var(--dur)), transform calc(.15s * var(--dur)); }
+.cz-trk:has(input:active) .cz-bub { opacity: 1; transform: translate(-50%, 0); }
+.cz-num { flex: none; display: flex; align-items: center; height: 30px; border-radius: 9px; background: var(--ev-cell, var(--surface)); box-shadow: inset 0 0 0 1px var(--ev-line, var(--line)); }
+.cz-num:focus-within { box-shadow: inset 0 0 0 1px var(--primary), 0 0 0 3px var(--focus); }
+.cz-nb { width: 26px; height: 100%; padding: 0; border: 0; border-radius: 9px; background: none; color: var(--ink); font: inherit; font-size: 15px; cursor: pointer; }
+.cz-nb:hover:not(:disabled) { background: var(--ev-cell, var(--hover)); }
+.cz-nb:active:not(:disabled) { scale: .9; }
+.cz-nb:disabled { opacity: .35; cursor: default; }
+.cz-numi { width: 34px; padding: 0; border: 0; background: none; color: var(--ink); font: inherit; font-size: 12.5px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; outline: none; }
+.cz-unit { padding-left: 1px; font-size: 12px; color: var(--weak); }
 .cz-sw { appearance: none; -webkit-appearance: none; position: relative; width: 40px; height: 24px; flex: none; margin: 0; border-radius: 12px; background: var(--line-strong); box-shadow: var(--inset); cursor: pointer; transition: background calc(300ms * var(--dur)) var(--ease); }
 .cz-sw::before { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--knob); box-shadow: 0 1px 3px rgb(0 0 0 / .3); transition: transform calc(500ms * var(--dur)) var(--spring); }
 .cz-sw:checked { background: var(--primary); box-shadow: 0 4px 10px -3px var(--glow); }
@@ -2042,14 +2061,15 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz-set { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 12px; min-height: 48px; padding: 8px 10px; border-radius: 12px; transition: background calc(.15s * var(--dur)); }
 .cz-set { position: relative; }
 .cz-set + .cz-set::before { content: ""; position: absolute; left: 10px; right: 10px; top: 0; height: 1px; background: var(--ev-line, var(--line-subtle)); }   /* 分隔線：直線，不跟著圓角彎 */
-.cz-set.cur::before, .cz-set.cur + .cz-set::before { display: none; }
+.cz-set:hover::before, .cz-set:hover + .cz-set::before, .cz.kbd .cz-set.cur::before, .cz.kbd .cz-set.cur + .cz-set::before { display: none; }
 .cz-set.block { grid-template-columns: minmax(0, 1fr); }
-.cz-set.cur { background: var(--ev-cell, var(--soft)); }
+.cz-set:hover { background: color-mix(in srgb, var(--ink) 3.5%, transparent); }   /* 滑過：很淡的底，提示可點 */
+.cz.kbd .cz-set.cur { outline: 2px solid var(--focus); outline-offset: -2px; }   /* 鍵盤操作：主色焦點框；滑鼠點選不加底色（灰底容易看成停用），靠展開的說明表示選到 */
 .cz-set .cz-rl { min-width: 0; }
 .cz-set .cz-lab { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cz-ctl { min-width: 0; display: flex; justify-content: flex-end; }
 .cz-set.block .cz-ctl { display: block; }
-.cz-set:not(.block) .cz-range { width: 176px; }
+
 .cz-set:not(.block) .cz-seg button { flex: none; min-width: 40px; padding: 0 9px; }
 .cz-set.changed .cz-rl .cz-dot { display: inline-block; }
 .cz-set.changed:is(:hover, .cur, :focus-within) .cz-rl .cz-undo1 { display: inline-flex; }   /* 改過的列：滑過或選到才出現單項還原 */
@@ -2081,6 +2101,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   .cz.tall { height: calc(92vh - 24px); }
   .cz .cz-h { padding-top: 4px; }
   .cz-tabs button, .cz-set .cz-seg button { min-height: 44px; }
+  .cz-num { height: 44px; }
+  .cz-nb { width: 40px; }
   .cz .cz-ic { width: 40px; height: 40px; }
   .cz .cz-hb { gap: 0; }
   .cz .cz-h h2 { white-space: nowrap; }   /* 標題不要被按鈕擠成直排 */
@@ -2100,13 +2122,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz.cz .cz-swatch[aria-pressed="true"] { box-shadow: 0 0 0 2.5px var(--c), 0 0 16px -2px var(--c); }
 .cz.cz .cz-pick { background: transparent; border-color: var(--ev-line-2); }
 /* 滑桿：細軌道＋刻度、發光圓鈕；數值＝等寬讀數 */
-.cz .cz-range input { -webkit-appearance: none; appearance: none; height: 20px; margin: 0; background: transparent; cursor: pointer; }
-.cz .cz-range input::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: repeating-linear-gradient(90deg, var(--ev-line-2) 0 1px, transparent 1px 10%) 0 0 / 100% 4px no-repeat, linear-gradient(var(--ev-line-2), var(--ev-line-2)) 0 100% / 100% 1.5px no-repeat; }
-.cz .cz-range input::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -3px; border-radius: 50%; background: var(--surface); border: 2px solid var(--ev-acc); box-shadow: 0 0 10px var(--ev-glow); }
-.cz .cz-range input::-moz-range-track { height: 1.5px; background: var(--ev-line-2); }
-.cz .cz-range input::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--ev-acc); box-shadow: 0 0 10px var(--ev-glow); }
 .cz :is(.cz-range output, .cz-step output, .cz-ratio, .cz-tile small, .cz-pick code) { font-family: var(--ev-mono); letter-spacing: .02em; }
-.cz .cz-range output { color: var(--ink); }
 .cz .cz-step { background: transparent; box-shadow: inset 0 0 0 1px var(--ev-line); border-radius: 12px; }
 .cz .cz-sw { background: var(--ev-line-2); box-shadow: none; }
 .cz .cz-sw:checked { background: var(--ev-acc); box-shadow: 0 0 14px -2px var(--ev-glow); }
@@ -5140,12 +5156,27 @@ void main(){
       resetBtn.disabled = same(theme, DEFAULT);
     }
     const seg = (path, opts, label) => el('div', { class: 'cz-seg', role: 'group', 'aria-label': label }, opts.map(([v, t]) => el('button', { type: 'button', 'aria-pressed': String(getPath(theme, path) === v), onclick: (e) => { setPath(theme, path, v); e.currentTarget.parentElement.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === e.currentTarget))); changed(); } }, t)));
-    const range = (path, min, max, step, fmt, label) => {
-      const out = el('output', {}, fmt(getPath(theme, path)));
-      const inp = el('input', { type: 'range', min, max, step, value: getPath(theme, path), 'aria-label': label,
-        oninput: (e) => { setPath(theme, path, +e.target.value); out.textContent = fmt(+e.target.value); changed(false); },
-        onchange: () => record() });
-      return el('div', { class: 'cz-range' }, inp, out);
+    // 滑桿：ends＝兩端的意義（例如 ['快', '慢']）；右邊數值框可直接輸入，− ＋ 一次一格；拖動時圓鈕上方顯示數值
+    const range = (path, min, max, step, fmt, label, ends) => {
+      const unit = fmt(0).replace(/^[-+\d.]+/, '');
+      const snap = (v) => +Math.min(max, Math.max(min, Math.round((v - min) / step) * step + min)).toFixed(2);
+      const bub = el('output', { class: 'cz-bub', 'aria-hidden': 'true' }, fmt(getPath(theme, path)));
+      const inp = el('input', { type: 'range', min, max, step, value: getPath(theme, path), 'aria-label': label, 'aria-valuetext': fmt(getPath(theme, path)),
+        oninput: (e) => set(+e.target.value, false), onchange: () => record() });
+      const num = el('input', { type: 'text', inputmode: 'decimal', class: 'cz-numi', value: String(getPath(theme, path)), 'aria-label': label + '（數值）',
+        onchange: (e) => set(parseFloat(e.target.value), true), onkeydown: (e) => { if (e.key === 'Enter') e.target.blur(); } });
+      const trk = el('div', { class: 'cz-trk' }, inp, bub);
+      const btn = (d, t, a) => el('button', { type: 'button', class: 'cz-nb', 'aria-label': label + a, onclick: () => set(getPath(theme, path) + d * step, true) }, t);
+      const minus = btn(-1, '−', '減少'), plus = btn(1, '＋', '增加');
+      const paint = (v) => { const f = (v - min) / (max - min); trk.style.setProperty('--p', f * 100 + '%'); trk.style.setProperty('--pf', f); minus.disabled = v <= min; plus.disabled = v >= max; };
+      function set(v, final) {
+        v = Number.isFinite(v) ? snap(v) : getPath(theme, path);
+        setPath(theme, path, v); inp.value = v; num.value = String(v); bub.textContent = fmt(v); inp.setAttribute('aria-valuetext', fmt(v)); paint(v);
+        changed(final);
+      }
+      paint(getPath(theme, path));
+      return el('div', { class: 'cz-range' }, ends ? el('span', { class: 'cz-end' }, ends[0]) : null, trk, ends ? el('span', { class: 'cz-end' }, ends[1]) : null,
+        el('div', { class: 'cz-num' }, minus, num, unit ? el('span', { class: 'cz-unit' }, unit) : null, plus));
     };
     const sw = (checked, onChange, label) => el('input', { type: 'checkbox', class: 'cz-sw', role: 'switch', 'aria-label': label, checked: !!checked, onchange: (e) => { onChange(e.target.checked); changed(); renderAll(); } });
     const colorInput = (path, label, onDone) => el('input', { type: 'color', value: getPath(theme, path), 'aria-label': label,
@@ -5159,11 +5190,11 @@ void main(){
       return b;
     }));
     // Swiss Style 沒有圓角：圓角相關的控制項停用，旁邊註明原因
-    const lockShape = (node) => {
+    const lockShape = (node, note = true) => {   // note＝false：只停用、不重複寫原因（同一分類第一列已寫）
       if (theme.style.ui !== 'swiss') return node;
       node.querySelectorAll('button, input').forEach((c) => { c.disabled = true; });
       node.classList.add('cz-locked');
-      return el('div', {}, node, el('p', { class: 'cz-hint' }, 'Swiss Style 固定直角，不能調整圓角。'));
+      return note ? el('div', {}, node, el('p', { class: 'cz-hint' }, 'Swiss Style 固定直角，不能調整圓角。')) : node;
     };
     const thumb = (cls, style = '') => el('i', { class: 'cz-th ' + cls, style, 'aria-hidden': 'true' });
     const qrow = (label, ...kids) => el('div', { class: 'cz-q' }, el('div', { class: 'cz-ql' }, label), ...kids);
@@ -5732,11 +5763,11 @@ void main(){
             seg(`type.levels.${k}.weight`, [[400, '一般'], [500, '中等'], [600, '半粗'], [700, '粗']], n + '粗細')); })) },
       { cat: 'shape', pin: true, key: 'radius', label: '圓角', hint: '卡片、按鈕和欄位的轉角弧度。', paths: ['shape'], block: true,
         ui: () => lockShape(opts('圓角', RADIUS.map(([name, sh, r]) => ({ name, thumb: thumb('r', `border-top-left-radius:${r}`), on: () => same(theme.shape, sh), pick: () => { theme.shape = clone(sh); } })))) },
-      { cat: 'shape', key: 'card', label: '卡片圓角', hint: '元件卡片、對話框這類大區塊的圓角。', paths: ['shape.card'], ui: () => lockShape(range('shape.card', 0, 32, 1, (v) => v + 'px', '卡片圓角')) },
-      { cat: 'shape', key: 'control', label: '按鈕與欄位圓角', hint: '按鈕、輸入框、下拉選單這類控制項的圓角。', paths: ['shape.control'], aff: '#c-btn, #c-ff, #c-dd, #c-search',
-        ui: () => lockShape(range('shape.control', 0, 20, 1, (v) => v + 'px', '按鈕與欄位圓角')) },
+      { cat: 'shape', key: 'card', label: '卡片圓角', hint: '元件卡片、對話框這類大區塊的圓角。', paths: ['shape.card'], block: true, ui: () => lockShape(range('shape.card', 0, 32, 1, (v) => v + 'px', '卡片圓角', ['直角', '圓']), false) },
+      { cat: 'shape', key: 'control', label: '按鈕與欄位圓角', hint: '按鈕、輸入框、下拉選單這類控制項的圓角。', paths: ['shape.control'], block: true, aff: '#c-btn, #c-ff, #c-dd, #c-search',
+        ui: () => lockShape(range('shape.control', 0, 20, 1, (v) => v + 'px', '按鈕與欄位圓角', ['直角', '圓']), false) },
       { cat: 'shape', key: 'pill', label: '標籤形狀', hint: '徽章和篩選標籤用膠囊或小方塊。', paths: ['shape.pill'], aff: '#c-bdg, #c-chips',
-        ui: () => lockShape(seg('shape.pill', [['full', '膠囊'], ['soft', '方塊']], '標籤形狀')) },
+        ui: () => lockShape(seg('shape.pill', [['full', '膠囊'], ['soft', '方塊']], '標籤形狀'), false) },
       { cat: 'motion', pin: true, key: 'anim', label: '動畫', hint: '「關」不播動畫；「少」比較慢，也不回彈。', paths: ['motion.reduce', 'motion.speed', 'motion.bounce'], block: true,
         ui: () => opts('動畫', MOTION.map(([name, m, d]) => {
           const t = thumb('mo'); t.innerHTML = `<svg viewBox="0 0 24 24"><path d="${d}"/></svg>`;
@@ -5744,7 +5775,7 @@ void main(){
             on: () => (m ? !theme.motion.reduce && theme.motion.speed === m.speed && theme.motion.bounce === m.bounce : theme.motion.reduce),
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
         })) },
-      { cat: 'motion', key: 'speed', label: '動畫速度', hint: '數字越大，動畫越慢。', paths: ['motion.speed'], ui: () => range('motion.speed', 0.5, 2, 0.25, (v) => v + '×', '動畫速度') },
+      { cat: 'motion', key: 'speed', label: '動畫速度', hint: '動畫時間的倍數：1× 是標準，往右越慢。', paths: ['motion.speed'], block: true, ui: () => range('motion.speed', 0.5, 2, 0.25, (v) => v + '×', '動畫速度', ['快', '慢']) },
       { cat: 'motion', key: 'bounce', label: '動畫回彈', hint: '元件到定位時回彈的幅度。', paths: ['motion.bounce'],
         ui: () => seg('motion.bounce', [['none', '無'], ['soft', '柔和'], ['standard', '標準'], ['strong', '強']], '動畫回彈') },
       { cat: 'motion', key: 'enter', label: '進場效果', hint: '元件牆卡片出現的方式；選了會馬上重播一次。', paths: ['motion.enter'],

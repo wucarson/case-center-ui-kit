@@ -12,6 +12,7 @@ import { PNG } from 'pngjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const TOL = Number(process.env.PIXEL_TOLERANCE || 0);
 const fw = process.argv[2] || 'react';
 const only = process.argv[3] || '';
 const outDir = path.join(root, 'tools', 'out', fw);
@@ -49,7 +50,7 @@ const implSrv = await serve(path.join(root, 'apps', fw + '-demo', 'dist'));
 const FREEZE = `*, *::before, *::after { animation: none !important; transition: none !important; caret-color: transparent !important; }
   /* 樣本裡的 <i class="caret"> 是示意游標；實作是瀏覽器原生游標（會閃爍、不能逐點比），兩邊都不畫 */
   .caret { display: none !important; }`;
-const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, protocolTimeout: 60000, args: ['--hide-scrollbars', '--font-render-hinting=none', '--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4'] });   // 宣告有滑鼠：Linux 無頭瀏覽器（CI）預設沒有，@media (hover: hover) 的滑過樣式會不生效
+const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, protocolTimeout: 60000, args: ['--hide-scrollbars', '--font-render-hinting=none', '--disable-lcd-text', '--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4'] });   // 宣告有滑鼠：Linux 無頭瀏覽器（CI）預設沒有，@media (hover: hover) 的滑過樣式會不生效
 const results = [];
 try {
   const open = async (url) => {
@@ -100,6 +101,9 @@ try {
     if (a.width === b.width && a.height === b.height) {
       const d = new PNG({ width: a.width, height: a.height });
       diff = pixelmatch(a.data, b.data, d.data, a.width, a.height, { threshold: 0, includeAA: true });
+      // 容許色差（PIXEL_TOLERANCE，預設 0＝完全一致）：CI 的 Linux 字型在輸入框裡反鋸齒會差 1～2 點、色差個位數，肉眼不可見；
+      // 只計算任一色版差超過容許值的點
+      if (diff && TOL) { let n = 0; for (let i = 0; i < a.data.length; i += 4) if (Math.max(Math.abs(a.data[i] - b.data[i]), Math.abs(a.data[i + 1] - b.data[i + 1]), Math.abs(a.data[i + 2] - b.data[i + 2]), Math.abs(a.data[i + 3] - b.data[i + 3])) > TOL) n++; diff = n; }
       if (diff) { fs.writeFileSync(path.join(outDir, `${k.c}-${k.id}-diff.png`), PNG.sync.write(d)); }
     }
     if (diff) { fs.writeFileSync(path.join(outDir, `${k.c}-${k.id}-ref.png`), PNG.sync.write(a)); fs.writeFileSync(path.join(outDir, `${k.c}-${k.id}-impl.png`), PNG.sync.write(b)); }

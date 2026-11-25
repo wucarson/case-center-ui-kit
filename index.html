@@ -7807,6 +7807,16 @@ ${aiComponents(id)}`;
     // 預覽頁回報自己的高度；主題、語言、深淺色改了就再同步一次
     addEventListener('message', (e) => { const m = e.data, f = dt && $('.dt-frame', dt); if (m?.type === 'wall-pv-h' && f && e.source === f.contentWindow) f.style.height = Math.max(200, m.h) + 'px'; });   // 框高＝預覽內容高度（不設上限，不出捲軸）
     new MutationObserver(() => { const f = dt && $('.dt-frame', dt); if (f) syncFrame(f); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-ui', 'style', 'lang', 'class', 'data-tabs', 'data-density'] });
+    // 詳細頁進場：各區塊由上到下淡入上移（標題區 → 展示台 → 頁籤與指南／規格 → 相關元件 → 上下一個）
+    // 每次進詳細頁都播（從元件牆點入、相關元件、上下一個、直接開網址）；動畫速度照外觀設定，減少動態時不播
+    function dtEnter() {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches || theme.motion.reduce) return;
+      const steps = [['.dt-hero'], ['.dt-stage'], ['.dt-tabs', '.dt-panel:not([hidden])'], ['.dt-rel'], ['.dt-pn']];
+      steps.forEach((sels, k) => sels.forEach((sel) => { const el = $(sel, dt); if (!el) return;
+        el.animate([{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }],
+          { duration: D(400), delay: D(k * 60), easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' });
+      }));
+    }
     function showDetail(id, tab = 'basic') {
       putBack();
       const d = DOC[id], cat = CAT_LABEL[catOf(id)] || catOf(id), cell = $('#' + id);
@@ -7838,7 +7848,7 @@ ${aiComponents(id)}`;
         $('.dt-stage', dt).append(cell);
       }
       dtId = id; wall.classList.add('ready'); setTab(tab); paintPlay(); setDev(devW);
-      shell.classList.add('on-detail'); dt.hidden = false;
+      shell.classList.add('on-detail'); dt.hidden = false; dtEnter();
       document.title = `${TITLE[id]}・${BASE_TITLE}`;
       scroller().scrollTop = 0;
       requestAnimationFrame(() => { dispatchEvent(new Event('resize')); moveTabBar(); setDev(devW); });   // 詳細頁顯示後才量得到展示台寬度

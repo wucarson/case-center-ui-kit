@@ -1,0 +1,25 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "callout",
+  "title": "提示訊息",
+  "tier": "class",
+  "logic": "core/display.ts",
+  "description": "頁面內的提示框，不擋操作。",
+  "use": "說明、提醒、載入失敗等需要留在頁面上的訊息。",
+  "instead": [{ "when": "操作結果的短暫回饋", "use": "toast" }],
+  "parts": [
+    {
+      "name": "root",
+      "selector": ".co",
+      "element": "div",
+      "classes": { "co": "提示框", "info": "資訊", "ok": "成功", "warn": "警告", "dng": "錯誤", "neu": "中性", "cpt": "緊湊（彈窗底部）" },
+      "attrs": { "role": { "values": ["alert", "status"] } },
+      "sync": [{ "class": "dng", "attr": "role", "value": "alert" }]
+    },
+    { "name": "icon", "selector": ".co > svg", "element": "svg", "classes": { "ic": "圖示" } },
+    { "name": "body", "selector": ".co > div", "element": "div", "classes": {} },
+    { "name": "heading", "selector": ".co > div > strong", "element": "strong", "classes": {} },
+    { "name": "text", "selector": ".co > div > p", "element": "p", "classes": {} }
+  ],
+  "example": "<div class=\"co info\"><div><strong>報表每小時更新一次</strong><p>目前顯示的是 14:00 的資料。</p></div></div>"
+}

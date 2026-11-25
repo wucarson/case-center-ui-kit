@@ -1,0 +1,28 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "period-picker",
+  "title": "期間選擇",
+  "tier": "logic",
+  "logic": "core/date.ts",
+  "description": "本月、近 30 天、近 90 天或自訂；範圍以文字寫出。選中片滑動。",
+  "use": "報表、儀表板的資料期間。",
+  "instead": [{ "when": "只選一天", "use": "date-picker" }],
+  "parts": [
+    { "name": "group", "selector": ".ps", "element": "div", "classes": { "ps": "期間" }, "attrs": { "role": { "values": ["radiogroup"], "required": true }, "aria-label": { "required": true } } },
+    { "name": "pill", "selector": ".ps > i", "element": "i", "classes": {} },
+    {
+      "name": "option",
+      "selector": ".ps > span",
+      "element": "span",
+      "classes": { "on": "選中" },
+      "attrs": { "role": { "values": ["radio"], "required": true }, "aria-checked": { "values": ["true", "false"], "required": true }, "tabindex": { "values": ["0", "-1"], "required": true } },
+      "sync": [
+        { "class": "on", "attr": "aria-checked", "value": "true" },
+        { "class": "on", "attr": "tabindex", "value": "0" }
+      ]
+    },
+    { "name": "range", "selector": ".ps-r", "element": "div", "classes": { "ps-r": "範圍文字" } }
+  ],
+  "keyboard": [{ "keys": "←、→", "action": "換到相鄰項（頭尾相接）" }],
+  "example": "<div class=\"ps\" role=\"radiogroup\" aria-label=\"期間\"><i></i><span role=\"radio\" aria-checked=\"true\" tabindex=\"0\" class=\"on\">本月</span><span role=\"radio\" aria-checked=\"false\" tabindex=\"-1\">近 30 天</span>…</div><div class=\"ps-r\">2026-11-01 ～ 2026-11-13・共 13 天</div>"
+}

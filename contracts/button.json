@@ -1,0 +1,41 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "button",
+  "title": "按鈕",
+  "tier": "class",
+  "logic": "core/button.ts",
+  "description": "主要動作用 .btn；一般、刪除、低調用 .b2。",
+  "use": "執行一個動作：儲存、送出、取消、刪除。一個畫面只放一個主要按鈕。",
+  "instead": [
+    { "when": "前往另一頁，而且是句子的一部分", "use": "連結" },
+    { "when": "立即切換開或關", "use": "switch" }
+  ],
+  "parts": [
+    {
+      "name": "primary",
+      "selector": ".btn",
+      "element": "button",
+      "classes": { "btn": "主要按鈕（48）", "sm": "32 高", "is-load": "送出中", "done": "完成", "is-off": "停用" },
+      "attrs": { "type": { "values": ["button", "submit", "reset"], "required": true }, "aria-busy": { "values": ["true"] } },
+      "sync": [{ "class": "is-load", "attr": "aria-busy", "value": "true" }]
+    },
+    {
+      "name": "secondary",
+      "selector": ".b2",
+      "element": "button",
+      "classes": { "b2": "一般按鈕（32）", "lg": "48 高", "ico": "只有圖示", "dng": "刪除類", "gh": "低調（工具列、表格內）", "is-off": "停用" },
+      "attrs": { "type": { "values": ["button", "submit", "reset"], "required": true }, "aria-busy": { "values": ["true"] } }
+    },
+    {
+      "name": "icon-only",
+      "selector": ".b2.ico",
+      "element": "button",
+      "classes": { "b2": "", "ico": "", "lg": "", "dng": "", "gh": "", "is-off": "" },
+      "label": "只有圖示時要給 aria-label"
+    },
+    { "name": "spinner", "selector": ".btn > .spin", "element": "i", "classes": { "spin": "轉圈" }, "attrs": { "aria-hidden": { "values": ["true"], "required": true } } },
+    { "name": "done-label", "selector": ".btn > .roll", "element": "span", "classes": { "roll": "完成時文字捲動" } }
+  ],
+  "keyboard": [{ "keys": "Enter、Space", "action": "觸發（原生按鈕行為）" }],
+  "example": "<button type=\"button\" class=\"btn\">儲存變更</button>"
+}

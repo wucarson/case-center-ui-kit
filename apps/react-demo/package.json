@@ -1,0 +1,25 @@
+{
+  "name": "@case-center/react-demo",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5181",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 5181"
+  },
+  "dependencies": {
+    "@case-center/react": "0.1.0",
+    "@case-center/styles": "0.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "~6.0.2",
+    "vite": "^5.4.11"
+  },
+  "description": "React 展示頁（比對工具截圖用）"
+}

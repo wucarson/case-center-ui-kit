@@ -1,0 +1,21 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "stepper",
+  "title": "流程步驟",
+  "tier": "class",
+  "logic": "core/display.ts",
+  "description": "完成打勾、目前加框、未開始虛線。只顯示進度，不能點。",
+  "use": "案件、工單的處理階段。",
+  "parts": [
+    { "name": "root", "selector": ".fl", "element": "div", "classes": { "fl": "步驟列" }, "attrs": { "role": { "values": ["list"], "required": true }, "aria-label": {} } },
+    {
+      "name": "step",
+      "selector": ".fl > .fs",
+      "element": "div",
+      "classes": { "fs": "一個步驟", "done": "完成", "cur": "目前", "todo": "未開始" },
+      "attrs": { "role": { "values": ["listitem"], "required": true }, "aria-current": { "values": ["step"] } },
+      "sync": [{ "class": "cur", "attr": "aria-current", "value": "step" }]
+    }
+  ],
+  "example": "<div class=\"fl\" role=\"list\"><div class=\"fs cur\" role=\"listitem\" aria-current=\"step\"><p><svg class=\"ic\" viewBox=\"0 0 24 24\">…</svg>處理中</p><small>李小美・進行中</small></div></div>"
+}

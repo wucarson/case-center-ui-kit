@@ -1,0 +1,22 @@
+{
+  "name": "case-center-ui-kit",
+  "private": true,
+  "description": "元件展示牆與 React／Vue／Angular 元件套件",
+  "workspaces": [
+    "packages/core",
+    "packages/tokens",
+    "packages/styles",
+    "packages/react",
+    "packages/vue",
+    "packages/angular",
+    "apps/react-demo",
+    "apps/vue-demo",
+    "apps/angular-demo"
+  ],
+  "scripts": {
+    "build:packages": "npm run build -w packages/core -w packages/tokens -w packages/react -w packages/vue -w packages/angular",
+    "build:apps": "npm run build -w apps/react-demo -w apps/vue-demo -w apps/angular-demo",
+    "build": "npm run build:packages && npm run build:apps",
+    "pack:check": "node tools/pack-check.mjs"
+  }
+}

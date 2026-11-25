@@ -1,0 +1,38 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "switch",
+  "title": "開關",
+  "tier": "logic",
+  "logic": "core/switch.ts",
+  "description": "立即生效，不用再按儲存。",
+  "use": "設定開或關，切換後馬上生效。",
+  "instead": [
+    { "when": "要按儲存才生效", "use": "checkbox" },
+    { "when": "兩個以上選項，而且選項要看得到", "use": "segmented" }
+  ],
+  "parts": [
+    {
+      "name": "root",
+      "selector": ".tgr",
+      "element": "div",
+      "classes": { "tgr": "外層", "on": "開啟", "dis": "停用" },
+      "attrs": {
+        "role": { "values": ["switch"], "required": true },
+        "aria-checked": { "values": ["true", "false"], "required": true },
+        "tabindex": { "values": ["0", "-1"], "required": true },
+        "aria-disabled": { "values": ["true"] },
+        "aria-label": {}
+      },
+      "sync": [
+        { "class": "on", "attr": "aria-checked", "value": "true" },
+        { "class": "dis", "attr": "aria-disabled", "value": "true" },
+        { "class": "dis", "attr": "tabindex", "value": "-1" }
+      ],
+      "label": "沒有可見標籤（<span>）時要給 aria-label"
+    },
+    { "name": "track", "selector": ".tgr > .tg", "element": "span", "classes": { "tg": "軌道", "sm": "小號：欄位面板、表格內", "is-focus": "鍵盤聚焦時的焦點框" } },
+    { "name": "thumb", "selector": ".tgr > .tg > i", "element": "i", "classes": {} }
+  ],
+  "keyboard": [{ "keys": "Space、Enter", "action": "切換" }],
+  "example": "<div role=\"switch\" aria-checked=\"true\" tabindex=\"0\" class=\"tgr on\"><span>到期前提醒</span><span class=\"tg\"><i></i></span></div>"
+}

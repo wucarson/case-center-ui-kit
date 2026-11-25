@@ -1,0 +1,29 @@
+{
+  "name": "@case-center/angular",
+  "version": "0.1.0",
+  "description": "案管中心元件（Angular，standalone 元件）",
+  "sideEffects": false,
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json -c tsconfig.lib.json"
+  },
+  "peerDependencies": {
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/platform-browser": "^22.0.0",
+    "@case-center/styles": "0.1.0"
+  },
+  "dependencies": {
+    "@case-center/core": "0.1.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/common": "^22.1.0",
+    "@angular/compiler": "^22.1.0",
+    "@angular/compiler-cli": "^22.1.0",
+    "@angular/core": "^22.1.0",
+    "@angular/platform-browser": "^22.1.0",
+    "ng-packagr": "^22.1.0",
+    "rxjs": "~7.8.0",
+    "typescript": "~6.0.2"
+  }
+}

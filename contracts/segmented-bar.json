@@ -1,0 +1,19 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "segmented-bar",
+  "title": "分段統計條",
+  "tier": "class",
+  "logic": "core/metrics.ts",
+  "description": "總數＋一條橫條呈現各狀態比例，下方圖例附數量（顏色不是唯一資訊）。",
+  "use": "工單狀態分布。",
+  "instead": [{ "when": "分類超過 5 個", "use": "長條圖" }],
+  "parts": [
+    { "name": "root", "selector": ".sb", "element": "div", "classes": { "sb": "分段統計條" } },
+    { "name": "head", "selector": ".sb > .sb-h", "element": "div", "classes": { "sb-h": "總數＋單位" } },
+    { "name": "bar", "selector": ".sb > .sb-b", "element": "div", "classes": { "sb-b": "比例條" }, "attrs": { "role": { "values": ["img"], "required": true }, "aria-label": { "required": true } } },
+    { "name": "segment", "selector": ".sb-b > i", "element": "i", "classes": {} },
+    { "name": "legend", "selector": ".sb > .sb-l", "element": "div", "classes": { "sb-l": "圖例" } },
+    { "name": "value", "selector": ".sb b", "element": "b", "classes": { "num": "等寬數字" } }
+  ],
+  "example": "<div class=\"sb\"><div class=\"sb-h\"><b class=\"num\">128</b><span>件工單</span></div><div class=\"sb-b\" role=\"img\" aria-label=\"共 128 件工單：進行中 43、待審核 18、已完成 55、未開始 12\"><i style=\"--c:var(--g2);--f:43\"></i>…</div><div class=\"sb-l\"><span><i style=\"--c:var(--g2)\"></i>進行中<b class=\"num\">43</b></span>…</div></div>"
+}

@@ -1,0 +1,1125 @@
+{
+  "button": {
+    "title": "按鈕",
+    "wide": false,
+    "variants": [
+      [
+        "主要 Primary",
+        "<span class=\"btn\">儲存變更</span>"
+      ],
+      [
+        "次要 Outline",
+        "<span class=\"b2 lg\">取消</span>"
+      ],
+      [
+        "刪除 Destructive",
+        "<span class=\"b2 lg dng\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3\"/></svg>刪除</span>"
+      ],
+      [
+        "低調 Ghost",
+        "<span class=\"b2 lg gh\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M12 5v14M5 12h14\"/></svg>新增欄位</span>"
+      ],
+      [
+        "圖示 Icon",
+        "<span class=\"b2 ico lg\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3\"/></svg></span>"
+      ],
+      [
+        "大小 Size",
+        "<span style=\"display:flex;gap:8px;align-items:center\"><span class=\"btn\">48</span><span class=\"btn sm\">32</span></span>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<span class=\"btn\">儲存</span>"
+      ],
+      [
+        "Hover",
+        "<span class=\"btn hv\">儲存</span>"
+      ],
+      [
+        "Pressed",
+        "<span class=\"btn hv is-press\">儲存</span>"
+      ],
+      [
+        "Focus",
+        "<span class=\"btn is-focus\">儲存</span>"
+      ],
+      [
+        "Loading",
+        "<span class=\"btn is-load\"><i class=\"spin\"></i>儲存中</span>"
+      ],
+      [
+        "Success",
+        "<span class=\"btn done\"><span class=\"roll\">已儲存</span></span>"
+      ],
+      [
+        "Disabled",
+        "<span class=\"btn is-off\">儲存</span>"
+      ]
+    ]
+  },
+  "form-field": {
+    "title": "表單欄位",
+    "wide": true,
+    "variants": [
+      [
+        "必填 Required",
+        "<div class=\"ff \">\n      <div class=\"ff-l\">工單名稱<span class=\"req\">*</span><span class=\"ff-e\">尚未填寫</span></div>\n      <div class=\"ff-i\"><span class=\"ph\">例如：機房巡檢</span></div>\n      <div class=\"ff-h\"><span>顯示在工單列表與通知</span><span class=\"cnt\">0 / 50</span></div>\n      <div class=\"ff-x\"></div></div>"
+      ],
+      [
+        "選填 Optional",
+        "<div class=\"ff \">\n      <div class=\"ff-l\">備註<span class=\"opt\">（選填）</span></div>\n      <div class=\"ff-i\"><span class=\"ph\">補充說明</span></div>\n      <div class=\"ff-h\"><span>只有內部成員看得到</span></div>\n      <div class=\"ff-x\"></div></div>"
+      ],
+      [
+        "多行 Textarea",
+        "<div class=\"ff \">\n      <div class=\"ff-l\">專案描述<span class=\"opt\">（選填）</span></div>\n      <div class=\"ff-i ta\"><span class=\"ph\">可補充背景與執行限制</span></div>\n      <div class=\"ff-h\"><span></span><span class=\"cnt\">0 / 500</span></div>\n      <div class=\"ff-x\"></div></div>"
+      ],
+      [
+        "帶單位 Suffix",
+        "<div class=\"ff \">\n      <div class=\"ff-l\">預估工時<span class=\"req\">*</span></div>\n      <div class=\"ff-i\"><span class=\"q\">12</span><span class=\"unit\">小時</span></div>\n      <div class=\"ff-h\"><span></span></div>\n      <div class=\"ff-x\"></div></div>"
+      ],
+      [
+        "帶圖示 Prefix",
+        "<div class=\"ff \">\n      <div class=\"ff-l\">指派對象<span class=\"req\">*</span></div>\n      <div class=\"ff-i\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><span class=\"ph\">搜尋姓名或部門</span></div>\n      <div class=\"ff-h\"><span></span></div>\n      <div class=\"ff-x\"></div></div>"
+      ],
+      [
+        "唯讀 Read-only",
+        "<div class=\"ff ro\">\n      <div class=\"ff-l\">所屬專案</div>\n      <div class=\"ff-i\"><span>變電站季度保養</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"5\" y=\"11\" width=\"14\" height=\"9.5\" rx=\"2\"/><path d=\"M8 11V8a4 4 0 0 1 8 0v3\"/></svg></div>\n      <div class=\"ff-h\"><span>由所屬案件帶入</span></div>\n      <div class=\"ff-x\"></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"ff \">\n      <div class=\"ff-l\">工單名稱<span class=\"req\">*</span></div>\n      <div class=\"ff-i\"><span class=\"ph\">例如：機房巡檢</span></div>\n      <div class=\"ff-h\"><span></span></div>\n      <div class=\"ff-x\"></div></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"ff hv\">\n      <div class=\"ff-l\">工單名稱<span class=\"req\">*</span></div>\n      <div class=\"ff-i\"><span class=\"ph\">例如：機房巡檢</span></div>\n      <div class=\"ff-h\"><span></span></div>\n      <div class=\"ff-x\"></div></div>"
+      ],
+      [
+        "Focus",
+        "<div class=\"ff focus\">\n      <div class=\"ff-l\">工單名稱<span class=\"req\">*</span></div>\n      <div class=\"ff-i\"><i class=\"caret\" style=\"margin-left:0\"></i><span class=\"ph\">例如：機房巡檢</span></div>\n      <div class=\"ff-h\"><span></span></div>\n      <div class=\"ff-x\"></div></div>"
+      ],
+      [
+        "Filled",
+        "<div class=\"ff \">\n      <div class=\"ff-l\">工單名稱<span class=\"req\">*</span></div>\n      <div class=\"ff-i\"><span class=\"q\">機房巡檢</span></div>\n      <div class=\"ff-h\"><span></span><span class=\"cnt\">4 / 50</span></div>\n      <div class=\"ff-x\"></div></div>"
+      ],
+      [
+        "Error",
+        "<div class=\"ff bad\">\n      <div class=\"ff-l\">工單名稱<span class=\"req\">*</span></div>\n      <div class=\"ff-i\"><span class=\"ph\">例如：機房巡檢</span></div>\n      \n      <div class=\"ff-x\">請輸入工單名稱</div></div>"
+      ],
+      [
+        "Disabled",
+        "<div class=\"ff dis\">\n      <div class=\"ff-l\">工單名稱<span class=\"req\">*</span></div>\n      <div class=\"ff-i\"><span class=\"q\">機房巡檢</span></div>\n      <div class=\"ff-h\"><span></span></div>\n      <div class=\"ff-x\"></div></div>"
+      ]
+    ]
+  },
+  "combo": {
+    "title": "下拉選單",
+    "wide": true,
+    "variants": [
+      [
+        "表單欄位 In form field",
+        "<div class=\"ff \">\n      <div class=\"ff-l\">所屬專案<span class=\"req\">*</span></div>\n      <div class=\"ff-i\"><span class=\"ph\">請選擇所屬專案</span><span class=\"unit\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></span></div>\n      <div class=\"ff-h\"><span></span></div>\n      <div class=\"ff-x\"></div></div>"
+      ],
+      [
+        "錯誤 Invalid",
+        "<div class=\"ff bad\">\n      <div class=\"ff-l\">所屬專案<span class=\"req\">*</span></div>\n      <div class=\"ff-i\"><span class=\"ph\">請選擇所屬專案</span><span class=\"unit\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></span></div>\n      \n      <div class=\"ff-x\">請選擇所屬專案</div></div>"
+      ],
+      [
+        "無可見標籤 Self-labelled",
+        "<div class=\"dd\"><div class=\"dd-t\"><span>機房巡檢</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Closed",
+        "<div class=\"dd\"><div class=\"dd-t\"><span class=\"ph\">請選擇所屬專案</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></div></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"dd\"><div class=\"dd-t hv\"><span class=\"ph\">請選擇所屬專案</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></div></div>"
+      ],
+      [
+        "Open",
+        "<div class=\"dd open pin\"><div class=\"dd-t\"><span>變電站季度保養</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg></div><div class=\"dd-m\"><div class=\"sel\">變電站季度保養<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg></div><div class=\"\">機房巡檢<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg></div><div class=\"\">設備汰換<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg></div></div></div>"
+      ],
+      [
+        "Typing",
+        "<div class=\"dd open pin\"><div class=\"dd-t\"><span>巡檢<i class=\"caret\"></i></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg></div><div class=\"dd-m\"><div class=\"hl\">機房巡檢<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg></div></div></div>"
+      ],
+      [
+        "No results",
+        "<div class=\"dd open pin\"><div class=\"dd-t\"><span>空調<i class=\"caret\"></i></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg></div><div class=\"dd-m\"><div class=\"none\">沒有符合的選項</div></div></div>"
+      ],
+      [
+        "Error",
+        "<div class=\"dd bad\"><div class=\"dd-t\"><span class=\"ph\">請選擇所屬專案</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></div></div>"
+      ]
+    ]
+  },
+  "multi-select": {
+    "title": "多選下拉",
+    "wide": true,
+    "variants": [
+      [
+        "工具列 sm",
+        "<div class=\"ms\"><div class=\"ms-t\"><span class=\"\">設計部、研發部</span><span class=\"ms-n\">2</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></div></div>"
+      ],
+      [
+        "表單欄位 field",
+        "<div class=\"ff \">\n      <div class=\"ff-l\">部門</div>\n      <div class=\"ff-i\"><span class=\"ph\">全部部門</span><span class=\"unit\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></span></div>\n      <div class=\"ff-h\"><span></span></div>\n      <div class=\"ff-x\"></div></div>"
+      ],
+      [
+        "單選 Single",
+        "<div class=\"ms\"><div class=\"ms-t\"><span >王小明</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "None",
+        "<div class=\"ms\"><div class=\"ms-t\"><span class=\"ph\">全部部門</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></div></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"ms\"><div class=\"ms-t hv\"><span class=\"ph\">全部部門</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></div></div>"
+      ],
+      [
+        "Selected (N)",
+        "<div class=\"ms\"><div class=\"ms-t\"><span class=\"\">設計部、研發部</span><span class=\"ms-n\">2</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></div></div>"
+      ],
+      [
+        "Open",
+        "<div class=\"ms open pin\"><div class=\"ms-t\"><span class=\"\">設計部、研發部</span><span class=\"ms-n\">2</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></div><div class=\"ms-p\"><div class=\"ms-s\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg>搜尋部門</div><div class=\"ms-l\"><div class=\"ck on\"><i><svg class=\"ic chk\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg><svg class=\"ic dash\" viewBox=\"0 0 24 24\"><path d=\"M6 12h12\"/></svg></i><span>設計部</span></div><div class=\"ck on\"><i><svg class=\"ic chk\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg><svg class=\"ic dash\" viewBox=\"0 0 24 24\"><path d=\"M6 12h12\"/></svg></i><span>研發部</span></div><div class=\"ck \"><i><svg class=\"ic chk\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg><svg class=\"ic dash\" viewBox=\"0 0 24 24\"><path d=\"M6 12h12\"/></svg></i><span>客服部</span></div></div><div class=\"ms-f\"><span>已選 2 個</span><u>清除</u></div></div></div>"
+      ],
+      [
+        "Searchable",
+        "<div class=\"ms open pin\"><div class=\"ms-t\"><span class=\"ph\">全部部門</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></div><div class=\"ms-p\"><div class=\"ms-s\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><span class=\"q\">研</span></div><div class=\"ms-l\"><div class=\"ck \"><i><svg class=\"ic chk\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg><svg class=\"ic dash\" viewBox=\"0 0 24 24\"><path d=\"M6 12h12\"/></svg></i><span>研發部</span></div></div><div class=\"ms-f\"><span>未選＝全部部門</span><u>清除</u></div></div></div>"
+      ]
+    ]
+  },
+  "checkbox": {
+    "title": "核取方塊",
+    "wide": false,
+    "variants": [
+      [
+        "單一 Single",
+        "<div class=\"ck on\"><i><svg class=\"ic chk\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg><svg class=\"ic dash\" viewBox=\"0 0 24 24\"><path d=\"M6 12h12\"/></svg></i><span>同步通知負責人</span></div>"
+      ],
+      [
+        "全選 Select all",
+        "<div class=\"cks\" style=\"width:100%\"><div class=\"ck all some\"><i><svg class=\"ic chk\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg><svg class=\"ic dash\" viewBox=\"0 0 24 24\"><path d=\"M6 12h12\"/></svg></i><span>全部成員</span></div><div class=\"ck on\"><i><svg class=\"ic chk\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg><svg class=\"ic dash\" viewBox=\"0 0 24 24\"><path d=\"M6 12h12\"/></svg></i><span>王小明</span></div><div class=\"ck \"><i><svg class=\"ic chk\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg><svg class=\"ic dash\" viewBox=\"0 0 24 24\"><path d=\"M6 12h12\"/></svg></i><span>陳大文</span></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Unchecked",
+        "<div class=\"ck \"><i><svg class=\"ic chk\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg><svg class=\"ic dash\" viewBox=\"0 0 24 24\"><path d=\"M6 12h12\"/></svg></i></div>"
+      ],
+      [
+        "Checked",
+        "<div class=\"ck on\"><i><svg class=\"ic chk\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg><svg class=\"ic dash\" viewBox=\"0 0 24 24\"><path d=\"M6 12h12\"/></svg></i></div>"
+      ],
+      [
+        "Indeterminate",
+        "<div class=\"ck some\"><i><svg class=\"ic chk\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg><svg class=\"ic dash\" viewBox=\"0 0 24 24\"><path d=\"M6 12h12\"/></svg></i></div>"
+      ],
+      [
+        "Focus",
+        "<div class=\"ck on\"><i class=\"is-focus\"><svg class=\"ic chk\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg><svg class=\"ic dash\" viewBox=\"0 0 24 24\"><path d=\"M6 12h12\"/></svg></i></div>"
+      ],
+      [
+        "Disabled",
+        "<div class=\"ck dis\"><i><svg class=\"ic chk\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg><svg class=\"ic dash\" viewBox=\"0 0 24 24\"><path d=\"M6 12h12\"/></svg></i></div>"
+      ]
+    ]
+  },
+  "radio-group": {
+    "title": "單選清單",
+    "wide": true,
+    "variants": [
+      [
+        "清單 List",
+        "<div class=\"rads\" style=\"width:100%\"><div class=\"rad on\"><i></i>依部門</div><div class=\"rad\"><i></i>依專案</div><div class=\"rad\"><i></i>依成員</div></div>"
+      ],
+      [
+        "帶說明 With description",
+        "<div class=\"rads\" style=\"width:100%\"><div class=\"rad on tall\"><i></i><span><b>完成後開始</b><small>前一個完成才開始</small></span></div><div class=\"rad tall\"><i></i><span><b>同時進行</b><small>可以一起做</small></span></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Unselected",
+        "<div class=\"rad\"><i></i>依專案</div>"
+      ],
+      [
+        "Selected",
+        "<div class=\"rad on\"><i></i>依部門</div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"rad hv\"><i></i>依專案</div>"
+      ],
+      [
+        "Focus",
+        "<div class=\"rad\"><i class=\"is-focus\"></i>依專案</div>"
+      ],
+      [
+        "Disabled",
+        "<div class=\"rad dis\"><i></i>依成員</div>"
+      ]
+    ]
+  },
+  "switch": {
+    "title": "開關",
+    "wide": false,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"tgr on\" style=\"width:100%\"><span>到期前提醒</span><span class=\"tg\"><i></i></span></div>"
+      ],
+      [
+        "小號 sm",
+        "<div class=\"tgr on\" style=\"width:100%\"><span>顯示負責人</span><span class=\"tg sm\"><i></i></span></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Off",
+        "<div class=\"tgr \"><span class=\"tg \"><i></i></span></div>"
+      ],
+      [
+        "On",
+        "<div class=\"tgr on\"><span class=\"tg \"><i></i></span></div>"
+      ],
+      [
+        "Focus",
+        "<div class=\"tgr on\"><span class=\"tg is-focus\"><i></i></span></div>"
+      ],
+      [
+        "Disabled",
+        "<div class=\"tgr dis\"><span class=\"tg \"><i></i></span></div>"
+      ],
+      [
+        "Disabled (On)",
+        "<div class=\"tgr on dis\"><span class=\"tg \"><i></i></span></div>"
+      ]
+    ]
+  },
+  "segmented": {
+    "title": "分段切換",
+    "wide": false,
+    "variants": [
+      [
+        "標準 Default",
+        "<div style=\"width:100%\"><div class=\"seg \" style=\"grid-template-columns:repeat(3,1fr)\"><i style=\"width:calc((100% - 6px) / 3);transform:translateX(0%)\"></i><span class=\"on \">日</span><span class=\" \">週</span><span class=\" \">月</span></div></div>"
+      ],
+      [
+        "小號帶數量 sm",
+        "<div style=\"width:100%\"><div class=\"seg sm\" style=\"grid-template-columns:repeat(2,1fr)\"><i style=\"width:calc((100% - 6px) / 2);transform:translateX(0%)\"></i><span class=\"on \">全部 12</span><span class=\" \">已選 3</span></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Selected",
+        "<div style=\"width:100%\"><div class=\"seg \" style=\"grid-template-columns:repeat(3,1fr)\"><i style=\"width:calc((100% - 6px) / 3);transform:translateX(100%)\"></i><span class=\" \">日</span><span class=\"on \">週</span><span class=\" \">月</span></div></div>"
+      ],
+      [
+        "Hover",
+        "<div style=\"width:100%\"><div class=\"seg \" style=\"grid-template-columns:repeat(3,1fr)\"><i style=\"width:calc((100% - 6px) / 3);transform:translateX(0%)\"></i><span class=\"on \">日</span><span class=\" \">週</span><span class=\" hv\">月</span></div></div>"
+      ],
+      [
+        "Pressed",
+        "<div style=\"width:100%\"><div class=\"seg \" style=\"grid-template-columns:repeat(3,1fr)\"><i style=\"width:calc((100% - 6px) / 3);transform:translateX(0%)\"></i><span class=\"on \">日</span><span class=\" \">週</span><span class=\" hv is-press\">月</span></div></div>"
+      ],
+      [
+        "Focus",
+        "<div style=\"width:100%\"><div class=\"seg \" style=\"grid-template-columns:repeat(3,1fr)\"><i style=\"width:calc((100% - 6px) / 3);transform:translateX(0%)\"></i><span class=\"on is-focus\">日</span><span class=\" \">週</span><span class=\" \">月</span></div></div>"
+      ]
+    ]
+  },
+  "menu": {
+    "title": "操作選單",
+    "wide": true,
+    "variants": [
+      [
+        "一般 Default",
+        "<div class=\"mn pin\"><div class=\"mn-p\"><div class=\"mn-i\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"8\" y=\"8\" width=\"12\" height=\"12\" rx=\"2\"/><path d=\"M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2\"/></svg>複製</div><div class=\"mn-i\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7\"/><path d=\"M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7\"/></svg>設定相依</div></div></div>"
+      ],
+      [
+        "停用附原因 Disabled with reason",
+        "<div class=\"mn pin\"><div class=\"mn-p\"><div class=\"mn-i dis\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M17 2l4 4-4 4\"/><path d=\"M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4\"/><path d=\"M21 13v1a4 4 0 0 1-4 4H3\"/></svg>建立排程規則<small>這張案件沒有對應的專案</small></div></div></div>"
+      ],
+      [
+        "刪除類 Destructive",
+        "<div class=\"mn pin\"><div class=\"mn-p\"><div class=\"mn-i\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"8\" y=\"8\" width=\"12\" height=\"12\" rx=\"2\"/><path d=\"M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2\"/></svg>複製</div><div class=\"mn-sep\"></div><div class=\"mn-i dng\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M18 6L6 18M6 6l12 12\"/></svg>取消案件</div></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Trigger",
+        "<div class=\"mn-h\"><span class=\"b2 ico\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"5.5\" cy=\"12\" r=\"1\"/><circle cx=\"12\" cy=\"12\" r=\"1\"/><circle cx=\"18.5\" cy=\"12\" r=\"1\"/></svg></span></div>"
+      ],
+      [
+        "Trigger open",
+        "<div class=\"mn-h\"><span class=\"b2 ico on\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"5.5\" cy=\"12\" r=\"1\"/><circle cx=\"12\" cy=\"12\" r=\"1\"/><circle cx=\"18.5\" cy=\"12\" r=\"1\"/></svg></span></div>"
+      ],
+      [
+        "Item hover",
+        "<div class=\"mn pin\"><div class=\"mn-p\"><div class=\"mn-i hl\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"8\" y=\"8\" width=\"12\" height=\"12\" rx=\"2\"/><path d=\"M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2\"/></svg>複製</div></div></div>"
+      ],
+      [
+        "Destructive hover",
+        "<div class=\"mn pin\"><div class=\"mn-p\"><div class=\"mn-i dng hl\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M18 6L6 18M6 6l12 12\"/></svg>取消案件</div></div></div>"
+      ],
+      [
+        "Disabled",
+        "<div class=\"mn pin\"><div class=\"mn-p\"><div class=\"mn-i dis\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M17 2l4 4-4 4\"/><path d=\"M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4\"/><path d=\"M21 13v1a4 4 0 0 1-4 4H3\"/></svg>建立排程規則</div></div></div>"
+      ]
+    ]
+  },
+  "dialog": {
+    "title": "對話框",
+    "wide": true,
+    "variants": [
+      [
+        "一般 Default",
+        "<div class=\"dl-d pin\"><b>確認結案</b><p><span>案件將標記為「已結案」。</span></p><div class=\"dl-a\"><span class=\"cancel\">取消</span><span class=\"ok is-focus\">確認結案</span></div></div>"
+      ],
+      [
+        "破壞性 Destructive",
+        "<div class=\"dl-d pin\"><b>刪除里程碑</b><p><span>「現場勘查」將從這個專案移除。</span></p><div class=\"dl-a\"><span class=\"cancel fc\">取消</span><span class=\"ok dng\">刪除里程碑</span></div></div>"
+      ],
+      [
+        "附補充 Note",
+        "<div class=\"dl-d pin\"><b>刪除里程碑</b><p><span>「現場勘查」將從這個專案移除。</span><small>關聯案件與工單不會被刪除。</small></p><div class=\"dl-a\"><span class=\"cancel\">取消</span><span class=\"ok dng\">刪除里程碑</span></div></div>"
+      ]
+    ],
+    "states": []
+  },
+  "tabs": {
+    "title": "頁籤",
+    "wide": true,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"tabs\" style=\"width:100%\"><span class=\"tab on\">全部</span><span class=\"tab \">待處理</span><span class=\"tab \">提及</span></div>"
+      ],
+      [
+        "帶數量 Count",
+        "<div class=\"tabs\" style=\"width:100%\"><span class=\"tab \">全部</span><span class=\"tab on\">待處理<b>12</b></span><span class=\"tab \">提及<b>3</b></span></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Selected",
+        "<div class=\"tabs\" style=\"width:100%\"><span class=\"tab on\">全部</span><span class=\"tab \">待處理<b>12</b></span></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"tabs\" style=\"width:100%\"><span class=\"tab on\">全部</span><span class=\"tab hv\">待處理<b>12</b></span></div>"
+      ],
+      [
+        "Count badge",
+        "<div class=\"tabs\" style=\"width:100%\"><span class=\"tab \">全部</span><span class=\"tab on\">待處理<b>12</b></span></div>"
+      ],
+      [
+        "Focus",
+        "<div class=\"tabs\" style=\"width:100%\"><span class=\"tab on\">全部</span><span class=\"tab is-focus\">待處理<b>12</b></span></div>"
+      ]
+    ]
+  },
+  "detail-tabs": {
+    "title": "詳情頁籤",
+    "wide": true,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"dt\"><span class=\"dtab on\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/></svg>概覽</span><span class=\"dtab \"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"/><path d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"/></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"/><path fill=\"none\" d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"/><path class=\"k\" d=\"M3.5 12.5h17\"/></svg>案件<b>256</b></span><span class=\"dtab \"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"5.5\" y=\"4.5\" width=\"13\" height=\"16\" rx=\"2\"/><path d=\"M9 4.5V3.5h6v1M9 13l2 2 4-4\"/></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"5.5\" y=\"4.5\" width=\"13\" height=\"16\" rx=\"2\"/><path fill=\"none\" d=\"M9 4.5V3.5h6v1\"/><path class=\"k\" d=\"M9 13l2 2 4-4\"/></svg>工單<b>575</b></span></div>"
+      ],
+      [
+        "分組 Group divider",
+        "<div class=\"dt\"><span class=\"dtab on\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/></svg>概覽</span><span class=\"dtab \"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"/><path d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"/></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"/><path fill=\"none\" d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"/><path class=\"k\" d=\"M3.5 12.5h17\"/></svg>案件<b>256</b></span><i class=\"sep\"></i><span class=\"dtab \"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5M9 13h6M9 17h4\"/></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path class=\"k\" d=\"M14 3v5h5M9 13h6M9 17h4\"/></svg>文件<b>2</b></span></div>"
+      ],
+      [
+        "讀屏數量 srCount",
+        "<div class=\"dt\"><span class=\"dtab \"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/><rect x=\"13\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"/></svg>概覽</span><span class=\"dtab on\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"/><path d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"/></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"/><path fill=\"none\" d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"/><path class=\"k\" d=\"M3.5 12.5h17\"/></svg>案件<b>3</b></span></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Selected (filled icon)",
+        "<div class=\"dt\"><span class=\"dtab on\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"/><path d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"/></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"/><path fill=\"none\" d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"/><path class=\"k\" d=\"M3.5 12.5h17\"/></svg>案件<b>256</b></span></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"dt\"><span class=\"dtab hv\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"/><path d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"/></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"/><path fill=\"none\" d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"/><path class=\"k\" d=\"M3.5 12.5h17\"/></svg>案件<b>256</b></span></div>"
+      ],
+      [
+        "Pressed",
+        "<div class=\"dt\"><span class=\"dtab on press\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"/><path d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"/></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"/><path fill=\"none\" d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"/><path class=\"k\" d=\"M3.5 12.5h17\"/></svg>案件<b>256</b></span></div>"
+      ],
+      [
+        "Focus",
+        "<div class=\"dt\"><span class=\"dtab is-focus\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"/><path d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"/></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"/><path fill=\"none\" d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"/><path class=\"k\" d=\"M3.5 12.5h17\"/></svg>案件<b>256</b></span></div>"
+      ]
+    ]
+  },
+  "status-badge": {
+    "title": "狀態徽章",
+    "wide": true,
+    "variants": [
+      [
+        "實心 Filled",
+        "<span style=\"display:flex;gap:8px;flex-wrap:wrap\"><span class=\"bdg t-a \"><i></i>進行中</span><span class=\"bdg t-c \"><i></i>已結案</span></span>"
+      ],
+      [
+        "外框 Outline",
+        "<span style=\"display:flex;gap:8px;flex-wrap:wrap\"><span class=\"bdg t-a ol\"><i></i>進行中</span><span class=\"bdg t-p ol\"><i></i>暫停</span></span>"
+      ],
+      [
+        "純文字 Plain",
+        "<span style=\"display:flex;gap:12px;flex-wrap:wrap\"><span class=\"bdg t-a pl\"><i></i>進行中</span><span class=\"bdg t-q pl nodot\">未指派</span></span>"
+      ]
+    ],
+    "states": [
+      [
+        "plan",
+        "<span class=\"bdg t-q \"><i></i>規劃中</span>"
+      ],
+      [
+        "active",
+        "<span class=\"bdg t-a \"><i></i>進行中</span>"
+      ],
+      [
+        "pause",
+        "<span class=\"bdg t-p \"><i></i>暫停</span>"
+      ],
+      [
+        "closed",
+        "<span class=\"bdg t-c \"><i></i>已結案</span>"
+      ],
+      [
+        "danger",
+        "<span class=\"bdg t-d \"><i></i>已退回</span>"
+      ],
+      [
+        "none",
+        "<span class=\"bdg t-q nodot\">未指派</span>"
+      ]
+    ]
+  },
+  "callout": {
+    "title": "提示訊息",
+    "wide": true,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"co info\"><div><strong>報表每小時更新一次</strong><p>目前顯示的是 14:00 的資料。</p></div></div>"
+      ],
+      [
+        "帶圖示 Icon",
+        "<div class=\"co warn\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M12 3.5l9.5 16.5h-19z\"/><path d=\"M12 10v4.5M12 17.5v.5\"/></svg><div><strong>有 3 張工單即將到期</strong><p>請在 11-20 前完成。</p></div></div>"
+      ],
+      [
+        "播報 Live",
+        "<div class=\"co ok\"><div><strong>案件已建立</strong><p>已一併開立 2 筆工單。</p></div></div>"
+      ],
+      [
+        "附動作 Action",
+        "<div class=\"co dng\"><div><strong>資料載入失敗</strong></div><span class=\"b2\">重試</span></div>"
+      ],
+      [
+        "緊湊 Compact",
+        "<div class=\"co neu cpt\"><div><strong>權重依工時比例自動計算</strong></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "info",
+        "<div class=\"co info\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 11v5M12 7.5v.5\"/></svg><div><strong>報表每小時更新</strong></div></div>"
+      ],
+      [
+        "success",
+        "<div class=\"co ok\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M8 12.5l2.8 2.8L16 10\"/></svg><div><strong>案件已建立</strong></div></div>"
+      ],
+      [
+        "warn",
+        "<div class=\"co warn\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M12 3.5l9.5 16.5h-19z\"/><path d=\"M12 10v4.5M12 17.5v.5\"/></svg><div><strong>即將到期</strong></div></div>"
+      ],
+      [
+        "danger",
+        "<div class=\"co dng\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M15 9l-6 6M9 9l6 6\"/></svg><div><strong>載入失敗</strong></div></div>"
+      ],
+      [
+        "neutral",
+        "<div class=\"co neu\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 11v5M12 7.5v.5\"/></svg><div><strong>計算方式</strong></div></div>"
+      ]
+    ]
+  },
+  "toast": {
+    "title": "Toast 通知",
+    "wide": true,
+    "variants": [
+      [
+        "一般 Plain",
+        "<div class=\"toast ok\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M8 12.5l2.8 2.8L16 10\"/></svg><div><b>已儲存</b></div></div>"
+      ],
+      [
+        "附補述 Detail",
+        "<div class=\"toast ok\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M8 12.5l2.8 2.8L16 10\"/></svg><div><b>已送出審核</b><small>等待 陳大文 覆核</small></div></div>"
+      ],
+      [
+        "可復原 Undo",
+        "<div class=\"toast ok\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M8 12.5l2.8 2.8L16 10\"/></svg><div><b>已移除成員</b><small>王小明</small></div><em>復原</em></div>"
+      ],
+      [
+        "自訂動作 Action",
+        "<div class=\"toast ok\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M8 12.5l2.8 2.8L16 10\"/></svg><div><b>已儲存</b></div><em>同步到 ERP</em></div>"
+      ]
+    ],
+    "states": []
+  },
+  "data-table": {
+    "title": "資料表格",
+    "wide": true,
+    "variants": [
+      [
+        "排序表頭 Sort header",
+        "<div class=\"tb\" style=\"width:100%\"><div class=\"tr hd\" style=\"grid-template-columns:1fr 1fr 1fr\"><span class=\"th\" data-s=\"none\">案號<svg viewBox=\"0 0 12 14\"><path class=\"up\" d=\"M6 1l4 5H2z\"/><path class=\"dn\" d=\"M6 13l4-5H2z\"/></svg></span><span>名稱</span><span class=\"th\" data-s=\"asc\">到期日<svg viewBox=\"0 0 12 14\"><path class=\"up\" d=\"M6 1l4 5H2z\"/><path class=\"dn\" d=\"M6 13l4-5H2z\"/></svg></span></div></div>"
+      ],
+      [
+        "到期欄 Due cell",
+        "<div class=\"dues\"><span class=\"due-r\">11-09<span class=\"tagx d\">逾期 3 天</span></span><span class=\"due-r\">11-12<span class=\"tagx w\">今天</span></span><span class=\"due-r\">11-14<span class=\"tagx w\">2 天內</span></span><span class=\"due-r\">11-28</span></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Sort none",
+        "<span class=\"th\" data-s=\"none\">到期日<svg viewBox=\"0 0 12 14\"><path class=\"up\" d=\"M6 1l4 5H2z\"/><path class=\"dn\" d=\"M6 13l4-5H2z\"/></svg></span>"
+      ],
+      [
+        "Sort asc",
+        "<span class=\"th\" data-s=\"asc\">到期日<svg viewBox=\"0 0 12 14\"><path class=\"up\" d=\"M6 1l4 5H2z\"/><path class=\"dn\" d=\"M6 13l4-5H2z\"/></svg></span>"
+      ],
+      [
+        "Sort desc",
+        "<span class=\"th\" data-s=\"desc\">到期日<svg viewBox=\"0 0 12 14\"><path class=\"up\" d=\"M6 1l4 5H2z\"/><path class=\"dn\" d=\"M6 13l4-5H2z\"/></svg></span>"
+      ],
+      [
+        "Row hover",
+        "<div class=\"tb\" style=\"width:100%\"><div class=\"tr hv\" style=\"grid-template-columns:auto 1fr;border-top:0\"><span class=\"id\">C-1042</span><span>官網改版</span></div></div>"
+      ],
+      [
+        "Overdue",
+        "<span class=\"due-r\">11-09<span class=\"tagx d\">逾期 3 天</span></span>"
+      ],
+      [
+        "Due soon",
+        "<span class=\"due-r\">11-14<span class=\"tagx w\">2 天內</span></span>"
+      ]
+    ]
+  },
+  "pagination": {
+    "title": "分頁",
+    "wide": true,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"pg\" style=\"width:100%\"><span>每頁<span class=\"sel\">20<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></span>筆，共 <b>56</b> 筆</span><nav><span class=\"dis\">‹</span><span class=\"on\">1</span><span>2</span><span>3</span><span>›</span></nav></div>"
+      ],
+      [
+        "頁數多 Ellipsis",
+        "<div class=\"pg\"><nav><span class=\"\">‹</span><span class=\"\">1</span><span class=\"gap\">…</span><span class=\"\">5</span><span class=\"on\">6</span><span class=\"\">7</span><span class=\"gap\">…</span><span class=\"\">12</span><span class=\"\">›</span></nav></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Current",
+        "<div class=\"pg\"><nav><span class=\"\">‹</span><span class=\"\">1</span><span class=\"on\">2</span><span class=\"\">3</span><span class=\"\">›</span></nav></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"pg\"><nav><span class=\"\">‹</span><span class=\"\">1</span><span class=\"on\">2</span><span class=\"hv\">3</span><span class=\"\">›</span></nav></div>"
+      ],
+      [
+        "Previous／Next",
+        "<div class=\"pg\"><nav><span class=\"\">‹</span><span class=\"\">1</span><span class=\"on\">2</span><span class=\"\">3</span><span class=\"hv\">›</span></nav></div>"
+      ],
+      [
+        "Disabled",
+        "<div class=\"pg\"><nav><span class=\"dis\">‹</span><span class=\"on\">1</span><span class=\"\">2</span><span class=\"\">3</span><span class=\"\">›</span></nav></div>"
+      ]
+    ]
+  },
+  "stepper": {
+    "title": "流程步驟",
+    "wide": true,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"fl\" style=\"width:100%\"><div class=\"fs done\"><p><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>待指派</p><small>11-04 完成</small></div><div class=\"fs cur\"><p><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>處理中</p><small>李小美・進行中</small></div><div class=\"fs todo\"><p><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>待審核</p><small>未開始</small></div><div class=\"fs todo\"><p><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>已結案</p><small>未開始</small></div></div>"
+      ],
+      [
+        "最後階段 Last",
+        "<div class=\"fl\" style=\"width:100%\"><div class=\"fs done\"><p><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>待指派</p><small>11-04 完成</small></div><div class=\"fs done\"><p><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>處理中</p><small>11-06 完成</small></div><div class=\"fs done\"><p><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>待審核</p><small>11-11 完成</small></div><div class=\"fs cur\"><p><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>已結案</p><small>王小明・進行中</small></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Done",
+        "<div class=\"fl\"><div class=\"fs done\"><p><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>待指派</p><small>11-04 完成</small></div></div>"
+      ],
+      [
+        "Current",
+        "<div class=\"fl\"><div class=\"fs cur\"><p><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>處理中</p><small>李小美・進行中</small></div></div>"
+      ],
+      [
+        "Upcoming",
+        "<div class=\"fl\"><div class=\"fs todo\"><p><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>待審核</p><small>未開始</small></div></div>"
+      ]
+    ]
+  },
+  "sidebar": {
+    "title": "側邊選單",
+    "wide": true,
+    "variants": [
+      [
+        "展開 Expanded",
+        "<div class=\"sd-app\"><nav class=\"sd\"><div class=\"sd-brand\"><i class=\"sd-logo\">案</i><b>案管中心</b></div><div class=\"sd-list\"><i class=\"sd-ind\" style=\"height: 30px; transform: translateY(26px);\"></i><span class=\"sd-g\">工作</span><span class=\"sd-it on\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><path d=\"M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><path d=\"M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z\"></path></svg><span>首頁</span></span><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"></rect><path d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"></rect><path fill=\"none\" d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"></path><path class=\"k\" d=\"M3.5 12.5h17\"></path></svg><span>案件</span><b>43</b></span><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"5.5\" y=\"4.5\" width=\"13\" height=\"16\" rx=\"2\"></rect><path d=\"M9 4.5V3.5h6v1M9 13l2 2 4-4\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"5.5\" y=\"4.5\" width=\"13\" height=\"16\" rx=\"2\"></rect><path fill=\"none\" d=\"M9 4.5V3.5h6v1\"></path><path class=\"k\" d=\"M9 13l2 2 4-4\"></path></svg><span>工單</span><b>12</b></span><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><path d=\"M3.5 7.5A1.5 1.5 0 0 1 5 6h4.5l2 2.5H19a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18z\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><path d=\"M3.5 7.5A1.5 1.5 0 0 1 5 6h4.5l2 2.5H19a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18z\"></path></svg><span>專案</span></span><span class=\"sd-g sd-tg\">管理<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 9l6 6 6-6\"></path></svg></span><div class=\"sd-sub\"><div><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><path d=\"M4 20V10M10 20V4M16 20v-7M22 20H2\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"3\" y=\"10\" width=\"3.5\" height=\"10\" rx=\"1\"></rect><rect x=\"10.25\" y=\"4\" width=\"3.5\" height=\"16\" rx=\"1\"></rect><rect x=\"17.5\" y=\"13\" width=\"3.5\" height=\"7\" rx=\"1\"></rect></svg><span>成員績效</span></span><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"></path><path d=\"M14 3v5h5M9 13h6M9 17h4\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"></path><path class=\"k\" d=\"M14 3v5h5M9 13h6M9 17h4\"></path></svg><span>報表</span></span></div></div></div><div class=\"sd-me\"><i class=\"av\">王</i><span>王小明</span></div></nav></div>"
+      ],
+      [
+        "收合 Collapsed",
+        "<div class=\"sd-app mini\"><nav class=\"sd\"><div class=\"sd-brand\"><i class=\"sd-logo\">案</i><b>案管中心</b></div><div class=\"sd-list\"><i class=\"sd-ind\" style=\"height: 30px; transform: translateY(26px);\"></i><span class=\"sd-g\">工作</span><span class=\"sd-it on\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><path d=\"M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><path d=\"M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z\"></path></svg><span>首頁</span></span><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"></rect><path d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"></rect><path fill=\"none\" d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"></path><path class=\"k\" d=\"M3.5 12.5h17\"></path></svg><span>案件</span><b>43</b></span><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"5.5\" y=\"4.5\" width=\"13\" height=\"16\" rx=\"2\"></rect><path d=\"M9 4.5V3.5h6v1M9 13l2 2 4-4\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"5.5\" y=\"4.5\" width=\"13\" height=\"16\" rx=\"2\"></rect><path fill=\"none\" d=\"M9 4.5V3.5h6v1\"></path><path class=\"k\" d=\"M9 13l2 2 4-4\"></path></svg><span>工單</span><b>12</b></span><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><path d=\"M3.5 7.5A1.5 1.5 0 0 1 5 6h4.5l2 2.5H19a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18z\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><path d=\"M3.5 7.5A1.5 1.5 0 0 1 5 6h4.5l2 2.5H19a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18z\"></path></svg><span>專案</span></span><span class=\"sd-g sd-tg\">管理<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 9l6 6 6-6\"></path></svg></span><div class=\"sd-sub\"><div><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><path d=\"M4 20V10M10 20V4M16 20v-7M22 20H2\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"3\" y=\"10\" width=\"3.5\" height=\"10\" rx=\"1\"></rect><rect x=\"10.25\" y=\"4\" width=\"3.5\" height=\"16\" rx=\"1\"></rect><rect x=\"17.5\" y=\"13\" width=\"3.5\" height=\"7\" rx=\"1\"></rect></svg><span>成員績效</span></span><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"></path><path d=\"M14 3v5h5M9 13h6M9 17h4\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"></path><path class=\"k\" d=\"M14 3v5h5M9 13h6M9 17h4\"></path></svg><span>報表</span></span></div></div></div><div class=\"sd-me\"><i class=\"av\">王</i><span>王小明</span></div></nav></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"sd-app\"><nav class=\"sd\"><div class=\"sd-list\"><span class=\"sd-g\">工作</span><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><path d=\"M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><path d=\"M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z\"></path></svg><span>首頁</span></span><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"></rect><path d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"></rect><path fill=\"none\" d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"></path><path class=\"k\" d=\"M3.5 12.5h17\"></path></svg><span>案件</span><b>43</b></span></div></nav></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"sd-app\"><nav class=\"sd\"><div class=\"sd-list\"><span class=\"sd-g\">工作</span><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><path d=\"M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><path d=\"M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z\"></path></svg><span>首頁</span></span><span class=\"sd-it hv\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"></rect><path d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"></rect><path fill=\"none\" d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"></path><path class=\"k\" d=\"M3.5 12.5h17\"></path></svg><span>案件</span><b>43</b></span></div></nav></div>"
+      ],
+      [
+        "Selected",
+        "<div class=\"sd-app\"><nav class=\"sd\"><div class=\"sd-list\"><i class=\"sd-ind\" style=\"height: 30px; transform: translateY(26px);\"></i><span class=\"sd-g\">工作</span><span class=\"sd-it on\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><path d=\"M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><path d=\"M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z\"></path></svg><span>首頁</span></span><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"></rect><path d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"7\" width=\"17\" height=\"12.5\" rx=\"2\"></rect><path fill=\"none\" d=\"M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7\"></path><path class=\"k\" d=\"M3.5 12.5h17\"></path></svg><span>案件</span><b>43</b></span></div></nav></div>"
+      ],
+      [
+        "Group closed",
+        "<div class=\"sd-app\"><nav class=\"sd\"><div class=\"sd-list\"><span class=\"sd-g sd-tg shut\">管理<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 9l6 6 6-6\"></path></svg></span><div class=\"sd-sub shut\"><div><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><path d=\"M4 20V10M10 20V4M16 20v-7M22 20H2\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><rect x=\"3\" y=\"10\" width=\"3.5\" height=\"10\" rx=\"1\"></rect><rect x=\"10.25\" y=\"4\" width=\"3.5\" height=\"16\" rx=\"1\"></rect><rect x=\"17.5\" y=\"13\" width=\"3.5\" height=\"7\" rx=\"1\"></rect></svg><span>成員績效</span></span><span class=\"sd-it\"><svg class=\"ic ln\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"></path><path d=\"M14 3v5h5M9 13h6M9 17h4\"></path></svg><svg class=\"ic fl\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"></path><path class=\"k\" d=\"M14 3v5h5M9 13h6M9 17h4\"></path></svg><span>報表</span></span></div></div></div></nav></div>"
+      ]
+    ]
+  },
+  "empty-state": {
+    "title": "空狀態",
+    "wide": true,
+    "variants": [
+      [
+        "無資料 Empty",
+        "<div class=\"es info\"><span class=\"es-m\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"5.5\" y=\"4.5\" width=\"13\" height=\"16\" rx=\"2\"/><path d=\"M9 4.5V3.5h6v1M9 11h6M9 15h4\"/></svg></span><b>還沒有工單</b><p>建立第一張工單開始派工</p><span class=\"b2\">新增工單</span></div>"
+      ],
+      [
+        "查無結果 No results",
+        "<div class=\"es warn\"><span class=\"es-m\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4M8.5 11h5\"/></svg></span><b>找不到符合的案件</b><p>試試放寬篩選條件</p><span class=\"b2\">清除篩選</span></div>"
+      ],
+      [
+        "載入失敗 Error",
+        "<div class=\"es danger\"><span class=\"es-m\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M12 3.5l9 16H3z\"/><path d=\"M12 10v4M12 17v.5\"/></svg></span><b>載入失敗</b><p>網路不穩，請稍後再試</p><span class=\"b2\">重試</span></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"es info\"><span class=\"es-m\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"5.5\" y=\"4.5\" width=\"13\" height=\"16\" rx=\"2\"/><path d=\"M9 4.5V3.5h6v1M9 11h6M9 15h4\"/></svg></span><b>還沒有工單</b><p>建立第一張工單開始派工</p><span class=\"b2\">新增工單</span></div>"
+      ],
+      [
+        "Action hover",
+        "<div class=\"es info\"><span class=\"es-m\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"5.5\" y=\"4.5\" width=\"13\" height=\"16\" rx=\"2\"/><path d=\"M9 4.5V3.5h6v1M9 11h6M9 15h4\"/></svg></span><b>還沒有工單</b><p>建立第一張工單開始派工</p><span class=\"b2 hv\">新增工單</span></div>"
+      ]
+    ]
+  },
+  "timeline": {
+    "title": "歷程",
+    "wide": true,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"nts\" style=\"width:100%\"><div class=\"nt\"><i class=\"a\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M4 20h4L19 9l-4-4L4 16zM13 7l4 4\"/></svg></i><div><p>李小美 變更狀態為「進行中」</p><small>剛剛</small></div></div><div class=\"nt\"><i class=\"b\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg></i><div><p>陳大文 完成工單 D-2207</p><small>2 分鐘前</small></div></div><div class=\"nt\"><i class=\"c\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M12 7.5V12l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z\"/></svg></i><div><p>林小華 將到期日改為 11-20</p><small>10 分鐘前</small></div></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Edit",
+        "<div class=\"nts\" style=\"width:100%\"><div class=\"nt\"><i class=\"a\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M4 20h4L19 9l-4-4L4 16zM13 7l4 4\"/></svg></i><div><p>李小美 變更狀態</p><small>剛剛</small></div></div></div>"
+      ],
+      [
+        "Done",
+        "<div class=\"nts\" style=\"width:100%\"><div class=\"nt\"><i class=\"b\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg></i><div><p>陳大文 完成工單</p><small>2 分鐘前</small></div></div></div>"
+      ],
+      [
+        "Due",
+        "<div class=\"nts\" style=\"width:100%\"><div class=\"nt\"><i class=\"c\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M12 7.5V12l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z\"/></svg></i><div><p>林小華 改到期日</p><small>10 分鐘前</small></div></div></div>"
+      ]
+    ]
+  },
+  "avatar-group": {
+    "title": "成員頭像群組",
+    "wide": true,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"ppl-r\"><div class=\"stack\"><span class=\"av\" style=\"--a:var(--cat2)\">陳</span><span class=\"av\" style=\"--a:var(--cat4)\">林</span></div><span class=\"ppl-c\">共 2 位</span></div>"
+      ],
+      [
+        "超過 Overflow",
+        "<div class=\"ppl-r\"><div class=\"stack\"><span class=\"av\" style=\"--a:var(--cat2)\">陳</span><span class=\"av\" style=\"--a:var(--cat4)\">林</span><span class=\"av\" style=\"--a:var(--cat3)\">張</span><span class=\"av more\">+2</span></div><span class=\"ppl-c\">共 5 位</span></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"ppl-r\"><div class=\"stack\"><span class=\"av\" style=\"--a:var(--cat2)\">陳</span><span class=\"av\" style=\"--a:var(--cat4)\">林</span><span class=\"av\" style=\"--a:var(--cat3)\">張</span></div><span class=\"ppl-c\">共 3 位</span></div>"
+      ],
+      [
+        "Hover (spread)",
+        "<div class=\"ppl-r\"><div class=\"stack spread\"><span class=\"av\" style=\"--a:var(--cat2)\">陳</span><span class=\"av\" style=\"--a:var(--cat4)\">林</span><span class=\"av\" style=\"--a:var(--cat3)\">張</span></div><span class=\"ppl-c\">共 3 位</span></div>"
+      ]
+    ]
+  },
+  "skeleton": {
+    "title": "骨架載入",
+    "wide": true,
+    "variants": [
+      [
+        "載入中 Loading",
+        "<div class=\"sk\" style=\"width:100%\"><div class=\"ghost\"><span class=\"av shim\"></span><span class=\"ls\"><b class=\"shim\"></b><b class=\"shim\"></b></span></div><div class=\"real\"><span class=\"av\" style=\"background:var(--cat1)\">王</span><div><p>李小美</p><small>設計師</small></div></div></div>"
+      ],
+      [
+        "載入完成 Loaded",
+        "<div class=\"sk loaded\" style=\"width:100%\"><div class=\"ghost\"><span class=\"av shim\"></span><span class=\"ls\"><b class=\"shim\"></b><b class=\"shim\"></b></span></div><div class=\"real\"><span class=\"av\" style=\"background:var(--cat1)\">王</span><div><p>李小美</p><small>設計師</small></div></div></div>"
+      ]
+    ],
+    "states": []
+  },
+  "star-toggle": {
+    "title": "追蹤星號",
+    "wide": false,
+    "variants": [
+      [
+        "未追蹤 Off",
+        "<span class=\"starb\"><svg viewBox=\"0 0 24 24\"><path d=\"M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z\"/></svg></span>"
+      ],
+      [
+        "已追蹤 On",
+        "<span class=\"starb on\"><svg viewBox=\"0 0 24 24\"><path d=\"M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z\"/></svg></span>"
+      ]
+    ],
+    "states": [
+      [
+        "Off",
+        "<span class=\"starb\"><svg viewBox=\"0 0 24 24\"><path d=\"M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z\"/></svg></span>"
+      ],
+      [
+        "On",
+        "<span class=\"starb on\"><svg viewBox=\"0 0 24 24\"><path d=\"M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z\"/></svg></span>"
+      ],
+      [
+        "Focus",
+        "<span class=\"starb is-focus\"><svg viewBox=\"0 0 24 24\"><path d=\"M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z\"/></svg></span>"
+      ]
+    ]
+  },
+  "info-popover": {
+    "title": "說明氣泡",
+    "wide": false,
+    "variants": [
+      [
+        "關閉 Closed",
+        "<div class=\"ip\"><div class=\"ip-l\">加權進度<span class=\"ip-b\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 11v5M12 7.5v.5\"></path></svg></span></div><div class=\"ip-v\">68%<small>3 / 5 個里程碑</small></div></div>"
+      ],
+      [
+        "展開 Open",
+        "<div class=\"ip\"><div class=\"ip-l\">加權進度<span class=\"ip-b\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 11v5M12 7.5v.5\"></path></svg></span></div><div class=\"ip-v\">68%<small>3 / 5 個里程碑</small></div><div class=\"ip-p show\" role=\"tooltip\" style=\"--ax: 63px;\">依里程碑權重加總；沒設權重的平均分配。</div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"ip\"><div class=\"ip-l\">加權進度<span class=\"ip-b\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 11v5M12 7.5v.5\"></path></svg></span></div><div class=\"ip-v\">68%<small>3 / 5 個里程碑</small></div></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"ip\"><div class=\"ip-l\">加權進度<span class=\"ip-b hv\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 11v5M12 7.5v.5\"></path></svg></span></div><div class=\"ip-v\">68%<small>3 / 5 個里程碑</small></div></div>"
+      ],
+      [
+        "Focus",
+        "<div class=\"ip\"><div class=\"ip-l\">加權進度<span class=\"ip-b fc\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 11v5M12 7.5v.5\"></path></svg></span></div><div class=\"ip-v\">68%<small>3 / 5 個里程碑</small></div></div>"
+      ],
+      [
+        "Open",
+        "<div class=\"ip\"><div class=\"ip-l\">加權進度<span class=\"ip-b\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><path d=\"M12 11v5M12 7.5v.5\"></path></svg></span></div><div class=\"ip-v\">68%<small>3 / 5 個里程碑</small></div><div class=\"ip-p show\" role=\"tooltip\" style=\"--ax: 63px;\">依里程碑權重加總；沒設權重的平均分配。</div></div>"
+      ]
+    ]
+  },
+  "date-picker": {
+    "title": "日期選擇",
+    "wide": true,
+    "variants": [
+      [
+        "欄位 Field",
+        "<div class=\"dp\"><div class=\"dp-f\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div></div>"
+      ],
+      [
+        "展開 Open",
+        "<div class=\"dp open\"><div class=\"dp-f\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"></rect><path d=\"M3.5 10h17M8 3v4M16 3v4\"></path></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div><div class=\"dp-p\"><div class=\"dp-pre\"><span>今天</span><span>明天</span><span class=\"on\">一週後</span><span>月底</span></div><div class=\"dp-c\"><div class=\"dp-m\"><span>2026 年 11 月</span><span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"></path></svg><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M9 6l6 6-6 6\"></path></svg></span></div><div class=\"dp-g\"><i class=\"dp-sel\" style=\"transform: translate(182px, 93px);\"></i><b>日</b><b>一</b><b>二</b><b>三</b><b>四</b><b>五</b><b>六</b><span class=\"off\">1</span><span class=\"off\">2</span><span class=\"off\">3</span><span class=\"off\">4</span><span class=\"off\">5</span><span class=\"off\">6</span><span class=\"off\">7</span><span class=\"off\">8</span><span class=\"off\">9</span><span class=\"off\">10</span><span class=\"off\">11</span><span class=\"off\">12</span><span class=\"today\">13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span class=\"on\">20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span></div></div></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Closed",
+        "<div class=\"dp\"><div class=\"dp-f\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"dp\"><div class=\"dp-f hv\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div></div>"
+      ],
+      [
+        "Open",
+        "<div class=\"dp open\"><div class=\"dp-f\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"></rect><path d=\"M3.5 10h17M8 3v4M16 3v4\"></path></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div><div class=\"dp-p\"><div class=\"dp-pre\"><span>今天</span><span>明天</span><span class=\"on\">一週後</span><span>月底</span></div><div class=\"dp-c\"><div class=\"dp-m\"><span>2026 年 11 月</span><span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"></path></svg><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M9 6l6 6-6 6\"></path></svg></span></div><div class=\"dp-g\"><i class=\"dp-sel\" style=\"transform: translate(182px, 93px);\"></i><b>日</b><b>一</b><b>二</b><b>三</b><b>四</b><b>五</b><b>六</b><span class=\"off\">1</span><span class=\"off\">2</span><span class=\"off\">3</span><span class=\"off\">4</span><span class=\"off\">5</span><span class=\"off\">6</span><span class=\"off\">7</span><span class=\"off\">8</span><span class=\"off\">9</span><span class=\"off\">10</span><span class=\"off\">11</span><span class=\"off\">12</span><span class=\"today\">13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span class=\"on\">20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span></div></div></div></div>"
+      ],
+      [
+        "Day hover",
+        "<div class=\"dp open\"><div class=\"dp-f\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"></rect><path d=\"M3.5 10h17M8 3v4M16 3v4\"></path></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div><div class=\"dp-p\"><div class=\"dp-pre\"><span>今天</span><span>明天</span><span class=\"on\">一週後</span><span>月底</span></div><div class=\"dp-c\"><div class=\"dp-m\"><span>2026 年 11 月</span><span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"></path></svg><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M9 6l6 6-6 6\"></path></svg></span></div><div class=\"dp-g\"><i class=\"dp-sel\" style=\"transform: translate(182px, 93px);\"></i><b>日</b><b>一</b><b>二</b><b>三</b><b>四</b><b>五</b><b>六</b><span class=\"off\">1</span><span class=\"off\">2</span><span class=\"off\">3</span><span class=\"off\">4</span><span class=\"off\">5</span><span class=\"off\">6</span><span class=\"off\">7</span><span class=\"off\">8</span><span class=\"off\">9</span><span class=\"off\">10</span><span class=\"off\">11</span><span class=\"off\">12</span><span class=\"today\">13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span class=\"on\">20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span class=\"hv\">26</span><span>27</span><span>28</span><span>29</span><span>30</span></div></div></div></div>"
+      ],
+      [
+        "Preset hover",
+        "<div class=\"dp open\"><div class=\"dp-f\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"></rect><path d=\"M3.5 10h17M8 3v4M16 3v4\"></path></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div><div class=\"dp-p\"><div class=\"dp-pre\"><span>今天</span><span>明天</span><span class=\"on\">一週後</span><span class=\"hv\">月底</span></div><div class=\"dp-c\"><div class=\"dp-m\"><span>2026 年 11 月</span><span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"></path></svg><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M9 6l6 6-6 6\"></path></svg></span></div><div class=\"dp-g\"><i class=\"dp-sel\" style=\"transform: translate(182px, 93px);\"></i><b>日</b><b>一</b><b>二</b><b>三</b><b>四</b><b>五</b><b>六</b><span class=\"off\">1</span><span class=\"off\">2</span><span class=\"off\">3</span><span class=\"off\">4</span><span class=\"off\">5</span><span class=\"off\">6</span><span class=\"off\">7</span><span class=\"off\">8</span><span class=\"off\">9</span><span class=\"off\">10</span><span class=\"off\">11</span><span class=\"off\">12</span><span class=\"today\">13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span class=\"on\">20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span></div></div></div></div>"
+      ]
+    ]
+  },
+  "time-picker": {
+    "title": "時間選擇器",
+    "wide": false,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"tp\"><div class=\"tp-f\"><span class=\"roll\"><span>09:30</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/></svg></div><div class=\"tp-c\"><div class=\"tp-col\"><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>09</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div><b>:</b><div class=\"tp-col\"><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>30</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"tp\"><div class=\"tp-f\"><span class=\"roll\"><span>09:30</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/></svg></div><div class=\"tp-c\"><div class=\"tp-col\"><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>09</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div><b>:</b><div class=\"tp-col\"><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>30</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div></div></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"tp\"><div class=\"tp-f\"><span class=\"roll\"><span>09:30</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/></svg></div><div class=\"tp-c\"><div class=\"tp-col\"><u class=\"hv\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>09</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div><b>:</b><div class=\"tp-col\"><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>30</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div></div></div>"
+      ]
+    ]
+  },
+  "period-picker": {
+    "title": "期間選擇",
+    "wide": true,
+    "variants": [
+      [
+        "標準 Default",
+        "<div style=\"width:100%\"><div class=\"ps\"><i style=\"width: 50px; transform: translateX(3px);\"></i><span class=\"on\">本月</span><span>近 30 天</span><span>近 90 天</span><span>自訂<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"></path></svg></span></div><div class=\"ps-r\">2026-11-01 ～ 2026-11-13・共 13 天</div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "本月",
+        "<div style=\"width:100%\"><div class=\"ps\"><i style=\"width: 50px; transform: translateX(3px);\"></i><span class=\"on\">本月</span><span>近 30 天</span><span>近 90 天</span><span>自訂<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"></path></svg></span></div><div class=\"ps-r\">2026-11-01 ～ 2026-11-13・共 13 天</div></div>"
+      ],
+      [
+        "近 30 天",
+        "<div style=\"width:100%\"><div class=\"ps\"><i style=\"width: 72px; transform: translateX(53px);\"></i><span>本月</span><span class=\"on\">近 30 天</span><span>近 90 天</span><span>自訂<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"></path></svg></span></div><div class=\"ps-r\">2026-10-15 ～ 2026-11-13・共 30 天</div></div>"
+      ],
+      [
+        "自訂",
+        "<div style=\"width:100%\"><div class=\"ps\"><i style=\"width: 66px; transform: translateX(195px);\"></i><span>本月</span><span>近 30 天</span><span>近 90 天</span><span class=\"on\">自訂<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"></path></svg></span></div><div class=\"ps-r\">2026-11-03 ～ 2026-11-12・共 10 天</div></div>"
+      ]
+    ]
+  },
+  "tag-search": {
+    "title": "搜尋與標籤建議",
+    "wide": true,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"tsr\"><div class=\"search focus\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><input class=\"ff-real\" placeholder=\"搜尋公告標題或標籤\" value=\"系統\"></div><div class=\"results show\"><div class=\"res hl\"><span>系統維護</span><em>8 篇</em></div><div class=\"res\"><span>系統升級</span><em>3 篇</em></div></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Empty",
+        "<div class=\"tsr\"><div class=\"search\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><input class=\"ff-real\" placeholder=\"搜尋公告標題或標籤\"></div></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"tsr\"><div class=\"search hv\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><input class=\"ff-real\" placeholder=\"搜尋公告標題或標籤\"></div></div>"
+      ],
+      [
+        "Focus",
+        "<div class=\"tsr\"><div class=\"search focus\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><input class=\"ff-real\" placeholder=\"搜尋公告標題或標籤\"></div></div>"
+      ],
+      [
+        "Suggestions",
+        "<div class=\"tsr\"><div class=\"search focus\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><input class=\"ff-real\" placeholder=\"搜尋公告標題或標籤\" value=\"系統\"></div><div class=\"results show\"><div class=\"res hl\"><span>系統維護</span><em>8 篇</em></div><div class=\"res\"><span>系統升級</span><em>3 篇</em></div></div></div>"
+      ],
+      [
+        "No results",
+        "<div class=\"tsr\"><div class=\"search focus\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><input class=\"ff-real\" placeholder=\"搜尋公告標題或標籤\" value=\"空調\"></div></div>"
+      ]
+    ]
+  },
+  "hold-to-confirm": {
+    "title": "按住確認",
+    "wide": false,
+    "variants": [
+      [
+        "標準 Default",
+        "<div class=\"hold-c\"><span class=\"btn hold\"><i class=\"fill\"></i><i class=\"bar\"></i><span class=\"roll\"><span>按住結案</span></span></span><div class=\"hold-h\">按住 1.5 秒才會送出</div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"hold-c\"><span class=\"btn hold\"><i class=\"fill\"></i><i class=\"bar\"></i><span class=\"roll\"><span>按住結案</span></span></span><div class=\"hold-h\">按住 1.5 秒才會送出</div></div>"
+      ],
+      [
+        "Hover",
+        "<div class=\"hold-c\"><span class=\"btn hold hv\"><i class=\"fill\"></i><i class=\"bar\"></i><span class=\"roll\"><span>按住結案</span></span></span><div class=\"hold-h\">按住 1.5 秒才會送出</div></div>"
+      ],
+      [
+        "Holding",
+        "<div class=\"hold-c\"><span class=\"btn hold\"><i class=\"fill\" style=\"transform:scaleX(0.5)\"></i><i class=\"bar\" style=\"transform:scaleX(0.5)\"></i><span class=\"roll\"><span>持續按住…</span></span></span><div class=\"hold-h\">按住 1.5 秒才會送出</div></div>"
+      ],
+      [
+        "Complete",
+        "<div class=\"hold-c\"><span class=\"btn hold done\"><i class=\"fill\"></i><i class=\"bar\"></i><span class=\"roll\"><span><svg class=\"ic draw\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>已結案</span></span></span><div class=\"hold-h\">按住 1.5 秒才會送出</div></div>"
+      ],
+      [
+        "Disabled",
+        "<div class=\"hold-c\"><span class=\"btn hold is-off\"><i class=\"fill\"></i><i class=\"bar\"></i><span class=\"roll\"><span>按住結案</span></span></span><div class=\"hold-h\">按住 1.5 秒才會送出</div></div>"
+      ]
+    ]
+  },
+  "drag-sort": {
+    "title": "拖移排序",
+    "wide": false,
+    "variants": [
+      [
+        "欄位面板",
+        "<div class=\"drg\"><i class=\"drg-ph\"></i><div class=\"drg-r vis\" style=\"transform:translateY(0px)\"><span class=\"drg-h lk\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"5\" y=\"11\" width=\"14\" height=\"9.5\" rx=\"2\"/><path d=\"M8 11V8a4 4 0 0 1 8 0v3\"/></svg></span><span class=\"drg-n\">名稱</span><button class=\"drg-s\" type=\"button\" disabled><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis\" style=\"transform:translateY(32px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">狀態</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis\" style=\"transform:translateY(64px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">負責人</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r\" style=\"transform:translateY(96px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">到期日</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"drg\"><i class=\"drg-ph\"></i><div class=\"drg-r vis\" style=\"transform:translateY(0px)\"><span class=\"drg-h lk\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"5\" y=\"11\" width=\"14\" height=\"9.5\" rx=\"2\"/><path d=\"M8 11V8a4 4 0 0 1 8 0v3\"/></svg></span><span class=\"drg-n\">名稱</span><button class=\"drg-s\" type=\"button\" disabled><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis\" style=\"transform:translateY(32px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">狀態</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis\" style=\"transform:translateY(64px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">負責人</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r\" style=\"transform:translateY(96px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">到期日</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div></div>"
+      ],
+      [
+        "Handle hover",
+        "<div class=\"drg\"><i class=\"drg-ph\"></i><div class=\"drg-r vis\" style=\"transform:translateY(0px)\"><span class=\"drg-h lk\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"5\" y=\"11\" width=\"14\" height=\"9.5\" rx=\"2\"/><path d=\"M8 11V8a4 4 0 0 1 8 0v3\"/></svg></span><span class=\"drg-n\">名稱</span><button class=\"drg-s\" type=\"button\" disabled><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis\" style=\"transform:translateY(32px)\"><button class=\"drg-h hv\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">狀態</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis\" style=\"transform:translateY(64px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">負責人</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r\" style=\"transform:translateY(96px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">到期日</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div></div>"
+      ],
+      [
+        "Lifted",
+        "<div class=\"drg\"><i class=\"drg-ph show\" style=\"transform:translateY(32px)\"></i><div class=\"drg-r vis\" style=\"transform:translateY(0px)\"><span class=\"drg-h lk\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"5\" y=\"11\" width=\"14\" height=\"9.5\" rx=\"2\"/><path d=\"M8 11V8a4 4 0 0 1 8 0v3\"/></svg></span><span class=\"drg-n\">名稱</span><button class=\"drg-s\" type=\"button\" disabled><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis lift\" style=\"transform:translateY(32px)\"><button class=\"drg-h hv\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">狀態</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r vis\" style=\"transform:translateY(64px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">負責人</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div><div class=\"drg-r\" style=\"transform:translateY(96px)\"><button class=\"drg-h\" type=\"button\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"9\" cy=\"6\" r=\"1\"/><circle cx=\"15\" cy=\"6\" r=\"1\"/><circle cx=\"9\" cy=\"12\" r=\"1\"/><circle cx=\"15\" cy=\"12\" r=\"1\"/><circle cx=\"9\" cy=\"18\" r=\"1\"/><circle cx=\"15\" cy=\"18\" r=\"1\"/></svg></button><span class=\"drg-n\">到期日</span><button class=\"drg-s\" type=\"button\"><span class=\"tg\"><i></i></span></button></div></div>"
+      ]
+    ]
+  },
+  "upload": {
+    "title": "檔案上傳",
+    "wide": true,
+    "variants": [
+      [
+        "PDF",
+        "<div class=\"up done\"><span class=\"up-i\" style=\"--tone:var(--danger)\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/></svg></span><div class=\"up-m\"><div class=\"up-r\"><span class=\"roll nm\"><span>設計規範_v3.pdf</span></span><span class=\"st num\">上傳完成</span></div><div class=\"up-b\"><i style=\"width:100%\"></i></div></div></div>"
+      ],
+      [
+        "Figma",
+        "<div class=\"up done\"><span class=\"up-i\" style=\"--tone:var(--g3)\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/></svg></span><div class=\"up-m\"><div class=\"up-r\"><span class=\"roll nm\"><span>首頁視覺稿.fig</span></span><span class=\"st num\">上傳完成</span></div><div class=\"up-b\"><i style=\"width:100%\"></i></div></div></div>"
+      ],
+      [
+        "Word",
+        "<div class=\"up done\"><span class=\"up-i\" style=\"--tone:var(--g2)\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/></svg></span><div class=\"up-m\"><div class=\"up-r\"><span class=\"roll nm\"><span>訪談紀錄_1112.docx</span></span><span class=\"st num\">上傳完成</span></div><div class=\"up-b\"><i style=\"width:100%\"></i></div></div></div>"
+      ],
+      [
+        "Excel",
+        "<div class=\"up done\"><span class=\"up-i\" style=\"--tone:var(--success)\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/></svg></span><div class=\"up-m\"><div class=\"up-r\"><span class=\"roll nm\"><span>工時統計_11月.xlsx</span></span><span class=\"st num\">上傳完成</span></div><div class=\"up-b\"><i style=\"width:100%\"></i></div></div></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Uploading",
+        "<div class=\"up\"><span class=\"up-i\" style=\"--tone:var(--danger)\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/></svg></span><div class=\"up-m\"><div class=\"up-r\"><span class=\"roll nm\"><span>設計規範_v3.pdf</span></span><span class=\"st num\">1.1 / 2.4 MB・45%</span></div><div class=\"up-b\"><i style=\"width:45%\"></i></div></div></div>"
+      ],
+      [
+        "Complete",
+        "<div class=\"up done\"><span class=\"up-i\" style=\"--tone:var(--danger)\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/></svg></span><div class=\"up-m\"><div class=\"up-r\"><span class=\"roll nm\"><span>設計規範_v3.pdf</span></span><span class=\"st num\">上傳完成</span></div><div class=\"up-b\"><i style=\"width:100%\"></i></div></div></div>"
+      ],
+      [
+        "Failed",
+        "<div class=\"up fail\"><span class=\"up-i\" style=\"--tone:var(--danger)\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z\"/><path d=\"M14 3v5h5\"/></svg></span><div class=\"up-m\"><div class=\"up-r\"><span class=\"roll nm\"><span>設計規範_v3.pdf</span></span><span class=\"st num\">上傳失敗</span></div><div class=\"up-b\"><i style=\"width:45%\"></i></div></div></div>"
+      ]
+    ]
+  },
+  "filter-chips": {
+    "title": "篩選標籤",
+    "wide": false,
+    "variants": [
+      [
+        "多個條件",
+        "<div class=\"chips\"><span class=\"chip\">狀態：進行中<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span><span class=\"chip\">設計部<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span><span class=\"chip\">本月到期<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span></div>"
+      ],
+      [
+        "一個條件",
+        "<div class=\"chips\"><span class=\"chip\">設計部<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span></div>"
+      ]
+    ],
+    "states": [
+      [
+        "Default",
+        "<div class=\"chips\"><span class=\"chip\">狀態：進行中<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span><span class=\"chip\">設計部<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span></div>"
+      ],
+      [
+        "Remove hover",
+        "<div class=\"chips\"><span class=\"chip kill\">狀態：進行中<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span><span class=\"chip\">設計部<u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg></u></span></div>"
+      ]
+    ]
+  },
+  "stat-row": {
+    "title": "統計卡",
+    "wide": true,
+    "variants": [
+      [
+        "三個指標",
+        "<div class=\"stats\" style=\"--n:3\"><div class=\"stat hot\"><span>進行中案件</span><b class=\"num\">42</b><small>件</small></div><div class=\"stat\"><span>本週工時</span><b class=\"num\">316</b><small>小時</small></div><div class=\"stat\"><span>逾期工單</span><b class=\"num\">7</b><small>件</small></div></div>"
+      ],
+      [
+        "兩個指標",
+        "<div class=\"stats\" style=\"--n:2\"><div class=\"stat\"><span>本週工時</span><b class=\"num\">316</b><small>小時</small></div><div class=\"stat\"><span>逾期工單</span><b class=\"num\">7</b><small>件</small></div></div>"
+      ]
+    ],
+    "states": []
+  },
+  "segmented-bar": {
+    "title": "分段統計條",
+    "wide": true,
+    "variants": [
+      [
+        "四個狀態",
+        "<div class=\"sb\"><div class=\"sb-h\"><b class=\"num\">128</b><span>件工單</span></div><div class=\"sb-b\"><i style=\"--c:var(--g2);--f:43\"></i><i style=\"--c:var(--warn);--f:18\"></i><i style=\"--c:var(--success);--f:55\"></i><i style=\"--c:var(--line-strong);--f:12\"></i></div><div class=\"sb-l\"><span><i style=\"--c:var(--g2)\"></i>進行中<b class=\"num\">43</b></span><span><i style=\"--c:var(--warn)\"></i>待審核<b class=\"num\">18</b></span><span><i style=\"--c:var(--success)\"></i>已完成<b class=\"num\">55</b></span><span><i style=\"--c:var(--line-strong)\"></i>未開始<b class=\"num\">12</b></span></div></div>"
+      ],
+      [
+        "兩個狀態",
+        "<div class=\"sb\"><div class=\"sb-h\"><b class=\"num\">40</b><span>件工單</span></div><div class=\"sb-b\"><i style=\"--c:var(--success);--f:32\"></i><i style=\"--c:var(--line-strong);--f:8\"></i></div><div class=\"sb-l\"><span><i style=\"--c:var(--success)\"></i>已完成<b class=\"num\">32</b></span><span><i style=\"--c:var(--line-strong)\"></i>未開始<b class=\"num\">8</b></span></div></div>"
+      ]
+    ],
+    "states": []
+  }
+}

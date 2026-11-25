@@ -1,0 +1,33 @@
+{
+  "name": "@case-center/vue",
+  "version": "0.1.0",
+  "description": "案管中心元件（Vue 3）",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build && vue-tsc -p tsconfig.json --declaration --emitDeclarationOnly --outDir dist"
+  },
+  "peerDependencies": {
+    "vue": "^3.3.0",
+    "@case-center/styles": "0.1.0"
+  },
+  "dependencies": {
+    "@case-center/core": "0.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "~6.0.2",
+    "vite": "^5.4.11",
+    "vue": "^3.5.13",
+    "vue-tsc": "^3.3.0"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "sidebar",
+  "title": "側邊選單",
+  "tier": "logic",
+  "logic": "core/sidebar.ts",
+  "description": "選中＝淡主色底＋填滿圖示，選中片彈性滑動；群組可收合；可收合成圖示列（滑過顯示名稱）。",
+  "use": "全站主要導覽。",
+  "parts": [
+    { "name": "root", "selector": ".sd-app", "element": "div", "classes": { "sd-app": "側欄外層", "mini": "收合成圖示列" } },
+    { "name": "nav", "selector": ".sd-app > .sd", "element": "nav", "classes": { "sd": "側欄" } },
+    {
+      "name": "brand",
+      "selector": ".sd > .sd-brand",
+      "element": "div",
+      "classes": { "sd-brand": "品牌列（可當收合鈕）" },
+      "attrs": { "role": { "values": ["button"] }, "aria-expanded": { "values": ["true", "false"] } }
+    },
+    { "name": "logo", "selector": ".sd-brand > .sd-logo", "element": "i", "classes": { "sd-logo": "標誌" } },
+    { "name": "list", "selector": ".sd > .sd-list", "element": "div", "classes": { "sd-list": "項目" } },
+    { "name": "indicator", "selector": ".sd-list > .sd-ind", "element": "i", "classes": { "sd-ind": "選中片" }, "attrs": { "aria-hidden": { "values": ["true"], "required": true } } },
+    { "name": "group", "selector": ".sd-list > .sd-g:not(.sd-tg)", "element": "span", "classes": { "sd-g": "群組標題" } },
+    {
+      "name": "group-toggle",
+      "selector": ".sd-list > .sd-tg",
+      "element": "span",
+      "classes": { "sd-g": "群組標題", "sd-tg": "可收合", "shut": "已收合" },
+      "attrs": { "role": { "values": ["button"], "required": true }, "tabindex": { "values": ["0"], "required": true }, "aria-expanded": { "values": ["true", "false"], "required": true } },
+      "sync": [{ "class": "shut", "attr": "aria-expanded", "value": "false" }]
+    },
+    { "name": "sub", "selector": ".sd-list > .sd-sub", "element": "div", "classes": { "sd-sub": "可收合群組的項目", "shut": "已收合" } },
+    {
+      "name": "item",
+      "selector": ".sd-it",
+      "element": "span",
+      "classes": { "sd-it": "項目", "on": "目前頁" },
+      "attrs": { "role": { "values": ["link"], "required": true }, "tabindex": { "values": ["0"], "required": true }, "aria-current": { "values": ["page"] } },
+      "sync": [{ "class": "on", "attr": "aria-current", "value": "page" }]
+    },
+    { "name": "me", "selector": ".sd > .sd-me", "element": "div", "classes": { "sd-me": "目前使用者" } },
+    { "name": "avatar", "selector": ".sd-me > .av", "element": "i", "classes": { "av": "頭像" } },
+    { "name": "tip", "selector": ".sd-app > .sd-tip", "element": "span", "classes": { "sd-tip": "收合時的名稱提示", "show": "顯示中" }, "attrs": { "aria-hidden": { "values": ["true"], "required": true } } }
+  ],
+  "keyboard": [{ "keys": "Enter、Space", "action": "前往項目；在群組標題上收合、展開；在品牌列上收合側欄" }],
+  "example": "<div class=\"sd-app\"><nav class=\"sd\"><div class=\"sd-list\"><i class=\"sd-ind\" aria-hidden=\"true\"></i><span class=\"sd-g\">工作</span><span class=\"sd-it on\" role=\"link\" tabindex=\"0\" aria-current=\"page\">…<span>首頁</span></span></div></nav></div>"
+}

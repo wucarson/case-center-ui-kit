@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "元件契約",
+  "description": "每個元件一份：class、標記、aria、鍵盤。tools/check-contracts.mjs 依此檢查各框架輸出的標記。",
+  "type": "object",
+  "required": ["name", "title", "tier", "parts"],
+  "properties": {
+    "name": { "type": "string", "description": "與 shared/cases.ts 的元件名相同" },
+    "title": { "type": "string" },
+    "tier": { "enum": ["class", "logic"], "description": "class＝只要 class；logic＝需要共用邏輯與框架外殼" },
+    "logic": { "type": "string", "description": "共用邏輯檔（tier 為 logic 時）" },
+    "description": { "type": "string" },
+    "use": { "type": "string", "description": "使用時機" },
+    "instead": { "type": "array", "items": { "type": "object", "required": ["when", "use"], "properties": { "when": { "type": "string" }, "use": { "type": "string" } } } },
+    "parts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "selector", "element", "classes"],
+        "properties": {
+          "name": { "type": "string" },
+          "selector": { "type": "string", "description": "CSS 選擇器，在每個案例內查找" },
+          "element": { "type": "string", "description": "必須是這個標籤" },
+          "classes": { "type": "object", "description": "允許的 class 與說明；出現其他 class 視為錯誤", "additionalProperties": { "type": "string" } },
+          "attrs": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": { "values": { "type": "array", "items": { "type": "string" } }, "required": { "type": "boolean" } }
+            }
+          },
+          "sync": {
+            "type": "array",
+            "description": "class 與屬性必須同時出現或同時不出現",
+            "items": { "type": "object", "required": ["class", "attr", "value"], "properties": { "class": { "type": "string" }, "attr": { "type": "string" }, "value": { "type": "string" } } }
+          },
+          "label": { "type": "string", "description": "需要讀屏名稱：有可見文字或 aria-label；缺少時列為警告" }
+        }
+      }
+    },
+    "keyboard": { "type": "array", "items": { "type": "object", "required": ["keys", "action"], "properties": { "keys": { "type": "string" }, "action": { "type": "string" } } } },
+    "example": { "type": "string" }
+  }
+}

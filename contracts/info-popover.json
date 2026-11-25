@@ -1,0 +1,32 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "info-popover",
+  "title": "資訊提示",
+  "tier": "logic",
+  "logic": "core/overlay.ts",
+  "description": "標籤後的 ⓘ：滑過 150ms 打開、點擊釘住、Esc 關閉；氣泡箭頭對準 ⓘ。說明只寫重點，不放操作。",
+  "use": "指標的算法、欄位的意思等補充說明。",
+  "parts": [
+    { "name": "root", "selector": ".ip", "element": "div", "classes": { "ip": "資訊提示" } },
+    { "name": "label", "selector": ".ip > .ip-l", "element": "div", "classes": { "ip-l": "標籤" } },
+    {
+      "name": "button",
+      "selector": ".ip-l > .ip-b",
+      "element": "span",
+      "classes": { "ip-b": "ⓘ", "fc": "鍵盤聚焦" },
+      "attrs": {
+        "role": { "values": ["button"], "required": true },
+        "tabindex": { "values": ["0"], "required": true },
+        "aria-label": { "required": true },
+        "aria-expanded": { "values": ["true", "false"], "required": true }
+      }
+    },
+    { "name": "value", "selector": ".ip > .ip-v", "element": "div", "classes": { "ip-v": "指標值" } },
+    { "name": "popover", "selector": ".ip > .ip-p", "element": "div", "classes": { "ip-p": "氣泡", "show": "顯示中" }, "attrs": { "role": { "values": ["tooltip"], "required": true } } }
+  ],
+  "keyboard": [
+    { "keys": "Enter、Space", "action": "打開並釘住；再按一次關閉" },
+    { "keys": "Esc", "action": "關閉" }
+  ],
+  "example": "<div class=\"ip\"><div class=\"ip-l\">加權進度<span class=\"ip-b\" role=\"button\" tabindex=\"0\" aria-label=\"加權進度：說明\" aria-expanded=\"false\">…</span></div><div class=\"ip-v\">68%<small>3 / 5 個里程碑</small></div></div>"
+}

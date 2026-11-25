@@ -1,0 +1,48 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "multi-select",
+  "title": "多選下拉",
+  "tier": "logic",
+  "logic": "core/listbox.ts",
+  "description": "從清單勾選多個；沒選＝全部。按鈕列出已選名稱和數量。",
+  "use": "篩選條件（部門、客戶），可複選。",
+  "instead": [{ "when": "只能選一個", "use": "combo" }],
+  "parts": [
+    { "name": "root", "selector": ".ms", "element": "div", "classes": { "ms": "多選", "open": "清單打開中", "pin": "清單跟在按鈕下方、不浮起" } },
+    {
+      "name": "trigger",
+      "selector": ".ms > .ms-t",
+      "element": "div",
+      "classes": { "ms-t": "按鈕" },
+      "attrs": {
+        "role": { "values": ["combobox"], "required": true },
+        "tabindex": { "values": ["0"], "required": true },
+        "aria-haspopup": { "values": ["listbox"], "required": true },
+        "aria-expanded": { "values": ["true", "false"], "required": true },
+        "aria-label": { "required": true }
+      }
+    },
+    { "name": "text", "selector": ".ms-t > span:not(.ms-n), .ff-i > span:not(.unit)", "element": "span", "classes": { "ph": "沒選（全部）：提示色" } },
+    { "name": "count", "selector": ".ms-t > .ms-n", "element": "span", "classes": { "ms-n": "已選數量" } },
+    { "name": "panel", "selector": ".ms-p", "element": "div", "classes": { "ms-p": "清單" }, "attrs": { "role": { "values": ["listbox"], "required": true }, "aria-multiselectable": { "values": ["true", "false"], "required": true } } },
+    { "name": "search", "selector": ".ms-p > .ms-s", "element": "div", "classes": { "ms-s": "搜尋列" } },
+    { "name": "search-input", "selector": ".ms-s > input", "element": "input", "classes": {}, "attrs": { "aria-label": { "required": true } } },
+    { "name": "options", "selector": ".ms-p > .ms-l", "element": "div", "classes": { "ms-l": "選項" } },
+    {
+      "name": "option",
+      "selector": ".ms-l > .ck",
+      "element": "div",
+      "classes": { "ck": "核取方塊", "on": "已勾選" },
+      "attrs": { "role": { "values": ["checkbox"], "required": true }, "aria-checked": { "values": ["true", "false"], "required": true } },
+      "sync": [{ "class": "on", "attr": "aria-checked", "value": "true" }]
+    },
+    { "name": "footer", "selector": ".ms-p > .ms-f", "element": "div", "classes": { "ms-f": "已選幾個＋清除" } },
+    { "name": "clear", "selector": ".ms-f > u", "element": "u", "classes": {}, "attrs": { "role": { "values": ["button"], "required": true }, "tabindex": { "values": ["0"], "required": true } } }
+  ],
+  "keyboard": [
+    { "keys": "Enter、Space、↓", "action": "打開" },
+    { "keys": "Space", "action": "在選項上勾選、取消" },
+    { "keys": "Esc", "action": "關閉" }
+  ],
+  "example": "<div class=\"ms\"><div class=\"ms-t\" role=\"combobox\" tabindex=\"0\" aria-expanded=\"false\" aria-haspopup=\"listbox\" aria-label=\"篩選部門\"><span>設計部、研發部</span><span class=\"ms-n\">2</span>…</div></div>"
+}

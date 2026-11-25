@@ -1,0 +1,42 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "dialog",
+  "title": "確認對話框",
+  "tier": "logic",
+  "logic": "core/overlay.ts",
+  "description": "需要確認才繼續。標題與觸發按鈕同名，不寫「確定要…嗎？」；破壞性動作確認鈕紅底、焦點先在取消。",
+  "use": "刪除、結案等不能復原或影響範圍大的動作。",
+  "instead": [{ "when": "可以復原", "use": "toast（附「復原」）" }],
+  "parts": [
+    {
+      "name": "card",
+      "selector": ".dl-d",
+      "element": "div",
+      "classes": { "dl-d": "對話框", "pin": "只畫本體、不浮起（展示、文件用）" },
+      "attrs": { "role": { "values": ["dialog"], "required": true }, "aria-labelledby": { "required": true }, "aria-modal": { "values": ["true"] } }
+    },
+    { "name": "title", "selector": ".dl-d > b", "element": "b", "classes": {} },
+    { "name": "body", "selector": ".dl-d > p", "element": "p", "classes": {} },
+    { "name": "actions", "selector": ".dl-d > .dl-a", "element": "div", "classes": { "dl-a": "按鈕列" } },
+    {
+      "name": "cancel",
+      "selector": ".dl-a > .cancel",
+      "element": "span",
+      "classes": { "cancel": "取消", "fc": "鍵盤聚焦" },
+      "attrs": { "role": { "values": ["button"], "required": true }, "tabindex": { "values": ["0"], "required": true } }
+    },
+    {
+      "name": "confirm",
+      "selector": ".dl-a > .ok",
+      "element": "span",
+      "classes": { "ok": "確認", "dng": "破壞性（紅底）", "is-focus": "鍵盤聚焦" },
+      "attrs": { "role": { "values": ["button"], "required": true }, "tabindex": { "values": ["0"], "required": true } }
+    }
+  ],
+  "keyboard": [
+    { "keys": "Esc", "action": "取消" },
+    { "keys": "Tab、Shift+Tab", "action": "只在兩顆按鈕間移動" },
+    { "keys": "Enter、Space", "action": "按下聚焦中的按鈕" }
+  ],
+  "example": "<div class=\"dl-d\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"t\"><b id=\"t\">刪除里程碑</b><p><span>「現場勘查」將從這個專案移除。</span></p><div class=\"dl-a\"><span class=\"cancel\" role=\"button\" tabindex=\"0\">取消</span><span class=\"ok dng\" role=\"button\" tabindex=\"0\">刪除里程碑</span></div></div>"
+}

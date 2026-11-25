@@ -1,0 +1,27 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "star-toggle",
+  "title": "追蹤星號",
+  "tier": "logic",
+  "logic": "core/choice.ts",
+  "description": "點一下追蹤（填滿＋星光）、再點取消。",
+  "use": "追蹤案件、專案，之後在「我追蹤的」找得到。",
+  "parts": [
+    {
+      "name": "root",
+      "selector": ".starb",
+      "element": "span",
+      "classes": { "starb": "星號", "on": "追蹤中" },
+      "attrs": {
+        "role": { "values": ["button"], "required": true },
+        "tabindex": { "values": ["0"], "required": true },
+        "aria-pressed": { "values": ["true", "false"], "required": true },
+        "aria-label": { "required": true }
+      },
+      "sync": [{ "class": "on", "attr": "aria-pressed", "value": "true" }]
+    },
+    { "name": "star", "selector": ".starb > svg", "element": "svg", "classes": {}, "attrs": { "aria-hidden": { "values": ["true"], "required": true } } }
+  ],
+  "keyboard": [{ "keys": "Enter、Space", "action": "切換" }],
+  "example": "<span class=\"starb\" role=\"button\" tabindex=\"0\" aria-pressed=\"false\" aria-label=\"追蹤案件\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"…\"/></svg></span>"
+}

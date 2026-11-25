@@ -1,0 +1,39 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "checkbox",
+  "title": "核取方塊",
+  "tier": "logic",
+  "logic": "core/choice.ts",
+  "description": "要按儲存才生效的多選。全選列可呈現半選。",
+  "use": "從清單中勾選多個項目，送出後才生效。",
+  "instead": [
+    { "when": "切換後立即生效", "use": "switch" },
+    { "when": "只能選一個", "use": "radio-group" }
+  ],
+  "parts": [
+    { "name": "list", "selector": ".cks", "element": "div", "classes": { "cks": "一組（垂直排列）" }, "attrs": { "role": { "values": ["group"], "required": true } } },
+    {
+      "name": "root",
+      "selector": ".ck",
+      "element": "div",
+      "classes": { "ck": "核取方塊", "on": "已勾選", "some": "半選", "all": "全選列", "dis": "停用" },
+      "attrs": {
+        "role": { "values": ["checkbox"], "required": true },
+        "aria-checked": { "values": ["true", "false", "mixed"], "required": true },
+        "tabindex": { "values": ["0", "-1"], "required": true },
+        "aria-disabled": { "values": ["true"] },
+        "aria-label": {}
+      },
+      "sync": [
+        { "class": "on", "attr": "aria-checked", "value": "true" },
+        { "class": "some", "attr": "aria-checked", "value": "mixed" },
+        { "class": "dis", "attr": "aria-disabled", "value": "true" }
+      ],
+      "label": "沒有可見標籤（<span>）時要給 aria-label"
+    },
+    { "name": "box", "selector": ".ck > i", "element": "i", "classes": { "is-focus": "鍵盤聚焦時的焦點框" } },
+    { "name": "mark", "selector": ".ck > i > svg", "element": "svg", "classes": { "ic": "圖示", "chk": "勾", "dash": "半選橫線" } }
+  ],
+  "keyboard": [{ "keys": "Space", "action": "切換；半選時變全選" }],
+  "example": "<div role=\"checkbox\" aria-checked=\"true\" tabindex=\"0\" class=\"ck on\"><i><svg class=\"ic chk\" viewBox=\"0 0 24 24\" aria-hidden=\"true\">…</svg><svg class=\"ic dash\" viewBox=\"0 0 24 24\" aria-hidden=\"true\">…</svg></i><span>同步通知負責人</span></div>"
+}

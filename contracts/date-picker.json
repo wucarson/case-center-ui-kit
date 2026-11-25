@@ -1,0 +1,66 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "date-picker",
+  "title": "日期選擇",
+  "tier": "logic",
+  "logic": "core/date.ts",
+  "description": "左側快捷（今天、明天、一週後、月底）、右側月曆；選了就生效。最早可選之前的日期變淡、不能選。",
+  "use": "選一天，例：到期日、結束日期。",
+  "instead": [{ "when": "要選一段期間", "use": "period-picker" }],
+  "parts": [
+    { "name": "root", "selector": ".dp", "element": "div", "classes": { "dp": "日期選擇", "open": "面板打開中" } },
+    {
+      "name": "field",
+      "selector": ".dp > .dp-f",
+      "element": "div",
+      "classes": { "dp-f": "欄位" },
+      "attrs": {
+        "role": { "values": ["button"], "required": true },
+        "tabindex": { "values": ["0"], "required": true },
+        "aria-label": { "required": true },
+        "aria-haspopup": { "values": ["dialog"], "required": true },
+        "aria-expanded": { "values": ["true", "false"], "required": true }
+      }
+    },
+    { "name": "value", "selector": ".dp-f > .roll", "element": "span", "classes": { "roll": "目前值（換值時滾動）" } },
+    { "name": "help", "selector": ".dp > .dp-h", "element": "div", "classes": { "dp-h": "說明" } },
+    { "name": "panel", "selector": ".dp > .dp-p", "element": "div", "classes": { "dp-p": "面板" }, "attrs": { "role": { "values": ["dialog"], "required": true }, "aria-label": { "required": true } } },
+    { "name": "presets", "selector": ".dp-p > .dp-pre", "element": "div", "classes": { "dp-pre": "快捷" } },
+    {
+      "name": "preset",
+      "selector": ".dp-pre > span",
+      "element": "span",
+      "classes": { "on": "等於目前值" },
+      "attrs": { "role": { "values": ["button"], "required": true }, "tabindex": { "values": ["0"], "required": true } }
+    },
+    { "name": "calendar", "selector": ".dp-p > .dp-c", "element": "div", "classes": { "dp-c": "月曆" } },
+    { "name": "month", "selector": ".dp-c > .dp-m", "element": "div", "classes": { "dp-m": "月份與換月" } },
+    {
+      "name": "month-nav",
+      "selector": ".dp-m svg",
+      "element": "svg",
+      "classes": { "ic": "圖示" },
+      "attrs": { "role": { "values": ["button"], "required": true }, "tabindex": { "values": ["-1"], "required": true }, "aria-label": { "required": true } }
+    },
+    { "name": "grid", "selector": ".dp-c > .dp-g", "element": "div", "classes": { "dp-g": "日期格" }, "attrs": { "role": { "values": ["grid"], "required": true }, "tabindex": { "values": ["0"], "required": true }, "aria-label": { "required": true } } },
+    { "name": "selected", "selector": ".dp-g > .dp-sel", "element": "i", "classes": { "dp-sel": "選中的圓（滑到選中日）" } },
+    { "name": "weekday", "selector": ".dp-g > b", "element": "b", "classes": {} },
+    {
+      "name": "day",
+      "selector": ".dp-g > span[role=\"gridcell\"]",
+      "element": "span",
+      "classes": { "off": "早於最早可選", "today": "今天", "on": "選中" },
+      "attrs": { "aria-selected": { "values": ["true", "false"], "required": true } },
+      "sync": [{ "class": "on", "attr": "aria-selected", "value": "true" }]
+    },
+    { "name": "blank", "selector": ".dp-g > span:not([role])", "element": "span", "classes": {}, "attrs": { "aria-hidden": { "values": ["true"], "required": true } } }
+  ],
+  "keyboard": [
+    { "keys": "Enter、Space、↓", "action": "在欄位上打開" },
+    { "keys": "←、→", "action": "前一天、後一天" },
+    { "keys": "↑、↓", "action": "前一週、後一週（跨月時跟著換月）" },
+    { "keys": "Enter", "action": "選取並關閉" },
+    { "keys": "Esc", "action": "關閉" }
+  ],
+  "example": "<div class=\"dp\"><div class=\"dp-f\" role=\"button\" tabindex=\"0\" aria-label=\"結束日期：2026-11-20（五）\" aria-haspopup=\"dialog\" aria-expanded=\"false\"><span class=\"roll\"><span>2026-11-20（五）</span></span>…</div></div>"
+}

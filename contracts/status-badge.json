@@ -1,0 +1,20 @@
+{
+  "$schema": "./contract.schema.json",
+  "name": "status-badge",
+  "title": "狀態徽章",
+  "tier": "class",
+  "logic": "core/display.ts",
+  "description": "顏色＋圓點＋文字。狀態文字一定要寫出來，不要只靠顏色。",
+  "use": "列表狀態欄、頁首、卡片上的案件或工單狀態。",
+  "parts": [
+    {
+      "name": "root",
+      "selector": ".bdg",
+      "element": "span",
+      "classes": { "bdg": "徽章", "t-q": "規劃中、未指派", "t-a": "進行中", "t-p": "暫停", "t-c": "已結案", "t-d": "退回、逾期", "ol": "外框（頁首、卡片）", "pl": "純文字（空間很小）", "nodot": "不顯示圓點" },
+      "label": "徽章文字就是狀態名稱"
+    },
+    { "name": "dot", "selector": ".bdg > i", "element": "i", "classes": {}, "attrs": { "aria-hidden": { "values": ["true"], "required": true } } }
+  ],
+  "example": "<span class=\"bdg t-a\"><i aria-hidden=\"true\"></i>進行中</span>"
+}

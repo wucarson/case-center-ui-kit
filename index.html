@@ -2057,13 +2057,13 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz-tabs small { min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--primary); color: var(--on-primary); font-size: 10px; line-height: 16px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
 .cz-tabs small[hidden] { display: none; }
 /* 設定列：名稱在左、控制在右（寬的控制項放名稱下方）；選到的列淡底並展開一句說明 */
-.cz.cz .cz-sets { gap: 0; padding: 4px; }
+.cz.cz .cz-sets { gap: 6px; padding: 0; border: 0; background: transparent; }   /* 每個項目自成一塊，用底色分隔（不用水平線） */
 .cz-set { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 12px; min-height: 48px; padding: 8px 10px; border-radius: 12px; transition: background calc(.15s * var(--dur)); }
-.cz-set { position: relative; }
-.cz-set + .cz-set::before { content: ""; position: absolute; left: 10px; right: 10px; top: 0; height: 1px; background: var(--ev-line, var(--line-subtle)); }   /* 分隔線：直線，不跟著圓角彎 */
-.cz-set:hover::before, .cz-set:hover + .cz-set::before, .cz.kbd .cz-set.cur::before, .cz.kbd .cz-set.cur + .cz-set::before { display: none; }
+.cz-set { background: var(--ev-cell, var(--soft)); }
+
+
 .cz-set.block { grid-template-columns: minmax(0, 1fr); }
-.cz-set:hover { background: color-mix(in srgb, var(--ink) 3.5%, transparent); }   /* 滑過：很淡的底，提示可點 */
+.cz-set:hover { background: color-mix(in srgb, var(--ink) 9%, transparent); }   /* 滑過：底色稍深，提示可點 */
 .cz.kbd .cz-set.cur { outline: 2px solid var(--focus); outline-offset: -2px; }   /* 鍵盤操作：主色焦點框；滑鼠點選不加底色（灰底容易看成停用），靠展開的說明表示選到 */
 .cz-set .cz-rl { min-width: 0; }
 .cz-set .cz-lab { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

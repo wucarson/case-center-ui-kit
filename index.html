@@ -858,7 +858,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .dt-def { margin: 0; max-width: 68ch; font-size: 16px; line-height: 26px; color: var(--muted); }
 .doc-code { display: flex; flex-wrap: wrap; gap: 6px; }
 .doc-code code { padding: 2px 8px; border-radius: var(--r-xs); background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-subtle); color: var(--muted); font: 12.5px/20px ui-monospace, 'SF Mono', 'JetBrains Mono', Consolas, monospace; }
-.dt-stage { position: relative; display: grid; place-items: center; min-height: 320px; padding: 44px 24px 32px; border: 1px solid var(--line-subtle); border-radius: var(--r-2xl); background: radial-gradient(color-mix(in srgb, var(--line-strong) 45%, transparent) 1px, transparent 1.2px) 0 0 / 18px 18px, color-mix(in srgb, var(--soft) 55%, var(--line-subtle)); overflow: auto; }
+.dt-stage { position: relative; display: grid; place-items: center; min-height: 320px; padding: 44px 24px 32px; border: 1px solid var(--line-subtle); border-radius: var(--r-2xl); background: radial-gradient(color-mix(in srgb, var(--line-strong) 45%, transparent) 1px, transparent 1.2px) 0 0 / 18px 18px, color-mix(in srgb, var(--soft) 55%, var(--line-subtle)); overflow-x: auto; overflow-y: hidden;   /* 高度跟著內容（卡片、預覽框都不限高），不出直向捲軸 */ }
 .dt-stage > .cell { flex: none; max-width: 100%; animation: none; cursor: default; }
 #wall > .cell[hidden] { display: none; }   /* .cell 的 display:flex 會蓋掉 hidden；分類篩選與自訂面板的隱藏都靠這條 */
 .dt-stage > .cell[hidden] { display: flex !important; }
@@ -1025,6 +1025,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .pv-mode #wall > .cell:not(.pv-on) { display: none !important; }
 .pv-mode .cell { animation: none !important; cursor: default; max-width: 100%; }
 .pv-mode .cell-doc { display: none !important; }
+.pv-mode, .pv-mode body { overflow: hidden; }   /* 預覽頁本身不捲動：高度交給外層的框 */
 /* 互動示範：右上角播放／暫停（只控制這張）；暫停後可以直接操作 */
 .dt-play { position: absolute; top: 12px; right: 12px; z-index: 2; }
 .dt-stage:has(> .dt-play) { padding-top: 72px; }   /* 按鈕佔上方空白，不壓到卡片標題（舊版；現在播放鈕在工具列裡） */
@@ -7601,7 +7602,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
       if (dtId && held.has(dtId)) setHold(false);
       if (!slot) return;
       const cell = $('#' + dtId);
-      if (cell) { cell.style.width = cell.style.height = ''; slot.replaceWith(cell); }
+      if (cell) { cell.style.width = cell.style.height = cell.style.minHeight = ''; slot.replaceWith(cell); }
       slot = null;
     }
     /* 預覽尺寸：桌機＝牆上的卡片直接搬進來（可暫停、操作）；平板、手機＝內嵌單一元件預覽頁，寬度 768／375，
@@ -7629,12 +7630,12 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
       paintDevW();
       let f = $('.dt-frame', st);
       if (!w) { f?.remove(); placeGrip(); return; }
-      if (!f) { f = document.createElement('iframe'); f.className = 'dt-frame'; f.title = TITLE[dtId] + '（預覽）'; f.loading = 'eager'; f.addEventListener('load', () => syncFrame(f)); f.src = pvUrl(dtId); st.append(f); }
+      if (!f) { f = document.createElement('iframe'); f.className = 'dt-frame'; f.setAttribute('scrolling', 'no'); f.title = TITLE[dtId] + '（預覽）'; f.loading = 'eager'; f.addEventListener('load', () => syncFrame(f)); f.src = pvUrl(dtId); st.append(f); }
       f.style.width = w + 'px';
       placeGrip();
     }
     // 預覽頁回報自己的高度；主題、語言、深淺色改了就再同步一次
-    addEventListener('message', (e) => { const m = e.data, f = dt && $('.dt-frame', dt); if (m?.type === 'wall-pv-h' && f && e.source === f.contentWindow) f.style.height = Math.max(460, Math.min(1400, m.h)) + 'px'; });
+    addEventListener('message', (e) => { const m = e.data, f = dt && $('.dt-frame', dt); if (m?.type === 'wall-pv-h' && f && e.source === f.contentWindow) f.style.height = Math.max(200, m.h) + 'px'; });   // 框高＝預覽內容高度（不設上限，不出捲軸）
     new MutationObserver(() => { const f = dt && $('.dt-frame', dt); if (f) syncFrame(f); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-ui', 'style', 'lang', 'class', 'data-tabs', 'data-density'] });
     function showDetail(id, tab = 'basic') {
       putBack();
@@ -7662,7 +7663,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
       if (cell) {
         const [w, h] = cardSize(cell);
         slot = document.createComment(id); cell.before(slot);
-        cell.style.width = w + 'px'; cell.style.height = h + 'px';
+        cell.style.width = w + 'px'; cell.style.height = 'auto'; cell.style.minHeight = h + 'px';   // 高度不限：至少牆上的高度，內容多就長高
         $('.dt-stage', dt).append(cell);
       }
       dtId = id; wall.classList.add('ready'); setTab(tab); paintPlay(); setDev(devW);
@@ -7710,12 +7711,12 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
       if (cell) {
         cell.hidden = false; cell.classList.add('pv-on'); document.title = TITLE[id] + '・預覽';
         const fit = () => {   // 尺寸照牆上這個寬度時的實際大小：暫時拿掉預覽模式量一次（同一個工作內，不會畫出來）
-          const de = document.documentElement; cell.style.width = cell.style.height = ''; de.classList.remove('pv-mode');
+          const de = document.documentElement; cell.style.width = cell.style.height = cell.style.minHeight = ''; de.classList.remove('pv-mode');
           const r = cell.getBoundingClientRect(); de.classList.add('pv-mode');
-          cell.style.width = Math.min(r.width, innerWidth - 32) + 'px'; cell.style.height = r.height + 'px';
+          cell.style.width = Math.min(r.width, innerWidth - 32) + 'px'; cell.style.height = 'auto'; cell.style.minHeight = r.height + 'px';
         };
         fit(); addEventListener('resize', fit);
-        const report = () => { if (parent !== window) parent.postMessage({ type: 'wall-pv-h', h: Math.ceil(cell.getBoundingClientRect().height + 48) }, '*'); };
+        const report = () => { if (parent !== window) parent.postMessage({ type: 'wall-pv-h', h: Math.ceil(cell.getBoundingClientRect().bottom + 24) }, '*'); };
         new ResizeObserver(report).observe(cell); report();
       }
     }

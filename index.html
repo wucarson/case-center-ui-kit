@@ -836,7 +836,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .shell { transition: margin-right calc(420ms * var(--dur)) var(--ease); }
 /* 面板開著時元件牆讓位：調設定永遠看得到即時變化 */
 /* 面板開著時：元件牆自己捲動，捲軸在內容區右側（面板左邊），不和面板疊在一起 */
-@media (min-width: 761px) { html:has(> body.cz-open) { overflow: hidden; } body.cz-open { position: fixed; inset: 0 380px 0 0; overflow-y: auto; overscroll-behavior: contain; } }
+@media (min-width: 761px) { html:has(> body.cz-open) { overflow: hidden; } body.cz-open { position: fixed; inset: 0 420px 0 0; overflow-y: auto; overscroll-behavior: contain; } }
 @media (min-width: 761px) { body.cz-open .top { top: -28px; } }   /* 面板開著時捲動容器換成 body：固定的標題列抵掉 body 的上內距（28px），貼齊頂端 */
 @media (max-width: 760px) { body.cz-open, body.doc-open { padding-bottom: 62vh; } }
 
@@ -1299,7 +1299,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 }
 @media (max-width: 540px), (pointer: coarse) { .ck-f { display: none; } }
 .ck-f kbd { padding: 0 4px; border: 1px solid var(--line); border-radius: 4px; font: 11px/16px ui-monospace, Consolas, monospace; }
-.cz { position: fixed; z-index: 30; top: 0; right: 0; bottom: 0; width: 380px; max-width: 100%; display: flex; flex-direction: column; background: var(--surface); border-left: 1px solid var(--line); box-shadow: var(--shadow-pop); transform: translateX(105%); transition: transform calc(520ms * var(--dur)) var(--spring-soft); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-right: env(safe-area-inset-right, 0px); }
+.cz { position: fixed; z-index: 30; top: 0; right: 0; bottom: 0; width: 420px; max-width: 100%; display: flex; flex-direction: column; background: var(--surface); border-left: 1px solid var(--line); box-shadow: var(--shadow-pop); transform: translateX(105%); transition: transform calc(520ms * var(--dur)) var(--spring-soft); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-right: env(safe-area-inset-right, 0px); }
 .cz.open { transform: none; }
 @media (max-width: 760px) {
   .cz { top: auto; left: 0; width: auto; height: 60vh; border-left: 0; border-top: 1px solid var(--line); border-radius: var(--r-2xl) var(--r-2xl) 0 0; transform: translateY(105%); padding-left: env(safe-area-inset-left, 0px); }
@@ -1438,10 +1438,6 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .cz-fsel, .cz-fin { width: 100%; height: 36px; padding: 0 10px; border: 0; border-radius: var(--r-md); background: var(--surface); box-shadow: var(--inset); color: var(--ink); font: inherit; font-size: 13px; font-weight: 600; }
 .cz-fin { font-weight: 400; }
 .cz-fprev { padding: 10px 12px; border-radius: var(--r-md); background: var(--surface); box-shadow: var(--raise); font-size: 18px; line-height: 26px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cz-pane { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin: 0 12px 12px; padding: 3px; border-radius: var(--r-md); background: var(--soft); box-shadow: var(--inset); }
-.cz-pane button { height: 30px; border: 0; border-radius: max(2px, calc(var(--r-md) - 3px)); background: transparent; color: var(--weak); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background calc(200ms * var(--dur)) var(--ease), color calc(200ms * var(--dur)) var(--ease), scale calc(300ms * var(--dur)) var(--spring); }
-.cz-pane button:active { scale: .96; }
-.cz-pane button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--raise); }
 .cz-body { gap: 16px !important; padding-bottom: 24px !important; }
 .cz-blk { gap: 16px; padding: 16px 14px 18px; }
 .cz-quick { gap: 0 !important; }
@@ -1506,13 +1502,13 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .cz-th.r { width: 30px; height: 20px; margin: 1px 0 0 6px; border-width: 2px 0 0 2px; border-color: var(--primary); border-radius: 0; background: none; }
 .cz-th.mo { border: 0; background: none; }
 .cz-th.mo svg { width: 26px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
-.cz-q .cz-sw-row { gap: 6px; flex-wrap: nowrap; }
-.cz-q .cz-swatch { width: 26px; height: 26px; }
-.cz-q .cz-pick { position: relative; width: 26px; height: 26px; padding: 0; justify-content: center; border-radius: 50%; font-size: 0; }
-.cz-q .cz-pick input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-.cz-q .cz-pick::after { content: "+"; font-size: 16px; line-height: 1; font-weight: 600; color: var(--weak); }
-.cz-q .cz-pick.on { background: var(--c); }
-.cz-q .cz-pick.on::after { content: none; }
+:is(.cz-q, .cz-set) .cz-sw-row { gap: 6px; flex-wrap: nowrap; }
+:is(.cz-q, .cz-set) .cz-swatch { width: 26px; height: 26px; }
+:is(.cz-q, .cz-set) .cz-pick { position: relative; width: 26px; height: 26px; padding: 0; justify-content: center; border-radius: 50%; font-size: 0; }
+:is(.cz-q, .cz-set) .cz-pick input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+:is(.cz-q, .cz-set) .cz-pick::after { content: "+"; font-size: 16px; line-height: 1; font-weight: 600; color: var(--weak); }
+:is(.cz-q, .cz-set) .cz-pick.on { background: var(--c); }
+:is(.cz-q, .cz-set) .cz-pick.on::after { content: none; }
 .cz-pick.on { border-style: solid; border-color: var(--c); box-shadow: 0 0 0 2px var(--soft), 0 0 0 3px var(--c); }
 .cz-warn { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 6px 6px 10px; border-radius: var(--r-md); background: var(--warn-bg); color: var(--warn-fg); font-size: 12px; font-weight: 600; }
 .cz-warn button { flex: none; height: 26px; padding: 0 10px; border: 0; border-radius: var(--r-sm); background: var(--surface); color: var(--ink); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; box-shadow: var(--raise); }
@@ -1981,7 +1977,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   --ev-glow: color-mix(in srgb, var(--primary) 42%, transparent);
   --ev-sel: color-mix(in srgb, var(--primary) 14%, transparent);
   --ev-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
-  top: 24px; right: 24px; bottom: 24px; width: 380px; max-width: calc(100% - 48px);
+  top: 24px; right: 24px; bottom: 24px; width: 420px; max-width: calc(100% - 48px);
   border: 1px solid var(--ev-line-2); border-radius: 22px; overflow: hidden;
   background: var(--ev-glass); -webkit-backdrop-filter: blur(28px) saturate(170%); backdrop-filter: blur(28px) saturate(170%);
   box-shadow: 0 28px 70px -28px rgb(15 30 60 / .35), 0 2px 6px rgb(15 30 60 / .06), inset 0 1px 0 rgb(255 255 255 / .55);
@@ -2003,7 +1999,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   .cz { top: auto; left: 24px; right: 24px; bottom: 24px; width: auto; max-width: none; height: calc(60vh - 24px); border: 1px solid var(--ev-line-2); border-radius: 22px; transform: translateY(calc(100% + 40px)); }
 }
 @media (min-width: 761px) {
-  body.cz-open { inset: 0 404px 0 0; margin: 0; scrollbar-width: none; }   /* 讓出面板寬＋右邊界；元件區照常捲動但不顯示捲動軸 */
+  body.cz-open { inset: 0 444px 0 0; margin: 0; scrollbar-width: none; }   /* 讓出面板寬＋右邊界；元件區照常捲動但不顯示捲動軸 */
   body.cz-open::-webkit-scrollbar { display: none; }
 }
 
@@ -2017,10 +2013,6 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz .cz-cur { padding: 12px 14px 10px; }
 .cz .cz-cur select, .cz :is(.cz-fsel, .cz-fin) { border-radius: 12px; background: var(--ev-cell); box-shadow: inset 0 0 0 1px var(--ev-line); }
 
-/* 層級頁籤：細框軌道，選中＝亮字＋細框 */
-.cz.cz .cz-pane { margin: 0 14px 4px; background: transparent; box-shadow: inset 0 0 0 1px var(--ev-line); border-radius: 12px; }
-.cz.cz .cz-pane button { position: relative; border-radius: 9px; color: var(--ev-dim); letter-spacing: .08em; }
-.cz.cz .cz-pane button[aria-selected="true"] { background: var(--ev-cell); color: var(--ink); box-shadow: inset 0 0 0 1px var(--ev-line-2); }
 
 /* 內容：細線分區，不用灰底區塊 */
 .cz .cz-body { background: transparent; padding: 14px 14px 24px; scrollbar-width: none; }   /* 照常捲動，不顯示捲動軸 */
@@ -2033,6 +2025,67 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz.cz :is(.cz-ql, .cz-blk > h3) { display: flex; align-items: center; gap: 8px; padding: 0; font-size: 12.5px; line-height: 18px; font-weight: 600; letter-spacing: .04em; color: var(--ink); }
 .cz .cz-rl { font-size: 12.5px; }
 .cz .cz-dot { box-shadow: 0 0 6px var(--ev-glow); }
+
+/* ---- 外觀設定（2026-11-25 改版）：分類頁籤＋設定列 ---- */
+/* 分類：7 類，放不下時橫向捲動；改過的項目數顯示在名稱旁 */
+.cz-tabs { flex: none; display: flex; gap: 2px; margin: 0 14px 4px; padding: 3px; overflow-x: auto; scrollbar-width: none; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--ev-line, var(--line)); }
+.cz-tabs::-webkit-scrollbar { display: none; }
+.cz-tabs button { flex: 1 0 auto; height: 30px; padding: 0 9px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 0; border-radius: 9px; background: transparent; color: var(--ev-dim, var(--weak)); font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: color calc(.15s * var(--dur)), background calc(.15s * var(--dur)); }
+.cz-tabs button:hover { color: var(--ink); }
+.cz-tabs button:active { scale: .96; }
+.cz-tabs button[aria-selected="true"] { background: var(--ev-cell, var(--soft)); color: var(--ink); box-shadow: inset 0 0 0 1px var(--ev-line-2, var(--line)); }
+.cz-tabs button:focus-visible { outline: 3px solid var(--focus); outline-offset: -1px; }
+.cz-tabs small { min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--primary); color: var(--on-primary); font-size: 10px; line-height: 16px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+.cz-tabs small[hidden] { display: none; }
+/* 設定列：名稱在左、控制在右（寬的控制項放名稱下方）；選到的列淡底並展開一句說明 */
+.cz.cz .cz-sets { gap: 0; padding: 4px; }
+.cz-set { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 12px; min-height: 48px; padding: 8px 10px; border-radius: 12px; transition: background calc(.15s * var(--dur)); }
+.cz-set { position: relative; }
+.cz-set + .cz-set::before { content: ""; position: absolute; left: 10px; right: 10px; top: 0; height: 1px; background: var(--ev-line, var(--line-subtle)); }   /* 分隔線：直線，不跟著圓角彎 */
+.cz-set.cur::before, .cz-set.cur + .cz-set::before { display: none; }
+.cz-set.block { grid-template-columns: minmax(0, 1fr); }
+.cz-set.cur { background: var(--ev-cell, var(--soft)); }
+.cz-set .cz-rl { min-width: 0; }
+.cz-set .cz-lab { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cz-ctl { min-width: 0; display: flex; justify-content: flex-end; }
+.cz-set.block .cz-ctl { display: block; }
+.cz-set:not(.block) .cz-range { width: 176px; }
+.cz-set:not(.block) .cz-seg button { flex: none; min-width: 40px; padding: 0 9px; }
+.cz-set.changed .cz-rl .cz-dot { display: inline-block; }
+.cz-set.changed:is(:hover, .cur, :focus-within) .cz-rl .cz-undo1 { display: inline-flex; }   /* 改過的列：滑過或選到才出現單項還原 */
+.cz-desc { grid-column: 1 / -1; display: none; margin: 0; font-size: 12px; line-height: 18px; color: var(--weak); }
+.cz-set.cur .cz-desc { display: block; }
+.cz-stack { display: flex; flex-direction: column; gap: 10px; }
+.cz-inl { display: flex; align-items: center; gap: 10px; }
+.cz-inl .cz-pick { width: 26px; height: 26px; padding: 0; border-radius: 50%; background: var(--c); border: 0; }
+.cz-inl .cz-pick input { opacity: 0; width: 100%; height: 100%; }
+/* 各層級字級：名稱＋字級在一行，粗細在下一行 */
+.cz-lv { display: flex; flex-direction: column; gap: 8px; }
+.cz-lvr { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 8px; padding-top: 8px; border-top: 1px solid var(--ev-line, var(--line-subtle)); }
+.cz-lvr > .cz-seg { grid-column: 1 / -1; }
+.cz-lvn { min-width: 0; display: flex; align-items: baseline; gap: 6px; overflow: hidden; white-space: nowrap; color: var(--ink); line-height: 1.3; }
+.cz-lvn small { font-size: 11px; font-weight: 500; color: var(--weak); }
+.cz-set .cz-list { max-height: 260px; overflow-y: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* 按鍵提示：只在用鍵盤操作時出現 */
+.cz-keys { flex: none; display: none; flex-wrap: wrap; gap: 4px 14px; padding: 8px 16px; border-top: 1px solid var(--ev-line, var(--line-subtle)); font-size: 11.5px; color: var(--weak); }
+.cz.kbd .cz-keys { display: flex; }
+.cz-keys kbd { margin-right: 2px; padding: 0 4px; border: 1px solid var(--ev-line-2, var(--line)); border-radius: 4px; font: 10.5px/16px ui-monospace, Consolas, monospace; }
+/* 牆上受影響的元件：選到或滑過某列時微微亮起 */
+#wall > .cell.cz-aff { outline: 2px solid color-mix(in srgb, var(--primary) 65%, transparent); outline-offset: 4px; }
+/* 手機：抽屜頂端握把，點一下或往上拉＝拉高（下半部仍看得到元件牆時可再拉回）；觸控目標 ≥ 44px */
+.cz-grab { display: none; }
+@media (max-width: 760px) {
+  .cz-grab { flex: none; display: flex; justify-content: center; align-items: center; height: 22px; padding: 0; border: 0; background: none; cursor: grab; touch-action: none; }
+  .cz-grab i { width: 36px; height: 4px; border-radius: 2px; background: var(--ev-line-2, var(--line-strong)); }
+  .cz { transition: transform calc(520ms * var(--dur)) var(--spring-soft), height calc(320ms * var(--dur)) var(--spring-soft); }
+  .cz.tall { height: calc(92vh - 24px); }
+  .cz .cz-h { padding-top: 4px; }
+  .cz-tabs button, .cz-set .cz-seg button { min-height: 44px; }
+  .cz .cz-ic { width: 40px; height: 40px; }
+  .cz .cz-hb { gap: 0; }
+  .cz .cz-h h2 { white-space: nowrap; }   /* 標題不要被按鈕擠成直排 */
+  .cz-keys { display: none !important; }
+}
 
 /* 選項格：透明格＋細框；選中＝主色細框＋柔光 */
 .cz.cz :is(.cz-style, .cz-opt, .cz-tile, .cz-langs button, .cz-filter button) { background: var(--ev-cell); box-shadow: inset 0 0 0 1px var(--ev-line); border-radius: 12px; }
@@ -2494,6 +2547,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 </div>
 
 <aside class="cz" id="cz" aria-labelledby="cz-title" inert>
+  <button class="cz-grab" id="cz-grab" type="button" aria-label="拉高面板" aria-expanded="false"><i></i></button>
   <div class="cz-h">
     <div class="cz-tt"><h2 id="cz-title" tabindex="-1">外觀</h2><span class="cz-state" id="cz-state"></span></div>
     <div class="cz-hb">
@@ -2514,8 +2568,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   <div class="cz-cur">
     <select id="cz-theme" aria-label="主題"></select>
   </div>
-  <div class="cz-pane" role="tablist" aria-label="設定層級"><button type="button" role="tab" data-pane="basic">基本</button><button type="button" role="tab" data-pane="adv">進階</button><button type="button" role="tab" data-pane="show">顯示</button></div>
+  <div class="cz-tabs" id="cz-tabs" role="tablist" aria-label="設定分類"></div>
   <div class="cz-body" id="cz-panel" role="tabpanel"></div>
+  <div class="cz-keys" aria-hidden="true"><span><kbd>↑</kbd><kbd>↓</kbd> 選擇</span><span><kbd>←</kbd><kbd>→</kbd> 調整</span><span><kbd>Q</kbd><kbd>E</kbd> 分類</span><span><kbd>Esc</kbd> 關閉</span></div>
   <div class="cz-foot">
     <p class="cz-note" id="cz-note" aria-live="polite"></p>
     <textarea class="cz-out" id="cz-out" readonly hidden aria-label="分享內容"></textarea>
@@ -4905,7 +4960,7 @@ void main(){
     const catOf = (id) => Object.keys(CAT).find((k) => CAT[k].includes(id)) || '其他';
     const cells = $$('#wall > .cell').map((el) => ({ id: el.id, el, name: (el.querySelector('header')?.firstChild?.textContent || el.id).trim(), cat: catOf(el.id) }));
     const naturalOrder = cells.map((c) => c.id);
-    const orderOf = () => { const o = theme.layout.order.filter((id) => naturalOrder.includes(id)); return [...o, ...naturalOrder.filter((id) => !o.includes(id))]; };
+    const orderOf = () => naturalOrder.slice();   // 照原本分類順序（拖移排序已拿掉）
     let wallCat = '';   // 分類篩選（空＝全部）
     let wallQ = '';     // 篩選字（空＝不篩）
     const wallHit = (c) => { if (!wallQ) return true; const x = ITEMS.find((i) => i.id === c.id); return !!x && wallQ.split(/\s+/).every((t) => x.hay.includes(t)); };
@@ -5076,7 +5131,8 @@ void main(){
     /* ---- 快速選項的選中狀態：滑桿拖動時也即時更新 ---- */
     let quick = [], primaryWarn = null;
     function paintMarks() {
-      for (const r of rows) r.classList.toggle('changed', !same(getPath(theme, r.dataset.path), getPath(DEFAULT, r.dataset.path)));
+      for (const r of rows) r.classList.toggle('changed', (r.dataset.paths ?? r.dataset.path ?? '').split(' ').filter(Boolean).some((p) => !same(getPath(theme, p), getPath(DEFAULT, p))));
+      paintCounts?.();
       $$('.cz-tile[data-path]').forEach((t) => t.classList.toggle('changed', !same(getPath(theme, t.dataset.path), getPath(DEFAULT, t.dataset.path))));
       $$('.cz-style').forEach((b, i) => b.setAttribute('aria-pressed', String(theme.style.ui === STYLES[i][0])));
       for (const [b, on] of quick) b.setAttribute('aria-pressed', String(on()));
@@ -5598,133 +5654,204 @@ void main(){
       [...sel.querySelectorAll('option')].forEach((o) => { if (GF_W[o.value]) o.style.fontFamily = `'${o.value}'`; });
       return el('div', { class: 'cz-font' }, sel, input, el('div', { class: 'cz-fprev', style: `font-family:${fontStack('custom')}` }, 'Aa 案件管理 1234'));
     }
-    function quickBody() {
-      const c = theme.color, ly = theme.layout;
-      const custom = !PRIMARY_SWATCHES.some(([v]) => v === c.primary);
+    /* ---- 外觀設定資料表 ----
+       一筆＝一列設定：cat 分類、key、label 名稱（白話）、hint 一句說明（選到那一列時展開）、
+       paths 會改到的 theme 路徑（改過標記、單項還原、分類上的改過數量都靠它）、ui() 控制項、
+       block＝控制項較寬、放在名稱下方；pin＝也放進「常用」；aff＝會影響的元件（選到或滑過時在牆上亮起）；lr:false＝←→ 不切換。
+       新增設定＝加一筆 */
+    const CZ_CATS = [['common', '常用'], ['style', '風格'], ['color', '色彩'], ['type', '字型'], ['shape', '形狀'], ['motion', '動態'], ['layout', '版面']];
+    // 層次＝陰影、主色光暈、邊框一起調（原本三個控制項）
+    const depthOf = (v) => ({ shadow: v, glow: [0, 50, 100, 150][v], border: ['subtle', 'subtle', 'standard', 'strong'][v] });
+    // 字級表只調字級與粗細；行高、字距照字級自動算（大字收緊）
+    const autoLh = (sz) => (sz >= 40 ? 1.15 : sz >= 28 ? 1.3 : sz >= 18 ? 1.4 : 1.5);
+    const autoLs = (sz) => (sz >= 40 ? -1.5 : sz >= 28 ? -1 : 0);
+    // 分段選項（按了就套用並重畫）：after＝套用後額外動作
+    const pick = (label, list, on, set, after) => el('div', { class: 'cz-seg', role: 'group', 'aria-label': label }, list.map(([v, n]) => {
+      const b = el('button', { type: 'button', 'aria-pressed': String(on(v)), onclick: () => { set(v); changed(); renderAll(); after?.(); } }, n);
+      quick.push([b, () => on(v)]); return b;
+    }));
+    const sizeStep = (k, n) => {
+      const out = el('output', {}, theme.type.levels[k].size + 'px');
+      const go = (d) => { const lv = theme.type.levels[k], v = Math.min(64, Math.max(8, lv.size + d)); lv.size = v; lv.lh = autoLh(v); lv.ls = autoLs(v); out.textContent = v + 'px'; changed(); };
+      return el('div', { class: 'cz-step', role: 'group', 'aria-label': n + '字級' }, el('button', { type: 'button', 'aria-label': '縮小', onclick: () => go(-1) }, '−'), out, el('button', { type: 'button', 'aria-label': '放大', onclick: () => go(1) }, '＋'));
+    };
+    function primaryEl() {
+      const c = theme.color, custom = !PRIMARY_SWATCHES.some(([v]) => v === c.primary);
       primaryWarn = el('div', { class: 'cz-warn', hidden: ratio(c.primary, '#ffffff') >= 3 }, el('span', {}, '這個顏色當文字可能看不清楚'), el('button', { type: 'button', onclick: fixPrimary }, '自動修正'));
-      const hidden = new Set(ly.hidden);
-      return [el('section', { class: 'cz-blk cz-quick' },
-        qrow('風格', stylesEl()),
-        qrow('字型', opts('字型', [['system', '系統'], ['sans', '黑體'], ['custom', '自訂']].map(([k, name]) => ({ name, thumb: Object.assign(el('i', { class: 'cz-th ft', style: `font-family:${fontStack(k)}`, 'aria-hidden': 'true' }), { textContent: 'Aa字' }), on: () => theme.type.family === k, pick: () => { theme.type.family = k; } }))),
-          theme.type.family === 'custom' ? fontPicker() : null,
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '字級' }, [[0.92, '小'], [1, '標準'], [1.08, '大']].map(([v, n]) => { const btn = el('button', { type: 'button', 'aria-pressed': String(theme.type.scale === v), onclick: () => { theme.type.scale = v; changed(); renderAll(); flash(); } }, '字級 ' + n); quick.push([btn, () => theme.type.scale === v]); return btn; })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '層次' }, RATIOS.map(([n, r]) => { const btn = el('button', { type: 'button', 'aria-pressed': String(sizesMatch(r)), onclick: () => { theme.type.levels = levelsFor(r); changed(); renderAll(); flash(); } }, '層次 ' + n); quick.push([btn, () => sizesMatch(r)]); return btn; }))),
-        qrow('主色', el('div', { class: 'cz-sw-row', role: 'group', 'aria-label': '主色' },
-          PRIMARY_SWATCHES.map(([v, n]) => el('button', { type: 'button', class: 'cz-swatch', style: `--c:${v}`, title: n, 'aria-label': `主色：${n}`, 'aria-pressed': String(c.primary === v), onclick: () => { c.primary = v; changed(); renderAll(); flash(); } })),
-          el('label', { class: 'cz-pick' + (custom ? ' on' : ''), title: '自訂顏色', style: custom ? `--c:${c.primary}` : '' }, colorInput('color.primary', '自訂主色'))), primaryWarn),
-        // 底色色調（2026-11-16 從進階移來）：縮圖並排底色、線條、文字三色 —— 淺底三種很像，靠中、深兩段把色相拉開
-        qrow('底色', opts('底色色調', [['cool', '偏藍'], ['neutral', '中性'], ['warm', '偏暖']].map(([k, name]) => {
+      return el('div', { class: 'cz-stack' }, el('div', { class: 'cz-sw-row', role: 'group', 'aria-label': '主色' },
+        PRIMARY_SWATCHES.map(([v, n]) => el('button', { type: 'button', class: 'cz-swatch', style: `--c:${v}`, title: n, 'aria-label': `主色：${n}`, 'aria-pressed': String(c.primary === v), onclick: () => { c.primary = v; changed(); renderAll(); flash(); } })),
+        el('label', { class: 'cz-pick' + (custom ? ' on' : ''), title: '自訂顏色', style: custom ? `--c:${c.primary}` : '' }, colorInput('color.primary', '自訂主色'))), primaryWarn);
+    }
+    function catsEl() {
+      const ly = theme.layout, hidden = new Set(ly.hidden);
+      return el('div', { class: 'cz-cats', role: 'group', 'aria-label': '依類別顯示' }, Object.keys(CAT).map((k) => {
+        const ids = CAT[k], off = ids.filter((id) => hidden.has(id)).length;
+        const state = off === 0 ? 'true' : off === ids.length ? 'false' : 'mixed';
+        return el('button', { type: 'button', class: 'cz-cat', 'aria-pressed': state, title: state === 'mixed' ? '部分顯示；點一下全部顯示' : '',
+          onclick: () => { const h = new Set(ly.hidden); for (const id of ids) state === 'true' ? h.add(id) : h.delete(id); ly.hidden = [...h]; changed(); renderAll(); } },
+          el('i', { 'aria-hidden': 'true' }), CAT_LABEL[k] || k);
+      }));
+    }
+    // 顯示的元件：類別一次開關＋逐一勾選（照原本分類順序，不再拖移排序）
+    function shownEl() {
+      const ly = theme.layout, hidden = new Set(ly.hidden);
+      return el('div', { class: 'cz-stack' }, catsEl(), el('ul', { class: 'cz-list', 'aria-label': '元件（勾選顯示）' }, naturalOrder.map((id) => {
+        const c2 = cells.find((x) => x.id === id);
+        return el('li', { class: 'cz-item' + (hidden.has(id) ? ' off' : '') }, el('label', {}, el('input', { type: 'checkbox', checked: !hidden.has(id), onchange: (e) => { const h = new Set(ly.hidden); e.target.checked ? h.delete(id) : h.add(id); ly.hidden = [...h]; changed(); renderAll(); } }), el('span', {}, c2.name)));
+      })));
+    }
+    const SETTINGS = [
+      { cat: 'common', key: 'mode', label: '深淺色', hint: '「跟系統」會依電腦或手機的設定自動切換。', paths: [],
+        ui: () => pick('深淺色', [['auto', '跟系統'], ['light', '淺色'], ['dark', '深色']], (v) => (root.dataset.theme || 'auto') === v, (v) => setMode(v)) },
+      { cat: 'style', pin: true, key: 'ui', label: '風格', hint: '一次換掉整體質感（圓角、陰影、邊框），之後可以再細調。', paths: ['style.ui'], block: true, ui: stylesEl },
+      { cat: 'style', key: 'tabs', label: '頁籤樣式', hint: '頁籤選中時的樣子；「自動」會跟著風格。', paths: ['style.tabs'], aff: '#c-tabs, #c-dtab',
+        ui: () => seg('style.tabs', [['auto', '自動'], ['underline', '底線'], ['pill', '膠囊'], ['block', '區塊']], '頁籤樣式') },
+      { cat: 'style', key: 'depth', label: '層次', hint: '卡片陰影、主色光暈和邊框的強弱，一起調整。', paths: ['depth.shadow', 'depth.glow', 'depth.border'],
+        ui: () => pick('層次', [[0, '無'], [1, '淡'], [2, '標準'], [3, '強']], (v) => theme.depth.shadow === v, (v) => { theme.depth = depthOf(v); }, flash) },
+      { cat: 'color', pin: true, key: 'primary', label: '主色', hint: '按鈕、選中、連結和焦點框的顏色；太淺看不清楚時會提醒，並可自動修正。', paths: ['color.primary'], block: true, ui: primaryEl },
+      { cat: 'color', key: 'neutral', label: '底色色調', hint: '頁面底色、線條和文字的冷暖。', paths: ['color.neutral'], block: true,
+        ui: () => opts('底色色調', [['cool', '偏藍'], ['neutral', '中性'], ['warm', '偏暖']].map(([k, name]) => {
           const p = (k === 'cool' ? COOL : NEUTRAL[k]).light;
-          return { name, thumb: thumb('tone', `background:linear-gradient(90deg, ${p.page} 0 34%, ${p['line-strong']} 34% 67%, ${p.muted} 67%);border-color:${p['line-strong']}`), on: () => c.neutral === k, pick: () => { c.neutral = k; } };
-        }))),
-        qrow('圓角', lockShape(opts('圓角', RADIUS.map(([name, s, r]) => ({ name, thumb: thumb('r', `border-top-left-radius:${r}`), on: () => same(theme.shape, s), pick: () => { theme.shape = clone(s); } }))))),
-        qrow('動畫', opts('動畫', MOTION.map(([name, m, d]) => {
+          return { name, thumb: thumb('tone', `background:linear-gradient(90deg, ${p.page} 0 34%, ${p['line-strong']} 34% 67%, ${p.muted} 67%);border-color:${p['line-strong']}`), on: () => theme.color.neutral === k, pick: () => { theme.color.neutral = k; } };
+        })) },
+      { cat: 'color', key: 'darkPrimary', label: '深色模式主色', hint: '深色背景下另用一個較亮的主色；關閉時自動計算。', paths: ['color.darkPrimary'],
+        ui: () => { const c = theme.color; return el('div', { class: 'cz-inl' }, c.darkPrimary ? el('label', { class: 'cz-pick on', title: '深色模式主色', style: `--c:${c.darkPrimary}` }, colorInput('color.darkPrimary', '深色模式主色')) : null, sw(c.darkPrimary, (on) => { c.darkPrimary = on ? tone(c.primary, 0.74, 0.9) : ''; }, '深色模式另選主色')); } },
+      { cat: 'color', key: 'status', label: '狀態顏色', hint: '成功、提醒、錯誤、資訊的顏色，用在徽章、提示框和通知。', paths: ['color.success', 'color.warn', 'color.danger', 'color.info'], block: true, aff: '#c-bdg, #c-co, #c-toast',
+        ui: () => el('div', { class: 'cz-tiles' }, [['success', '成功'], ['warn', '提醒'], ['danger', '錯誤'], ['info', '資訊']].map(([k, n]) => el('label', { class: 'cz-tile', 'data-path': 'color.' + k, title: '點色塊換色' }, colorInput('color.' + k, n + '顏色'), n))) },
+      { cat: 'color', key: 'series', label: '圖表顏色', hint: '長條、圓餅、折線等圖表依序使用的顏色。', paths: ['color.series'], block: true, aff: '#c-bars, #c-pie, #c-line, #c-stk, #c-ht',
+        ui: () => el('div', { class: 'cz-series' }, theme.color.series.map((v, i) => el('input', { type: 'color', value: v, 'aria-label': `圖表第 ${i + 1} 色`, oninput: (e) => { theme.color.series[i] = e.target.value; changed(false); }, onchange: () => record() }))) },
+      { cat: 'type', key: 'family', label: '字型', hint: '「系統」用各平台預設字型；「自訂」可以選 Google Fonts。', paths: ['type.family', 'type.custom'], block: true,
+        ui: () => el('div', { class: 'cz-stack' }, opts('字型', [['system', '系統'], ['sans', '黑體'], ['custom', '自訂']].map(([k, name]) => ({ name, thumb: Object.assign(el('i', { class: 'cz-th ft', style: `font-family:${fontStack(k)}`, 'aria-hidden': 'true' }), { textContent: 'Aa字' }), on: () => theme.type.family === k, pick: () => { theme.type.family = k; } }))), theme.type.family === 'custom' ? fontPicker() : null) },
+      { cat: 'type', key: 'scale', label: '字級', hint: '全部文字一起放大或縮小。', paths: ['type.scale'],
+        ui: () => pick('字級', [[0.92, '小'], [1, '標準'], [1.08, '大']], (v) => theme.type.scale === v, (v) => { theme.type.scale = v; }, flash) },
+      { cat: 'type', key: 'ratio', label: '標題與內文差距', hint: '「鮮明」讓標題更大、層級更明顯；「緊湊」適合資訊密集的頁面。', paths: [],
+        ui: () => pick('標題與內文差距', RATIOS.map(([n, r]) => [r, n]), (r) => sizesMatch(r), (r) => { theme.type.levels = levelsFor(r); }, flash) },
+      { cat: 'type', key: 'levels', label: '各層級字級', hint: '個別調整七個層級的字級和粗細；行高、字距會照字級自動計算。', paths: ['type.levels'], block: true, lr: false,
+        ui: () => el('div', { class: 'cz-lv' }, LEVELS.map(([k, n, en]) => { const lv = theme.type.levels[k];
+          return el('div', { class: 'cz-lvr' }, el('span', { class: 'cz-lvn', style: `font-family:${fontStack(theme.type.family)};font-size:${Math.min(18, lv.size)}px;font-weight:${lv.weight}` }, n, el('small', {}, en)), sizeStep(k, n),
+            seg(`type.levels.${k}.weight`, [[400, '一般'], [500, '中等'], [600, '半粗'], [700, '粗']], n + '粗細')); })) },
+      { cat: 'shape', pin: true, key: 'radius', label: '圓角', hint: '卡片、按鈕和欄位的轉角弧度。', paths: ['shape'], block: true,
+        ui: () => lockShape(opts('圓角', RADIUS.map(([name, sh, r]) => ({ name, thumb: thumb('r', `border-top-left-radius:${r}`), on: () => same(theme.shape, sh), pick: () => { theme.shape = clone(sh); } })))) },
+      { cat: 'shape', key: 'card', label: '卡片圓角', hint: '元件卡片、對話框這類大區塊的圓角。', paths: ['shape.card'], ui: () => lockShape(range('shape.card', 0, 32, 1, (v) => v + 'px', '卡片圓角')) },
+      { cat: 'shape', key: 'control', label: '按鈕與欄位圓角', hint: '按鈕、輸入框、下拉選單這類控制項的圓角。', paths: ['shape.control'], aff: '#c-btn, #c-ff, #c-dd, #c-search',
+        ui: () => lockShape(range('shape.control', 0, 20, 1, (v) => v + 'px', '按鈕與欄位圓角')) },
+      { cat: 'shape', key: 'pill', label: '標籤形狀', hint: '徽章和篩選標籤用膠囊或小方塊。', paths: ['shape.pill'], aff: '#c-bdg, #c-chips',
+        ui: () => lockShape(seg('shape.pill', [['full', '膠囊'], ['soft', '方塊']], '標籤形狀')) },
+      { cat: 'motion', pin: true, key: 'anim', label: '動畫', hint: '「關」不播動畫；「少」比較慢，也不回彈。', paths: ['motion.reduce', 'motion.speed', 'motion.bounce'], block: true,
+        ui: () => opts('動畫', MOTION.map(([name, m, d]) => {
           const t = thumb('mo'); t.innerHTML = `<svg viewBox="0 0 24 24"><path d="${d}"/></svg>`;
           return { name, thumb: t,
             on: () => (m ? !theme.motion.reduce && theme.motion.speed === m.speed && theme.motion.bounce === m.bounce : theme.motion.reduce),
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
-        })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['line', '浮線'], ['fly', '飛入'], ['tile', '拼塊'], ['stack', '疊放']].map(([v, n]) => { const on = () => (['fly', 'tile', 'stack'].includes(theme.motion.enter) ? theme.motion.enter : 'line') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '深淺色轉場' }, [['dim', '亮度'], ['wand', '魔杖'], ['slash', '亂刀'], ['hole', '黑洞']].map(([v, n]) => { const on = () => (['hole', 'slash', 'wand'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'dim') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.themeFx = v; changed(); renderAll(); } }, '深淺色 ' + n); quick.push([btn, on]); return btn; }))),
-      )];
-    }
-    function catsEl() {
-      const ly = theme.layout, hidden = new Set(ly.hidden);
-      return el('div', { class: 'cz-cats', role: 'group', 'aria-label': '顯示哪些元件' }, Object.keys(CAT).map((k) => {
-          const ids = CAT[k], off = ids.filter((id) => hidden.has(id)).length;
-          const state = off === 0 ? 'true' : off === ids.length ? 'false' : 'mixed';
-          return el('button', { type: 'button', class: 'cz-cat', 'aria-pressed': state, title: state === 'mixed' ? '部分顯示；點一下全部顯示' : '',
-            onclick: () => { const h = new Set(ly.hidden); for (const id of ids) state === 'true' ? h.add(id) : h.delete(id); ly.hidden = [...h]; changed(); renderAll(); } },
-            el('i', { 'aria-hidden': 'true' }), CAT_LABEL[k] || k);
-        }));
-    }
+        })) },
+      { cat: 'motion', key: 'speed', label: '動畫速度', hint: '數字越大，動畫越慢。', paths: ['motion.speed'], ui: () => range('motion.speed', 0.5, 2, 0.25, (v) => v + '×', '動畫速度') },
+      { cat: 'motion', key: 'bounce', label: '動畫回彈', hint: '元件到定位時回彈的幅度。', paths: ['motion.bounce'],
+        ui: () => seg('motion.bounce', [['none', '無'], ['soft', '柔和'], ['standard', '標準'], ['strong', '強']], '動畫回彈') },
+      { cat: 'motion', key: 'enter', label: '進場效果', hint: '元件牆卡片出現的方式；選了會馬上重播一次。', paths: ['motion.enter'],
+        ui: () => pick('進場效果', [['line', '浮線'], ['fly', '飛入'], ['tile', '拼塊'], ['stack', '疊放']], (v) => (['fly', 'tile', 'stack'].includes(theme.motion.enter) ? theme.motion.enter : 'line') === v, (v) => { theme.motion.enter = v; }, () => requestAnimationFrame(() => replayEnter())) },
+      { cat: 'motion', key: 'themeFx', label: '深淺色轉場', hint: '切換深淺色時的畫面效果。', paths: ['motion.themeFx'],
+        ui: () => pick('深淺色轉場', [['dim', '亮度'], ['wand', '魔杖'], ['slash', '亂刀'], ['hole', '黑洞']], (v) => (['hole', 'slash', 'wand'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'dim') === v, (v) => { theme.motion.themeFx = v; }) },
+      { cat: 'layout', key: 'cols', label: '每列卡片數', hint: '寬螢幕時，每列最多放幾張卡片。', paths: ['layout.cols'], ui: () => seg('layout.cols', [[2, '2'], [3, '3'], [4, '4'], [5, '5']], '每列卡片數') },
+      { cat: 'layout', key: 'density', label: '疏密', hint: '同時調整卡片之間和元件內的間距。', paths: ['layout.density'], ui: () => seg('layout.density', [['compact', '緊'], ['standard', '標準'], ['relaxed', '鬆']], '疏密') },
+      { cat: 'layout', key: 'shown', label: '顯示的元件', hint: '依類別一次開關，或逐一勾選元件牆要顯示的元件。', paths: ['layout.hidden'], block: true, lr: false, ui: shownEl },
+    ];
 
-    let pane = 'basic', catFilter = '全部';
-    try { const v = localStorage.getItem('wall-cz-pane') || (localStorage.getItem('wall-cz-more') === '1' ? 'adv' : 'basic'); if (['basic', 'adv', 'show'].includes(v)) pane = v; } catch (e) {}
-    const num = (path, min, max, step, fmt, label) => { const out = el('output', {}, fmt(getPath(theme, path))); const go = (d) => { const v = +Math.min(max, Math.max(min, getPath(theme, path) + d)).toFixed(2); setPath(theme, path, v); out.textContent = fmt(v); changed(); }; return el('div', { class: 'cz-step', role: 'group', 'aria-label': label }, el('button', { type: 'button', 'aria-label': '減少', onclick: () => go(-step) }, '−'), out, el('button', { type: 'button', 'aria-label': '增加', onclick: () => go(step) }, '＋')); };
-    const stepper = (path, min, max, label) => { const out = el('output', {}, getPath(theme, path) + 'px'); const go = (d) => { const v = Math.min(max, Math.max(min, getPath(theme, path) + d)); setPath(theme, path, v); out.textContent = v + 'px'; changed(); }; return el('div', { class: 'cz-step', role: 'group', 'aria-label': label }, el('button', { type: 'button', 'aria-label': '縮小', onclick: () => go(-1) }, '−'), out, el('button', { type: 'button', 'aria-label': '放大', onclick: () => go(1) }, '＋')); };
-    function moreBody(kind) {
-      const c = theme.color, ly = theme.layout, order = orderOf(), hidden = new Set(ly.hidden);
-      const shown = order.filter((id) => catFilter === '全部' || catOf(id) === catFilter);
-      const move = (id, dir) => { const o = orderOf(); const i = o.indexOf(id), j = i + dir; if (j < 0 || j >= o.length) return; [o[i], o[j]] = [o[j], o[i]]; ly.order = o; changed(); renderAll(); };
-      let dragId = null;
-      const adv = [
-        blk('風格細節',
-          row('頁籤', 'style.tabs', seg('style.tabs', [['auto', '自動'], ['underline', '底線'], ['pill', '膠囊'], ['block', '區塊']], '頁籤樣式')),
-          row('立體感', 'depth.shadow', seg('depth.shadow', [[0, '無'], [1, '淡'], [2, '標準'], [3, '強']], '立體感')),
-          row('發光', 'depth.glow', range('depth.glow', 0, 150, 10, (v) => v + '%', '發光強度')),
-          row('邊框', 'depth.border', seg('depth.border', [['subtle', '淡'], ['standard', '標準'], ['strong', '明顯']], '邊框'))),
-        blk('顏色細節',
-          row('深色模式另選主色', 'color.darkPrimary', sw(c.darkPrimary, (on) => { c.darkPrimary = on ? tone(c.primary, 0.74, 0.9) : ''; }, '深色模式另選主色'), null, true),
-          c.darkPrimary ? el('label', { class: 'cz-pick', style: 'align-self:flex-start' }, colorInput('color.darkPrimary', '深色模式主色'), '深色主色') : null,
-          row('狀態顏色', 'color.success', el('div', { class: 'cz-tiles' }, [['success', '成功'], ['warn', '提醒'], ['danger', '錯誤'], ['info', '資訊']].map(([k, n]) =>
-            el('label', { class: 'cz-tile', 'data-path': 'color.' + k, title: '點色塊換色' }, colorInput('color.' + k, n + '顏色'), n)))),
-          row('圖表顏色', 'color.series', el('div', { class: 'cz-series' }, c.series.map((v, i) => el('input', { type: 'color', value: v, 'aria-label': `圖表第 ${i + 1} 色`, oninput: (e) => { c.series[i] = e.target.value; changed(false); }, onchange: () => record() }))))),
-        blk('字型細節',
-          el('p', { class: 'cz-hint' }, '七個層級對齊 Material 3；字級以 100% 字級時為準。'),
-          ...LEVELS.map(([k, n, en]) => {
-            const lv = theme.type.levels[k], p = `type.levels.${k}`;
-            const prev = el('div', { class: 'cz-tprev', style: `font-family:${fontStack(theme.type.family)};font-size:${Math.min(22, lv.size)}px;font-weight:${lv.weight};letter-spacing:${lv.ls / 100}em` }, `${n} ${en}`);
-            return row(`${n}　${en}`, p, el('div', { class: 'cz-type' }, prev,
-              el('div', { class: 'cz-tgrid' },
-                el('span', {}, '字級'), num(p + '.size', 8, 64, 1, (v) => v + 'px', n + '字級'),
-                el('span', {}, '行高'), num(p + '.lh', 1, 2, 0.05, (v) => v.toFixed(2), n + '行高'),
-                el('span', {}, '字距'), num(p + '.ls', -5, 10, 0.5, (v) => (v > 0 ? '+' : '') + v + '%', n + '字距')),
-              seg(p + '.weight', [[400, '一般'], [500, '中等'], [600, '半粗'], [700, '粗']], n + '粗細')));
-          })),
-        blk('圓角細節',
-          lockShape(el('div', { class: 'cz-lockable' },
-            row('卡片', 'shape.card', range('shape.card', 0, 32, 1, (v) => v + 'px', '卡片圓角')),
-            row('按鈕與欄位', 'shape.control', range('shape.control', 0, 20, 1, (v) => v + 'px', '按鈕與欄位圓角')),
-            row('標籤', 'shape.pill', seg('shape.pill', [['full', '膠囊'], ['soft', '方塊']], '標籤形狀'))))),
-        blk('動畫細節',
-          row('速度', 'motion.speed', range('motion.speed', 0.5, 2, 0.25, (v) => v + '×', '動畫速度')),
-          row('彈跳感', 'motion.bounce', seg('motion.bounce', [['none', '無'], ['soft', '柔和'], ['standard', '標準'], ['strong', '強']], '彈跳感')),
-          row('自動示範', 'motion.autoplay', sw(theme.motion.autoplay, (v) => (theme.motion.autoplay = v), '自動示範'), null, true)),
-      ];
-      const show = [
-        blk('版面',
-          row('每列幾格', 'layout.cols', seg('layout.cols', [[2, '2'], [3, '3'], [4, '4'], [5, '5']], '每列幾格')),
-          row('間距', 'layout.density', seg('layout.density', [['compact', '緊'], ['standard', '標準'], ['relaxed', '鬆']], '間距')),
-          el('p', { class: 'cz-hint' }, '同時調整卡片距離與元件內的間距。')),
-        blk('元件',
-          row('類別', 'layout.hidden', catsEl()),
-          el('div', { class: 'cz-filter', role: 'group', 'aria-label': '依類別篩選' }, ['全部', ...Object.keys(CAT)].map((k) => el('button', { type: 'button', 'aria-pressed': String(k === catFilter), onclick: () => { catFilter = k; renderAll(); } }, CAT_LABEL[k] || k))),
-          el('div', { class: 'cz-links' }, el('button', { type: 'button', onclick: () => { ly.order = []; ly.hidden = []; changed(); renderAll(); } }, '恢復原本排列')),
-          el('ul', { class: 'cz-list', 'aria-label': '元件（勾選顯示，拖曳或 ↑↓ 調順序）' }, shown.map((id) => {
-            const c2 = cells.find((x) => x.id === id);
-            const li = el('li', { class: 'cz-item' + (hidden.has(id) ? ' off' : ''), draggable: 'true',
-              ondragstart: (e) => { dragId = id; li.classList.add('drag'); e.dataTransfer.effectAllowed = 'move'; },
-              ondragend: () => li.classList.remove('drag'),
-              ondragover: (e) => { e.preventDefault(); li.classList.add('over'); },
-              ondragleave: () => li.classList.remove('over'),
-              ondrop: (e) => { e.preventDefault(); li.classList.remove('over'); if (!dragId || dragId === id) return; const o = orderOf().filter((x) => x !== dragId); o.splice(o.indexOf(id), 0, dragId); ly.order = o; changed(); renderAll(); } },
-              el('span', { class: 'grip', 'aria-hidden': 'true', title: '拖曳調順序' }, '⋮⋮'),
-              el('label', {}, el('input', { type: 'checkbox', checked: !hidden.has(id), onchange: (e) => { const h = new Set(ly.hidden); e.target.checked ? h.delete(id) : h.add(id); ly.hidden = [...h]; changed(); renderAll(); if (e.target.checked) { c2.el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); c2.el.classList.remove('cz-flash'); void c2.el.offsetWidth; c2.el.classList.add('cz-flash'); } } }), el('span', {}, c2.name), el('em', {}, CAT_LABEL[c2.cat] || c2.cat)),
-              el('button', { type: 'button', class: 'mv', 'aria-label': `${c2.name} 往前`, title: '往前', onclick: () => move(id, -1) }, '↑'),
-              el('button', { type: 'button', class: 'mv', 'aria-label': `${c2.name} 往後`, title: '往後', onclick: () => move(id, 1) }, '↓'));
-            return li;
-          }))),
-      ];
-      return kind === 'show' ? show : adv;
+    /* ---- 外觀面板：分類、列、改過標記 ---- */
+    const czTabs = $('#cz-tabs');
+    let czCat = 'common', czCur = '', czReveal = false;
+    try { const v = localStorage.getItem('wall-cz-cat'); if (CZ_CATS.some(([k]) => k === v)) czCat = v; czCur = localStorage.getItem('wall-cz-row') || ''; } catch (e) {}
+    const inCat = (k) => SETTINGS.filter((x) => (k === 'common' ? x.pin || x.cat === 'common' : x.cat === k));
+    const isChanged = (x) => x.paths.some((p) => !same(getPath(theme, p), getPath(DEFAULT, p)));
+    var paintCounts = () => $$('button', czTabs).forEach((b) => { const n = inCat(b.dataset.cat).filter(isChanged).length, sm = $('small', b); sm.hidden = !n; sm.textContent = n; sm.setAttribute('aria-label', `改過 ${n} 項`); });
+    function paintTabs() {
+      czTabs.replaceChildren(...CZ_CATS.map(([k, n]) => el('button', { type: 'button', role: 'tab', id: 'cz-t-' + k, 'data-cat': k, 'aria-selected': String(k === czCat), 'aria-controls': 'cz-panel', tabindex: k === czCat ? '0' : '-1', onclick: () => setCzCat(k) }, n, el('small', { hidden: true }))));
+      panel.setAttribute('aria-labelledby', 'cz-t-' + czCat);
+      $('[aria-selected="true"]', czTabs)?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     }
-
+    function setCzCat(k, focusTab) {
+      if (k === czCat) return; czCat = k; try { localStorage.setItem('wall-cz-cat', k); } catch (e) {}
+      panel.scrollTop = 0; renderAll(); aff(null);
+      if (focusTab) $('[aria-selected="true"]', czTabs)?.focus();
+    }
+    function settingRow(x) {
+      const reset = el('button', { type: 'button', class: 'cz-undo1', title: '改回預設', 'aria-label': `「${x.label}」改回預設`, onclick: () => { x.paths.forEach((p) => setPath(theme, p, clone(getPath(DEFAULT, p)))); changed(); renderAll(); } });
+      reset.innerHTML = RESET_ICON;
+      const r = el('div', { class: 'cz-set' + (x.block ? ' block' : ''), 'data-key': x.key, 'data-paths': x.paths.join(' ') },
+        el('div', { class: 'cz-rl' }, el('span', { class: 'cz-dot', 'aria-hidden': 'true' }), el('span', { class: 'cz-lab' }, x.label), reset),
+        el('div', { class: 'cz-ctl' }, x.ui()),
+        el('p', { class: 'cz-desc' }, x.hint));
+      if (x.aff) r.dataset.aff = x.aff;
+      if (x.lr === false) r.dataset.nolr = '';
+      rows.push(r); return r;
+    }
     const panel = $('#cz-panel');
     function renderAll() {
       rows.length = 0; quick = [];
       const top = panel.scrollTop;
-      panel.replaceChildren(...(pane === 'basic' ? quickBody() : moreBody(pane)));
-      $$('.cz-pane button').forEach((b) => { const on = b.dataset.pane === pane; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
+      paintTabs();
+      panel.replaceChildren(el('section', { class: 'cz-blk cz-sets' }, inCat(czCat).map(settingRow)));
       loadFont(WEBFONT.sans[LANG] || WEBFONT.sans.zh); loadFont(theme.type.custom);
-      panel.scrollTop = top;
+      const cur = czCur ? panel.querySelector(`.cz-set[data-key="${czCur}"]`) : null;
+      cur?.classList.add('cur');
+      if (czReveal) { czReveal = false; panel.scrollTop = 0; cur?.scrollIntoView({ block: 'nearest' }); } else panel.scrollTop = top;
       paintMarks(); renderLib(); paintHist();
     }
-    // 頁面右上的淺色／深色鈕切換時，模式選項跟著更新
-    new MutationObserver(() => { if (cz.classList.contains('open')) paintMarks(); }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
-    $$('.cz-pane button').forEach((b) => {
-      b.addEventListener('click', () => { if (b.dataset.pane === pane) return; pane = b.dataset.pane; try { localStorage.setItem('wall-cz-pane', pane); } catch (e) {} panel.scrollTop = 0; renderAll(); });
-      b.addEventListener('keydown', (e) => { if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return; e.preventDefault(); const all = $$('.cz-pane button'), i = all.indexOf(b), o = all[(i + (e.key === 'ArrowRight' ? 1 : all.length - 1)) % all.length]; o.click(); o.focus(); });
+    // 頁面右上的淺色／深色鈕切換時，選項跟著更新
+    new MutationObserver(() => { if ($('#cz').classList.contains('open')) { paintMarks(); if (czCat === 'common') renderAll(); } }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    // 牆上受影響的元件亮起
+    const aff = (sel) => { $$('#wall > .cell.cz-aff').forEach((c) => c.classList.remove('cz-aff')); if (sel) $$(sel).forEach((c) => { if (c.matches('#wall > .cell')) c.classList.add('cz-aff'); }); };
+    const setCur = (r) => {
+      $$('.cz-set.cur', panel).forEach((x) => { if (x !== r) x.classList.remove('cur'); });
+      if (!r) return; r.classList.add('cur'); czCur = r.dataset.key; try { localStorage.setItem('wall-cz-row', czCur); } catch (e) {}
+      aff(r.dataset.aff);
+    };
+    const focusRow = (r, idx) => {
+      if (!r) return;
+      const os = $$('[aria-pressed]:not(:disabled)', r);
+      const t = idx != null && os[idx] ? os[idx] : os.find((b) => b.getAttribute('aria-pressed') === 'true') || r.querySelector('button:not(.cz-undo1):not(:disabled), input:not(:disabled), select');
+      (t || r).focus({ preventScroll: true }); r.scrollIntoView({ block: 'nearest' }); setCur(r);
+    };
+    panel.addEventListener('focusin', (e) => { const r = e.target.closest('.cz-set'); if (r) setCur(r); });
+    panel.addEventListener('pointerdown', (e) => { const r = e.target.closest('.cz-set'); if (r) setCur(r); });
+    panel.addEventListener('pointerover', (e) => { const r = e.target.closest('.cz-set'); aff(r ? r.dataset.aff : $('.cz-set.cur', panel)?.dataset.aff); });
+    panel.addEventListener('pointerleave', () => aff($('.cz-set.cur', panel)?.dataset.aff));
+    // 鍵盤：↑↓ 換列、←→ 改選項（滑桿照原生）、Q／E 換分類；用鍵盤時顯示按鍵提示
+    $('#cz').addEventListener('keydown', (e) => {
+      const t = e.target, czEl = $('#cz');
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key) || /^[qe]$/i.test(e.key)) czEl.classList.add('kbd');
+      if (e.ctrlKey || e.metaKey || e.altKey || t.matches('input[type="text"], input[type="color"], select, textarea')) return;
+      if (/^[qe]$/i.test(e.key)) { e.preventDefault(); const i = CZ_CATS.findIndex(([k]) => k === czCat); setCzCat(CZ_CATS[(i + (e.key.toLowerCase() === 'e' ? 1 : CZ_CATS.length - 1)) % CZ_CATS.length][0], true); return; }
+      if (czTabs.contains(t) && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); const i = CZ_CATS.findIndex(([k]) => k === czCat); setCzCat(CZ_CATS[(i + (e.key === 'ArrowRight' ? 1 : CZ_CATS.length - 1)) % CZ_CATS.length][0], true); return; }
+      if (czTabs.contains(t) && e.key === 'ArrowDown') { e.preventDefault(); focusRow($('.cz-set', panel)); return; }
+      if (!panel.contains(t)) return;
+      const list = $$('.cz-set', panel), r = t.closest('.cz-set');
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault(); const i = r ? list.indexOf(r) : -1, j = i + (e.key === 'ArrowDown' ? 1 : -1);
+        if (j < 0) { $('[aria-selected="true"]', czTabs)?.focus(); return; }
+        focusRow(list[Math.min(list.length - 1, j)]);
+      } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && r && !('nolr' in r.dataset) && !t.matches('input[type="range"]')) {
+        const os = $$('[aria-pressed]:not(:disabled)', r); if (!os.length) return;
+        e.preventDefault();
+        const i = os.findIndex((b) => b.getAttribute('aria-pressed') === 'true'), j = Math.max(0, Math.min(os.length - 1, (i < 0 ? 0 : i) + (e.key === 'ArrowRight' ? 1 : -1)));
+        if (j === i) return;
+        const key = r.dataset.key; os[j].click();
+        focusRow(panel.querySelector(`.cz-set[data-key="${key}"]`), j);
+      }
     });
+    $('#cz').addEventListener('pointerdown', () => $('#cz').classList.remove('kbd'));
+    // 手機：握把點一下或往上拉＝拉高，往下拉＝收回（已經是一般高度時往下拉＝關閉）
+    {
+      const g = $('#cz-grab'); let y0 = null, moved = false;
+      const tall = (on) => { $('#cz').classList.toggle('tall', on); g.setAttribute('aria-expanded', String(on)); g.setAttribute('aria-label', on ? '收回面板' : '拉高面板'); };
+      g.addEventListener('pointerdown', (e) => { y0 = e.clientY; moved = false; g.setPointerCapture(e.pointerId); });
+      g.addEventListener('pointermove', (e) => { if (y0 != null && Math.abs(e.clientY - y0) > 8) moved = true; });
+      g.addEventListener('pointerup', (e) => {
+        if (y0 == null) return; const dy = e.clientY - y0; y0 = null;
+        if (!moved) return;
+        if (dy < -40) tall(true); else if (dy > 40) { if ($('#cz').classList.contains('tall')) tall(false); else $('#cz-close').click(); }
+      });
+      g.addEventListener('click', () => { if (!moved) tall(!$('#cz').classList.contains('tall')); });
+    }
     const renderPanes = renderAll;
     /* ---- 匯出：從目前畫面讀出淺色、深色兩組實際值 ---- */
     const TOK = {
@@ -6690,6 +6817,7 @@ ${stamp()}
       // 切換捲動容器（視窗 ↔ 內容區）時保留捲動位置
       const wide = matchMedia('(min-width: 761px)').matches, y = on ? scrollY : document.body.scrollTop;
       cz.classList.toggle('open', on); cz.inert = !on; document.body.classList.toggle('cz-open', on);
+      if (on) czReveal = true; else { aff(null); cz.classList.remove('kbd', 'tall'); $('#cz-grab').setAttribute('aria-expanded', 'false'); }
       if (wide) { if (on) document.body.scrollTop = y; else scrollTo(0, y); }
       opener.setAttribute('aria-expanded', String(on));
       if (on) { renderAll(); setTimeout(() => $('#cz-title').focus({ preventScroll: true }), 60); } else { closeMenus(); opener.focus({ preventScroll: true }); }

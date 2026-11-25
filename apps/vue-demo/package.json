@@ -1,5 +1,5 @@
 {
-  "name": "@case-center/vue-demo",
+  "name": "@wucarson/facet-vue-demo",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -9,8 +9,8 @@
     "preview": "vite preview --port 5182"
   },
   "dependencies": {
-    "@case-center/vue": "0.1.0",
-    "@case-center/styles": "0.1.0",
+    "@wucarson/facet-vue": "0.1.0",
+    "@wucarson/facet-styles": "0.1.0",
     "vue": "^3.5.13"
   },
   "devDependencies": {

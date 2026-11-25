@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
-import { MONTH_NEXT, MONTH_PREV, canPickDay, dateFieldLabel, dateGridKey, dayClass, isDateOpenKey, monthTitle, placeDaySel, shiftView, viewOf, type MonthView } from '@case-center/core/date';
-import { cx, onOutsidePointer } from '@case-center/core/dom';
-import { PRESETS, WEEK, fmtDay, fromISO, monthCells, todayISO } from '@case-center/core/dates';
+import { MONTH_NEXT, MONTH_PREV, canPickDay, dateFieldLabel, dateGridKey, dayClass, isDateOpenKey, monthTitle, placeDaySel, shiftView, viewOf, type MonthView } from '@wucarson/facet-core/date';
+import { cx, onOutsidePointer } from '@wucarson/facet-core/dom';
+import { PRESETS, WEEK, fmtDay, fromISO, monthCells, todayISO } from '@wucarson/facet-core/dates';
 import Icon from './Icon.vue';
 import type { StyleProp } from './util';
 

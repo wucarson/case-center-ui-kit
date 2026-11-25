@@ -1,7 +1,7 @@
 import { useEffect, useRef, type CSSProperties } from 'react';
 import {
   countUp, legendDotStyle, segmentBarLabel, segmentStyle, segmentTotal, statClass, statsStyle, type BarSegment, type StatItem,
-} from '@case-center/core/metrics';
+} from '@wucarson/facet-core/metrics';
 import { cx, styleOf } from './util';
 
 export type { BarSegment, StatItem };

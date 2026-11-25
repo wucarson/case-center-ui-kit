@@ -3,7 +3,7 @@ import {
   CALLOUT_ICON, EMPTY_ICON, TIMELINE_CLS, TIMELINE_ICON, avatarBg, badgeClass, badgeDot, calloutClass, calloutRole, emptyClass, emptyRole,
   avatarNames, avatarRest, avatarShown, avatarStackClass, avatarTotal, skeletonClass, stepNote, stepState,
   type AvatarPerson, type BadgeAppearance, type BadgeTone, type CalloutTone, type EmptyTone, type TimelineType,
-} from '@case-center/core/display';
+} from '@wucarson/facet-core/display';
 import { Button } from './button';
 import { Icon } from './icon';
 

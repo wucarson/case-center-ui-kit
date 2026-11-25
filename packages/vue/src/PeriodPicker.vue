@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
-import { focusNth } from '@case-center/core/choice';
-import { periodIndex, periodKey, periodText, placePeriodPill } from '@case-center/core/date';
-import { PERIODS, todayISO, type PeriodKey } from '@case-center/core/dates';
+import { focusNth } from '@wucarson/facet-core/choice';
+import { periodIndex, periodKey, periodText, placePeriodPill } from '@wucarson/facet-core/date';
+import { PERIODS, todayISO, type PeriodKey } from '@wucarson/facet-core/dates';
 import Icon from './Icon.vue';
 import type { StyleProp } from './util';
 

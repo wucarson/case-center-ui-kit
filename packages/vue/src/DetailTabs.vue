@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { focusNth } from '@case-center/core/choice';
-import { detailTabAriaLabel, detailTabClass, detailTabSeparator, tabsKey } from '@case-center/core/tabs';
-import type { FillIconName } from '@case-center/core/icons';
+import { focusNth } from '@wucarson/facet-core/choice';
+import { detailTabAriaLabel, detailTabClass, detailTabSeparator, tabsKey } from '@wucarson/facet-core/tabs';
+import type { FillIconName } from '@wucarson/facet-core/icons';
 import Icon from './Icon.vue';
 import type { StyleProp } from './util';
 

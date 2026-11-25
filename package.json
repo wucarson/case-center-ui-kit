@@ -17,6 +17,11 @@
     "build:packages": "npm run build -w packages/core -w packages/tokens -w packages/react -w packages/vue -w packages/angular",
     "build:apps": "npm run build -w apps/react-demo -w apps/vue-demo -w apps/angular-demo",
     "build": "npm run build:packages && npm run build:apps",
-    "pack:check": "node tools/pack-check.mjs"
+    "pack:check": "node tools/pack-check.mjs",
+    "changeset": "changeset",
+    "release": "npm run build:packages && node tools/publish.mjs"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.31.1"
   }
 }

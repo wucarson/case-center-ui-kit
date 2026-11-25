@@ -1,11 +1,11 @@
 import { Component, ElementRef, computed, inject, input, model, output, signal } from '@angular/core';
-import { isFocusVisible } from '@case-center/core/dom';
+import { isFocusVisible } from '@wucarson/facet-core/dom';
 import {
   STAR_PATH, checkboxAttrs, checkboxClass, checkboxNext, focusNth, isCheckboxToggleKey, isStarToggleKey, radioClass, radioKey, radioMove,
   radioTabIndex, segmentedClass, segmentedColumns, segmentedKey, segmentedThumb, starClass,
   type CheckboxState, type RadioOption,
-} from '@case-center/core/choice';
-import { burst } from '@case-center/core/burst';
+} from '@wucarson/facet-core/choice';
+import { burst } from '@wucarson/facet-core/burst';
 import { Icon } from './icon';
 
 export type { RadioOption };

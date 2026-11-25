@@ -1,7 +1,16 @@
 {
-  "name": "@case-center/vue",
+  "name": "@wucarson/facet-vue",
   "version": "0.1.0",
   "description": "案管中心元件（Vue 3）",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wucarson/case-center-ui-kit.git",
+    "directory": "packages/vue"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "type": "module",
   "sideEffects": false,
   "files": [
@@ -18,10 +27,10 @@
   },
   "peerDependencies": {
     "vue": "^3.3.0",
-    "@case-center/styles": "0.1.0"
+    "@wucarson/facet-styles": "0.1.0"
   },
   "dependencies": {
-    "@case-center/core": "0.1.0"
+    "@wucarson/facet-core": "0.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",

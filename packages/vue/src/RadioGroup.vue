@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { focusNth, radioClass, radioKey, radioMove, radioTabIndex, type RadioOption } from '@case-center/core/choice';
+import { focusNth, radioClass, radioKey, radioMove, radioTabIndex, type RadioOption } from '@wucarson/facet-core/choice';
 import type { StyleProp } from './util';
 
 export type { RadioOption };

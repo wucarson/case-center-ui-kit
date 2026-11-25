@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { avatarNames, avatarRest, avatarShown, avatarStackClass, avatarStyle, avatarTotal, type AvatarPerson } from '@case-center/core/display';
+import { avatarNames, avatarRest, avatarShown, avatarStackClass, avatarStyle, avatarTotal, type AvatarPerson } from '@wucarson/facet-core/display';
 import type { StyleProp } from './util';
 
 /** 成員頭像群組：重疊排列，滑過時展開；超過 max 收成 +N，右邊寫總人數。規則在 core/display.ts。 */

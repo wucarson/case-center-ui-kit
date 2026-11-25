@@ -36,22 +36,22 @@ console.log('✓ 全新專案安裝完成');
 
 // 3. 執行期載入（Node 直接 import，驗證 exports 對得上）
 const run = (code) => { try { return sh(`node --input-type=module -e "${code}"`, app).trim(); } catch (e) { return 'ERR ' + e.stderr.split('\n')[0]; } };
-ok(run("import { sortRows } from '@case-center/core/table'; console.log(typeof sortRows)") === 'function', 'import @case-center/core/table');
-ok(run("import { tokens } from '@case-center/tokens'; console.log(typeof tokens.color)") === 'object', 'import @case-center/tokens');
-ok(run("import { createRequire } from 'node:module'; const r = createRequire(process.cwd() + '/'); console.log(r.resolve('@case-center/styles/components.css').endsWith('components.css'))") === 'true', '解析 @case-center/styles/components.css');
+ok(run("import { sortRows } from '@wucarson/facet-core/table'; console.log(typeof sortRows)") === 'function', 'import @wucarson/facet-core/table');
+ok(run("import { tokens } from '@wucarson/facet-tokens'; console.log(typeof tokens.color)") === 'object', 'import @wucarson/facet-tokens');
+ok(run("import { createRequire } from 'node:module'; const r = createRequire(process.cwd() + '/'); console.log(r.resolve('@wucarson/facet-styles/components.css').endsWith('components.css'))") === 'true', '解析 @wucarson/facet-styles/components.css');
 
 // 4. 型別檢查：照文件的用法各寫一段
 fs.mkdirSync(path.join(app, 'src'));
-fs.writeFileSync(path.join(app, 'src/react.tsx'), `import { Button, DataTable, Switch, type TableColumn } from '@case-center/react';
+fs.writeFileSync(path.join(app, 'src/react.tsx'), `import { Button, DataTable, Switch, type TableColumn } from '@wucarson/facet-react';
 const cols: TableColumn[] = [];
 export const A = () => <><Button variant="outline">取消</Button><Switch checked={true} onChange={() => {}} label="提醒" /><DataTable label="案件" columns={cols} rows={[]} /></>;
 `);
 fs.writeFileSync(path.join(app, 'src/vue.ts'), `import { defineComponent, h } from 'vue';
-import { Button, DataTable } from '@case-center/vue';
+import { Button, DataTable } from '@wucarson/facet-vue';
 export const A = defineComponent(() => () => [h(Button, { variant: 'outline' }, () => '取消'), h(DataTable, { label: '案件', columns: [], rows: [] })]);
 `);
 fs.writeFileSync(path.join(app, 'src/angular.ts'), `import { Component } from '@angular/core';
-import { Button, DataTable, Switch } from '@case-center/angular';
+import { Button, DataTable, Switch } from '@wucarson/facet-angular';
 @Component({ selector: 'x-a', imports: [Button, DataTable, Switch], template: '' })
 export class A {}
 `);

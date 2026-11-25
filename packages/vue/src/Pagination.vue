@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { PAGE_ARROW, isPageKey, pageArrowOff, pageCount, pageItems, pageLabel, pageTarget } from '@case-center/core/pagination';
+import { PAGE_ARROW, isPageKey, pageArrowOff, pageCount, pageItems, pageLabel, pageTarget } from '@wucarson/facet-core/pagination';
 import Icon from './Icon.vue';
 import type { StyleProp } from './util';
 

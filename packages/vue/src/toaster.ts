@@ -1,5 +1,5 @@
 import { defineComponent, h, onBeforeUnmount, shallowRef, Teleport } from 'vue';
-import { TOASTER_STYLE, dismiss, getToasts, subscribeToasts, toast, type ToastData } from '@case-center/core/toast';
+import { TOASTER_STYLE, dismiss, getToasts, subscribeToasts, toast, type ToastData } from '@wucarson/facet-core/toast';
 import Toast from './Toast.vue';
 
 export { toast, dismiss, type ToastData };

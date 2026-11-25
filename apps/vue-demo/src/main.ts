@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
-import '@case-center/styles/components.css';
+import '@wucarson/facet-styles/components.css';
 import '../../shared/case.css';
 import Demo from './Demo.vue';
 

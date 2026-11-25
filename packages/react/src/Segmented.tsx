@@ -1,5 +1,5 @@
 import { useRef, type CSSProperties, type KeyboardEvent } from 'react';
-import { focusNth, segmentedClass, segmentedColumns, segmentedKey, segmentedThumb } from '@case-center/core/choice';
+import { focusNth, segmentedClass, segmentedColumns, segmentedKey, segmentedThumb } from '@wucarson/facet-core/choice';
 import { cx, styleOf } from './util';
 
 export interface SegmentedProps {

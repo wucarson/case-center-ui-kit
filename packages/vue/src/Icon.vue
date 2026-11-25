@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ICONS, ICONS_FILL, type FillIconName, type IconName } from '@case-center/core/icons';
+import { ICONS, ICONS_FILL, type FillIconName, type IconName } from '@wucarson/facet-core/icons';
 /** <Icon name="trash" />：輸出和展示牆相同的 <svg class="ic">；fill＝填滿版（<svg class="ic fl">，選中時顯示） */
 defineProps<{ name: IconName; fill?: boolean; class?: string }>();
 </script>

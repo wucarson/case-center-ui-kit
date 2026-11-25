@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { fileTone, uploadBarLabel, uploadClass, uploadText, uploadWidth, type UploadStatus } from '@case-center/core/upload';
+import { fileTone, uploadBarLabel, uploadClass, uploadText, uploadWidth, type UploadStatus } from '@wucarson/facet-core/upload';
 import { cx, styleOf } from './util';
 
 export type { UploadStatus };

@@ -1,6 +1,6 @@
 import { Component, computed, input, model } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { PAGE_ARROW, isPageKey, pageArrowOff, pageCount, pageItems, pageLabel, pageTarget } from '@case-center/core/pagination';
+import { PAGE_ARROW, isPageKey, pageArrowOff, pageCount, pageItems, pageLabel, pageTarget } from '@wucarson/facet-core/pagination';
 import { Icon } from './icon';
 
 /**

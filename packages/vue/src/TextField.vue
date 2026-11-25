@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, useId } from 'vue';
-import { fieldCount } from '@case-center/core/field';
-import type { IconName } from '@case-center/core/icons';
+import { fieldCount } from '@wucarson/facet-core/field';
+import type { IconName } from '@wucarson/facet-core/icons';
 import FormField from './FormField.vue';
 import Icon from './Icon.vue';
 import type { StyleProp } from './util';

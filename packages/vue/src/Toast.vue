@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TOAST_ICON, isToastActionKey, toastClass, type ToastTone } from '@case-center/core/toast';
+import { TOAST_ICON, isToastActionKey, toastClass, type ToastTone } from '@wucarson/facet-core/toast';
 import Icon from './Icon.vue';
 
 /** 單則提示（.toast）。規則在 core/toast.ts。 */

@@ -3,7 +3,7 @@ import { computed, nextTick, ref, watch } from 'vue';
 import {
   DIALOG_OVERLAY_STYLE, dialogCancelClass, dialogClass, dialogFocusKey, dialogKey, dialogOkClass, dialogTitleId, focusDialogButton,
   type DialogButton, type DialogFocus,
-} from '@case-center/core/overlay';
+} from '@wucarson/facet-core/overlay';
 
 /** 確認對話框：需要確認才繼續。Esc＝取消；Tab 只在兩顆按鈕間移動。規則在 core/overlay.ts。 */
 const props = withDefaults(defineProps<{

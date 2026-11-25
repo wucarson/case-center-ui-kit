@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
-import { HOLD_MS, HoldControl, holdClass, holdFill, holdHint, holdText, isHoldKey, type HoldPhase } from '@case-center/core/hold';
+import { HOLD_MS, HoldControl, holdClass, holdFill, holdHint, holdText, isHoldKey, type HoldPhase } from '@wucarson/facet-core/hold';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
 

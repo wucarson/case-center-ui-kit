@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { focusNth, segmentedClass, segmentedColumns, segmentedKey, segmentedThumb } from '@case-center/core/choice';
+import { focusNth, segmentedClass, segmentedColumns, segmentedKey, segmentedThumb } from '@wucarson/facet-core/choice';
 import type { StyleProp } from './util';
 
 /** 分段切換：選中片彈性滑動。左右鍵切換。v-model:value（選中的索引）。規則在 core/choice.ts。 */

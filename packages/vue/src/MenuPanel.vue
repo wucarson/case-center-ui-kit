@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { focusMenuItem, isMenuItemOff, menuItemClass, menuKey, menuSelect, type MenuItem } from '@case-center/core/menu';
+import { focusMenuItem, isMenuItemOff, menuItemClass, menuKey, menuSelect, type MenuItem } from '@wucarson/facet-core/menu';
 import Icon from './Icon.vue';
 
 export type { MenuItem };

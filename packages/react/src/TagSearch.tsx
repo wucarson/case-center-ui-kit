@@ -1,5 +1,5 @@
 import { useId, useMemo, useState, type CSSProperties, type KeyboardEvent } from 'react';
-import { searchBoxClass, suggestionClass, suggestionId, suggestionListLabel, tagMatches, tagSearchKey, type TagSuggestion } from '@case-center/core/search';
+import { searchBoxClass, suggestionClass, suggestionId, suggestionListLabel, tagMatches, tagSearchKey, type TagSuggestion } from '@wucarson/facet-core/search';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
 

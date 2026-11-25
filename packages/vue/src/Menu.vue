@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue';
-import { onOutsidePointer } from '@case-center/core/dom';
-import { MENU_FLOAT_STYLE, focusFirstMenuItem, menuTriggerClass } from '@case-center/core/menu';
+import { onOutsidePointer } from '@wucarson/facet-core/dom';
+import { MENU_FLOAT_STYLE, focusFirstMenuItem, menuTriggerClass } from '@wucarson/facet-core/menu';
 import Icon from './Icon.vue';
 import MenuPanel, { type MenuItem } from './MenuPanel.vue';
 

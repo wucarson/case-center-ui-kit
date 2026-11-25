@@ -1,5 +1,5 @@
 import { Component, computed, input, model } from '@angular/core';
-import { TIME_COLS, pad2, parseTime, timeKey, timeStep, type TimePart } from '@case-center/core/time';
+import { TIME_COLS, pad2, parseTime, timeKey, timeStep, type TimePart } from '@wucarson/facet-core/time';
 import { Icon } from './icon';
 
 /**

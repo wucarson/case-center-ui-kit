@@ -1,5 +1,5 @@
 import { useState, type CSSProperties } from 'react';
-import { avatarNames, avatarRest, avatarShown, avatarStackClass, avatarStyle, avatarTotal, type AvatarPerson } from '@case-center/core/display';
+import { avatarNames, avatarRest, avatarShown, avatarStackClass, avatarStyle, avatarTotal, type AvatarPerson } from '@wucarson/facet-core/display';
 import { cx, styleOf } from './util';
 
 export type { AvatarPerson };

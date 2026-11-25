@@ -1,10 +1,10 @@
 import { Component, ElementRef, afterRenderEffect, computed, input, linkedSignal, model, signal, viewChild } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { cx, isActivateKey } from '@case-center/core/dom';
+import { cx, isActivateKey } from '@wucarson/facet-core/dom';
 import {
   SIDEBAR_CHEVRON, placeSidebarIndicator, sidebarBrandLabel, sidebarClass, sidebarGroupToggleClass, sidebarHasActive, sidebarInitialOpen,
   sidebarItemClass, sidebarSubClass, sidebarTipTop, toggleAt, type SidebarGroup, type SidebarItem,
-} from '@case-center/core/sidebar';
+} from '@wucarson/facet-core/sidebar';
 import { Icon, SvgPath } from './icon';
 
 export type { SidebarGroup, SidebarItem };

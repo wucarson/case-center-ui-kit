@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { focusNth } from '@case-center/core/choice';
-import { chipExit, chipFocusAfter, chipRemoveLabel, chipsLabel, withoutAt } from '@case-center/core/chips';
-import { isActivateKey } from '@case-center/core/dom';
+import { focusNth } from '@wucarson/facet-core/choice';
+import { chipExit, chipFocusAfter, chipRemoveLabel, chipsLabel, withoutAt } from '@wucarson/facet-core/chips';
+import { isActivateKey } from '@wucarson/facet-core/dom';
 import type { StyleProp } from './util';
 
 /** 篩選標籤：目前套用的篩選條件，可逐一移除（縮小淡出，焦點移到下一個）。v-model:items。規則在 core/chips.ts。 */

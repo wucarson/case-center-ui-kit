@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEve
 import {
   dueTag, dueText, flipRows, isSortKey, measureRows, nextSort, rowClass, sortRows, tagClass, thAriaSort, thLabel, thState, todayIso,
   type TableColumn, type TableSort, type ThState,
-} from '@case-center/core/table';
+} from '@wucarson/facet-core/table';
 import { cx, styleOf } from './util';
 
 export type { TableColumn, TableSort, ThState };

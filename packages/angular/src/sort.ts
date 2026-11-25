@@ -1,9 +1,9 @@
 import { Component, ElementRef, computed, effect, inject, input, model, signal, untracked } from '@angular/core';
-import { cx } from '@case-center/core/dom';
+import { cx } from '@wucarson/facet-core/dom';
 import {
   SORT_STEP, sortAnnounce, sortClampY, sortHandleLabel, sortHeight, sortKey, sortLand, sortMin, sortMove, sortRowClass, sortSlot, sortToggle, sortY,
   type SortItem,
-} from '@case-center/core/sort';
+} from '@wucarson/facet-core/sort';
 import { Icon, SvgPath } from './icon';
 
 export type { SortItem };

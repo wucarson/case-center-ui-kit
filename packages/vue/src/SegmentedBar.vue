@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { legendDotStyle, segmentBarLabel, segmentStyle, segmentTotal, type BarSegment } from '@case-center/core/metrics';
+import { legendDotStyle, segmentBarLabel, segmentStyle, segmentTotal, type BarSegment } from '@wucarson/facet-core/metrics';
 import MetricNum from './MetricNum.vue';
 import type { StyleProp } from './util';
 

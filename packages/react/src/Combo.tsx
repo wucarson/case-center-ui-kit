@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
-import { onOutsidePointer } from '@case-center/core/dom';
-import { COMBO_EMPTY, comboClass, comboIcon, comboKey, comboListId, comboOptionClass, comboOptionId, filterItems } from '@case-center/core/listbox';
+import { onOutsidePointer } from '@wucarson/facet-core/dom';
+import { COMBO_EMPTY, comboClass, comboIcon, comboKey, comboListId, comboOptionClass, comboOptionId, filterItems } from '@wucarson/facet-core/listbox';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
 

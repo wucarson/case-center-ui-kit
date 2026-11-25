@@ -1,7 +1,7 @@
 import { Component, ElementRef, afterEveryRender, computed, inject, input, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { buttonClass, type ButtonVariant } from '@case-center/core/button';
-import type { IconName } from '@case-center/core/icons';
+import { buttonClass, type ButtonVariant } from '@wucarson/facet-core/button';
+import type { IconName } from '@wucarson/facet-core/icons';
 import { Icon } from './icon';
 
 /**

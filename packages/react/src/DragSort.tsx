@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } fr
 import {
   sortAnnounce, sortClampY, sortHandleLabel, sortHeight, sortKey, sortLand, sortMin, sortMove, sortRowClass, sortSlot, sortToggle, sortY,
   SORT_STEP, type SortItem,
-} from '@case-center/core/sort';
+} from '@wucarson/facet-core/sort';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
 

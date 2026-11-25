@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
-import { isActivateKey, onOutsidePointer } from '@case-center/core/dom';
-import { filterItems, multiClass, multiFooter, multiKey, multiSearchLabel, multiShowCount, multiText, multiTextClass, multiToggle, multiTriggerLabel } from '@case-center/core/listbox';
+import { isActivateKey, onOutsidePointer } from '@wucarson/facet-core/dom';
+import { filterItems, multiClass, multiFooter, multiKey, multiSearchLabel, multiShowCount, multiText, multiTextClass, multiToggle, multiTriggerLabel } from '@wucarson/facet-core/listbox';
 import { Checkbox } from './Checkbox';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';

@@ -3,8 +3,8 @@ import { computed, ref, watch } from 'vue';
 import {
   SORT_STEP, sortAnnounce, sortClampY, sortHandleLabel, sortHeight, sortKey, sortLand, sortMin, sortMove, sortRowClass, sortSlot, sortToggle, sortY,
   type SortItem,
-} from '@case-center/core/sort';
-import { cx } from '@case-center/core/dom';
+} from '@wucarson/facet-core/sort';
+import { cx } from '@wucarson/facet-core/dom';
 import Icon from './Icon.vue';
 import type { StyleProp } from './util';
 

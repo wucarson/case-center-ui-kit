@@ -1,5 +1,5 @@
 import { useRef, type CSSProperties, type KeyboardEvent } from 'react';
-import { focusNth, radioClass, radioKey, radioMove, radioTabIndex, type RadioOption } from '@case-center/core/choice';
+import { focusNth, radioClass, radioKey, radioMove, radioTabIndex, type RadioOption } from '@wucarson/facet-core/choice';
 import { cx, styleOf, useFocusVisible } from './util';
 
 export type { RadioOption };

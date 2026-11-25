@@ -1,6 +1,6 @@
 import { Directive, computed, inject, input } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { ICONS, ICONS_FILL, type FillIconName, type IconName } from '@case-center/core/icons';
+import { ICONS, ICONS_FILL, type FillIconName, type IconName } from '@wucarson/facet-core/icons';
 
 /** <svg ccIcon="trash"></svg>：輸出和展示牆相同的 <svg class="ic">；fill＝填滿版（選中時顯示） */
 @Directive({

@@ -1,6 +1,6 @@
 import { Component, Directive, ElementRef, InjectionToken, computed, contentChild, inject, input, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { SR_ONLY_STYLE, fieldClass, fieldInputClass, fieldMark, leftField } from '@case-center/core/field';
+import { SR_ONLY_STYLE, fieldClass, fieldInputClass, fieldMark, leftField } from '@wucarson/facet-core/field';
 
 /** 自己就是輸入框區（.ff-i）的元件（放在欄位裡的下拉、多選）：欄位外框就不再包一層 */
 export const FIELD_BOX = new InjectionToken<unknown>('FIELD_BOX');

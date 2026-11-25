@@ -512,7 +512,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .pie-c :is(circle.sg, .fr) { transition-property: stroke-width, opacity, transform; }
 .pie-c :is(circle.sg, .fr).on { transform: translate(var(--dx, 0), var(--dy, 0)); }
 .pie.focus circle.sg:not(.on) { opacity: .35; }
-.pie-m { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.pie-m { position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 .pie-m b { font-size: calc(22px * var(--fs-k) * var(--rk, 1)); line-height: calc(28px * var(--fs-k) * var(--rk, 1)); font-weight: 600; }
 .pie-m small { max-width: 76px; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); line-height: calc(15px * var(--fs-k) * var(--rk, 1)); color: var(--weak); hyphens: auto; overflow-wrap: break-word; }
 .pie-l { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }

@@ -148,15 +148,40 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 .ctl svg { width: 14px; height: 14px; fill: currentColor; }
 
 /* 分類標籤：膠囊按鈕，選中淡主色（同篩選標籤） */
-.wf { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: -2px; }
-.wf button { height: 40px; padding: 0 16px 0 18px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--tile); color: var(--muted); font: inherit; font-size: calc(15px * var(--fs-k)); font-weight: 500; cursor: pointer; transition: background calc(.2s * var(--dur)), border-color calc(.2s * var(--dur)), color calc(.2s * var(--dur)), transform calc(.2s * var(--dur)) var(--spring); }
+.wf { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: -2px; }
+.wf-c { display: flex; flex-wrap: wrap; gap: 10px; min-width: 0; }
+.wf-c button { flex: none; }
+/* 篩選框：分類列右側；打字即時篩選卡片 */
+.wq { margin-left: auto; width: 240px; height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 6px 0 14px; border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--tile); color: var(--weak); transition: border-color calc(.2s * var(--dur)); }
+.wq:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
+.wq:focus-within { border-color: var(--primary); outline: 3px solid var(--focus); outline-offset: 1px; }
+.wq > svg, .wq-x svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.wq input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; color: var(--ink); font: inherit; font-size: 15px; outline: none; }
+.wq input::placeholder { color: var(--label); }
+.wq input::-webkit-search-cancel-button { display: none; }
+.wq-x { flex: none; width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 50%; background: none; color: var(--weak); cursor: pointer; }
+.wq-x:hover { background: var(--hover); color: var(--ink); }
+.wq-x:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.wq-x[hidden] { display: none; }
+.wq-none { margin: 8px 0 0; padding: 48px 16px; border: 1px dashed var(--line); border-radius: var(--r-lg); text-align: center; color: var(--weak); }
+.wq-none b { color: var(--ink); }
+.wq-none button { margin-left: 6px; border: 0; background: none; color: var(--primary); font: inherit; font-weight: 600; cursor: pointer; }
+.shell.on-detail > .wq-none { display: none; }
+/* 平板：篩選框換到分類下一列、撐滿；手機：篩選框放第一列，分類改單列橫向捲動（右緣淡出提示） */
+@media (max-width: 900px) { .wq { flex: 1 1 100%; width: auto; margin-left: 0; } }
+@media (max-width: 540px) {
+  .wq { order: -1; }
+  .wf-c { flex-wrap: nowrap; width: 100%; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+  .wf-c::-webkit-scrollbar { display: none; }
+}
+.wf-c button { height: 40px; padding: 0 16px 0 18px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--tile); color: var(--muted); font: inherit; font-size: calc(15px * var(--fs-k)); font-weight: 500; cursor: pointer; transition: background calc(.2s * var(--dur)), border-color calc(.2s * var(--dur)), color calc(.2s * var(--dur)), transform calc(.2s * var(--dur)) var(--spring); }
 /* 數量做成小膠囊，和上方設定按鈕（32px、純文字）明顯區分 */
-.wf button small { min-width: 22px; height: 20px; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-pill); background: var(--soft); font-size: 12px; font-weight: 600; color: var(--weak); font-variant-numeric: tabular-nums; }
-.wf button:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); color: var(--ink); }
-.wf button:active { transform: scale(.96); }
-.wf button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
-.wf button[aria-pressed="true"] { background: var(--tint); border-color: color-mix(in srgb, var(--primary) 40%, transparent); color: var(--selected-fg); font-weight: 600; }
-.wf button[aria-pressed="true"] small { background: var(--primary); color: var(--on-primary); }
+.wf-c button small { min-width: 22px; height: 20px; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-pill); background: var(--soft); font-size: 12px; font-weight: 600; color: var(--weak); font-variant-numeric: tabular-nums; }
+.wf-c button:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); color: var(--ink); }
+.wf-c button:active { transform: scale(.96); }
+.wf-c button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.wf-c button[aria-pressed="true"] { background: var(--tint); border-color: color-mix(in srgb, var(--primary) 40%, transparent); color: var(--selected-fg); font-weight: 600; }
+.wf-c button[aria-pressed="true"] small { background: var(--primary); color: var(--on-primary); }
 .shell.on-detail > .wf { display: none; }
 .wall { position: relative; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-auto-rows: var(--row); grid-auto-flow: dense; gap: var(--gap); }
 .cell {
@@ -583,8 +608,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 @media (max-width: 540px) {
   .tabs, .ps { overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
   .tabs::-webkit-scrollbar, .ps::-webkit-scrollbar { display: none; }
-  :is(.tabs, .ps, .dt).ovf { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
-  :is(.tabs, .ps, .dt).ovf.end { -webkit-mask-image: none; mask-image: none; }   /* 捲到最右就不用淡出 */
+  :is(.tabs, .ps, .dt, .wf-c).ovf { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
+  :is(.tabs, .ps, .dt, .wf-c).ovf.end { -webkit-mask-image: none; mask-image: none; }   /* 捲到最右就不用淡出 */
 }
 @media (max-width: 360px) {   /* 小手機：半寬卡片太窄（按住確認的按鈕放不下），一律撐滿；圓餅圖圖例收窄 */
   .cell.half { grid-column: span 2; }
@@ -833,7 +858,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 @keyframes cell-ping { 0%, 40% { box-shadow: 0 0 0 4px var(--focus), var(--shadow-lift); } }
 
 .shell.on-detail > .wall { display: none; }
-.boot-dt .shell > :is(.wf, .wall), .boot-dt #toggle-play { visibility: hidden; }   /* 直接開詳細頁網址：路由切好前不畫元件牆 */
+.boot-dt .shell > :is(.wf, .wall, .wq-none), .boot-dt #toggle-play { visibility: hidden; }   /* 直接開詳細頁網址：路由切好前不畫元件牆 */
 /* 詳細頁有自己的播放／暫停（會連動整體），頂部列的整體播放鈕先隱藏，避免兩顆打架 */
 .shell.on-detail #toggle-play { display: none; }
 /* 進場動畫只播第一次：牆從詳細頁回來時 display 由 none 變回 grid，瀏覽器會把 rise 重播，排後面的卡片空白最久 2 秒多（2026-11-16 修正）。ping 是返回時的提示，要留著 */
@@ -1249,16 +1274,30 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .ck-i kbd { padding: 0 6px; border: 1px solid var(--line); border-radius: 5px; color: var(--weak); font: 11px/18px ui-monospace, Consolas, monospace; }
 .ck-l { overflow-y: auto; padding: 6px; overscroll-behavior: contain; }
 .ck-g { padding: 8px 10px 4px; font-size: 12px; font-weight: 600; color: var(--label); }
-.ck-r { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 4px 10px; border-radius: var(--r-sm); cursor: pointer; }
+.ck-r { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 4px 10px; border-radius: var(--r-sm); cursor: pointer; }
 .ck-r.on { background: var(--tint); }
-.ck-r b { font-weight: 600; }
-.ck-r small { display: block; font-size: 12px; line-height: 18px; color: var(--weak); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ck-r > div { flex: 1; min-width: 0; }
+.ck-r b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+/* 元件圖示（同詳細頁相關元件）：淡主色方塊 */
+.ck-ic { flex: none; width: 28px; height: 28px; display: grid; place-items: center; border-radius: var(--r-sm); background: color-mix(in srgb, var(--primary) 12%, transparent); color: var(--primary); }
+.ck-ic svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ck-r.on .ck-ic { background: color-mix(in srgb, var(--primary) 20%, transparent); }
 .ck-r code { flex: none; font: 12px/18px ui-monospace, Consolas, monospace; color: var(--weak); }
 .ck-r.on code { color: var(--primary); }
 .ck-r mark { background: none; color: var(--primary); font-weight: 700; }
 .ck-e { padding: 28px 16px; text-align: center; color: var(--weak); }
 .ck-f { flex: none; display: flex; gap: 14px; padding: 8px 16px; border-top: 1px solid var(--line-subtle); font-size: 12px; color: var(--weak); }
+.ck-x { display: none; flex: none; height: 32px; padding: 0 4px; border: 0; background: none; color: var(--primary); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+/* 手機：底部全高抽屜（高度跟著可見區，鍵盤彈出時不被蓋住）；觸控列高 48；沒有實體鍵盤就不顯示快捷鍵說明，改用「取消」 */
+@media (max-width: 540px) {
+  .cmdk { left: 0; right: 0; top: calc(var(--vvt, 0px) + 12px); width: auto; height: calc(var(--vvh, 100dvh) - 12px); max-height: none; translate: none; border-bottom: 0; border-radius: var(--r-lg) var(--r-lg) 0 0; transform: translateY(100%); }
+  .cmdk.open { transform: none; }
+  .ck-i { height: 56px; }
+  .ck-i kbd { display: none; }
+  .ck-x { display: block; }
+  .ck-r { min-height: 48px; }
+  .ck-l { padding-bottom: calc(6px + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 540px), (pointer: coarse) { .ck-f { display: none; } }
 .ck-f kbd { padding: 0 4px; border: 1px solid var(--line); border-radius: 4px; font: 11px/16px ui-monospace, Consolas, monospace; }
 .cz { position: fixed; z-index: 30; top: 0; right: 0; bottom: 0; width: 380px; max-width: 100%; display: flex; flex-direction: column; background: var(--surface); border-left: 1px solid var(--line); box-shadow: var(--shadow-pop); transform: translateX(105%); transition: transform calc(520ms * var(--dur)) var(--spring-soft); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-right: env(safe-area-inset-right, 0px); }
 .cz.open { transform: none; }
@@ -1823,10 +1862,10 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="y2k"] :is(.seg span.on, .ps span.on), :root[data-ui="y2k"]:not([data-tabs="underline"]) :is(.dtab.on, .dtab.on svg) { color: var(--on-primary); }   /* 主色金屬上的字用主色配對的文字色 */
 :root[data-ui="y2k"]:not([data-tabs="underline"]) .dtab.on b { background: rgb(255 255 255 / .25); color: var(--on-primary); box-shadow: none; }
 /* 分類標籤、工具列：亮面＋鉻邊 */
-:root[data-ui="y2k"] :is(.wf button, .top-a .ctl) { border: 1px solid transparent; background: var(--y2k-gloss-s) padding-box, var(--y2k-btn) padding-box, var(--y2k-rim) border-box; box-shadow: inset 0 1px 0 var(--y2k-in1), 0 2px 6px -3px rgb(var(--sh-rgb, 60 90 150) / .3); }
-:root[data-ui="y2k"] .wf button[aria-pressed="true"] { background: var(--y2k-spec) padding-box, var(--y2k-pearl) padding-box, var(--y2k-metal) 0 0 / 100% 130% padding-box, var(--y2k-metal-rim) border-box; color: var(--on-primary); }
-:root[data-ui="y2k"] .wf button[aria-pressed="true"] small { background: rgb(255 255 255 / .25); color: var(--on-primary); }
-:root[data-ui="y2k"] :is(.wf button, .top-a .ctl):hover { filter: brightness(1.05); }
+:root[data-ui="y2k"] :is(.wf-c button, .top-a .ctl) { border: 1px solid transparent; background: var(--y2k-gloss-s) padding-box, var(--y2k-btn) padding-box, var(--y2k-rim) border-box; box-shadow: inset 0 1px 0 var(--y2k-in1), 0 2px 6px -3px rgb(var(--sh-rgb, 60 90 150) / .3); }
+:root[data-ui="y2k"] .wf-c button[aria-pressed="true"] { background: var(--y2k-spec) padding-box, var(--y2k-pearl) padding-box, var(--y2k-metal) 0 0 / 100% 130% padding-box, var(--y2k-metal-rim) border-box; color: var(--on-primary); }
+:root[data-ui="y2k"] .wf-c button[aria-pressed="true"] small { background: rgb(255 255 255 / .25); color: var(--on-primary); }
+:root[data-ui="y2k"] :is(.wf-c button, .top-a .ctl):hover { filter: brightness(1.05); }
 
 
 /* ==== 頁籤樣式（data-tabs）：列表頁籤與詳情頁籤一起換 ==== */
@@ -2048,8 +2087,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     </div>
   </div>
 
-  <nav class="wf" id="wf" aria-label="元件分類"></nav>
+  <div class="wf" id="wf"><nav class="wf-c" id="wf-c" aria-label="元件分類"></nav><div class="wq" role="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input id="wq" type="search" placeholder="篩選元件" aria-label="篩選元件（名稱、英文、程式名稱）" autocomplete="off" spellcheck="false" enterkeyhint="search"><button class="wq-x" id="wq-x" type="button" aria-label="清除篩選" hidden><svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div></div>
 
+  <p class="wq-none" id="wq-none" role="status" hidden></p>
   <div class="wall" id="wall">
     <section class="cell h2" id="c-dd">
       <header>下拉選單<em>combo</em></header>
@@ -2448,7 +2488,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   </div>
 </div>
 <div class="cmdk" id="ck" role="dialog" aria-modal="true" aria-label="搜尋元件" hidden>
-  <div class="ck-i"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input id="ck-q" type="text" role="combobox" aria-expanded="true" aria-controls="ck-l" aria-autocomplete="list" placeholder="搜尋元件：名稱、英文、程式名稱" autocomplete="off" spellcheck="false"><kbd>Esc</kbd></div>
+  <div class="ck-i"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input id="ck-q" type="text" role="combobox" aria-expanded="true" aria-controls="ck-l" aria-autocomplete="list" placeholder="搜尋元件：名稱、英文、程式名稱" autocomplete="off" spellcheck="false" enterkeyhint="go"><kbd>Esc</kbd><button class="ck-x" id="ck-x" type="button">取消</button></div>
   <div class="ck-l" id="ck-l" role="listbox" aria-label="元件"></div>
   <div class="ck-f"><span><kbd>↑</kbd> <kbd>↓</kbd> 選擇</span><span><kbd>Enter</kbd> 前往並看說明</span><span><kbd>Esc</kbd> 關閉</span></div>
 </div>
@@ -2550,8 +2590,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   // 頁籤、詳情頁籤、期間選擇：內容比寬度長時加 .ovf（右緣淡出），捲到最右加 .end
   {
     const ovf = (el) => { el.classList.toggle('ovf', el.scrollWidth > el.clientWidth + 1); el.classList.toggle('end', el.scrollLeft + el.clientWidth >= el.scrollWidth - 2); };
-    const scan = () => $$('.tabs, .ps, .dt').forEach(ovf);
-    document.addEventListener('scroll', (e) => { if (e.target instanceof Element && e.target.matches('.tabs, .ps, .dt')) ovf(e.target); }, true);
+    const scan = () => $$('.tabs, .ps, .dt, .wf-c').forEach(ovf);
+    document.addEventListener('scroll', (e) => { if (e.target instanceof Element && e.target.matches('.tabs, .ps, .dt, .wf-c')) ovf(e.target); }, true);
     addEventListener('resize', scan); requestAnimationFrame(scan); setTimeout(scan, 1200);
     // 選中項換了：在可捲動的列裡捲到看得見（置中）
     const follow = new MutationObserver((ms) => { for (const m of ms) { const el = m.target, box = el.parentElement; if (!el.classList.contains('on') || !box || box.scrollWidth <= box.clientWidth + 1) continue; const x = el.offsetLeft - (box.clientWidth - el.offsetWidth) / 2; if (el.offsetLeft < box.scrollLeft || el.offsetLeft + el.offsetWidth > box.scrollLeft + box.clientWidth) box.scrollTo({ left: Math.max(0, x), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); } });
@@ -4867,11 +4907,13 @@ void main(){
     const naturalOrder = cells.map((c) => c.id);
     const orderOf = () => { const o = theme.layout.order.filter((id) => naturalOrder.includes(id)); return [...o, ...naturalOrder.filter((id) => !o.includes(id))]; };
     let wallCat = '';   // 分類篩選（空＝全部）
-    const inView = (c) => !theme.layout.hidden.includes(c.id) && (!wallCat || c.cat === wallCat);
+    let wallQ = '';     // 篩選字（空＝不篩）
+    const wallHit = (c) => { if (!wallQ) return true; const x = ITEMS.find((i) => i.id === c.id); return !!x && wallQ.split(/\s+/).every((t) => x.hay.includes(t)); };
+    const inView = (c) => !theme.layout.hidden.includes(c.id) && (!wallCat || c.cat === wallCat) && wallHit(c);
     function applyLayout(resizeAfter = 0) {
       const order = orderOf();
       for (const c of cells) { c.el.style.order = String(order.indexOf(c.id)); c.el.hidden = !inView(c); }
-      paintCats?.();
+      paintCats?.(); paintNone?.();
       // 滑動標記、圖表都靠量位置：版面變了就讓它們重量一次
       if (resizeAfter) { clearTimeout(applyLayout._t); applyLayout._t = setTimeout(() => dispatchEvent(new Event('resize')), resizeAfter); }
       else requestAnimationFrame(() => dispatchEvent(new Event('resize')));
@@ -5160,11 +5202,16 @@ void main(){
     const MOTION = [['關', null, 'M5 12h14'], ['少', { speed: 1.25, bounce: 'none' }, 'M4 16c4 0 6-8 16-8'], ['標準', { speed: 1, bounce: 'standard' }, 'M3 17c3 0 4-10 8-10s3 7 6 7 2-3 4-3']];
     const CAT_LABEL = { 輸入: '表單', 導覽: '導覽', 狀態: '狀態', 資料: '資料', 圖表: '圖表' };
     /* ---- 元件牆分類篩選：全部／表單／導覽／狀態／資料／圖表 ---- */
-    const wf = $('#wf');
+    const wf = $('#wf'), wfc = $('#wf-c');
     var paintCats = () => {
-      const vis = cells.filter((c) => !theme.layout.hidden.includes(c.id));
-      wf.innerHTML = [['', '全部', vis.length], ...Object.keys(CAT).map((k) => [k, CAT_LABEL[k] || k, vis.filter((c) => c.cat === k).length])]
-        .filter(([k, , n]) => !k || n).map(([k, t, n]) => `<button type="button" data-cat="${k}" aria-pressed="${wallCat === k}">${t}<small>${n}</small></button>`).join('');
+      const vis = cells.filter((c) => !theme.layout.hidden.includes(c.id) && wallHit(c));
+      wfc.innerHTML = [['', '全部', vis.length], ...Object.keys(CAT).map((k) => [k, CAT_LABEL[k] || k, vis.filter((c) => c.cat === k).length])]
+        .filter(([k, , n]) => !k || n || k === wallCat).map(([k, t, n]) => `<button type="button" data-cat="${k}" aria-pressed="${wallCat === k}">${t}<small>${n}</small></button>`).join('');
+    };
+    var paintNone = () => {
+      const p = $('#wq-none'), none = !!wallQ && !cells.some((c) => !c.el.hidden);
+      p.hidden = !none;
+      if (none) p.innerHTML = `找不到符合「<b>${esc($('#wq').value.trim())}</b>」的元件${wallCat ? '（目前只看「' + esc(CAT_LABEL[wallCat] || wallCat) + '」）' : ''}，試試英文或程式名稱<button type="button" data-wq-clear>清除篩選</button>`;
     };
     // 切換分類：布幕掃描——離開的卡片布幕由下往上蓋回，進來的卡片布幕由上往下滑開，光線是布幕上緣；原地不位移、不縮放。
     // 不等吹完才排版：離開的卡片先改成絕對定位留在原處飄走，版面同時重排，從點擊到新卡片出現約 0.2 秒
@@ -5179,15 +5226,21 @@ void main(){
     const clearPending = () => { if (!pending) return; clearTimeout(pending.t); pending.out.forEach(([c, a]) => { a.cancel(); emergeStop(c.el); }); pending = null; };
     function setCat(k) {
       if (k === wallCat) return;
-      clearPending();   // 連續點擊：上一次還沒收完的直接停掉，以最後一次為準
+      refilter(() => { wallCat = k; const u = new URL(location.href); k ? u.searchParams.set('cat', k) : u.searchParams.delete('cat'); history.replaceState(history.state, '', u); }, true);
+    }
+    function setQuery(q) {
+      q = q.trim().toLowerCase(); if (q === wallQ) return;
+      refilter(() => { wallQ = q; }, false);
+    }
+    // 分類或篩選字改變：畫面內要離開的卡片先離場，再重排、新卡片進場
+    function refilter(change, scrollBack) {
+      clearPending();   // 連續點擊／打字：上一次還沒收完的直接停掉，以最後一次為準
       const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const fits = (c) => !theme.layout.hidden.includes(c.id) && (!k || c.cat === k);
-      const out = still ? [] : inViewport(cells.filter((c) => !c.el.hidden && !fits(c)).map((c) => [c, c.el.getBoundingClientRect()]));
-      wallCat = k;
-      const u = new URL(location.href); k ? u.searchParams.set('cat', k) : u.searchParams.delete('cat'); history.replaceState(history.state, '', u);
+      change();
+      const out = still ? [] : inViewport(cells.filter((c) => !c.el.hidden && !inView(c)).map((c) => [c, c.el.getBoundingClientRect()]));
       paintCats?.();   // 分類按鈕立即切換，不等動畫
       // 捲到很下面才切換時，平滑捲回分類列，避免新卡片排在畫面上方、看起來一片空白
-      if (wf.getBoundingClientRect().top < $('.top').offsetHeight) wf.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
+      if (scrollBack && wf.getBoundingClientRect().top < $('.top').offsetHeight) wf.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
       if (!out.length) return relayout(still);
       hushFor(D(1000));   // 轉場期間暫停卡片內的示範動畫，讓出運算
       // 離場：拼塊＝拆成方塊飛散 0.45 秒；飛入、疊放＝原地淡出 0.22 秒；浮線＝由下往上碎成灰燼吹散 0.6 秒（畫面內離開的卡片同時進行）
@@ -5496,6 +5549,15 @@ void main(){
     }
     const replayEnter = () => { hushFor(D(1000)); playEnter(inViewport(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()])), true); };
     wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });
+    {
+      const wq = $('#wq'), wqx = $('#wq-x'); let t = 0;
+      const sync = () => { wqx.hidden = !wq.value; };
+      const clear = () => { wq.value = ''; sync(); clearTimeout(t); setQuery(''); };
+      wq.addEventListener('input', () => { sync(); clearTimeout(t); t = setTimeout(() => setQuery(wq.value), 150); });
+      wq.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.stopPropagation(); if (wq.value) clear(); else wq.blur(); } else if (e.key === 'Enter') { clearTimeout(t); setQuery(wq.value); } });
+      wqx.addEventListener('click', () => { clear(); wq.focus(); });
+      $('#wq-none').addEventListener('click', (e) => { if (e.target.closest('[data-wq-clear]')) { clear(); wq.focus(); } });
+    }
     { const q = new URLSearchParams(location.search).get('cat'), k = q && (CAT[q] ? q : Object.keys(CAT).find((x) => CAT_LABEL[x] === q)); if (k) wallCat = k; }   // 網址可用內部名稱或畫面上的名稱（例如 表單）
     applyLayout();
     // 首次進場：畫面內的卡片依閱讀順序重排 --i（錯開總長不超過 0.3 秒）；畫面外的不播
@@ -7817,7 +7879,9 @@ ${aiComponents(id)}`;
           { duration: D(400), delay: D(k * 60), easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' });
       }));
     }
+    const noteRecent = (id) => { try { const a = JSON.parse(localStorage.getItem('wall-recent') || '[]').filter((x) => x !== id); a.unshift(id); localStorage.setItem('wall-recent', JSON.stringify(a.slice(0, 6))); } catch (e) {} };
     function showDetail(id, tab = 'basic') {
+      noteRecent(id);
       putBack();
       const d = DOC[id], cat = CAT_LABEL[catOf(id)] || catOf(id), cell = $('#' + id);
       const ids = seq(), i = ids.indexOf(id), prev = i > 0 ? ids[i - 1] : null, next = i >= 0 && i < ids.length - 1 ? ids[i + 1] : null;
@@ -7958,7 +8022,13 @@ ${aiComponents(id)}`;
     const mark = (t, q) => { if (!q) return esc(t); const i = t.toLowerCase().indexOf(q); return i < 0 ? esc(t) : esc(t.slice(0, i)) + '<mark>' + esc(t.slice(i, i + q.length)) + '</mark>' + esc(t.slice(i + q.length)); };
     function ckRender() {
       const q = ckQ.value.trim().toLowerCase(), toks = q.split(/\s+/).filter(Boolean);
-      if (!toks.length) ckHits = ORDER.flatMap((c) => ITEMS.filter((x) => x.cat === c));
+      let groups = [];
+      if (!toks.length) {
+        let rec = []; try { rec = JSON.parse(localStorage.getItem('wall-recent') || '[]'); } catch (e) {}
+        rec = rec.map((id) => ITEMS.find((x) => x.id === id)).filter(Boolean).slice(0, 4);
+        ckHits = [...rec, ...ORDER.flatMap((c) => ITEMS.filter((x) => x.cat === c))];
+        groups = ckHits.map((x, i) => (i < rec.length ? '最近看過' : x.cat));
+      }
       else ckHits = ITEMS.filter((x) => toks.every((t) => x.hay.includes(t))).map((x) => {
         const tl = x.t.toLowerCase(), cl = x.code.toLowerCase();
         const sc = tl.startsWith(q) ? 0 : tl.includes(q) ? 1 : cl.includes(q) ? 2 : x.hay.split(' ').some((w) => w.startsWith(toks[0])) ? 3 : 4;
@@ -7968,17 +8038,17 @@ ${aiComponents(id)}`;
       if (!ckHits.length) { ckL.innerHTML = `<div class="ck-e">找不到「${esc(ckQ.value.trim())}」，試試英文或程式名稱</div>`; ckQ.removeAttribute('aria-activedescendant'); return; }
       let html = '', lastCat = null;
       ckHits.forEach((x, i) => {
-        if (!toks.length && x.cat !== lastCat) { html += `<div class="ck-g" role="presentation">${esc(x.cat)}</div>`; lastCat = x.cat; }
-        html += `<div class="ck-r${i === ckAt ? ' on' : ''}" role="option" id="ck-o-${x.id}" data-i="${i}" aria-selected="${i === ckAt}"><div><b>${mark(x.t, q)}</b><small>${esc(x.d)}</small></div><code>${mark(x.code, q)}</code></div>`;
+        if (groups[i] && groups[i] !== lastCat) { html += `<div class="ck-g" role="presentation">${esc(groups[i])}</div>`; lastCat = groups[i]; }
+        html += `<div class="ck-r${i === ckAt ? ' on' : ''}" role="option" id="ck-o-${i}" data-i="${i}" aria-selected="${i === ckAt}"><i class="ck-ic" aria-hidden="true"><svg viewBox="0 0 24 24">${REL_ICON[x.id] || ''}</svg></i><b>${mark(x.t, q)}</b><code>${mark(x.code, q)}</code></div>`;
       });
       ckL.innerHTML = html;
-      ckQ.setAttribute('aria-activedescendant', 'ck-o-' + ckHits[ckAt].id);
+      ckQ.setAttribute('aria-activedescendant', 'ck-o-' + ckAt);
     }
     const ckMove = (i) => {
       if (!ckHits.length) return; ckAt = (i + ckHits.length) % ckHits.length;
       $$('.ck-r', ckL).forEach((r) => { const on = +r.dataset.i === ckAt; r.classList.toggle('on', on); r.setAttribute('aria-selected', on); });
       const r = $(`.ck-r[data-i="${ckAt}"]`, ckL); r?.scrollIntoView({ block: 'nearest' });
-      ckQ.setAttribute('aria-activedescendant', 'ck-o-' + ckHits[ckAt].id);
+      ckQ.setAttribute('aria-activedescendant', 'ck-o-' + ckAt);
     };
     function openCk() {
       if (!ck.hidden) return;
@@ -8008,6 +8078,8 @@ ${aiComponents(id)}`;
     ckL.addEventListener('mousemove', (e) => { const r = e.target.closest('.ck-r'); if (r && +r.dataset.i !== ckAt) ckMove(+r.dataset.i); });
     ckL.addEventListener('click', (e) => { const r = e.target.closest('.ck-r'); if (r) ckGo(+r.dataset.i); });
     ckBd.addEventListener('click', () => closeCk());
+    $('#ck-x').addEventListener('click', () => closeCk());
+    if (window.visualViewport) { const vv = visualViewport, fitVV = () => { ck.style.setProperty('--vvh', vv.height + 'px'); ck.style.setProperty('--vvt', vv.offsetTop + 'px'); }; vv.addEventListener('resize', fitVV); vv.addEventListener('scroll', fitVV); fitVV(); }
     $('#open-search').addEventListener('click', openCk);
     document.addEventListener('keydown', (e) => {
       const typing = e.target.closest?.('input, textarea, select, [contenteditable="true"]');

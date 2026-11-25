@@ -49,7 +49,7 @@ const implSrv = await serve(path.join(root, 'apps', fw + '-demo', 'dist'));
 const FREEZE = `*, *::before, *::after { animation: none !important; transition: none !important; caret-color: transparent !important; }
   /* 樣本裡的 <i class="caret"> 是示意游標；實作是瀏覽器原生游標（會閃爍、不能逐點比），兩邊都不畫 */
   .caret { display: none !important; }`;
-const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, protocolTimeout: 60000, args: ['--hide-scrollbars', '--font-render-hinting=none'] });
+const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, protocolTimeout: 60000, args: ['--hide-scrollbars', '--font-render-hinting=none', '--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4'] });   // 宣告有滑鼠：Linux 無頭瀏覽器（CI）預設沒有，@media (hover: hover) 的滑過樣式會不生效
 const results = [];
 try {
   const open = async (url) => {

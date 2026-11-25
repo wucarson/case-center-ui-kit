@@ -43,11 +43,17 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             tools/package-lock.json
+      - name: 安裝中文字型
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
       - run: npm ci
-      - run: npm run build:packages
-      - run: npm run build -w apps/${{ matrix.fw }}-demo
       - run: npm ci
         working-directory: tools
+      # 參考樣本在這台機器重新匯出：樣本裡的寬度、位置是照字型量的，要和比對時用同一套字型
+      - name: 從展示牆匯出樣本
+        run: node export.mjs
+        working-directory: tools
+      - run: npm run build:packages
+      - run: npm run build -w apps/${{ matrix.fw }}-demo
       - name: 契約檢查
         run: node check-contracts.mjs ${{ matrix.fw }}
         working-directory: tools

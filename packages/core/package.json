@@ -1,6 +1,6 @@
 {
   "name": "@wucarson/facet-core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "元件共用邏輯（class、aria、鍵盤規則、圖示），不依賴任何框架",
   "license": "UNLICENSED",
   "repository": {

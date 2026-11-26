@@ -2094,6 +2094,17 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz-set:not(.block) .cz-seg button { flex: none; min-width: 40px; padding: 0 9px; }
 .cz-set.changed .cz-rl .cz-dot { display: inline-block; }
 .cz-set.changed:is(:hover, .cur, :focus-within) .cz-rl .cz-undo1 { display: inline-flex; }   /* 改過的列：滑過或選到才出現單項還原 */
+/* 細調：主項名稱旁的展開鈕；細項接在主項下方、往內縮一階 */
+.cz-more { margin-left: auto; flex: none; height: 22px; padding: 0 4px 0 8px; display: inline-flex; align-items: center; gap: 2px; border: 0; border-radius: 7px; background: transparent; color: var(--ev-dim, var(--weak)); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: color calc(.15s * var(--dur)), background calc(.15s * var(--dur)); }
+.cz-rl .cz-undo1 + .cz-more { margin-left: 0; }
+.cz-more:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.cz-more:focus-visible { outline: 3px solid var(--focus); outline-offset: -1px; }
+.cz-more i { display: inline-flex; }
+.cz-more svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: rotate calc(.2s * var(--dur)) var(--spring-soft, ease); }
+.cz-more[aria-expanded="true"] svg { rotate: 90deg; }
+.cz-more.changed::before { content: ""; width: 5px; height: 5px; margin-right: 3px; border-radius: 50%; background: var(--primary); }
+.cz-set.sub { margin-left: 14px; min-height: 42px; }
+.cz-set[hidden] { display: none; }
 
 .cz-stack { display: flex; flex-direction: column; gap: 10px; }
 .cz-inl { display: flex; align-items: center; gap: 10px; }
@@ -5977,7 +5988,7 @@ void main(){
        paths 會改到的 theme 路徑（改過標記、單項還原、分類上的改過數量都靠它）、ui() 控制項、
        block＝控制項較寬、放在名稱下方；pin＝也放進「常用」；aff＝會影響的元件（選到或滑過時在牆上亮起）；lr:false＝←→ 不切換。
        新增設定＝加一筆 */
-    const CZ_CATS = [['common', '常用'], ['style', '風格'], ['color', '色彩'], ['type', '字型'], ['shape', '形狀'], ['motion', '動態'], ['layout', '版面']];
+    const CZ_CATS = [['style', '風格'], ['color', '色彩'], ['type', '字型'], ['motion', '動態'], ['layout', '版面']];   // 細項用 sub 掛在主項底下，收在「細調」裡
     // 層次＝陰影、主色光暈、邊框一起調（原本三個控制項）
     const depthOf = (v) => ({ shadow: v, glow: [0, 50, 100, 150][v], border: ['subtle', 'subtle', 'standard', 'strong'][v] });
     // 字級表只調字級與粗細；行高、字距照字級自動算（大字收緊）
@@ -6019,20 +6030,27 @@ void main(){
       })));
     }
     const SETTINGS = [
-      { cat: 'common', key: 'mode', label: '深淺色', paths: [],
+      { cat: 'style', key: 'mode', label: '深淺色', paths: [],
         ui: () => pick('深淺色', [['auto', '跟系統'], ['light', '淺色'], ['dark', '深色']], (v) => (root.dataset.theme || 'auto') === v, (v) => setMode(v)) },
-      { cat: 'style', pin: true, key: 'ui', label: '風格', paths: ['style.ui'], block: true, ui: stylesEl },
-      { cat: 'style', key: 'tabs', label: '頁籤樣式', paths: ['style.tabs'], aff: '#c-tabs, #c-dtab',
-        ui: () => seg('style.tabs', [['auto', '自動'], ['underline', '底線'], ['pill', '膠囊'], ['block', '區塊']], '頁籤樣式') },
+      { cat: 'style', key: 'ui', label: '風格', paths: ['style.ui'], block: true, ui: stylesEl },
+      { cat: 'style', key: 'radius', label: '圓角', paths: ['shape'], block: true,
+        ui: () => lockShape(opts('圓角', RADIUS.map(([name, sh, r]) => ({ name, thumb: thumb('r', `border-top-left-radius:${r}`), on: () => same(theme.shape, sh), pick: () => { theme.shape = clone(sh); } })))) },
+      { cat: 'style', sub: 'radius', key: 'card', label: '卡片圓角', paths: ['shape.card'], block: true, ui: () => lockShape(range('shape.card', 0, 32, 1, (v) => v + 'px', '卡片圓角', ['直角', '圓']), false) },
+      { cat: 'style', sub: 'radius', key: 'control', label: '按鈕與欄位圓角', paths: ['shape.control'], block: true, aff: '#c-btn, #c-ff, #c-dd, #c-search',
+        ui: () => lockShape(range('shape.control', 0, 20, 1, (v) => v + 'px', '按鈕與欄位圓角', ['直角', '圓']), false) },
+      { cat: 'style', sub: 'radius', key: 'pill', label: '標籤形狀', paths: ['shape.pill'], aff: '#c-bdg, #c-chips',
+        ui: () => lockShape(seg('shape.pill', [['full', '膠囊'], ['soft', '方塊']], '標籤形狀'), false) },
       { cat: 'style', key: 'depth', label: '層次', paths: ['depth.shadow', 'depth.glow', 'depth.border'],
         ui: () => pick('層次', [[0, '無'], [1, '淡'], [2, '標準'], [3, '強']], (v) => theme.depth.shadow === v, (v) => { theme.depth = depthOf(v); }, flash) },
-      { cat: 'color', pin: true, key: 'primary', label: '主色', paths: ['color.primary'], block: true, ui: primaryEl },
+      { cat: 'style', key: 'tabs', label: '頁籤樣式', paths: ['style.tabs'], aff: '#c-tabs, #c-dtab',
+        ui: () => seg('style.tabs', [['auto', '自動'], ['underline', '底線'], ['pill', '膠囊'], ['block', '區塊']], '頁籤樣式') },
+      { cat: 'color', key: 'primary', label: '主色', paths: ['color.primary'], block: true, ui: primaryEl },
       { cat: 'color', key: 'neutral', label: '底色色調', paths: ['color.neutral'], block: true,
         ui: () => opts('底色色調', [['cool', '偏藍'], ['neutral', '中性'], ['warm', '偏暖']].map(([k, name]) => {
           const p = (k === 'cool' ? COOL : NEUTRAL[k]).light;
           return { name, thumb: thumb('tone', `background:linear-gradient(90deg, ${p.page} 0 34%, ${p['line-strong']} 34% 67%, ${p.muted} 67%);border-color:${p['line-strong']}`), on: () => theme.color.neutral === k, pick: () => { theme.color.neutral = k; } };
         })) },
-      { cat: 'color', key: 'darkPrimary', label: '深色模式主色', paths: ['color.darkPrimary'],
+      { cat: 'color', sub: 'primary', key: 'darkPrimary', label: '深色模式主色', paths: ['color.darkPrimary'],
         ui: () => { const c = theme.color; return el('div', { class: 'cz-inl' }, c.darkPrimary ? el('label', { class: 'cz-pick on', title: '深色模式主色', style: `--c:${c.darkPrimary}` }, colorInput('color.darkPrimary', '深色模式主色')) : null, sw(c.darkPrimary, (on) => { c.darkPrimary = on ? tone(c.primary, 0.74, 0.9) : ''; }, '深色模式另選主色')); } },
       { cat: 'color', key: 'status', label: '狀態顏色', paths: ['color.success', 'color.warn', 'color.danger', 'color.info'], block: true, aff: '#c-bdg, #c-co, #c-toast',
         ui: () => el('div', { class: 'cz-tiles' }, [['success', '成功'], ['warn', '提醒'], ['danger', '錯誤'], ['info', '資訊']].map(([k, n]) => el('label', { class: 'cz-tile', 'data-path': 'color.' + k, title: '點色塊換色' }, colorInput('color.' + k, n + '顏色'), n))) },
@@ -6042,28 +6060,21 @@ void main(){
         ui: () => el('div', { class: 'cz-stack' }, opts('字型', [['system', '系統'], ['sans', '黑體'], ['custom', '自訂']].map(([k, name]) => ({ name, thumb: Object.assign(el('i', { class: 'cz-th ft', style: `font-family:${fontStack(k)}`, 'aria-hidden': 'true' }), { textContent: 'Aa字' }), on: () => theme.type.family === k, pick: () => { theme.type.family = k; } }))), theme.type.family === 'custom' ? fontPicker() : null) },
       { cat: 'type', key: 'scale', label: '字級', paths: ['type.scale'],
         ui: () => pick('字級', [[0.92, '小'], [1, '標準'], [1.08, '大']], (v) => theme.type.scale === v, (v) => { theme.type.scale = v; }, flash) },
-      { cat: 'type', key: 'ratio', label: '標題與內文差距', paths: [],
+      { cat: 'type', sub: 'scale', key: 'ratio', label: '標題與內文差距', paths: [],
         ui: () => pick('標題與內文差距', RATIOS.map(([n, r]) => [r, n]), (r) => sizesMatch(r), (r) => { theme.type.levels = levelsFor(r); }, flash) },
-      { cat: 'type', key: 'levels', label: '各層級字級', paths: ['type.levels'], block: true, lr: false,
+      { cat: 'type', sub: 'scale', key: 'levels', label: '各層級字級', paths: ['type.levels'], block: true, lr: false,
         ui: () => el('div', { class: 'cz-lv' }, LEVELS.map(([k, n, en]) => { const lv = theme.type.levels[k];
           return el('div', { class: 'cz-lvr' }, el('span', { class: 'cz-lvn', style: `font-family:${fontStack(theme.type.family)};font-size:${Math.min(18, lv.size)}px;font-weight:${lv.weight}` }, n, el('small', {}, en)), sizeStep(k, n),
             seg(`type.levels.${k}.weight`, [[400, '一般'], [500, '中等'], [600, '半粗'], [700, '粗']], n + '粗細')); })) },
-      { cat: 'shape', pin: true, key: 'radius', label: '圓角', paths: ['shape'], block: true,
-        ui: () => lockShape(opts('圓角', RADIUS.map(([name, sh, r]) => ({ name, thumb: thumb('r', `border-top-left-radius:${r}`), on: () => same(theme.shape, sh), pick: () => { theme.shape = clone(sh); } })))) },
-      { cat: 'shape', key: 'card', label: '卡片圓角', paths: ['shape.card'], block: true, ui: () => lockShape(range('shape.card', 0, 32, 1, (v) => v + 'px', '卡片圓角', ['直角', '圓']), false) },
-      { cat: 'shape', key: 'control', label: '按鈕與欄位圓角', paths: ['shape.control'], block: true, aff: '#c-btn, #c-ff, #c-dd, #c-search',
-        ui: () => lockShape(range('shape.control', 0, 20, 1, (v) => v + 'px', '按鈕與欄位圓角', ['直角', '圓']), false) },
-      { cat: 'shape', key: 'pill', label: '標籤形狀', paths: ['shape.pill'], aff: '#c-bdg, #c-chips',
-        ui: () => lockShape(seg('shape.pill', [['full', '膠囊'], ['soft', '方塊']], '標籤形狀'), false) },
-      { cat: 'motion', pin: true, key: 'anim', label: '動畫', paths: ['motion.reduce', 'motion.speed', 'motion.bounce'], block: true,
+      { cat: 'motion', key: 'anim', label: '動畫', paths: ['motion.reduce', 'motion.speed', 'motion.bounce'], block: true,
         ui: () => opts('動畫', MOTION.map(([name, m, d]) => {
           const t = thumb('mo'); t.innerHTML = `<svg viewBox="0 0 24 24"><path d="${d}"/></svg>`;
           return { name, thumb: t,
             on: () => (m ? !theme.motion.reduce && theme.motion.speed === m.speed && theme.motion.bounce === m.bounce : theme.motion.reduce),
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
         })) },
-      { cat: 'motion', key: 'speed', label: '動畫速度', paths: ['motion.speed'], block: true, ui: () => range('motion.speed', 0.5, 2, 0.25, (v) => v + '×', '動畫速度', ['快', '慢']) },
-      { cat: 'motion', key: 'bounce', label: '動畫回彈', paths: ['motion.bounce'],
+      { cat: 'motion', sub: 'anim', key: 'speed', label: '動畫速度', paths: ['motion.speed'], block: true, ui: () => range('motion.speed', 0.5, 2, 0.25, (v) => v + '×', '動畫速度', ['快', '慢']) },
+      { cat: 'motion', sub: 'anim', key: 'bounce', label: '動畫回彈', paths: ['motion.bounce'],
         ui: () => seg('motion.bounce', [['none', '無'], ['soft', '柔和'], ['standard', '標準'], ['strong', '強']], '動畫回彈') },
       { cat: 'motion', key: 'enter', label: '進場效果', paths: ['motion.enter'],
         ui: () => pick('進場效果', [['line', '浮線'], ['fly', '飛入'], ['tile', '拼塊'], ['stack', '疊放']], (v) => (['fly', 'tile', 'stack'].includes(theme.motion.enter) ? theme.motion.enter : 'line') === v, (v) => { theme.motion.enter = v; }, () => requestAnimationFrame(() => replayEnter())) },
@@ -6076,11 +6087,21 @@ void main(){
 
     /* ---- 外觀面板：分類、列、改過標記 ---- */
     const czTabs = $('#cz-tabs');
-    let czCat = 'common', czCur = '', czReveal = false;
-    try { const v = localStorage.getItem('wall-cz-cat'); if (CZ_CATS.some(([k]) => k === v)) czCat = v; czCur = localStorage.getItem('wall-cz-row') || ''; } catch (e) {}
-    const inCat = (k) => SETTINGS.filter((x) => (k === 'common' ? x.pin || x.cat === 'common' : x.cat === k));
+    let czCat = 'style', czCur = '', czReveal = false;
+    const czOpen = new Set();   // 展開「細調」的主項
+    try { const v = localStorage.getItem('wall-cz-cat'); if (CZ_CATS.some(([k]) => k === v)) czCat = v; czCur = localStorage.getItem('wall-cz-row') || ''; JSON.parse(localStorage.getItem('wall-cz-open') || '[]').forEach((k) => czOpen.add(k)); } catch (e) {}
+    const inCat = (k) => SETTINGS.filter((x) => x.cat === k);
+    const subsOf = (k) => SETTINGS.filter((x) => x.sub === k);
     const isChanged = (x) => x.paths.some((p) => !same(getPath(theme, p), getPath(DEFAULT, p)));
-    var paintCounts = () => $$('button', czTabs).forEach((b) => { const n = inCat(b.dataset.cat).filter(isChanged).length, sm = $('small', b); sm.hidden = !n; sm.textContent = n; sm.setAttribute('aria-label', `改過 ${n} 項`); });
+    var paintCounts = () => {
+      $$('button', czTabs).forEach((b) => { const n = inCat(b.dataset.cat).filter(isChanged).length, sm = $('small', b); sm.hidden = !n; sm.textContent = n; sm.setAttribute('aria-label', `改過 ${n} 項`); });
+      $$('.cz-more', panel).forEach((b) => b.classList.toggle('changed', subsOf(b.dataset.for).some(isChanged)));   // 細調裡有改過的：按鈕上加小點
+    };
+    const toggleMore = (k, on) => {
+      on ? czOpen.add(k) : czOpen.delete(k); try { localStorage.setItem('wall-cz-open', JSON.stringify([...czOpen])); } catch (e) {}
+      $$(`.cz-set.sub[data-for="${k}"]`, panel).forEach((r) => { r.hidden = !on; });
+      const b = $(`.cz-more[data-for="${k}"]`, panel); b?.setAttribute('aria-expanded', String(on));
+    };
     function paintTabs() {
       czTabs.replaceChildren(...CZ_CATS.map(([k, n]) => el('button', { type: 'button', role: 'tab', id: 'cz-t-' + k, 'data-cat': k, 'aria-selected': String(k === czCat), 'aria-controls': 'cz-panel', tabindex: k === czCat ? '0' : '-1', onclick: () => setCzCat(k) }, n, el('small', { hidden: true }))));
       panel.setAttribute('aria-labelledby', 'cz-t-' + czCat);
@@ -6095,8 +6116,10 @@ void main(){
       const reset = el('button', { type: 'button', class: 'cz-undo1', title: '改回預設', 'aria-label': `「${x.label}」改回預設`, onclick: () => { x.paths.forEach((p) => setPath(theme, p, clone(getPath(DEFAULT, p)))); changed(); renderAll(); } });
       reset.innerHTML = RESET_ICON;
       const r = el('div', { class: 'cz-set' + (x.block ? ' block' : ''), 'data-key': x.key, 'data-paths': x.paths.join(' ') },
-        el('div', { class: 'cz-rl' }, el('span', { class: 'cz-dot', 'aria-hidden': 'true' }), el('span', { class: 'cz-lab' }, x.label), reset),
+        el('div', { class: 'cz-rl' }, el('span', { class: 'cz-dot', 'aria-hidden': 'true' }), el('span', { class: 'cz-lab' }, x.label), reset,
+          subsOf(x.key).length ? el('button', { type: 'button', class: 'cz-more', 'data-for': x.key, 'aria-expanded': String(czOpen.has(x.key)), 'aria-label': `「${x.label}」細調`, onclick: () => toggleMore(x.key, !czOpen.has(x.key)) }, '細調', Object.assign(el('i', { 'aria-hidden': 'true' }), { innerHTML: '<svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>' })) : null),
         el('div', { class: 'cz-ctl' }, x.ui()));
+      if (x.sub) { r.classList.add('sub'); r.dataset.for = x.sub; r.hidden = !czOpen.has(x.sub); }
       if (x.aff) r.dataset.aff = x.aff;
       if (x.lr === false) r.dataset.nolr = '';
       rows.push(r); return r;
@@ -6106,7 +6129,9 @@ void main(){
       rows.length = 0; quick = [];
       const top = panel.scrollTop;
       paintTabs();
-      panel.replaceChildren(el('section', { class: 'cz-blk cz-sets' }, inCat(czCat).map(settingRow)));
+      const curX = SETTINGS.find((x) => x.key === czCur);
+      if (czReveal && curX?.sub && !czOpen.has(curX.sub)) toggleMore(curX.sub, true);   // 要顯示的列在細調裡：先展開
+      panel.replaceChildren(el('section', { class: 'cz-blk cz-sets' }, inCat(czCat).filter((x) => !x.sub).flatMap((x) => [x, ...subsOf(x.key)]).map(settingRow)));
       loadFont(WEBFONT.sans[LANG] || WEBFONT.sans.zh); loadFont(theme.type.custom);
       const cur = czCur ? panel.querySelector(`.cz-set[data-key="${czCur}"]`) : null;
       cur?.classList.add('cur');
@@ -6114,7 +6139,7 @@ void main(){
       paintMarks(); renderLib(); paintHist();
     }
     // 頁面右上的淺色／深色鈕切換時，選項跟著更新
-    new MutationObserver(() => { if ($('#cz').classList.contains('open')) { paintMarks(); if (czCat === 'common') renderAll(); } }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    new MutationObserver(() => { if ($('#cz').classList.contains('open')) { paintMarks(); if (czCat === 'style') renderAll(); } }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     // 牆上受影響的元件亮起
     const aff = (sel) => { $$('#wall > .cell.cz-aff').forEach((c) => c.classList.remove('cz-aff')); if (sel) $$(sel).forEach((c) => { if (c.matches('#wall > .cell')) c.classList.add('cz-aff'); }); };
     const setCur = (r) => {
@@ -6141,7 +6166,7 @@ void main(){
       if (czTabs.contains(t) && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); const i = CZ_CATS.findIndex(([k]) => k === czCat); setCzCat(CZ_CATS[(i + (e.key === 'ArrowRight' ? 1 : CZ_CATS.length - 1)) % CZ_CATS.length][0], true); return; }
       if (czTabs.contains(t) && e.key === 'ArrowDown') { e.preventDefault(); focusRow($('.cz-set', panel)); return; }
       if (!panel.contains(t)) return;
-      const list = $$('.cz-set', panel), r = t.closest('.cz-set');
+      const list = $$('.cz-set:not([hidden])', panel), r = t.closest('.cz-set');
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault(); const i = r ? list.indexOf(r) : -1, j = i + (e.key === 'ArrowDown' ? 1 : -1);
         if (j < 0) { $('[aria-selected="true"]', czTabs)?.focus(); return; }

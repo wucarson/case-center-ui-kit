@@ -2298,8 +2298,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
    標準＝上浮＋主色外框；扁平＝底色加深一階；液態玻璃＝跟著滑鼠的光澤＋模糊加重；Neumorphism＝往下凹；Swiss＝頂端粗墨線瞬間出現；Y2K＝鉻面反光掃過一次 */
 :root[data-ui="flat"] #wall > .cell { transition: background-color calc(.2s * var(--dur)) var(--ease), border-color calc(.2s * var(--dur)) var(--ease); }
 :root[data-ui="flat"] #wall > .cell:hover { background-color: color-mix(in srgb, var(--card) 95%, var(--ink)); border-color: var(--line-strong); }
-:root[data-ui="glass"] #wall > .cell { position: relative; }
-:root[data-ui="glass"] #wall > .cell::after { content: ""; position: absolute; inset: 0; z-index: 3; border-radius: inherit; pointer-events: none; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgb(255 255 255 / .2), transparent 65%); opacity: 0; transition: opacity calc(.3s * var(--dur)) var(--ease); }
+:root[data-ui="glass"] #wall > .cell { position: relative; isolation: isolate; }   /* 光澤畫在內容下面（z-index -1）：可以亮一點也不會洗白文字 */
+:root[data-ui="glass"] #wall > .cell::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 0%), rgb(255 255 255 / .95), rgb(255 255 255 / .4) 40%, transparent 75%), radial-gradient(340px circle at var(--mx, 50%) var(--my, 0%), transparent 30%, rgb(60 90 150 / .16));   /* 淺色卡片本身偏白：光源處接近純白、遠離光源微微變暗，靠明暗對比讓投射光看得出來 */ opacity: 0; transition: opacity calc(.3s * var(--dur)) var(--ease); }
 :root[data-ui="glass"] #wall > .cell:hover::after { opacity: 1; }
 :root[data-ui="glass"] #wall > .cell:hover { -webkit-backdrop-filter: blur(calc(var(--glass-blur, 22px) + 8px)) saturate(190%); backdrop-filter: blur(calc(var(--glass-blur, 22px) + 8px)) saturate(190%); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="glass"] #wall > .cell::after { background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgb(255 255 255 / .09), transparent 65%); } }

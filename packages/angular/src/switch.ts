@@ -1,14 +1,17 @@
 import { Component, ElementRef, computed, inject, input, model, signal } from '@angular/core';
 import { isFocusVisible } from '@wucarson/facet-core/dom';
+import { FormBridge } from './form';
 import { isSwitchToggleKey, switchNext, switchRootAttrs, switchRootClass, switchTrackClass, type SwitchState } from '@wucarson/facet-core/switch';
 
 /**
  * 開關：立即生效，不用再按儲存。Space／Enter 切換。
  * 用法：<div ccSwitch [(checked)]="on" label="到期前提醒"></div>
  * 沒有可見標籤時，在同一個元素加 aria-label。
+ * 表單：<div ccSwitch formControlName="remind" label="到期前提醒"></div>（ngModel 亦可）
  */
 @Component({
   selector: '[ccSwitch]',
+  hostDirectives: [FormBridge],
   host: {
     role: 'switch',
     '[class]': 'rootClass()',
@@ -31,9 +34,10 @@ export class Switch {
   readonly disabled = input(false);
 
   protected readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  protected readonly form = inject<FormBridge<boolean>>(FormBridge).attach(this.checked, false);
   protected readonly isFocusVisible = isFocusVisible;
   protected readonly focusVisible = signal(false);
-  private readonly state = computed<SwitchState>(() => ({ checked: this.checked(), disabled: this.disabled(), size: this.size() }));
+  private readonly state = computed<SwitchState>(() => ({ checked: this.checked(), disabled: this.disabled() || this.form.disabled(), size: this.size() }));
   protected readonly rootClass = computed(() => switchRootClass(this.state()));
   protected readonly trackClass = computed(() => switchTrackClass(this.state(), this.focusVisible()));
   protected readonly attrs = computed(() => switchRootAttrs(this.state()));

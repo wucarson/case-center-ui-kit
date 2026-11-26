@@ -18,3 +18,4 @@ export * from './switch';
 export * from './table';
 export * from './tabs';
 export * from './time';
+export * from './form';

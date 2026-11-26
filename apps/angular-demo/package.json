@@ -8,13 +8,14 @@
     "build": "ng build"
   },
   "dependencies": {
-    "@wucarson/facet-angular": "0.1.0",
-    "@wucarson/facet-core": "0.1.0",
-    "@wucarson/facet-styles": "0.1.0",
     "@angular/common": "^22.1.0",
     "@angular/compiler": "^22.1.0",
     "@angular/core": "^22.1.0",
+    "@angular/forms": "^22.1.0",
     "@angular/platform-browser": "^22.1.0",
+    "@wucarson/facet-angular": "0.1.0",
+    "@wucarson/facet-core": "0.1.0",
+    "@wucarson/facet-styles": "0.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

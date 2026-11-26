@@ -38,6 +38,20 @@
         }
       }
     },
+    "form": {
+      "type": "object",
+      "description": "會產生表單值的元件才寫。命名規則：boolean 用 checked，其餘用 value。三個框架照這裡實作表單綁定（Angular：ControlValueAccessor；Vue：v-model；React：value／defaultValue／onChange／name／ref），tools/form-check.mjs 驗收",
+      "required": ["value", "prop"],
+      "properties": {
+        "value": { "enum": ["boolean", "string", "number", "string[]"], "description": "值的型別" },
+        "prop": { "enum": ["checked", "value"], "description": "boolean＝checked，其餘＝value" },
+        "format": { "type": "string", "description": "字串格式，例：YYYY-MM-DD、HH:mm" },
+        "empty": { "description": "沒有值（表單 reset 成 null）時的空值" }
+      },
+      "if": { "properties": { "value": { "const": "boolean" } } },
+      "then": { "properties": { "prop": { "const": "checked" } } },
+      "else": { "properties": { "prop": { "const": "value" } } }
+    },
     "keyboard": { "type": "array", "items": { "type": "object", "required": ["keys", "action"], "properties": { "keys": { "type": "string" }, "action": { "type": "string" } } } },
     "example": { "type": "string" }
   }

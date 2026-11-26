@@ -1,6 +1,7 @@
 {
   "name": "case-center-ui-kit",
   "private": true,
+  "type": "module",
   "description": "元件展示牆與 React／Vue／Angular 元件套件",
   "workspaces": [
     "packages/core",

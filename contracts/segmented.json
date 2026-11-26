@@ -7,6 +7,7 @@
   "description": "2–4 個互斥選項，選中片彈性滑動。",
   "use": "切換檢視、時間範圍等短選項。",
   "instead": [{ "when": "選項文字長或需要說明", "use": "radio-group" }],
+  "form": { "value": "number", "prop": "value", "format": "選中的索引", "empty": 0 },
   "parts": [
     { "name": "root", "selector": ".seg", "element": "div", "classes": { "seg": "分段切換", "sm": "小號：對話框、卡片內" }, "attrs": { "role": { "values": ["radiogroup"], "required": true }, "aria-label": {} } },
     { "name": "thumb", "selector": ".seg > i", "element": "i", "classes": {} },

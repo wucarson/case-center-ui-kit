@@ -7,6 +7,7 @@
   "description": "左側快捷（今天、明天、一週後、月底）、右側月曆；選了就生效。最早可選之前的日期變淡、不能選。",
   "use": "選一天，例：到期日、結束日期。",
   "instead": [{ "when": "要選一段期間", "use": "period-picker" }],
+  "form": { "value": "string", "prop": "value", "format": "YYYY-MM-DD", "empty": "" },
   "parts": [
     { "name": "root", "selector": ".dp", "element": "div", "classes": { "dp": "日期選擇", "open": "面板打開中" } },
     {

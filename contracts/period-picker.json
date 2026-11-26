@@ -7,6 +7,7 @@
   "description": "本月、近 30 天、近 90 天或自訂；範圍以文字寫出。選中片滑動。",
   "use": "報表、儀表板的資料期間。",
   "instead": [{ "when": "只選一天", "use": "date-picker" }],
+  "form": { "value": "string", "prop": "value", "format": "month｜30d｜90d｜custom", "empty": "month" },
   "parts": [
     { "name": "group", "selector": ".ps", "element": "div", "classes": { "ps": "期間" }, "attrs": { "role": { "values": ["radiogroup"], "required": true }, "aria-label": { "required": true } } },
     { "name": "pill", "selector": ".ps > i", "element": "i", "classes": {} },

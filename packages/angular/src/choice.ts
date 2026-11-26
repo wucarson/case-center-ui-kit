@@ -6,6 +6,7 @@ import {
   type CheckboxState, type RadioOption,
 } from '@wucarson/facet-core/choice';
 import { burst } from '@wucarson/facet-core/burst';
+import { FormBridge } from './form';
 import { Icon } from './icon';
 
 export type { RadioOption };
@@ -13,9 +14,11 @@ export type { RadioOption };
 /**
  * 核取方塊：要按儲存才生效的多選。Space 切換。
  *   <div ccCheckbox [(checked)]="sync" label="同步通知負責人"></div>
+ * 表單：<div ccCheckbox formControlName="agree" label="我已閱讀"></div>（必填用 Validators.requiredTrue）
  */
 @Component({
   selector: '[ccCheckbox]',
+  hostDirectives: [FormBridge],
   imports: [Icon],
   host: {
     role: 'checkbox',
@@ -40,9 +43,10 @@ export class Checkbox {
   readonly disabled = input(false);
 
   protected readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  protected readonly form = inject<FormBridge<boolean>>(FormBridge).attach(this.checked, false);
   protected readonly isFocusVisible = isFocusVisible;
   protected readonly focusVisible = signal(false);
-  private readonly state = computed<CheckboxState>(() => ({ checked: this.checked(), indeterminate: this.indeterminate(), selectAll: this.selectAll(), disabled: this.disabled() }));
+  private readonly state = computed<CheckboxState>(() => ({ checked: this.checked(), indeterminate: this.indeterminate(), selectAll: this.selectAll(), disabled: this.disabled() || this.form.disabled() }));
   protected readonly cls = computed(() => checkboxClass(this.state()));
   protected readonly attrs = computed(() => checkboxAttrs(this.state()));
 
@@ -67,11 +71,13 @@ export class CheckboxList {
 /**
  * 單選清單：2–5 個互斥選項、選項都看得到。方向鍵切換（跳過停用項）。
  *   <div ccRadioGroup [options]="options" [(value)]="groupBy" aria-label="分組方式"></div>
+ * 表單：<div ccRadioGroup [options]="options" formControlName="groupBy" aria-label="分組方式"></div>
  */
 @Component({
   selector: '[ccRadioGroup]',
+  hostDirectives: [FormBridge],
   host: { role: 'radiogroup', '[class.rads]': '!single()', '[style.display]': 'single() ? "contents" : null' },
-  template: `@for (o of options(); track o.value) {<div role="radio" [attr.aria-checked]="o.value === value()" [attr.aria-disabled]="o.disabled || null" [attr.tabindex]="tab($index)" [class]="radioCls(o)" (click)="pick(o)" (keydown)="onKey($event, $index)" (focus)="onFocus($event, $index)" (blur)="focusAt.set(-1)"><i [class.is-focus]="focusAt() === $index"></i>@if (o.description) {<span><b>{{ o.label }}</b><small>{{ o.description }}</small></span>} @else {<ng-container>{{ o.label }}</ng-container>}</div>}`,
+  template: `@for (o of opts(); track o.value) {<div role="radio" [attr.aria-checked]="o.value === value()" [attr.aria-disabled]="o.disabled || null" [attr.tabindex]="tab($index)" [class]="radioCls(o)" (click)="pick(o)" (keydown)="onKey($event, $index)" (focus)="onFocus($event, $index)" (blur)="focusAt.set(-1)"><i [class.is-focus]="focusAt() === $index"></i>@if (o.description) {<span><b>{{ o.label }}</b><small>{{ o.description }}</small></span>} @else {<ng-container>{{ o.label }}</ng-container>}</div>}`,
 })
 export class RadioGroup {
   readonly options = input.required<RadioOption[]>();
@@ -80,18 +86,21 @@ export class RadioGroup {
   readonly single = input(false);
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  protected readonly form = inject<FormBridge<string | undefined>>(FormBridge).attach(this.value, undefined);
+  /** 表單停用時每個選項都停用 */
+  protected readonly opts = computed(() => (this.form.disabled() ? this.options().map((o) => ({ ...o, disabled: true })) : this.options()));
   protected readonly focusAt = signal(-1);
-  protected tab(i: number) { return radioTabIndex(this.options(), this.value(), i); }
+  protected tab(i: number) { return radioTabIndex(this.opts(), this.value(), i); }
   protected radioCls(o: RadioOption) { return radioClass(o, o.value === this.value()); }
   protected pick(o: RadioOption) { if (!o.disabled) this.value.set(o.value); }
   protected onKey(e: KeyboardEvent, i: number) {
     const r = radioKey(e.key);
     if (!r) return;
     e.preventDefault();
-    if (r.type === 'pick') { this.pick(this.options()[i]); return; }
-    const j = radioMove(this.options(), i, r.dir);
+    if (r.type === 'pick') { this.pick(this.opts()[i]); return; }
+    const j = radioMove(this.opts(), i, r.dir);
     if (j < 0) return;
-    this.value.set(this.options()[j].value);
+    this.value.set(this.opts()[j].value);
     focusNth(this.host.nativeElement, '[role="radio"]', j);
   }
   protected onFocus(e: FocusEvent, i: number) { this.focusAt.set(isFocusVisible(e.currentTarget as Element) ? i : -1); }
@@ -100,11 +109,13 @@ export class RadioGroup {
 /**
  * 分段切換：選中片彈性滑動。左右鍵切換。
  *   <div ccSegmented [options]="['日', '週', '月']" [(value)]="range" aria-label="時間範圍"></div>
+ * 表單：值是選中的索引（number）。表單停用時不能操作（展示牆尚無停用樣式）。
  */
 @Component({
   selector: '[ccSegmented]',
-  host: { role: 'radiogroup', '[class]': 'cls()', '[style.grid-template-columns]': 'columns()' },
-  template: `<i [style]="thumb()"></i>@for (t of options(); track t) {<span role="radio" [attr.aria-checked]="$index === value()" [attr.tabindex]="$index === value() ? 0 : -1" [class.on]="$index === value()" (click)="value.set($index)" (keydown)="onKey($event, $index)">{{ t }}</span>}`,
+  hostDirectives: [FormBridge],
+  host: { role: 'radiogroup', '[class]': 'cls()', '[style.grid-template-columns]': 'columns()', '[attr.aria-disabled]': 'form.disabled() || null' },
+  template: `<i [style]="thumb()"></i>@for (t of options(); track t) {<span role="radio" [attr.aria-checked]="$index === value()" [attr.tabindex]="$index === value() && !form.disabled() ? 0 : -1" [class.on]="$index === value()" (click)="select($index)" (keydown)="onKey($event, $index)">{{ t }}</span>}`,
 })
 export class Segmented {
   /** 2–4 個互斥選項 */
@@ -115,12 +126,14 @@ export class Segmented {
   readonly size = input<'md' | 'sm'>('md');
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  protected readonly form = inject<FormBridge<number>>(FormBridge).attach(this.value, 0);
   protected readonly cls = computed(() => segmentedClass(this.size()));
+  protected select(i: number) { if (!this.form.disabled()) this.value.set(i); }
   protected readonly columns = computed(() => segmentedColumns(this.options().length));
   protected readonly thumb = computed(() => segmentedThumb(this.options().length, this.value()));
   protected onKey(e: KeyboardEvent, i: number) {
     const r = segmentedKey(e.key, i, this.options().length);
-    if (!r) return;
+    if (!r || this.form.disabled()) return;
     e.preventDefault();
     this.value.set(r.index);
     if (r.focus) focusNth(this.host.nativeElement, '[role="radio"]', r.index);

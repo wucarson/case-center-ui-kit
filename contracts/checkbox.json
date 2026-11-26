@@ -10,6 +10,7 @@
     { "when": "切換後立即生效", "use": "switch" },
     { "when": "只能選一個", "use": "radio-group" }
   ],
+  "form": { "value": "boolean", "prop": "checked", "empty": false },
   "parts": [
     { "name": "list", "selector": ".cks", "element": "div", "classes": { "cks": "一組（垂直排列）" }, "attrs": { "role": { "values": ["group"], "required": true } } },
     {

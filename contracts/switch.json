@@ -10,6 +10,7 @@
     { "when": "要按儲存才生效", "use": "checkbox" },
     { "when": "兩個以上選項，而且選項要看得到", "use": "segmented" }
   ],
+  "form": { "value": "boolean", "prop": "checked", "empty": false },
   "parts": [
     {
       "name": "root",

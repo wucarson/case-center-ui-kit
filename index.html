@@ -1956,6 +1956,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   mask-position: center; mask-repeat: no-repeat; mask-size: 100% 100%, 0px 0px;
   mask-composite: exclude;
 }
+/* Nox（切深色）往內收：舊配色只留在墨水形狀內，形狀從畫面外縮回杖尖，新配色從四邊往中央推進 */
+.vt-wand-in::view-transition-old(root) { mask-image: var(--wand-ink-mask); mask-position: center; mask-repeat: no-repeat; mask-size: 0px 0px; }
 .vt-wand-quick::view-transition-old(root) { mask-image: none; }
 .vt-wand::view-transition-group(root) { animation: none; }
 .wand-ink { position: absolute; z-index: 2; left: 50%; top: 50%; width: 384px; height: 384px; opacity: 0; }
@@ -2990,7 +2992,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       if (!gl) return null;
       const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
       const FS = `precision highp float;
-uniform vec2 R,C;uniform float K,A,T,HZ,D;
+uniform vec2 R,C;uniform float K,A,T,HZ,D,S;
 const float RAD=140.544,BAND=10.681;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+1.),f.x),f.y);}
@@ -3007,7 +3009,7 @@ void main(){
   vec2 hz=vec2(n2(q*.018/D+vec2(T*2.1,-T*1.3)),n2(q*.022/D+vec2(-T*1.7,T*2.4)+9.))-.5;
   q+=hz*HZ*D;
   vec2 v=q-C;float a=atan(v.y,v.x);
-  float d=length(v)-K*shape(a);
+  float d=S*(length(v)-K*shape(a));
   float w=max(K*BAND,6.*D);
   float df=d+(fbm(q*.04/D+vec2(T*.8,-T*.5))-.5)*9.*D+(n2(q*.13/D-T*1.5)-.5)*3.*D;
   float ph=a/6.2832*2.+T*.35;
@@ -3029,16 +3031,106 @@ void main(){
       gl.useProgram(pr);
       gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
       const al = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
-      const U = {}; for (const k of ['R', 'C', 'K', 'A', 'T', 'HZ', 'D']) U[k] = gl.getUniformLocation(pr, k);
+      const U = {}; for (const k of ['R', 'C', 'K', 'A', 'T', 'HZ', 'D', 'S']) U[k] = gl.getUniformLocation(pr, k);
       cv.addEventListener('webglcontextlost', (e) => { e.preventDefault(); wandGl = null; });
       wandGl = {
         cv, gl,
         // 每次轉場開始：依畫面尺寸設定畫布
-        size(W, H, D, center) { cv.width = Math.round(W * D); cv.height = Math.round(H * D); gl.viewport(0, 0, cv.width, cv.height); gl.uniform2f(U.R, cv.width, cv.height); gl.uniform2f(U.C, center[0] * D, center[1] * D); gl.uniform1f(U.D, D); this.D = D; },
+        size(W, H, D, center, dir = 1) { gl.uniform1f(U.S, dir); cv.width = Math.round(W * D); cv.height = Math.round(H * D); gl.viewport(0, 0, cv.width, cv.height); gl.uniform2f(U.R, cv.width, cv.height); gl.uniform2f(U.C, center[0] * D, center[1] * D); gl.uniform1f(U.D, D); this.D = D; },
         // k＝墨水目前的縮放倍率（每個貼圖 px 對應幾個 CSS px）；alpha＝墨水透明度；t＝秒；hz＝熱浪位移 px
         draw(k, alpha, t, hz) { gl.uniform1f(U.K, k * this.D); gl.uniform1f(U.A, alpha); gl.uniform1f(U.T, t); gl.uniform1f(U.HZ, hz); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLES, 0, 3); },
       };
       return wandGl;
+    }
+    /* 照片魔杖（同「深淺之神」阿波羅胸像的做法）：真實照片去背 → 依明暗推算凹凸（高度圖 → 法線）→ WebGL 即時打光。
+       · 照片不放進公開 repo：只有頁面裡有 <script type="text/plain" id="wand-photo">（私人 Artifact 版本才注入）時才啟用，否則用程式畫的魔杖
+       · 照片是斜放的商品照：依杖尖、杖尾座標旋轉裁成橫條（杖尖在左），尺寸比例同程式畫的魔杖（高＝長 × 0.07）
+       · 打光：固定的左上主光保留照片原本的明暗；另有兩個會動的光——蓄力時沿杖身流向杖尖的三色光、杖尖的施法光 */
+    let wandPhoto = null, wandPhotoGl;
+    async function loadWandPhoto() {
+      if (wandPhoto) return wandPhoto;
+      const src = document.getElementById('wand-photo')?.textContent.trim();
+      if (!src) return null;
+      const im = new Image();
+      im.src = src;
+      await im.decode();
+      const TIP = [66, 40], END = [1234, 1200];   // 照片中杖尖、杖尾的位置（px）
+      const L = Math.hypot(END[0] - TIP[0], END[1] - TIP[1]), ang = Math.atan2(END[1] - TIP[1], END[0] - TIP[0]);
+      const W = Math.round(L), H = Math.round(L * .07), N = W * H;
+      const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      const g = cv.getContext('2d', { willReadFrequently: true });
+      g.translate(0, H / 2); g.rotate(-ang); g.translate(-TIP[0], -TIP[1]); g.drawImage(im, 0, 0);
+      const img = g.getImageData(0, 0, W, H), P = img.data;
+      // 去白底：亮的去掉；偏灰的淺色（地上的影子）也去掉，金色環等有彩度的亮部保留；半透明邊緣把白底成分扣掉，避免白邊
+      const A = new Float32Array(N), Y = new Float32Array(N);
+      for (let i = 0; i < N; i++) {
+        const o = i * 4, r = P[o], gg = P[o + 1], b = P[o + 2], mx = Math.max(r, gg, b), mn = Math.min(r, gg, b);
+        const lum = .299 * r + .587 * gg + .114 * b, sat = mx ? (mx - mn) / mx : 0;
+        let a = lum < 130 ? 1 : Math.max(0, Math.min(1, (226 - lum) / 46)) * Math.max(0, Math.min(1, (sat - .08) / .12));
+        if (P[o + 3] < 255) a = 0;   // 旋轉後照片外的空白
+        A[i] = a; Y[i] = lum / 255 * a;
+        if (a > 0 && a < 1) for (let k = 0; k < 3; k++) P[o + k] = Math.max(0, Math.min(255, (P[o + k] - (1 - a) * 255) / a));
+        P[o + 3] = a * 255;
+      }
+      g.putImageData(img, 0, 0);
+      // 高度圖：細／中兩層明暗＋依輪廓推的圓柱感（同阿波羅），再算法線
+      const blur = (src, r) => { const t = new Float32Array(N), o = new Float32Array(N), n = 2 * r + 1;
+        for (let y = 0; y < H; y++) { let sm = 0; for (let x = -r; x <= r; x++) sm += src[y * W + Math.min(W - 1, Math.max(0, x))]; for (let x = 0; x < W; x++) { t[y * W + x] = sm / n; sm += src[y * W + Math.min(W - 1, x + r + 1)] - src[y * W + Math.max(0, x - r)]; } }
+        for (let x = 0; x < W; x++) { let sm = 0; for (let y = -r; y <= r; y++) sm += t[Math.min(H - 1, Math.max(0, y)) * W + x]; for (let y = 0; y < H; y++) { o[y * W + x] = sm / n; sm += t[Math.min(H - 1, y + r + 1) * W + x] - t[Math.max(0, y - r) * W + x]; } } return o; };
+      const y1 = blur(Y, 1), y2 = blur(blur(Y, 3), 3), round = blur(blur(A, 6), 6);
+      const Hh = new Float32Array(N); for (let i = 0; i < N; i++) Hh[i] = y1[i] * 2.2 + y2[i] * 5 + Math.sqrt(round[i]) * 34;
+      const NM = new Uint8Array(N * 4);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x, o = i * 4;
+        const hx = Hh[y * W + Math.min(W - 1, x + 1)] - Hh[y * W + Math.max(0, x - 1)], hy = Hh[Math.min(H - 1, y + 1) * W + x] - Hh[Math.max(0, y - 1) * W + x];
+        const nx = -hx * .7, ny = -hy * .7, l = Math.hypot(nx, ny, 1);
+        NM[o] = (nx / l * .5 + .5) * 255; NM[o + 1] = (ny / l * .5 + .5) * 255; NM[o + 2] = (1 / l * .5 + .5) * 255; NM[o + 3] = 255; }
+      wandPhoto = { cv, W, H, normal: NM, url: cv.toDataURL() };
+      return wandPhoto;
+    }
+    // 照片魔杖的打光程式（畫布與程式只建立一次）；不支援時回傳 null，改用照片原圖（不打光）
+    function getWandPhotoGl() {
+      if (wandPhotoGl !== undefined) return wandPhotoGl;
+      const ph = wandPhoto; if (!ph) return null;
+      wandPhotoGl = null;
+      const cv = document.createElement('canvas'); cv.width = ph.W; cv.height = ph.H;
+      const gl = cv.getContext('webgl', { premultipliedAlpha: true, antialias: false, alpha: true });
+      if (!gl) return null;
+      const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+      const FS = `precision mediump float;
+uniform sampler2D uC,uN;uniform vec2 uR;uniform vec3 uFL,uFC,uTC;uniform float uTip;
+void main(){
+  vec2 t=vec2(gl_FragCoord.x/uR.x,1.-gl_FragCoord.y/uR.y);
+  vec4 c=texture2D(uC,t);if(c.a<.004){gl_FragColor=vec4(0.);return;}
+  vec3 n=normalize(texture2D(uN,t).xyz*2.-1.);
+  vec3 p=vec3(t*uR,0.);
+  vec3 lk=normalize(vec3(-.4,-.6,.7));
+  vec3 col=c.rgb*(.8+.3*max(dot(n,lk),0.));
+  vec3 ld=uFL-p;float dl=length(ld);ld/=dl;float at=1./(1.+pow(dl/(uR.y*1.6),2.));
+  col+=uFC*(c.rgb*1.8*max(dot(n,ld),0.)+pow(max(dot(n,normalize(ld+vec3(0.,0.,1.))),0.),22.)*.8)*at;
+  vec3 tl=vec3(0.,uR.y*.5,uR.y*.9)-p;float dt=length(tl);tl/=dt;float ta=1./(1.+pow(dt/(uR.y*3.5),2.));
+  col+=uTC*uTip*(c.rgb*1.5*max(dot(n,tl),0.)+pow(max(dot(n,normalize(tl+vec3(0.,0.,1.))),0.),18.)*.7)*ta;
+  gl_FragColor=vec4(min(col,1.)*c.a,c.a);
+}`;
+      const sh = (type, src) => { const x = gl.createShader(type); gl.shaderSource(x, src); gl.compileShader(x); if (!gl.getShaderParameter(x, gl.COMPILE_STATUS)) console.error('wand photo shader', gl.getShaderInfoLog(x)); return x; };
+      const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null;
+      gl.useProgram(pr);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const al = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
+      const tex = (unit, set) => { const t = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t);
+        for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v); set(); };
+      tex(0, () => gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, ph.cv));
+      tex(1, () => gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, ph.W, ph.H, 0, gl.RGBA, gl.UNSIGNED_BYTE, ph.normal));
+      const U = {}; for (const k of ['uC', 'uN', 'uR', 'uFL', 'uFC', 'uTC', 'uTip']) U[k] = gl.getUniformLocation(pr, k);
+      gl.uniform1i(U.uC, 0); gl.uniform1i(U.uN, 1); gl.uniform2f(U.uR, ph.W, ph.H); gl.viewport(0, 0, ph.W, ph.H);
+      cv.addEventListener('webglcontextlost', (e) => { e.preventDefault(); wandPhotoGl = null; });
+      wandPhotoGl = {
+        cv, gl,
+        // fx：光流在杖身上的位置（0＝杖尖、1＝握柄端）；fi：光流亮度；fc：光流顏色；tip：杖尖光亮度；tc：杖尖光顏色
+        draw(fx, fi, fc, tip, tc) { gl.uniform3f(U.uFL, fx * ph.W, ph.H * .5, ph.H * .8); gl.uniform3f(U.uFC, fc[0] * fi, fc[1] * fi, fc[2] * fi); gl.uniform1f(U.uTip, tip); gl.uniform3f(U.uTC, tc[0], tc[1], tc[2]);
+          gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLES, 0, 3); },
+      };
+      return wandPhotoGl;
     }
 
     function wandSwap(next, apply) {
@@ -3082,13 +3174,20 @@ void main(){
           <linearGradient id="ww-hl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
           <mask id="ww-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect class="ww-sweep" x="${(C[0] - total / 2 - 160).toFixed(0)}" y="0" width="140" height="${H}" fill="url(#ww-hl)"/></mask></defs>
           <ellipse class="ww-glow" cx="${C[0]}" cy="${C[1]}" rx="${(total / 2 + FS * 0.7).toFixed(0)}" ry="${(FS * 0.85).toFixed(0)}" fill="url(#ww-g)"/><g class="ww-main" mask="url(#ww-ash-mask)">${letters('ww-l')}</g>${lumos ? `<g class="ww-shine" mask="url(#ww-mask)">${letters('ww-s')}</g>` : ''}</svg>`;
-      const wc = fx.querySelector('.wand-cv');
-      wc.width = art.wand.width;
-      wc.height = art.wand.height;
-      wc.getContext('2d').drawImage(art.wand, 0, 0);
+      let wc = fx.querySelector('.wand-cv');
+      const photo = wandPhoto;   // 照片魔杖（私人 Artifact 版本才有）
+      let PG = null;
+      if (photo) { try { PG = getWandPhotoGl(); } catch { PG = null; } }
+      if (PG) { PG.cv.className = 'wand-cv'; wc.replaceWith(PG.cv); wc = PG.cv; PG.draw(1, 0, [0, 0, 0], 0, [0, 0, 0]); }
+      else {
+        const src = photo ? photo.cv : art.wand;
+        wc.width = src.width;
+        wc.height = src.height;
+        wc.getContext('2d').drawImage(src, 0, 0);
+      }
       // 杖身光流只出現在杖身輪廓內：用魔杖圖當遮罩
       const flow = fx.querySelector('.wand-flow');
-      flow.style.webkitMaskImage = flow.style.maskImage = `url("${art.wandUrl}")`;
+      flow.style.webkitMaskImage = flow.style.maskImage = `url("${photo ? photo.url : art.wandUrl}")`;
       // 杖尖火花（煙火）：全螢幕畫布，每顆火花受阻力減速、受重力下墜，拖出彎曲的光尾
       const sparkCv = document.createElement('canvas');
       sparkCv.className = 'wand-sparks';
@@ -3108,7 +3207,7 @@ void main(){
       try { G = getWandGl(); } catch { G = null; }
       let haze = null;
       if (G) {
-        G.size(W, H, DPR, C);
+        G.size(W, H, DPR, C, lumos ? 1 : -1);   // Nox 往內收
         pigment.style.visibility = 'hidden';
         fx.prepend(G.cv, pigment);
       } else {
@@ -3166,7 +3265,21 @@ void main(){
         const contractSize = textureSpan(seedRadius * .68);
         const seedRelease = (HIT + 85) / DUR;
         const feather = Math.round(Math.max(36, Math.min(84, Math.min(W, H) * .095)));
-        if (useInkMask) {
+        // Nox（切深色）＝熄滅：光從四邊被收回杖尖；Lumos（切淺色）＝點亮：從杖尖往外擴散
+        const inward = !lumos && useInkMask;
+        const bigSpan = textureSpan(RV * 1.7);   // 往內收的起點：墨水形狀最凹處也蓋得住整個畫面
+        const CLOSE = (HIT + SPREAD + 110) / DUR;   // 收到杖尖後再 0.11 秒完全消失
+        if (inward) {
+          const ms = (span) => `${span}px ${span}px`;
+          de.animate([
+            { maskSize: ms(bigSpan), offset: 0 },
+            { maskSize: ms(bigSpan), offset: startSpread, easing: spreadEase },
+            { maskSize: ms(contractSize), offset: endSpread, easing: 'ease-in' },
+            { maskSize: ms(0), offset: CLOSE },
+            { maskSize: ms(0), offset: 1 }
+          ], motion);
+          de.classList.add('vt-wand-in');
+        } else if (useInkMask) {
           const maskSize = (span) => `100% 100%, ${span}px ${span}px`;
           de.animate([
             { maskSize: maskSize(0), offset: 0 },
@@ -3186,7 +3299,14 @@ void main(){
         }
 
         const inkTransform = span => `translate(-50%, -50%) scale(${span / art.size})`;
-        const inkFrames = [
+        const inkFrames = inward ? [
+          { opacity: 0, transform: inkTransform(bigSpan) },
+          { opacity: 0, transform: inkTransform(bigSpan), offset: startSpread - 40 / DUR },
+          { opacity: 1, transform: inkTransform(bigSpan), offset: startSpread, easing: spreadEase },
+          { opacity: 1, transform: inkTransform(contractSize), offset: endSpread, easing: 'ease-in' },
+          { opacity: 0, transform: inkTransform(.01), offset: CLOSE },
+          { opacity: 0, transform: inkTransform(.01), offset: 1 }
+        ] : [
           { opacity: 0, transform: inkTransform(textureSpan(seedRadius)), easing: 'ease-out' },
           { opacity: 1, offset: 55 / DUR },
           { opacity: 1, transform: inkTransform(contractSize), offset: startSpread, easing: 'ease-out' },
@@ -3240,8 +3360,27 @@ void main(){
           { offset: CHARGE / DUR, opacity: 1, transform: swing(-90), easing: 'cubic-bezier(.55, 0, .9, .45)' },
           { offset: HIT / DUR, opacity: 1, transform: swing(18, .98), easing: 'cubic-bezier(.2, .8, .3, 1)' },
           { offset: (HIT + 90) / DUR, opacity: 1, transform: swing(0) },
-          { offset: (HIT + 260) / DUR, opacity: 0, transform: swing(0, .99) },
+          { offset: (lumos ? HIT + 260 : HIT + SPREAD + 260) / DUR, opacity: 0, transform: swing(0, .99) },   // Nox：等光收回杖尖再淡出
           { offset: 1, opacity: 0, transform: swing(0, .99) }], { duration: DUR, fill: 'both' });
+        // 照片魔杖打光：蓄力時三色光沿杖身從握柄流向杖尖（照亮凹凸紋理），杖尖施法光照亮杖頭
+        if (PG) {
+          const p0 = performance.now();
+          const mixc = (a, b, k) => a.map((v, i) => v + (b[i] - v) * k);
+          const FLOWC = [[.24, .55, 1], [1, .31, .55], [1, .7, .28], [1, 1, 1]];   // 握柄端藍 → 粉 → 橘 → 到杖尖白熱
+          const lit = (now) => {
+            if (!fx.isConnected || PG.gl.isContextLost()) return;
+            const t = now - p0;
+            const f = Math.max(0, Math.min(1, (t - C0) / (HIT - C0))), e = f * f;   // 越流越快
+            const seg = Math.min(2.999, e * 3), fc = mixc(FLOWC[Math.floor(seg)], FLOWC[Math.floor(seg) + 1], seg % 1);
+            const fi = t < C0 ? 0 : t < HIT ? 1.3 * Math.min(1, f * 4) : Math.max(0, 1.3 * (1 - (t - HIT) / 160));
+            let tip;
+            if (lumos) tip = t < HIT - 30 ? .35 * Math.min(1, t / C0) : t < HIT + 50 ? .35 + 1.9 * (t - HIT + 30) / 80 : Math.max(0, 2.25 * (1 - (t - HIT - 50) / (DUR * .5)));
+            else { const end = HIT + SPREAD; tip = t < C0 ? t / C0 : t < end ? 1 : t < end + 110 ? 1 + 1.4 * (t - end) / 110 : Math.max(0, 2.4 * (1 - (t - end - 110) / 100)); }
+            PG.draw(1 - 1.15 * e, fi, fc, tip, lumos ? [1, .93, .78] : [.8, .86, 1]);
+            if (t < DUR) requestAnimationFrame(lit);
+          };
+          requestAnimationFrame(lit);
+        }
         // 杖身光流：蓄力期間一道三色光從握柄沿杖身流向杖尖，越流越快，抵達杖尖時正好甩下
         fx.querySelector('.wand-flow i').animate([
           { transform: `translateX(${WL.toFixed(0)}px)`, opacity: 1 },
@@ -3301,7 +3440,7 @@ void main(){
         // 杖尖：Lumos 施咒時亮起；Nox 先亮著、施咒時熄滅
         fx.querySelector('.wand-tip').animate(lumos
           ? [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 0.7, transform: 'scale(.55)', offset: C0 / DUR }, { opacity: 0.7, transform: 'scale(.55)', offset: (HIT - 30) / DUR }, { opacity: 1, transform: 'scale(1.8)', offset: (HIT + 50) / DUR }, { opacity: 1, transform: 'scale(1)', offset: 0.6 }, { opacity: 0, transform: 'scale(.6)' }]
-          : [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1)', offset: C0 / DUR }, { opacity: 1, transform: 'scale(1.2)', offset: (HIT - 20) / DUR }, { opacity: 0, transform: 'scale(0)', offset: (HIT + 90) / DUR }, { opacity: 0, transform: 'scale(0)' }],
+          : [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 1, transform: 'scale(1)', offset: C0 / DUR }, { opacity: 1, transform: 'scale(1.2)', offset: (HIT - 20) / DUR }, { opacity: 1, transform: 'scale(1.3)', offset: (HIT + SPREAD) / DUR }, { opacity: 1, transform: 'scale(2.1)', offset: (HIT + SPREAD + 110) / DUR }, { opacity: 0, transform: 'scale(0)', offset: (HIT + SPREAD + 210) / DUR }, { opacity: 0, transform: 'scale(0)' }],   // Nox：光收回杖尖時一直亮著，收完一閃熄滅
           { duration: DUR, fill: 'both' });
         const haloScale = (scale) => `translate(-50%, -50%) scale(${scale})`;
         fx.querySelector('.wand-halo').animate([
@@ -3379,7 +3518,7 @@ void main(){
         listeners.abort();
         fx.remove();
         de.style.removeProperty('--wand-ink-mask');
-        de.classList.remove('vt-wand', 'vt-wand-ink', 'vt-wand-quick');
+        de.classList.remove('vt-wand', 'vt-wand-ink', 'vt-wand-in', 'vt-wand-quick');
         shBusy = false;
       };
       vt.finished.then(cleanUp, cleanUp);
@@ -3406,7 +3545,7 @@ void main(){
     let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途
     if ('requestIdleCallback' in window && document.startViewTransition
         && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      requestIdleCallback(() => { try { prepareWandArt(); getWandGl(); } catch { /* 按下切換時可直接換色 */ } });   // 墨水圖與 WebGL 程式都先準備好，點擊時不卡
+      requestIdleCallback(() => { try { prepareWandArt(); getWandGl(); } catch { /* 按下切換時可直接換色 */ } loadWandPhoto().then(() => { try { getWandPhotoGl(); } catch {} }).catch(() => {}); });   // 墨水圖與 WebGL 程式都先準備好，點擊時不卡
     }
     /* 深淺色轉場（黑洞／白洞，兩個方向都約 1.45 秒）：黑洞的外觀不變，畫面像海水漩渦一樣被捲進洞裡（白洞反過來湧出）
        · 做法：View Transitions 拍下舊畫面；被捲走的那一層（黑洞＝舊畫面、白洞＝新畫面）套 SVG 濾鏡 #bh-lens：

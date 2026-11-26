@@ -195,15 +195,12 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 }
 .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-lift); }
 @keyframes rise { from { transform: none; } }   /* 只用來計時：首次進場全部播完才標記 .ready */
-/* 進場：拼塊（tileIn）——方塊層蓋在牆上、有 3D 透視；只在動畫期間存在 */
-.tile-fx { position: fixed; inset: 0; z-index: 60; pointer-events: none; perspective: 1200px; transform-style: preserve-3d; }
-.tile { position: absolute; --tc: var(--c1); background: linear-gradient(160deg, color-mix(in srgb, var(--tc) 72%, #ffffff), var(--tc) 60%, color-mix(in srgb, var(--tc) 82%, #000000)); box-shadow: inset 0 1px 0 rgb(255 255 255 / .3); backface-visibility: visible; will-change: transform, opacity; }   /* 顏色跟色板（--c1～--c4 輪流），不加外陰影：上百塊同時動時陰影最吃效能 */
-.tile::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: #fff; opacity: 0; }   /* 落地閃光、光波 */
-.tile.out { background: var(--card); box-shadow: inset 0 0 0 1px var(--line); }   /* 離場：卡片本身碎開 */
+/* 進場：疊放的線稿層、煙霧的 WebGL 畫布——蓋在牆上，只在動畫期間存在 */
+.tile-fx { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+.smoke-fx { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 60; pointer-events: none; }
 .wire-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .wire-svg .wl { fill: none; stroke: var(--primary); stroke-width: 1.2; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }   /* 疊放的線稿：元件外框 */
 .wire-svg .wt { stroke: color-mix(in srgb, var(--primary) 30%, var(--line-strong)); stroke-opacity: .55; stroke-linecap: round; }   /* 文字的骨架條（粗細依字高） */
-.tile-sweep { position: absolute; pointer-events: none; border-radius: var(--r-2xl); background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / .4) 50%, transparent 65%) no-repeat; background-size: 60% 100%; mix-blend-mode: overlay; }
 /* 進場：浮線（lineIn）以卡片中心展開；離場灰燼的顆粒畫在全畫面畫布 */
 .cell.lineup { transform-origin: 50% 50%; }
 .ash-cv { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 60; pointer-events: none; }
@@ -5845,8 +5842,8 @@ void main(){
       if (scrollBack && wf.getBoundingClientRect().top < $('.top').offsetHeight) wf.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
       if (!out.length) return relayout(still);
       hushFor(D(1000));   // 轉場期間暫停卡片內的示範動畫，讓出運算
-      // 離場：拼塊＝拆成方塊飛散 0.45 秒；飛入、疊放＝原地淡出 0.22 秒；浮線＝由下往上碎成灰燼吹散 0.6 秒（畫面內離開的卡片同時進行）
-      const so = theme.motion.enter === 'tile' ? tileOut(out) : ['fly', 'stack'].includes(theme.motion.enter) ? { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]), ms: D(220) } : ashOut(out);
+      // 離場：煙霧＝變模糊往右蒸發 0.6 秒；飛入、疊放＝原地淡出 0.22 秒；浮線＝由下往上碎成灰燼吹散 0.6 秒（畫面內離開的卡片同時進行）
+      const so = ['smoke', 'tile'].includes(theme.motion.enter) ? smokeOut(out) : ['fly', 'stack'].includes(theme.motion.enter) ? { out: out.map(([c]) => [c, c.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: D(220), easing: EASE, fill: 'forwards' })]), ms: D(220) } : ashOut(out);
       pending = { out: so.out };
       pending.t = setTimeout(() => { const p = pending; pending = null; relayout(false); p.out.forEach(([c, a]) => { a.cancel(); emergeStop(c.el); }); }, so.ms);
     }
@@ -5892,7 +5889,7 @@ void main(){
     function playEnter(list, scene) {
       if (document.documentElement.classList.contains('pv-mode')) return;   // 預覽頁不播進場
       if (!list.length || matchMedia('(prefers-reduced-motion: reduce)').matches || theme.motion.reduce) return;
-      if (theme.motion.enter === 'tile') { tileIn(list, scene); return; }
+      if (['smoke', 'tile'].includes(theme.motion.enter)) { smokeIn(list, scene); return; }
       if (theme.motion.enter === 'stack') { stackIn(list, scene); return; }
       if (theme.motion.enter === 'fly') {
         const cx = innerWidth / 2, cy = innerHeight / 2, md = Math.hypot(cx, cy) || 1;
@@ -5977,95 +5974,118 @@ void main(){
       if (!A.raf) { g.clearRect(0, 0, cv.width, cv.height); A.last = 0; }
     }
     // 回傳 [卡片, 動畫] 與全部結束的時間
-    /* 進場（拼塊）：每張卡片切成 4×3 塊主色方塊，從 3D 空間四面八方飛入（帶模糊、邊飛邊翻轉），落地時各閃一下；
-       拼好後一道光波從畫面中央往外掃過方塊，光波到的地方方塊淡出、露出真正的卡片（微傾後回正），內容一行一行浮上來；
-       最後一道高光斜掃過。scene＝整面牆一起收尾（光波、高光共用一次）；否則每張卡片拼完就各自收尾。
-       離場（拼塊）：卡片拆成方塊往外飛散、翻轉、淡出。方塊只在動畫期間存在，結束後全部移除 */
-    const TILE = { cols: 3, rows: 2 };   // 每張卡 6 塊：畫面上約 70 塊同時飛，比 12 塊時輕一半
     let tileFx = null;
     const tileLayer = () => {
       if (!tileFx || !tileFx.isConnected) { tileFx = document.createElement('div'); tileFx.className = 'tile-fx'; tileFx.setAttribute('aria-hidden', 'true'); document.body.append(tileFx); }
       return tileFx;
     };
-    const tileRnd = (() => { let s = 7; return () => ((s = (s * 16807) % 2147483647) / 2147483647); })();
-    // 一張卡片的方塊（位置固定在畫面上，左上角的方塊帶卡片圓角）
-    let tileSeq = 0;
-    function tileSet(r, cls) {
-      tileSeq++;
-      const L = tileLayer(), out = [], rad = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--r-2xl')) || 20;
-      const tw = r.width / TILE.cols, th = r.height / TILE.rows;
-      for (let y = 0; y < TILE.rows; y++) for (let x = 0; x < TILE.cols; x++) {
-        const t = document.createElement('i'); t.className = 'tile ' + cls; if (cls !== 'out') t.style.setProperty('--tc', `var(--c${((x + y * TILE.cols + tileSeq) % 4) + 1})`);
-        const cr = [y === 0 && x === 0, y === 0 && x === TILE.cols - 1, y === TILE.rows - 1 && x === TILE.cols - 1, y === TILE.rows - 1 && x === 0].map((on) => (on ? rad + 'px' : '3px')).join(' ');
-        Object.assign(t.style, { left: (r.left + x * tw + 1).toFixed(1) + 'px', top: (r.top + y * th + 1).toFixed(1) + 'px', width: (tw - 2).toFixed(1) + 'px', height: (th - 2).toFixed(1) + 'px', borderRadius: cr });
-        L.append(t); out.push({ t, cx: r.left + (x + 0.5) * tw, cy: r.top + (y + 0.5) * th });
-      }
-      return out;
+    /* 進場（煙霧）：每張卡片的位置先冒出一團稀薄、比卡片大的霧，原地慢慢變濃、收攏成卡片的形狀；
+       霧收好時真正的卡片由模糊變清楚浮現，霧同時散去。scene＝整面牆一起：由畫面中央往外依序凝聚。
+       離場（煙霧）：卡片變模糊、往右飄並淡出，同時一團同形狀的霧從左邊開始蒸發、邊緣散成細絲，整團被拉長往右飄散。
+       霧畫在一張全畫面 WebGL 畫布上（最多同時 24 張卡片，密度上限 1，閒置就移出畫面）；不支援 WebGL 時只有卡片本身的模糊與飄移 */
+    const SMOKE_N = 24, SMOKE_IN = 1000, SMOKE_OUT = 600;
+    const smoke = { cv: null, gl: null, U: null, jobs: [], raf: 0, failed: false };
+    const smokeGl = () => {
+      if (smoke.failed) return null;
+      if (smoke.gl && !smoke.gl.isContextLost()) return smoke.gl;
+      const cv = document.createElement('canvas'); cv.className = 'smoke-fx'; cv.setAttribute('aria-hidden', 'true');
+      const gl = cv.getContext('webgl', { premultipliedAlpha: true, antialias: false });
+      if (!gl) { smoke.failed = true; return null; }
+      const FS = `precision highp float;
+#define N ${SMOKE_N}
+uniform vec2 R;uniform float T,DPR;uniform vec4 RC[N],ST[N];uniform vec3 COL,THIN;uniform float AMAX;
+float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+1.),f.x),f.y);}
+float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*vn(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return s;}
+float sdRR(vec2 p,vec2 b,float r){vec2 q=abs(p)-b+r;return length(max(q,0.))+min(max(q.x,q.y),0.)-r;}
+void main(){
+  vec2 p=vec2(gl_FragCoord.x,R.y-gl_FragCoord.y)/DPR;float t=T*.001;
+  vec2 w=vec2(fbm(p*.006+vec2(0.,t*.35)),fbm(p*.006+vec2(5.2,1.3)-t*.3))-.5;   /* 全畫面共用的流動扭曲 */
+  float acc=0.,nn=.5;
+  for(int i=0;i<N;i++){
+    vec4 s=ST[i];if(s.x<0.)continue;
+    vec4 r=RC[i];vec2 b=.5*r.zw,c=r.xy+b;float u=s.x;
+    vec2 e=p-c;if(abs(e.x)>b.x+(s.y<.5?320.:150.)||abs(e.y)>b.y+150.)continue;   /* 離這張卡片很遠：跳過 */
+    float dens;vec2 q;
+    if(s.y<.5){
+      /* 蒸發：整團往右漂、被流場拉扯；左邊先散，邊緣越來越柔 */
+      q=e-vec2(u*u*170.+u*30.,-u*28.)-w*u*150.;
+      float n=fbm(q*vec2(.006,.02)+s.z*17.+vec2(-t*.9,0.));                                  /* 橫向拉長的紋理：像被風吹開的水氣 */
+      float soft=3.+u*60.;
+      float body=1.-smoothstep(-soft,soft,sdRR(q+vec2(n-.5,(n-.5)*.3)*u*220.,b,s.w));          /* 輪廓跟著紋理起伏，不留直邊 */
+      float xn=clamp((q.x+b.x)/(2.*b.x),0.,1.),th=u*1.5-.25;
+      float keep=smoothstep(th,th+.28,xn*.45+n*.75);
+      dens=body*keep*smoothstep(0.,.22,u)*(.7+.3*n);
+    }else{
+      /* 凝聚：從大一圈的稀薄霧團原地變濃、收攏成卡片，最後散去 */
+      float g=smoothstep(0.,.72,u);
+      q=e/mix(1.3,1.,g)+w*(1.-g)*160.;
+      float soft=mix(90.,2.,g);
+      float body=1.-smoothstep(-soft,soft,sdRR(q,b,s.w));
+      float n=fbm(q*.011+s.z*17.+vec2(t*.25,t*.4));
+      float cov=mix(.78,-.2,g);
+      dens=body*smoothstep(cov,cov+.32,n+.12)*mix(.4,1.,g)*(.78+.22*n)*(1.-smoothstep(.66,1.,u))*smoothstep(0.,.12,u);
     }
-    const tileFrom = () => {   // 3D 空間裡的起點：四面八方、前後都有，邊飛邊翻轉
-      const a = tileRnd() * Math.PI * 2, d = 0.55 + tileRnd() * 0.6;
-      return `translate3d(${(Math.cos(a) * innerWidth * d).toFixed(0)}px, ${(Math.sin(a) * innerHeight * d).toFixed(0)}px, ${(tileRnd() < 0.6 ? 300 + tileRnd() * 600 : -400 - tileRnd() * 500).toFixed(0)}px) rotateX(${(tileRnd() * 540 - 270).toFixed(0)}deg) rotateY(${(tileRnd() * 540 - 270).toFixed(0)}deg) rotateZ(${(tileRnd() * 180 - 90).toFixed(0)}deg)`;
+    if(dens>acc){acc=dens;nn=fbm(q*.02+s.z*5.+vec2(t*.2,-t*.15));}
+  }
+  float a=clamp(acc,0.,1.)*AMAX;
+  vec3 col=mix(THIN,COL,clamp(acc*.7+(nn-.4)*1.3*(1.-acc*.55),0.,1.));                                     /* 細紋理決定明暗：稀薄處、霧的凹處偏灰，凸起處偏白，看得出體積 */
+  gl_FragColor=vec4(col*a,a);
+}`;
+      const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error('smoke shader', gl.getShaderInfoLog(s)); return s; };
+      const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}')); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) { smoke.failed = true; return null; }
+      gl.useProgram(pr);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const al = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
+      const U = {}; for (const k of ['R', 'T', 'DPR', 'RC', 'ST', 'COL', 'THIN', 'AMAX']) U[k] = gl.getUniformLocation(pr, k);
+      cv.addEventListener('webglcontextlost', () => { smoke.failed = true; smoke.jobs = []; cv.remove(); });
+      Object.assign(smoke, { cv, gl, U });
+      return gl;
     };
-    function tileIn(list, scene) {
-      hushFor(D(1700));   // 轉場期間暫停卡片內的示範動畫，讓出運算
-      const cx = innerWidth / 2, cy = innerHeight / 2, md = Math.hypot(cx, cy) || 1, FLY = 480;
-      const cards = list.map(([c, r]) => ({ c, r, d: Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md }));
-      let landAll = 0;
-      for (const k of cards) {   // 方塊飛入：離中心越遠越晚出發（0–250ms），每塊再錯開 0–120ms
-        k.t0 = k.d * 250; k.tiles = tileSet(k.r, '');
-        k.land = 0;
-        for (const p of k.tiles) {
-          const delay = k.t0 + tileRnd() * 120; p.land = delay + FLY; k.land = Math.max(k.land, p.land);
-          p.t.animate([{ transform: tileFrom(), opacity: 0 }, { opacity: 1, offset: 0.3 }, { transform: 'none', opacity: 1 }], { duration: D(FLY), delay: D(delay), fill: 'both', easing: 'cubic-bezier(.2, .7, .25, 1)' });
-        }
-        landAll = Math.max(landAll, k.land);
-      }
-      let end = 0;
-      for (const k of cards) {
-        // 光波：整面牆一起＝全部拼好後從中央往外掃（依卡片離中心的距離）；各自收尾＝這張拼好就掃
-        const wave = (scene ? landAll + 40 + k.d * 260 : k.land + 40);
-        for (const p of k.tiles) {
-          const pw = wave + (scene ? Math.hypot(p.cx - k.r.left - k.r.width / 2, p.cy - k.r.top - k.r.height / 2) / md * 260 : ((p.cx - k.r.left) / k.r.width) * 160);
-          p.t.animate([{ opacity: 0 }, { opacity: 0.7, offset: 0.3 }, { opacity: 0.3 }], { duration: D(240), delay: D(pw), pseudoElement: '::after', fill: 'both', easing: 'ease-out' });   // 光波：白色疊層亮起
-          p.t.animate([{ opacity: 1 }, { opacity: 1, offset: 0.3 }, { opacity: 0 }], { duration: D(240), delay: D(pw), fill: 'forwards', easing: 'ease-out' });
-          p.off = pw + 240;
-        }
-        // 卡片在光波到時現身：微傾後回正；內容依序浮上來
-        const show = wave + 60;
-        k.c.el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: D(220), delay: D(Math.max(0, show - 120)), fill: 'backwards', easing: 'ease-out' });
-        k.c.el.animate([{ transform: 'perspective(900px) rotateX(5deg) rotateY(-4deg) scale(.985)' }, { transform: 'none' }], { duration: D(420), delay: D(show), easing: 'cubic-bezier(.3, 1.3, .6, 1)' });
-        const kids = [...k.c.el.children].filter((e) => e.offsetParent !== null).slice(0, 3);   // 標題、內容區：最多 3 段，少開動畫
-        kids.forEach((e, i) => e.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: D(320), delay: D(show + 40 + i * 70), fill: 'backwards', easing: 'cubic-bezier(.22, 1, .36, 1)' }));
-        const done = show + 40 + kids.length * 70 + 320;
-        if (!scene) sweepOn(k.r, done - 120, 380);   // 各自收尾：這張卡自己掃一道高光
-        end = Math.max(end, done, ...k.tiles.map((p) => p.off));
-      }
-      if (scene) sweepOn({ left: 0, top: 0, width: innerWidth, height: innerHeight }, end - 200, 520);   // 整面牆一起：最後一道高光斜掃過整個畫面
-      const L = tileLayer(), all = cards.flatMap((k) => k.tiles.map((p) => p.t));
-      setTimeout(() => { all.forEach((t) => t.remove()); L.querySelectorAll('.tile-sweep').forEach((s) => s.remove()); if (!L.children.length) L.remove(); }, D(end + 600));
+    // 加入一批卡片的霧（t0：相對現在的延遲毫秒）；畫布在有霧時才放進畫面
+    function smokeAdd(items, mode, dur) {
+      const gl = smokeGl(); if (!gl) return false;
+      const now = performance.now(), rad = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--r-2xl')) || 20;
+      smoke.jobs = smoke.jobs.filter((j) => now < j.t0 + j.dur);
+      for (const [r, t0] of items) if (smoke.jobs.length < SMOKE_N) smoke.jobs.push({ r: [r.left, r.top, r.width, r.height], mode, t0: now + t0, dur, seed: Math.random(), rad: Math.min(rad, r.width / 2, r.height / 2) });
+      const { cv, U } = smoke, DPR = Math.min(1, devicePixelRatio || 1), W = Math.round(innerWidth * DPR), H = Math.round(innerHeight * DPR);
+      if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+      gl.viewport(0, 0, W, H); gl.uniform2f(U.R, W, H); gl.uniform1f(U.DPR, DPR);
+      const de = document.documentElement, dk = de.dataset.theme ? de.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      gl.uniform3f(U.COL, ...(dk ? [0.86, 0.88, 0.92] : [1, 1, 1])); gl.uniform3f(U.THIN, ...(dk ? [0.55, 0.58, 0.64] : [0.7, 0.74, 0.82])); gl.uniform1f(U.AMAX, dk ? 0.62 : 0.94);
+      if (!cv.isConnected) document.body.append(cv);
+      if (!smoke.raf) smoke.raf = requestAnimationFrame(smokeLoop);
+      return true;
     }
-    // 高光：一道斜向亮帶掃過指定範圍
-    function sweepOn(r, at, dur) {
-      const s = document.createElement('i'); s.className = 'tile-sweep';
-      Object.assign(s.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
-      tileLayer().append(s);
-      s.animate([{ backgroundPosition: '-60% 0', opacity: 0 }, { opacity: 1, offset: 0.15 }, { opacity: 1, offset: 0.85 }, { backgroundPosition: '160% 0', opacity: 0 }], { duration: D(dur), delay: D(Math.max(0, at)), fill: 'both', easing: 'cubic-bezier(.45, 0, .2, 1)' });   // 開始前、結束後都透明
+    function smokeLoop(now) {
+      const { gl, U, cv } = smoke; smoke.raf = 0; now = window.__smokeNow ?? now;   // 逐格檢查用：設定 __smokeNow 定住時間
+      if (!gl || smoke.failed) return;
+      smoke.jobs = smoke.jobs.filter((j) => now < j.t0 + j.dur);
+      if (!smoke.jobs.length) { gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); cv.remove(); return; }
+      const rc = new Float32Array(SMOKE_N * 4), st = new Float32Array(SMOKE_N * 4).fill(-1);
+      smoke.jobs.forEach((j, i) => { rc.set(j.r, i * 4); st.set([now < j.t0 ? -1 : (now - j.t0) / j.dur, j.mode, j.seed, j.rad], i * 4); });
+      gl.uniform4fv(U.RC, rc); gl.uniform4fv(U.ST, st); gl.uniform1f(U.T, now);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLES, 0, 3);
+      smoke.raf = requestAnimationFrame(smokeLoop);
     }
-    // 離場：拆成方塊往外飛散（方塊用卡片底色與框線色，看起來是卡片本身碎開）
-    function tileOut(list) {
-      const dur = D(450), cx = innerWidth / 2, cy = innerHeight / 2;
-      const outs = list.map(([c, r]) => {
-        const tiles = tileSet(r, 'out');
-        for (const p of tiles) {
-          const vx = p.cx - cx, vy = p.cy - cy, L = Math.hypot(vx, vy) || 1, push = 160 + tileRnd() * 220;
-          p.t.animate([{ transform: 'none', opacity: 1 },
-            { transform: `translate3d(${(vx / L * push).toFixed(0)}px, ${(vy / L * push).toFixed(0)}px, ${(200 + tileRnd() * 400).toFixed(0)}px) rotateX(${(tileRnd() * 300 - 150).toFixed(0)}deg) rotateY(${(tileRnd() * 300 - 150).toFixed(0)}deg)`, opacity: 0 }],
-            { duration: dur, delay: D(tileRnd() * 80), fill: 'both', easing: 'cubic-bezier(.5, 0, .9, .5)' });
-        }
-        setTimeout(() => tiles.forEach((p) => p.t.remove()), dur + D(120));
-        return [c, c.el.animate([{ opacity: 0 }, { opacity: 0 }], { duration: dur, fill: 'forwards' })];
-      });
-      return { out: outs, ms: dur };
+    function smokeIn(list, scene) {
+      hushFor(D(SMOKE_IN + 300));
+      const cx = innerWidth / 2, cy = innerHeight / 2, md = Math.hypot(cx, cy) || 1, dur = D(SMOKE_IN);
+      const items = list.map(([c, r]) => [c, r, scene ? D(Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy) / md * 280) : 0]);
+      smokeAdd(items.map(([, r, t0]) => [r, t0]), 1, dur);
+      // 霧收攏到 6 成時卡片開始浮現：由模糊、微放大變清楚
+      for (const [c, , t0] of items) {
+        emergeStop(c.el);
+        c.el.animate([{ opacity: 0, filter: 'blur(12px)', transform: 'scale(1.025)' }, { opacity: 0, filter: 'blur(12px)', transform: 'scale(1.025)', offset: 0.5 }, { opacity: 1, offset: 0.82 }, { opacity: 1, filter: 'blur(0)', transform: 'none' }],
+          { duration: dur, delay: t0, fill: 'backwards', easing: 'cubic-bezier(.3, 0, .2, 1)' });
+      }
+    }
+    // 離場：卡片變模糊往右飄、淡出（換成霧），霧再往右蒸發
+    function smokeOut(list) {
+      const dur = D(SMOKE_OUT);
+      smokeAdd(list.map(([, r]) => [r, 0]), 0, dur);
+      return { out: list.map(([c]) => { emergeStop(c.el); return [c, c.el.animate([{ opacity: 1, filter: 'blur(0)', transform: 'none' }, { opacity: 0, filter: 'blur(12px)', transform: 'translateX(36px)', offset: 0.45 }, { opacity: 0, filter: 'blur(12px)', transform: 'translateX(36px)' }], { duration: dur, fill: 'forwards', easing: 'cubic-bezier(.4, 0, .6, 1)' })]; }), ms: dur };
     }
     /* 進場（疊放）：空白卡片先飛入落定（沿用飛入）→ 卡片裡的元件線稿被描出來（有框線或底色的元件描圓角外框、文字畫佔位線，
        由上而下錯開）→ 元件實際樣子由淡到清楚浮現、線稿淡出（不加收尾高光）。
@@ -6369,7 +6389,7 @@ void main(){
       { cat: 'motion', sub: 'anim', key: 'bounce', label: '動畫回彈', paths: ['motion.bounce'],
         ui: () => seg('motion.bounce', [['none', '無'], ['soft', '柔和'], ['standard', '標準'], ['strong', '強']], '動畫回彈') },
       { cat: 'motion', key: 'enter', label: '進場效果', paths: ['motion.enter'],
-        ui: () => pick('進場效果', [['line', '浮線'], ['fly', '飛入'], ['tile', '拼塊'], ['stack', '疊放']], (v) => (['fly', 'tile', 'stack'].includes(theme.motion.enter) ? theme.motion.enter : 'line') === v, (v) => { theme.motion.enter = v; }, () => requestAnimationFrame(() => replayEnter())) },
+        ui: () => pick('進場效果', [['line', '浮線'], ['fly', '飛入'], ['smoke', '煙霧'], ['stack', '疊放']], (v) => ({ fly: 'fly', smoke: 'smoke', tile: 'smoke', stack: 'stack' }[theme.motion.enter] || 'line') === v, (v) => { theme.motion.enter = v; }, () => requestAnimationFrame(() => replayEnter())) },
       { cat: 'motion', key: 'themeFx', label: '深淺色轉場', paths: ['motion.themeFx'],
         ui: () => pick('深淺色轉場', [['dim', '亮度'], ['wand', '魔杖'], ['slash', '亂刀'], ['hole', '黑洞']], (v) => (['hole', 'slash', 'wand'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'dim') === v, (v) => { theme.motion.themeFx = v; }) },
       { cat: 'layout', key: 'cols', label: '每列卡片數', paths: ['layout.cols'], ui: () => seg('layout.cols', [[2, '2'], [3, '3'], [4, '4'], [5, '5']], '每列卡片數') },

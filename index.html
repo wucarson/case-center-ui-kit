@@ -2313,14 +2313,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 /* Y2K：滑過時像閃卡——卡片跟著滑鼠輕微 3D 傾斜（最多約 6°）；箔片細彩虹條紋只在一道斜向光帶內出現、跟著滑鼠移動，滑鼠處有一點銳利白色反光；外框轉全息色
    資訊要清楚：反光畫在內容下面（卡片 isolation、偽元素 z-index -1），文字、圖表不被彩光蓋到；--px／--py 由滑鼠位置換算（0～1）
    淺色：條紋用相乘，白底上才顯色；深色：用濾色疊亮，彩虹發亮不混成灰 */
-:root[data-ui="y2k"] #wall > .cell { isolation: isolate; --px: .5; --py: .5; --foil: #ff6fbf, #ffc23d, #4fe08f, #3fb0ff, #9b7bff, #ff6fbf; --foil-a: .3; --foil-blend: multiply; --glare: rgb(255 255 255 / .95); --glare-a: .9; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] #wall > .cell { --foil: #ff7ccf, #ffd060, #62f0a8, #5cc4ff, #b398ff, #ff7ccf; --foil-a: .5; --foil-blend: screen; --glare: rgb(255 255 255 / .5); --glare-a: .7; } }
-:root[data-theme="dark"][data-ui="y2k"] #wall > .cell { --foil: #ff7ccf, #ffd060, #62f0a8, #5cc4ff, #b398ff, #ff7ccf; --foil-a: .5; --foil-blend: screen; --glare: rgb(255 255 255 / .5); --glare-a: .7; }
+:root[data-ui="y2k"] #wall > .cell { isolation: isolate; --px: .5; --py: .5; --foil: #ff6fbf, #ffc23d, #4fe08f, #3fb0ff, #9b7bff, #ff6fbf; --foil-a: .2; --foil-blend: multiply; --glare: rgb(255 255 255 / .95); --glare-a: .9; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] #wall > .cell { --foil: #ff7ccf, #ffd060, #62f0a8, #5cc4ff, #b398ff, #ff7ccf; --foil-a: .35; --foil-blend: screen; --glare: rgb(255 255 255 / .5); --glare-a: .7; } }
+:root[data-theme="dark"][data-ui="y2k"] #wall > .cell { --foil: #ff7ccf, #ffd060, #62f0a8, #5cc4ff, #b398ff, #ff7ccf; --foil-a: .35; --foil-blend: screen; --glare: rgb(255 255 255 / .5); --glare-a: .7; }
 :root[data-ui="y2k"] #wall > .cell::before, :root[data-ui="y2k"] #wall > .cell::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity calc(.3s * var(--dur)) var(--ease); }
 :root[data-ui="y2k"] #wall > .cell::before {   /* 箔片：細條紋，位置跟著滑鼠滑動（一動就閃）；遮罩成一道斜向光帶 */
-  background: repeating-linear-gradient(115deg, var(--foil) 64px) calc(var(--px) * 100%) calc(var(--py) * 100%) / 200% 200% no-repeat;   /* 底圖兩倍大、不重複：移動時不會露出拼接縫 */
-  -webkit-mask: linear-gradient(115deg, transparent 22%, #000 42% 58%, transparent 78%) calc(var(--px) * 100%) calc(var(--py) * 100%) / 300% 300% no-repeat;
-  mask: linear-gradient(115deg, transparent 22%, #000 42% 58%, transparent 78%) calc(var(--px) * 100%) calc(var(--py) * 100%) / 300% 300% no-repeat;
+  background: repeating-linear-gradient(115deg, var(--foil) 240px) calc(var(--px) * 100%) calc(var(--py) * 100%) / 200% 200% no-repeat;   /* 底圖兩倍大、不重複：移動時不會露出拼接縫 */
+  -webkit-mask: linear-gradient(115deg, transparent 34%, #000 47% 53%, transparent 66%) calc(var(--px) * 100%) calc(var(--py) * 100%) / 300% 300% no-repeat;
+  mask: linear-gradient(115deg, transparent 34%, #000 47% 53%, transparent 66%) calc(var(--px) * 100%) calc(var(--py) * 100%) / 300% 300% no-repeat;
   mix-blend-mode: var(--foil-blend); }
 :root[data-ui="y2k"] #wall > .cell::after { background: radial-gradient(circle at calc(var(--px) * 100%) calc(var(--py) * 100%), var(--glare) 0, rgb(255 255 255 / .18) 70px, transparent 160px); }   /* 鏡面反光：中心銳利、很快淡掉 */
 :root[data-ui="y2k"] #wall > .cell:hover::before { opacity: var(--foil-a); }

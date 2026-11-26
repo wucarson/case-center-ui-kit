@@ -3043,7 +3043,7 @@ void main(){
     /* 照片魔杖（同「深淺之神」阿波羅胸像的做法）：真實照片去背 → 依明暗推算凹凸（高度圖 → 法線）→ WebGL 即時打光。
        · 照片不放進公開 repo：只有頁面裡有 <script type="text/plain" id="wand-photo">（私人 Artifact 版本才注入）時才啟用，否則用程式畫的魔杖
        · 照片在本機預先旋轉、去白底與地上的影子，裁成橫條 PNG（杖尖在左）再注入；魔杖元素的高度照這張圖的比例
-       · 打光：固定的左上主光保留照片原本的明暗；另有兩個會動的光——蓄力時沿杖身流向杖尖的三色光、杖尖的施法光 */
+       · 外觀完全照照片：角度同照片（44.8°）、整支在畫面內、平常不改色；只疊兩個會動的光——蓄力時沿杖身流向杖尖的三色光、杖尖的施法光 */
     let wandPhoto = null, wandPhotoGl;
     async function loadWandPhoto() {
       if (wandPhoto) return wandPhoto;
@@ -3075,6 +3075,7 @@ void main(){
       return wandPhoto;
     }
     // 照片魔杖的打光程式（畫布與程式只建立一次）；不支援時回傳 null，改用照片原圖（不打光）
+    loadWandPhoto().then(() => { try { getWandPhotoGl(); } catch {} }).catch(() => {});   // 照片魔杖：一開頁就載入，點擊時已備妥
     function getWandPhotoGl() {
       if (wandPhotoGl !== undefined) return wandPhotoGl;
       const ph = wandPhoto; if (!ph) return null;
@@ -3090,8 +3091,7 @@ void main(){
   vec4 c=texture2D(uC,t);if(c.a<.004){gl_FragColor=vec4(0.);return;}
   vec3 n=normalize(texture2D(uN,t).xyz*2.-1.);
   vec3 p=vec3(t*uR,0.);
-  vec3 lk=normalize(vec3(-.4,-.6,.7));
-  vec3 col=c.rgb*(.8+.3*max(dot(n,lk),0.));
+  vec3 col=c.rgb;   // 平常＝照片原色；下面只疊會動的光
   vec3 ld=uFL-p;float dl=length(ld);ld/=dl;float at=1./(1.+pow(dl/(uR.y*1.6),2.));
   col+=uFC*(c.rgb*1.8*max(dot(n,ld),0.)+pow(max(dot(n,normalize(ld+vec3(0.,0.,1.))),0.),22.)*.8)*at;
   vec3 tl=vec3(0.,uR.y*.5,uR.y*.9)-p;float dt=length(tl);tl/=dt;float ta=1./(1.+pow(dt/(uR.y*3.5),2.));
@@ -3130,10 +3130,10 @@ void main(){
       catch { apply(); return; }
       const lumos = next === 'light', W = innerWidth, H = innerHeight, C = [W / 2, H / 2];
       const tip = C;   // 直接在畫面中央點擊施法，不從畫外滑入
-      const th = 42;   // 杖身固定朝右下，杖尖落在點擊位置
+      const th = wandPhoto ? 44.8 : 42;   // 杖身朝右下，杖尖落在點擊位置；照片魔杖照照片本身的角度
 
-      // 魔杖長度：杖尖沿杖身方向到畫面邊緣的距離 × 1.5，下緣三分之一伸出畫面外
-      const dx = Math.cos(th * Math.PI / 180), dy = Math.sin(th * Math.PI / 180), exit = Math.min((W - tip[0]) / dx, (H - tip[1]) / dy), WL = exit * 1.5, WH = WL * (wandPhoto ? wandPhoto.H / wandPhoto.W : 0.07);   // 照片魔杖照圖片比例
+      // 魔杖長度：照片魔杖整支放進畫面（杖尖到畫面邊緣距離的 0.94 倍），程式畫的魔杖維持 1.5 倍、下緣伸出畫面外
+      const dx = Math.cos(th * Math.PI / 180), dy = Math.sin(th * Math.PI / 180), exit = Math.min((W - tip[0]) / dx, (H - tip[1]) / dy), WL = exit * (wandPhoto ? .94 : 1.5), WH = WL * (wandPhoto ? wandPhoto.H / wandPhoto.W : 0.07);   // 照片魔杖照圖片比例
       const RV = Math.hypot(W, H) / 2 + 140;
       const useInkMask = CSS.supports('mask-composite', 'exclude');
       const seedRadius = Math.max(23, Math.min(52, Math.min(W, H) * .072));
@@ -3511,7 +3511,7 @@ void main(){
     let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途
     if ('requestIdleCallback' in window && document.startViewTransition
         && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      requestIdleCallback(() => { try { prepareWandArt(); getWandGl(); } catch { /* 按下切換時可直接換色 */ } loadWandPhoto().then(() => { try { getWandPhotoGl(); } catch {} }).catch(() => {}); });   // 墨水圖與 WebGL 程式都先準備好，點擊時不卡
+      requestIdleCallback(() => { try { prepareWandArt(); getWandGl(); } catch { /* 按下切換時可直接換色 */ } });   // 墨水圖與 WebGL 程式都先準備好，點擊時不卡
     }
     /* 深淺色轉場（黑洞／白洞，兩個方向都約 1.45 秒）：黑洞的外觀不變，畫面像海水漩渦一樣被捲進洞裡（白洞反過來湧出）
        · 做法：View Transitions 拍下舊畫面；被捲走的那一層（黑洞＝舊畫面、白洞＝新畫面）套 SVG 濾鏡 #bh-lens：

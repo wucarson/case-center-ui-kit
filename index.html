@@ -1962,9 +1962,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 /* 杖身光流：遮罩＝魔杖圖（JS 設定），光帶從握柄流向杖尖；前緣白熱、後拖暖橘→粉→藍 */
 .wand-flow { position: absolute; inset: 0; overflow: hidden; mask-size: 100% 100%; -webkit-mask-size: 100% 100%; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; mix-blend-mode: screen; }
 .wand-flow i { position: absolute; top: 0; bottom: 0; left: 0; width: 35%; background: linear-gradient(90deg, transparent, #fff 8%, #ffb347 28%, #ff4f8b 58%, #3d8bff 84%, transparent); opacity: 0; }
-/* 杖尖火花：細長光條，沿噴出方向排列 */
-.wand-spark.dot { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: var(--c); transform-origin: 50% 50%; }
-.wand-spark { position: absolute; z-index: 4; width: 14px; height: 2.5px; margin-top: -1.25px; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--c)); box-shadow: 0 0 6px var(--c); transform-origin: 0 50%; opacity: 0; pointer-events: none; }
+/* 杖尖火花（煙火）：全螢幕畫布，JS 逐格畫彎曲光尾 */
+.wand-sparks { position: absolute; z-index: 4; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .wand-tip { position: absolute; left: -14px; top: -5px; width: 28px; height: 28px; border-radius: 50%; }
 .lumos .wand-tip { background: radial-gradient(circle, #fff 0 22%, rgb(220 235 255 / .9) 38%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 24px 8px rgb(210 230 255 / .7); }
 .nox .wand-tip { background: radial-gradient(circle, #fff 0 18%, rgb(200 220 255 / .7) 40%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 14px 4px rgb(200 220 255 / .45); }
@@ -3012,15 +3011,12 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       // 杖身光流只出現在杖身輪廓內：用魔杖圖當遮罩
       const flow = fx.querySelector('.wand-flow');
       flow.style.webkitMaskImage = flow.style.maskImage = `url("${art.wandUrl}")`;
-      // 杖尖火花：三色＋白，避開杖身方向（往右下 42°）往外噴
-      const SPARKS = ['#ffffff', '#ffb347', '#ff4f8b', '#3d8bff'];
-      const sparks = Array.from({ length: 40 }, (_, i) => {   // 40 道：長光條、短光條、小光點混合
-        const s = document.createElement('i');
-        s.className = 'wand-spark' + (i % 3 === 2 ? ' dot' : '');
-        s.style.cssText = `left:${tip[0]}px;top:${tip[1]}px;--c:${SPARKS[i % SPARKS.length]}` + (i % 3 === 2 ? '' : `;width:${(8 + Math.random() * 16).toFixed(0)}px`);
-        fx.append(s);
-        return s;
-      });
+      // 杖尖火花（煙火）：全螢幕畫布，每顆火花受阻力減速、受重力下墜，拖出彎曲的光尾
+      const sparkCv = document.createElement('canvas');
+      sparkCv.className = 'wand-sparks';
+      const DPR = Math.min(2, devicePixelRatio || 1);
+      sparkCv.width = Math.round(W * DPR); sparkCv.height = Math.round(H * DPR);
+      fx.append(sparkCv);
       const pigment = new Image();
       pigment.className = 'wand-ink';
       pigment.alt = '';
@@ -3143,18 +3139,51 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           { transform: `translateX(${(-WL * .35).toFixed(0)}px)`, opacity: 1, offset: .9 },
           { transform: `translateX(${(-WL * .4).toFixed(0)}px)`, opacity: 0 }
         ], { duration: HIT - C0, delay: C0, easing: 'cubic-bezier(.5, 0, .85, .5)', fill: 'both' });
-        // 杖尖火花：甩下瞬間往外噴，先快後慢、邊飛邊縮短淡掉
-        sparks.forEach((s, i) => {
-          const a = 42 + 40 + (i / sparks.length) * 280 + (Math.random() - .5) * 18;   // 避開杖身方向 42° ±40°
-          const d = 60 + Math.random() * 120, dur = 420 + Math.random() * 280;
-          const dot = s.classList.contains('dot');   // 光點整顆縮小；光條只縮長度
-          const at = (dist, k) => `rotate(${a.toFixed(1)}deg) translateX(${dist.toFixed(0)}px) ${dot ? `scale(${Math.max(k, .3)})` : `scaleX(${k})`}`;
-          s.animate([
-            { transform: at(6, .3), opacity: 1 },
-            { transform: at(d * .75, 1), opacity: 1, offset: .35 },
-            { transform: at(d, .15), opacity: 0 }
-          ], { duration: dur, delay: HIT - 10, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' });
-        });
+        // 杖尖火花（煙火）：甩下瞬間噴出 40 顆，避開杖身方向（42° ±40°）；飛 150–380px，重力讓軌跡往下彎，光尾越後面越細越淡
+        {
+          const COLORS = ['#ffffff', '#ffb347', '#ff4f8b', '#3d8bff'];
+          const sg = sparkCv.getContext('2d');
+          sg.scale(DPR, DPR);
+          sg.lineCap = 'round';
+          const TAU = 300, G = .0011, TRAIL = 14;   // 阻力時間常數（ms）、重力（px/ms²）、光尾保留幾個位置
+          const ps = Array.from({ length: 40 }, (_, i) => {
+            const a = (42 + 40 + (i / 40) * 280 + (Math.random() - .5) * 14) * Math.PI / 180;
+            const v = (.5 + Math.random() * .75) * (i % 3 === 2 ? .7 : 1);   // 每三顆一顆較慢、較短，做出層次
+            return { x: tip[0], y: tip[1], vx: Math.cos(a) * v, vy: Math.sin(a) * v - .12, life: 650 + Math.random() * 450,
+              w: i % 3 === 2 ? 1.2 : 1.6 + Math.random() * 1.2, c: COLORS[i % COLORS.length], tr: [] };
+          });
+          const t0 = performance.now() + HIT - 10;
+          let last = t0;
+          const step = (now) => {
+            if (!fx.isConnected) return;
+            if (now < t0) { requestAnimationFrame(step); return; }
+            const dt = Math.min(40, now - last); last = now;
+            const age = now - t0, k = Math.exp(-dt / TAU);
+            sg.clearRect(0, 0, W, H);
+            sg.globalCompositeOperation = 'lighter';
+            let alive = false;
+            for (const p of ps) {
+              const f = age / p.life;
+              if (f >= 1) continue;
+              alive = true;
+              p.vx *= k; p.vy = p.vy * k + G * dt;
+              p.x += p.vx * dt; p.y += p.vy * dt;
+              p.tr.push([p.x, p.y]); if (p.tr.length > TRAIL) p.tr.shift();
+              const fade = 1 - f * f;   // 前段亮、尾段快速熄
+              sg.strokeStyle = p.c; sg.shadowColor = p.c; sg.shadowBlur = 6;
+              for (let j = 1; j < p.tr.length; j++) {   // 光尾：越舊的段越細越淡
+                const q = j / p.tr.length;
+                sg.globalAlpha = fade * q * .9;
+                sg.lineWidth = p.w * (.3 + .7 * q);
+                sg.beginPath(); sg.moveTo(p.tr[j - 1][0], p.tr[j - 1][1]); sg.lineTo(p.tr[j][0], p.tr[j][1]); sg.stroke();
+              }
+              sg.globalAlpha = fade; sg.fillStyle = '#fff';   // 火花頭：白熱小點
+              sg.beginPath(); sg.arc(p.x, p.y, p.w * .7, 0, Math.PI * 2); sg.fill();
+            }
+            if (alive) requestAnimationFrame(step); else sg.clearRect(0, 0, W, H);
+          };
+          requestAnimationFrame(step);
+        }
         // 點下的衝擊：整個畫面（新舊配色與特效層一起）震 8px，約 0.3 秒收掉
         const shake = [[0, 0], [8, -5], [-8, 4], [5, -3], [-3, 1.5], [1, -.5], [0, 0]].map(([x, y]) => ({ transform: `translate(${x}px, ${y}px)` }));
         for (const pe of ['::view-transition-group(root)', '::view-transition-group(wand)'])

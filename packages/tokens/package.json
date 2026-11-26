@@ -1,6 +1,6 @@
 {
   "name": "@wucarson/facet-tokens",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "設計 token：顏色、圓角、陰影、字級（TS 物件與 CSS 變數）",
   "license": "UNLICENSED",
   "repository": {

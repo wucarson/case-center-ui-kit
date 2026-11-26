@@ -9,8 +9,8 @@
     "preview": "vite preview --port 5182"
   },
   "dependencies": {
-    "@wucarson/facet-vue": "0.1.0",
-    "@wucarson/facet-styles": "0.1.0",
+    "@wucarson/facet-vue": "0.2.0",
+    "@wucarson/facet-styles": "0.2.0",
     "vue": "^3.5.13"
   },
   "devDependencies": {

@@ -1681,7 +1681,7 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 /* 大卡片：沒有內側陰影，外側亮暗依卡片尺寸放大，邊緣明暗落差清楚才顯立體 */
 :root[data-ui="neu"] .cell { border: 0; padding: 17px 19px 19px; box-shadow: -5px -5px 10px var(--neu-hi), 5px 5px 10px var(--neu-lo); }
 :root[data-ui="neu"] .cell:hover { box-shadow: -3px -3px 6px var(--neu-hi), 3px 3px 6px var(--neu-lo); }   /* 滑過：陰影變淺，像往下沉、準備被按下 */
-:root[data-ui="neu"] #wall > .cell:active:not(:has(:is(button, input, a, label, [role], [tabindex]):active)) { box-shadow: inset 5px 5px 10px var(--neu-lo), inset -5px -5px 10px var(--neu-hi); transition-duration: calc(.12s * var(--dur)); }   /* 按下卡片本身（不是裡面的控制項）：凹進去 */
+:root[data-ui="neu"] #wall > .cell:active:not(:has(:is(button, input, a, label, [role], [tabindex]):active)) { box-shadow: 0 0 0 transparent, 0 0 0 transparent, inset 11px 11px 20px var(--neu-lo), inset -9px -9px 18px var(--neu-hi), 0 1.5px 0 var(--neu-hi); transition-duration: calc(.12s * var(--dur)); }   /* 按下卡片本身（不是裡面的控制項）：凹進去 */
 /* 詳細頁：此風格破例不用陰影分層，改用底色深淺——外框區塊（頁首、指南、規格）比頁面亮一階，展示台與預覽、程式碼比頁面暗一階 */
 :root[data-ui="neu"] { --neu-blk: color-mix(in srgb, var(--page) 45%, #ffffff); --neu-well: color-mix(in srgb, var(--page) 94%, var(--ink)); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="neu"] { --neu-blk: color-mix(in srgb, var(--page) 93%, #ffffff); --neu-well: color-mix(in srgb, var(--page) 65%, #000000); } }
@@ -2304,7 +2304,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 :root[data-ui="glass"] #wall > .cell:hover { -webkit-backdrop-filter: blur(calc(var(--glass-blur, 22px) + 8px)) saturate(190%); backdrop-filter: blur(calc(var(--glass-blur, 22px) + 8px)) saturate(190%); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="glass"] #wall > .cell::after { background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgb(255 255 255 / .09), transparent 65%); } }
 :root[data-theme="dark"][data-ui="glass"] #wall > .cell::after { background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgb(255 255 255 / .09), transparent 65%); }
-:root[data-ui="neu"] #wall > .cell:hover { box-shadow: inset 6px 6px 13px var(--neu-lo), inset -6px -6px 13px var(--neu-hi), inset 0 0 0 1px color-mix(in srgb, var(--neu-lo) 45%, transparent), 0 1.5px 0 var(--neu-hi), 0 -1px 0 color-mix(in srgb, var(--neu-lo) 60%, transparent); }   /* 滑過：深凹；外緣下方一條亮線、上方一條暗線，凹槽輪廓清楚 */
+/* Neumorphism：浮起 → 滑過時順順凹下（外陰影收起、內陰影長出，數量與順序兩邊一致才能漸變）、卡片微微下沉；外緣下方一條亮線 */
+:root[data-ui="neu"] #wall > .cell { box-shadow: -5px -5px 10px var(--neu-hi), 5px 5px 10px var(--neu-lo), inset 0 0 0 transparent, inset 0 0 0 transparent, 0 0 0 transparent; transition: box-shadow calc(.5s * var(--dur)) var(--ease), scale calc(.5s * var(--dur)) var(--ease); }
+:root[data-ui="neu"] #wall > .cell:hover { box-shadow: 0 0 0 transparent, 0 0 0 transparent, inset 9px 9px 18px var(--neu-lo), inset -9px -9px 18px var(--neu-hi), 0 1.5px 0 var(--neu-hi); scale: .985; }
 :root[data-ui="swiss"] #wall > .cell, :root[data-ui="swiss"] #wall > .cell:hover { transition: none; }
 :root[data-ui="swiss"] #wall > .cell:hover { border-color: var(--ink); box-shadow: inset 0 6px 0 var(--ink); }
 :root[data-ui="y2k"] #wall > .cell { position: relative; }
@@ -2313,8 +2315,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 :root[data-ui="y2k"] #wall > .cell::after { content: ""; position: absolute; inset: 0; z-index: 3; padding: 2px; border-radius: inherit; pointer-events: none; opacity: 0;
   background: conic-gradient(from var(--y2k-a), transparent 0 68%, rgb(70 170 255) 79%, #ffffff 86%, rgb(220 110 255) 93%, transparent);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
-:root[data-ui="y2k"] #wall > .cell:hover::after { animation: y2k-orbit calc(1.4s * var(--dur)) cubic-bezier(.4, 0, .3, 1) 1 both; }
-@keyframes y2k-orbit { 0% { opacity: 0; --y2k-a: -40deg; } 12% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; --y2k-a: 320deg; } }
+:root[data-ui="y2k"] #wall > .cell::after { transition: opacity calc(.3s * var(--dur)) var(--ease); }
+:root[data-ui="y2k"] #wall > .cell:hover::after { opacity: 1; animation: y2k-orbit calc(2.4s * var(--dur)) linear infinite; }   /* 滑過期間沿外框不停繞行（約 2.4 秒一圈）*/
+@keyframes y2k-orbit { from { --y2k-a: 0deg; } to { --y2k-a: 360deg; } }
 /* 減少動態：只留顏色變化，不浮、不掃光 */
 body.reduce #wall > .cell::after { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { #wall > .cell::after { animation: none !important; } }

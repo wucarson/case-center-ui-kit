@@ -2180,8 +2180,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz .cz-menu { border-radius: 14px; border-color: var(--ev-line-2); background: var(--ev-glass); -webkit-backdrop-filter: blur(24px) saturate(170%); backdrop-filter: blur(24px) saturate(170%); }
 
 /* ---- 外觀面板（2026-11-26）：左側圖示欄、浮起卡片、凹槽＋凸起選中片 ----
-   材質三階：凹槽（well，分段切換／數值框／圖示欄）→ 卡片（card，每個設定項目）→ 凸鈕（knob，選中片／選項格） */
-.cz {
+   材質三階：凹槽（well，分段切換／數值框／圖示欄）→ 卡片（card，每個設定項目）→ 凸鈕（knob，選中片／選項格）；分享視窗共用 */
+.cz, .sh {
   --cz-card: color-mix(in srgb, var(--surface) 82%, transparent);
   --cz-card-hi: var(--surface);
   --cz-card-sh: inset 0 1px 0 rgb(255 255 255 / .9), 0 0 0 1px rgb(15 30 60 / .07), 0 1px 2px rgb(15 30 60 / .06), 0 6px 16px -9px rgb(15 30 60 / .28);
@@ -2192,7 +2192,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   --cz-knob-sh: inset 0 1px 0 rgb(255 255 255 / .95), 0 0 0 1px rgb(15 30 60 / .08), 0 1px 2px rgb(15 30 60 / .16), 0 3px 8px -3px rgb(15 30 60 / .22);
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .cz {
+  :root:not([data-theme="light"]) :is(.cz, .sh) {
     --cz-card: rgb(255 255 255 / .075); --cz-card-hi: rgb(255 255 255 / .105);
     --cz-card-sh: inset 0 1px 0 rgb(255 255 255 / .1), 0 0 0 1px rgb(255 255 255 / .06), 0 10px 20px -12px rgb(0 0 0 / .85);
     --cz-sub-sh: inset 0 0 0 1px rgb(255 255 255 / .06);
@@ -2200,7 +2200,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     --cz-knob: rgb(255 255 255 / .15); --cz-knob-sh: inset 0 1px 0 rgb(255 255 255 / .2), 0 0 0 1px rgb(255 255 255 / .08), 0 2px 5px rgb(0 0 0 / .55);
   }
 }
-:root[data-theme="dark"] .cz {
+:root[data-theme="dark"] :is(.cz, .sh) {
   --cz-card: rgb(255 255 255 / .075); --cz-card-hi: rgb(255 255 255 / .105);
   --cz-card-sh: inset 0 1px 0 rgb(255 255 255 / .1), 0 0 0 1px rgb(255 255 255 / .06), 0 10px 20px -12px rgb(0 0 0 / .85);
   --cz-sub-sh: inset 0 0 0 1px rgb(255 255 255 / .06);
@@ -2293,6 +2293,42 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz-cmp[aria-pressed="false"] > span { text-decoration: line-through; text-decoration-color: color-mix(in srgb, currentColor 50%, transparent); }
 /* 選中時的光圈擴散 */
 .cz-ring { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: 0 0 0 0 var(--rc, var(--primary)); }
+
+/* ---- 分享視窗（2026-11-26）：層次同外觀面板（毛玻璃外框、凹槽頁籤＋凸鈕滑塊、浮起程式碼卡片）；
+   是工具介面，顏色不跟正在編輯的主色：強調一律用墨色，只有主題名前的小點保留主色當色卡 ---- */
+.sh {
+  --sh-glass: color-mix(in srgb, var(--surface) 80%, transparent); --sh-line: color-mix(in srgb, var(--ink) 12%, transparent); --sh-line-2: color-mix(in srgb, var(--ink) 22%, transparent);
+  --sh-acc: var(--ink); --sh-on: var(--surface); --sh-focus: color-mix(in srgb, var(--ink) 45%, transparent);
+  gap: 14px; padding: 20px; border: 1px solid var(--sh-line-2); border-radius: 22px; background: var(--sh-glass);
+  -webkit-backdrop-filter: blur(28px) saturate(170%); backdrop-filter: blur(28px) saturate(170%);
+  box-shadow: 0 28px 70px -28px rgb(15 30 60 / .4), 0 2px 6px rgb(15 30 60 / .06), inset 0 1px 0 rgb(255 255 255 / .55);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .sh { --sh-glass: color-mix(in srgb, color-mix(in srgb, var(--page) 70%, #000) 80%, transparent); --sh-line: rgb(255 255 255 / .12); --sh-line-2: rgb(255 255 255 / .2); box-shadow: 0 30px 80px -24px rgb(0 0 0 / .75), inset 0 1px 0 rgb(255 255 255 / .07); }
+}
+:root[data-theme="dark"] .sh { --sh-glass: color-mix(in srgb, color-mix(in srgb, var(--page) 70%, #000) 80%, transparent); --sh-line: rgb(255 255 255 / .12); --sh-line-2: rgb(255 255 255 / .2); box-shadow: 0 30px 80px -24px rgb(0 0 0 / .75), inset 0 1px 0 rgb(255 255 255 / .07); }
+.sh .sh-h b { letter-spacing: .04em; }
+.sh .sh-x, .sh .sh-bar .sh-act { border-radius: 10px; color: var(--weak); }
+.sh .sh-x:hover, .sh .sh-bar .sh-act:hover { background: var(--cz-knob); box-shadow: var(--cz-knob-sh); color: var(--ink); }
+/* 頁籤：凹槽＋凸鈕滑塊（同外觀面板的分段切換） */
+.sh .sh-tabs { padding: 4px; gap: 4px; border-radius: 15px; background: var(--cz-well); box-shadow: var(--cz-well-sh); }
+.sh .sh-tabs button { border-radius: 11px; color: var(--weak); }
+.sh .sh-tabs button:hover, .sh .sh-tabs button[aria-selected="true"] { color: var(--ink); }
+.sh .sh-tabs > i, :root .sh .sh-tabs > i { top: 4px; bottom: 4px; border-radius: 11px; background: var(--cz-knob); box-shadow: var(--cz-knob-sh); }
+/* 程式碼：浮起卡片，工具列細線分隔 */
+.sh .sh-ed { border: 0; border-radius: 16px; background: var(--cz-card); box-shadow: var(--cz-card-sh); }
+.sh .sh-bar { background: transparent; border-bottom-color: var(--sh-line); }
+.sh .sh-bar .sh-files { border-radius: 9px; }
+.sh .sh-bar .sh-files:hover { background-color: var(--cz-well); }
+/* 語法：標題與解碼光改用墨色（其餘是語意色，不是主色） */
+.sh .sh-code .tk-hd { color: var(--ink); }
+.sh .sh-code .mx { color: var(--ink); text-shadow: 0 0 8px color-mix(in srgb, var(--ink) 40%, transparent); }
+/* 下載鈕：墨色實心＋凸起高光；完成時仍轉成功綠 */
+.sh .sh-all { border-radius: 12px; background: var(--sh-acc); color: var(--sh-on); box-shadow: inset 0 1px 0 rgb(255 255 255 / .18), 0 1px 2px rgb(0 0 0 / .2), 0 8px 18px -10px rgb(0 0 0 / .55); }
+.sh .sh-all:hover { filter: none; background: color-mix(in srgb, var(--sh-acc) 86%, var(--sh-on)); }
+.sh .sh-all.done { background: var(--ok-grad); color: var(--on-primary); }
+.sh .sh-link { text-decoration-color: var(--sh-line-2); }
+.sh :focus-visible { outline-color: var(--sh-focus); }
 </style>
 
 <div class="shell">
@@ -5322,7 +5358,7 @@ void main(){
       const s = t.shape;
       if (s.card !== d.shape.card || s.control !== d.shape.control || s.pill !== d.shape.pill) {
         const k = s.control;
-        Object.assign(R, { 'r-2xl': s.card + 'px', 'r-md': k + 'px', 'r-lg': k + 2 + 'px', 'r-sm': Math.round(k * 0.8) + 'px', 'r-xs': Math.round(k * 0.6) + 'px', 'r-pill': s.pill === 'full' ? '999px' : Math.max(4, k - 2) + 'px' });
+        Object.assign(R, { 'r-2xl': s.card + 'px', 'r-md': k + 'px', 'r-lg': k + 2 + 'px', 'r-sm': Math.round(k * 0.8) + 'px', 'r-xs': Math.round(k * 0.6) + 'px', 'r-pill': s.pill === 'full' ? '999px' : Math.min(6, Math.max(3, Math.round(k * 0.5))) + 'px' });   // 方塊：3–6px，按鈕圓角再大也跟膠囊明顯不同（原本＝按鈕圓角−2，圓潤時 12px 看起來跟膠囊一樣）
       }
       const m = t.motion;
       R.dur = m.reduce ? 0 : +(1 / m.speed).toFixed(3);

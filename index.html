@@ -6381,7 +6381,7 @@ void main(){
         const row = panel.querySelector(`.cz-set[data-key="${k}"]`), t = row && $$('.' + c, row)[i], K = czK();
         if (!t || !(K > 0)) return;
         t.animate([{ scale: .9 }, { scale: 1.05, offset: .45 }, { scale: 1 }], { duration: 460 * K, easing: 'cubic-bezier(.2, .8, .2, 1)' });
-        const ring = el('i', { class: 'cz-ring', 'aria-hidden': 'true' }); if (c === 'cz-swatch') ring.style.setProperty('--rc', getComputedStyle(t).getPropertyValue('--c'));
+        const ring = el('span', { class: 'cz-ring', 'aria-hidden': 'true' }); if (c === 'cz-swatch') ring.style.setProperty('--rc', getComputedStyle(t).getPropertyValue('--c'));
         t.append(ring);
         ring.animate([{ boxShadow: '0 0 0 0 var(--rc, var(--primary))', opacity: .7 }, { boxShadow: '0 0 0 12px var(--rc, var(--primary))', opacity: 0 }], { duration: 560 * K, easing: 'cubic-bezier(.2, .8, .2, 1)' }).finished.then(() => ring.remove(), () => ring.remove());
       });

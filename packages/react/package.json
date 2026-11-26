@@ -27,11 +27,11 @@
   },
   "peerDependencies": {
     "react": ">=18",
-    "react-dom": ">=18",
-    "@wucarson/facet-styles": "0.1.0"
+    "react-dom": ">=18"
   },
   "dependencies": {
-    "@wucarson/facet-core": "0.1.0"
+    "@wucarson/facet-core": "0.1.0",
+    "@wucarson/facet-styles": "0.1.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",

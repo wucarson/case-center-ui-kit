@@ -19,11 +19,11 @@
     "@angular/common": "^22.0.0",
     "@angular/core": "^22.0.0",
     "@angular/forms": "^22.0.0",
-    "@angular/platform-browser": "^22.0.0",
-    "@wucarson/facet-styles": "0.1.0"
+    "@angular/platform-browser": "^22.0.0"
   },
   "dependencies": {
     "@wucarson/facet-core": "0.1.0",
+    "@wucarson/facet-styles": "0.1.0",
     "tslib": "^2.3.0"
   },
   "devDependencies": {

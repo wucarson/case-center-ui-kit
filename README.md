@@ -40,7 +40,7 @@
 ```
 
 ```sh
-npm i @wucarson/facet-react @wucarson/facet-styles     # Vue、Angular 換成 facet-vue、facet-angular
+npm i @wucarson/facet-react     # Vue、Angular 換成 facet-vue、facet-angular；樣式（facet-styles）會一起裝
 ```
 
 ### 使用

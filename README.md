@@ -30,18 +30,42 @@
 | `@wucarson/facet-vue` | Vue 3.3 以上 |
 | `@wucarson/facet-angular` | Angular 22（standalone 元件，屬性選擇器 `<button ccButton>`） |
 
+### 環境需求
+
+| 項目 | 版本 |
+| --- | --- |
+| Node.js | 22 以上（CI 以 22 驗證） |
+| React | 18 以上（含 react-dom） |
+| Vue | 3.3 以上 |
+| Angular | 22（core、common、forms、platform-browser） |
+
 ### 安裝
 
-套件發佈在 GitHub Packages。使用的專案根目錄加 `.npmrc`，並準備一組有 `read:packages` 權限的 GitHub token：
+套件發佈在 GitHub Packages，下載要用 GitHub token（套件公開，任何 GitHub 帳號都能自己產生，不用跟維護者申請）。
 
-```
-@wucarson:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
-```
+1. **產生 token**：GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic) → Generate new token，只勾 `read:packages`。
+2. **設環境變數** `GITHUB_TOKEN`（設完重開終端機）：
+   ```sh
+   setx GITHUB_TOKEN "ghp_你的token"                         # Windows
+   echo 'export GITHUB_TOKEN=ghp_你的token' >> ~/.zshrc      # macOS
+   ```
+3. **加 `.npmrc`**：把本 repo 的 [`.npmrc.example`](.npmrc.example) 複製到專案根目錄，改名 `.npmrc`。
+4. **安裝**：
+   ```sh
+   npm i @wucarson/facet-react     # Vue、Angular 換成 facet-vue、facet-angular；樣式（facet-styles）會一起裝
+   ```
 
-```sh
-npm i @wucarson/facet-react     # Vue、Angular 換成 facet-vue、facet-angular；樣式（facet-styles）會一起裝
-```
+CI 也一樣：`actions/setup-node` 設 `registry-url: https://npm.pkg.github.com`、`scope: '@wucarson'`，並把 `NODE_AUTH_TOKEN` 設為有 `read:packages` 的 token。
+
+#### 安裝常見錯誤
+
+| 訊息 | 原因 | 處理 |
+| --- | --- | --- |
+| `401 Unauthorized` | 沒帶到 token，或 token 過期 | 確認 `GITHUB_TOKEN` 有值（Windows：`echo %GITHUB_TOKEN%`；macOS：`echo $GITHUB_TOKEN`）；過期就重新產生 |
+| `403 Forbidden` | token 沒勾 `read:packages` | 重新產生 token，勾 `read:packages` |
+| `404 Not Found`（網址是 registry.npmjs.org） | 沒讀到 `.npmrc`，跑去公開 npm 找 | `.npmrc` 要放專案根目錄（和 `package.json` 同層），檔名不能有 `.example` |
+| `ERESOLVE`（peer dependency） | 框架版本不符 | 對照上方「環境需求」，Angular 必須是 22 |
+| 元件沒有樣式 | 沒引入 CSS | 見下方「使用」的 CSS 引入 |
 
 ### 使用
 

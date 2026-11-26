@@ -974,7 +974,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sp .ff.dis .ff-l { color: var(--label); }
 /* 下拉、多選、日期、時間、標籤搜尋、分段切換、期間停用：同欄位停用——淡灰底、淡邊框、無陰影、文字與圖示改次要色；不能操作（不出滑過樣式） */
 .sp :is(.dd, .ms, .dp).dis > :is(.dd-t, .ms-t, .dp-f), .sp .tp.dis .tp-f, .sp .tsr.dis .search { background: var(--soft); border-color: var(--line-subtle); box-shadow: none; color: var(--label); pointer-events: none; }
-.sp :is(.dd, .ms, .dp).dis > :is(.dd-t, .ms-t, .dp-f) :is(span, svg), .sp .tp.dis .tp-f svg, .sp .tsr.dis .search :is(svg, input) { color: var(--label); }
+.sp :is(.dd, .ms, .dp).dis > :is(.dd-t, .ms-t, .dp-f) :is(span, svg, input), .sp .tp.dis .tp-f svg, .sp .tsr.dis .search :is(svg, input) { color: var(--label); opacity: 1; }   /* input：框架版的下拉文字在原生輸入框裡 */
 .sp .ms.dis .ms-n { background: var(--line-subtle); color: var(--label); }
 .sp .tp.dis .tp-col { pointer-events: none; }
 .sp .tp.dis .tp-col u { color: var(--label); opacity: .45; }

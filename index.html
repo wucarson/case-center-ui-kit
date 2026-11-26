@@ -847,7 +847,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
    原本的說明側欄會擋住右側卡片、讓位又會讓牆重排造成誤點，所以改成整頁。 */
 #wall > .cell { cursor: pointer; transition: transform calc(.55s * var(--dur)) var(--spring-soft), box-shadow calc(.4s * var(--dur)) var(--ease), border-color calc(.25s * var(--dur)) var(--ease); }
 /* 滑過：外框轉淡主色，提示「點了會進詳細頁」；鍵盤聚焦 ⓘ 時同樣亮起 */
-#wall > .cell:hover, #wall > .cell:has(.cell-doc:focus-visible) { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
+:root:not([data-ui]) #wall > .cell:hover, #wall > .cell:has(.cell-doc:focus-visible) { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }   /* 滑過的主色外框只給標準風格；其他風格用各自的滑過效果 */
 /* ⓘ 緊跟在標題後面（右上角留給程式名稱與圖例）；平常隱藏，滑過卡片或鍵盤聚焦才出現 */
 .cell-doc { width: 24px; height: 24px; margin: -4px auto -4px -6px;   /* 點擊範圍 24px（WCAG 2.5.8），圖示仍 15px、位置不變 */
   flex: none; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--label); cursor: pointer; opacity: 0; scale: .7; transition: opacity calc(.2s * var(--dur)) var(--ease), scale calc(.35s * var(--dur)) var(--spring), color calc(.2s * var(--dur)), background calc(.2s * var(--dur)); }
@@ -2293,6 +2293,27 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz-cmp[aria-pressed="false"] > span { text-decoration: line-through; text-decoration-color: color-mix(in srgb, currentColor 50%, transparent); }
 /* 選中時的光圈擴散 */
 .cz-ring { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: 0 0 0 0 var(--rc, var(--primary)); }
+
+/* ---- 元件卡片滑過：每種風格一個招牌效果（2026-11-26） ----
+   標準＝上浮＋主色外框；扁平＝底色加深一階；液態玻璃＝跟著滑鼠的光澤＋模糊加重；Neumorphism＝往下凹；Swiss＝頂端粗墨線瞬間出現；Y2K＝鉻面反光掃過一次 */
+:root[data-ui="flat"] #wall > .cell { transition: background-color calc(.2s * var(--dur)) var(--ease), border-color calc(.2s * var(--dur)) var(--ease); }
+:root[data-ui="flat"] #wall > .cell:hover { background-color: color-mix(in srgb, var(--card) 95%, var(--ink)); border-color: var(--line-strong); }
+:root[data-ui="glass"] #wall > .cell { position: relative; }
+:root[data-ui="glass"] #wall > .cell::after { content: ""; position: absolute; inset: 0; z-index: 3; border-radius: inherit; pointer-events: none; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgb(255 255 255 / .2), transparent 65%); opacity: 0; transition: opacity calc(.3s * var(--dur)) var(--ease); }
+:root[data-ui="glass"] #wall > .cell:hover::after { opacity: 1; }
+:root[data-ui="glass"] #wall > .cell:hover { -webkit-backdrop-filter: blur(calc(var(--glass-blur, 22px) + 8px)) saturate(190%); backdrop-filter: blur(calc(var(--glass-blur, 22px) + 8px)) saturate(190%); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="glass"] #wall > .cell::after { background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgb(255 255 255 / .09), transparent 65%); } }
+:root[data-theme="dark"][data-ui="glass"] #wall > .cell::after { background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgb(255 255 255 / .09), transparent 65%); }
+:root[data-ui="neu"] #wall > .cell:hover { box-shadow: inset 3px 3px 7px var(--neu-lo), inset -3px -3px 7px var(--neu-hi); }
+:root[data-ui="swiss"] #wall > .cell, :root[data-ui="swiss"] #wall > .cell:hover { transition: none; }
+:root[data-ui="swiss"] #wall > .cell:hover { border-color: var(--ink); box-shadow: inset 0 6px 0 var(--ink); }
+:root[data-ui="y2k"] #wall > .cell { position: relative; }
+:root[data-ui="y2k"] #wall > .cell::after { content: ""; position: absolute; inset: 0; z-index: 3; border-radius: inherit; pointer-events: none; background: linear-gradient(105deg, transparent 36%, rgb(159 220 255 / .45) 44%, rgb(255 255 255 / .9) 50%, rgb(243 180 255 / .45) 56%, transparent 64%) no-repeat; background-size: 250% 100%; background-position: 160% 0; opacity: 0; }
+:root[data-ui="y2k"] #wall > .cell:hover::after { animation: y2k-sweep calc(.9s * var(--dur)) cubic-bezier(.3, .1, .3, 1) 1 both; }
+@keyframes y2k-sweep { 0% { opacity: 1; background-position: 160% 0; } 85% { opacity: 1; } 100% { opacity: 0; background-position: -60% 0; } }
+/* 減少動態：只留顏色變化，不浮、不掃光 */
+body.reduce #wall > .cell::after { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { #wall > .cell::after { animation: none !important; } }
 
 /* ---- 分享視窗（2026-11-26）：層次同外觀面板（毛玻璃外框、凹槽頁籤＋凸鈕滑塊、浮起程式碼卡片）；
    是工具介面，顏色不跟正在編輯的主色：強調一律用墨色，只有主題名前的小點保留主色當色卡 ---- */
@@ -5441,6 +5462,12 @@ void main(){
     const catOf = (id) => Object.keys(CAT).find((k) => CAT[k].includes(id)) || '其他';
     const cells = $$('#wall > .cell').map((el) => ({ id: el.id, el, name: (el.querySelector('header')?.firstChild?.textContent || el.id).trim(), cat: catOf(el.id) }));
     const naturalOrder = cells.map((c) => c.id);
+    // 液態玻璃：滑過卡片時，光澤跟著滑鼠位置
+    $('#wall').addEventListener('pointermove', (e) => {
+      if (document.documentElement.dataset.ui !== 'glass') return;
+      const c = e.target.closest('#wall > .cell'); if (!c) return;
+      const b = c.getBoundingClientRect(); c.style.setProperty('--mx', (e.clientX - b.left) + 'px'); c.style.setProperty('--my', (e.clientY - b.top) + 'px');
+    }, { passive: true });
     const orderOf = () => naturalOrder.slice();   // 照原本分類順序（拖移排序已拿掉）
     let wallCat = '';   // 分類篩選（空＝全部）
     let wallQ = '';     // 篩選字（空＝不篩）

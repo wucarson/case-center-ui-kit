@@ -1933,22 +1933,20 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .bh-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; view-transition-name: bhole; }
 .bh-fx canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* 深淺色轉場：亂刀（slashSwap）——碎片層蓋在最上面 */
-/* 深淺色轉場：魔杖（wandSwap）——墨流遮罩淡出舊配色，讓底下的新配色沿前緣顯現。 */
+/* 深淺色轉場：魔杖（wandSwap）——AI 脈衝：杖尖推出一道彩色光環（後跟兩道餘波），新配色沿光環前緣顯現。 */
 @property --wr { syntax: '<length>'; inherits: false; initial-value: 0px; }
 @property --wf { syntax: '<length>'; inherits: false; initial-value: 160px; }
 .vt-wand::view-transition-old(root), .vt-wand::view-transition-new(root), ::view-transition-group(wand), ::view-transition-old(wand), ::view-transition-new(wand) { animation: none; mix-blend-mode: normal; }
 .vt-dim::view-transition-old(root), .vt-dim::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 .vt-wand::view-transition-old(root) { z-index: 2; }
-/* 徑向遮罩是墨流遮罩無法使用時的備援。 */
+/* 舊配色快照挖一個跟著光環長大的圓洞：半徑 --wr，羽化 --wf */
 .vt-wand::view-transition-old(root) { mask-image: radial-gradient(circle, transparent calc(var(--wr) - var(--wf)), #000 var(--wr)); }
-.vt-wand-ink::view-transition-old(root) {
-  mask-image: linear-gradient(#000, #000), var(--wand-ink-mask);
-  mask-position: center; mask-repeat: no-repeat; mask-size: 100% 100%, 0px 0px;
-  mask-composite: exclude;
-}
 .vt-wand-quick::view-transition-old(root) { mask-image: none; }
 .vt-wand::view-transition-group(root) { animation: none; }
-.wand-ink { position: absolute; z-index: 2; left: 50%; top: 50%; width: 384px; height: 384px; opacity: 0; }
+/* 脈衝光環：固定尺寸的圓用 scale 長大；前緣在半徑 80% 處（--pf），內藍、白熱前緣、外粉→暖橘（Afterglow 三色） */
+.wand-pulse, .wand-echo { position: absolute; z-index: 2; border-radius: 50%; transform: translate(-50%, -50%) scale(0); pointer-events: none; will-change: transform, opacity; }
+.wand-pulse { background: radial-gradient(circle closest-side, transparent 58%, rgb(61 139 255 / 0) 62%, rgb(61 139 255 / .5) 74%, rgb(255 255 255 / .92) 78.5%, #fff 80%, rgb(255 79 139 / .68) 82%, rgb(255 179 71 / .32) 88%, rgb(255 179 71 / 0) 96%); }
+.wand-echo { background: radial-gradient(circle closest-side, transparent 78%, rgb(255 79 139 / .8) 79.2%, #fff 80%, rgb(61 139 255 / .8) 80.8%, transparent 82%); }
 .vt-wand * { transition: none !important; }
 ::view-transition-group(wand) { z-index: 3; }
 .wand-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; view-transition-name: wand; }
@@ -2798,8 +2796,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       setTimeout(() => { layer.remove(); shBusy = false; }, TOTAL + 40);
     }
     /* 深淺色轉場（魔杖，約 1.45 秒）：杖尖在中央點一下。
-       墨水先朝杖尖回縮，再向外擴散。Lumos 揭開淺色，Nox 揭開深色。
-       舊畫面沿柔邊墨流淡出，新畫面留在底層，交界保留一層舊配色殘影。 */
+       AI 脈衝：杖尖推出一道彩色光環（內藍、白熱前緣、外粉→暖橘），後跟兩道餘波，0.45 秒推到畫面外。
+       舊畫面快照沿光環前緣挖圓洞，新配色從洞裡顯現。Lumos 揭開淺色，Nox 揭開深色。 */
     document.fonts?.load('600 40px "Cormorant Garamond"', 'LumosNox').catch(() => {});
     // 接骨木魔杖（Canvas，轉場開始前畫一次）：杖尖在左（x = 0），杖身由尖漸粗、沿途 8 個節瘤（越靠握把越大），
     // 握把兩圈雕刻環與凹槽、尾端圓頭；每一直條都用圓柱明暗（上緣窄高光、下緣反光），再疊沿杖身流動、繞過節瘤的木紋
@@ -2855,71 +2853,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     let wandArt;
     function prepareWandArt() {
       if (wandArt) return wandArt;
-      const size = 384, center = size / 2, radius = size * .366, band = radius * .076;
-      const angles = Array.from({ length: 144 }, (_, i) => {
-        const angle = i * Math.PI / 72;
-        const coarse = Math.sin(3 * angle + .9) * .44 + Math.sin(5 * angle - 1.7) * .31 + Math.sin(8 * angle + .5) * .25;
-        const warped = angle + .063 * Math.sin(7 * angle) + .034 * Math.sin(13 * angle - .8);
-        const fine = Math.sin(14 * warped + .9) * .48 + Math.sin(23 * warped - 1.1) * .34 + Math.sin(32 * warped) * .18;
-        return { x: Math.cos(angle), y: Math.sin(angle), radius: radius * (1 + .22 * (coarse + .42 * fine)),
-          fine, fold: Math.sin(11 * warped + .6) };
-      });
-      function outline(offsetAt) {
-        const points = angles.map(({ x, y, radius, fine, fold }) => {
-          const r = radius + offsetAt(fine, fold);
-          return [center + x * r, center + y * r];
-        });
-        const path = new Path2D();
-        points.forEach(([x, y], i) => {
-          const [nx, ny] = points[(i + 1) % points.length];
-          if (i === 0) {
-            const [lx, ly] = points[points.length - 1];
-            path.moveTo((lx + x) / 2, (ly + y) / 2);
-          }
-          path.quadraticCurveTo(x, y, (x + nx) / 2, (y + ny) / 2);
-        });
-        path.closePath();
-        return path;
-      }
-      function ring(outer, inner) {
-        const path = new Path2D(outer);
-        path.addPath(inner);
-        return path;
-      }
-
       const canvas = document.createElement('canvas');
-      canvas.width = canvas.height = size;
       const g = canvas.getContext('2d');
-      const crest = outline(() => 0), behind = outline(() => -band);
-      // 遮罩與墨色共用輪廓。只在準備素材時畫柔邊，播放時交給瀏覽器調整尺寸。
-      g.fillStyle = '#000';
-      g.filter = 'blur(2.1px)';
-      g.globalAlpha = .77;
-      g.fill(crest);
-      g.globalAlpha = 1;
-      g.fill(behind);
-      const mask = canvas.toDataURL();
-      const wash = ring(outline((fine) => band * (.45 + .35 * fine)), behind);
-      const rim = ring(crest, outline((fine, fold) => -band * (.2 + .17 * fine) * (.55 + .45 * fold)));
-      const veins = ring(outline((fine) => -band * (.52 - .2 * fine)),
-        outline((fine, fold) => -band * (.53 - .2 * fine + .10 * (1 + fold))));
-      function pigment(colors) {
-        g.clearRect(0, 0, size, size);
-        g.filter = 'blur(2.4px)';
-        g.globalAlpha = .21;
-        g.fillStyle = colors[0];
-        g.fill(wash, 'evenodd');
-        g.filter = 'none';
-        g.globalAlpha = .31;
-        g.fillStyle = colors[1];
-        g.fill(rim, 'evenodd');
-        g.globalAlpha = .41;
-        g.fillStyle = colors[2];
-        g.fill(veins, 'evenodd');
-        return canvas.toDataURL();
-      }
-      const lumos = pigment(['#dca25b', '#a86632', '#ffe1af']);
-      const nox = pigment(['#7a77be', '#42437d', '#c5cbff']);
       // 預先畫咒語的剝落邊緣。只有筆畫遮罩會取樣這張圖。
       const ashWidth = 256, ashHeight = 144;
       canvas.width = ashWidth;
@@ -2940,7 +2875,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       wand.width = 720;
       wand.height = Math.round(wand.width * .07);
       drawElder(wand, wand.width, wand.height);
-      wandArt = { mask, lumos, nox, spellAsh, wand, size, radius };
+      wandArt = { spellAsh, wand };
       return wandArt;
     }
 
@@ -2958,11 +2893,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 
       // 魔杖長度：杖尖沿杖身方向到畫面邊緣的距離 × 1.5，下緣三分之一伸出畫面外
       const dx = Math.cos(th * Math.PI / 180), dy = Math.sin(th * Math.PI / 180), exit = Math.min((W - tip[0]) / dx, (H - tip[1]) / dy), WL = exit * 1.5, WH = WL * 0.07;
-      const RV = Math.hypot(W, H) / 2 + 140;
-      const useInkMask = CSS.supports('mask-composite', 'exclude');
-      const seedRadius = Math.max(23, Math.min(52, Math.min(W, H) * .072));
-      const textureSpan = (radius) => radius * art.size / art.radius;
-      const finalSpan = textureSpan(RV * 1.26);
+      // 光環終點：畫面對角線一半＋羽化寬度（前緣推出畫面外才算換完）
+      const feather = Math.round(Math.max(24, Math.min(40, Math.min(W, H) * .045)));
+      const RE = Math.hypot(W, H) / 2 + feather + 24;
+      const PF = .8, PD = (2 * RE / PF).toFixed(0);   // 光環前緣在圓半徑 80% 處（同 CSS 漸層）；圓直徑 PD
+      const ringAt = `left:${C[0]}px;top:${C[1]}px;width:${PD}px;height:${PD}px`;
       // 咒語：每個字母一個 SVG 文字（先描邊再填色），用畫布量字寬排位置
       const word = lumos ? 'Lumos' : 'Nox', FS = Math.min(90, Math.max(42, W * 0.064)) * 2 / 3, GAP = FS * 0.08;
       const ctx = document.createElement('canvas').getContext('2d'); ctx.font = `600 ${FS.toFixed(1)}px 'Cormorant Garamond', Georgia, serif`;
@@ -2973,6 +2908,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const fx = document.createElement('div'); fx.className = 'wand-fx' + (lumos ? ' lumos' : ' nox'); fx.setAttribute('aria-hidden', 'true');
       fx.innerHTML = `
         <div class="wand-halo" style="left:${C[0]}px;top:${C[1]}px"></div>
+        <i class="wand-echo" style="${ringAt}"></i><i class="wand-echo" style="${ringAt}"></i><i class="wand-pulse" style="${ringAt}"></i>
         <div class="wand" style="left:${tip[0]}px;top:${(tip[1] - WH / 2).toFixed(1)}px;width:${WL.toFixed(0)}px;height:${WH.toFixed(1)}px;rotate:${th}deg"><canvas class="wand-cv"></canvas><i class="wand-tip"></i></div>
         <svg class="wand-word" width="${W}" height="${H}" style="font-size:${FS.toFixed(1)}px"><defs>
           <mask id="ww-ash-mask" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" mask-type="alpha" ${ashBounds}>
@@ -2989,11 +2925,6 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       wc.width = art.wand.width;
       wc.height = art.wand.height;
       wc.getContext('2d').drawImage(art.wand, 0, 0);
-      const pigment = new Image();
-      pigment.className = 'wand-ink';
-      pigment.alt = '';
-      pigment.src = lumos ? art.lumos : art.nox;
-      fx.prepend(pigment);
       const de = document.documentElement;
       de.classList.add('vt-wand');
       shBusy = true;
@@ -3001,7 +2932,6 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       try {
         vt = document.startViewTransition(() => {
           apply();
-          if (useInkMask) de.style.setProperty('--wand-ink-mask', `url("${art.mask}")`);
           document.body.append(fx);
         });
       } catch {
@@ -3019,7 +2949,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       }, { signal: listeners.signal });
       document.addEventListener('visibilitychange', () => { if (document.hidden) skip(); }, { signal: listeners.signal });
       vt.ready.then(() => {
-        // 截圖與新配色準備已拖延時，讓兩層卡片快速交疊淡換，避免再跑完整墨流。
+        // 截圖與新配色準備已拖延時，讓兩層卡片快速交疊淡換，避免再跑完整脈衝。
         if (performance.now() - startedAt > 360) {
           fx.style.opacity = '0';
           de.classList.add('vt-wand-quick');
@@ -3028,42 +2958,26 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           });
           return;
         }
-        const DUR = 1450, C0 = 95, HIT = 150, SPREAD = 1030;
-        const motion = { pseudoElement: '::view-transition-old(root)', duration: DUR, fill: 'both' };
-        const startSpread = HIT / DUR, endSpread = (HIT + SPREAD) / DUR;
-        const spreadEase = 'cubic-bezier(.42, 0, .30, 1)';
-        const contractSize = textureSpan(seedRadius * .68);
-        const seedRelease = (HIT + 85) / DUR;
-        const feather = Math.round(Math.max(36, Math.min(84, Math.min(W, H) * .095)));
-        if (useInkMask) {
-          const maskSize = (span) => `100% 100%, ${span}px ${span}px`;
-          de.animate([
-            { maskSize: maskSize(0), offset: 0 },
-            { maskSize: maskSize(0), offset: startSpread, easing: 'cubic-bezier(.2, 0, .35, 1)' },
-            { maskSize: maskSize(contractSize * 1.12), offset: seedRelease, easing: spreadEase },
-            { maskSize: maskSize(finalSpan), offset: endSpread },
-            { maskSize: maskSize(finalSpan), offset: 1 }
-          ], motion);
-          de.classList.add('vt-wand-ink');
-        } else {
-          de.animate([
-            { '--wr': '0px', '--wf': `${feather}px`, offset: 0 },
-            { '--wr': '0px', '--wf': `${feather}px`, offset: startSpread, easing: spreadEase },
-            { '--wr': `${RV + feather}px`, '--wf': `${feather}px`, offset: endSpread },
-            { '--wr': `${RV + feather}px`, '--wf': `${feather}px`, offset: 1 }
-          ], motion);
-        }
-
-        const inkTransform = span => `translate(-50%, -50%) scale(${span / art.size})`;
-        pigment.animate([
-          { opacity: 0, transform: inkTransform(textureSpan(seedRadius)), easing: 'ease-out' },
-          { opacity: 1, offset: 55 / DUR },
-          { opacity: 1, transform: inkTransform(contractSize), offset: startSpread, easing: 'ease-out' },
-          { transform: inkTransform(contractSize * 1.12), offset: seedRelease, easing: spreadEase },
-          { opacity: 1, offset: (HIT + SPREAD * .65) / DUR },
-          { transform: inkTransform(finalSpan), offset: endSpread },
-          { opacity: 0, transform: inkTransform(finalSpan), offset: 1 }
-        ], { duration: DUR, fill: 'both' });
+        // AI 脈衝：點擊後 0.45 秒推到畫面外；前快後慢（約 0.3 秒蓋過三分之二）
+        const DUR = 1450, C0 = 95, HIT = 150, SPREAD = 450;
+        const spreadEase = 'cubic-bezier(.16, 1, .3, 1)';
+        // 換色遮罩與光環用同一組時間與曲線：光環前緣永遠落在換色邊界上（前緣外側暖光蓋舊配色、內側藍光蓋新配色）
+        de.animate([
+          { '--wr': '0px', '--wf': `${feather}px` },
+          { '--wr': `${RE}px`, '--wf': `${feather}px` }
+        ], { pseudoElement: '::view-transition-old(root)', duration: SPREAD, delay: HIT, easing: spreadEase, fill: 'both' });
+        const grow = [{ transform: 'translate(-50%, -50%) scale(0)' }, { transform: 'translate(-50%, -50%) scale(1)' }];
+        const pulse = fx.querySelector('.wand-pulse');
+        pulse.animate(grow, { duration: SPREAD, delay: HIT, easing: spreadEase, fill: 'both' });
+        pulse.animate([{ opacity: 0 }, { opacity: 1, offset: .06 }, { opacity: 1, offset: .5 }, { opacity: 0 }],
+          { duration: SPREAD + 300, delay: HIT, fill: 'both' });
+        // 兩道餘波：晚 70、140ms 出發，越後面越淡，邊推邊淡掉
+        fx.querySelectorAll('.wand-echo').forEach((echo, i) => {
+          const lag = HIT + 70 * (i + 1), peak = i ? .28 : .5;
+          echo.animate(grow, { duration: SPREAD, delay: lag, easing: spreadEase, fill: 'both' });
+          echo.animate([{ opacity: 0 }, { opacity: peak, offset: .08 }, { opacity: 0 }],
+            { duration: SPREAD + 150, delay: lag, easing: 'ease-out', fill: 'both' });
+        });
 
         // 魔杖直接在中央亮起並點擊，不再由畫外滑入；點擊後迅速淡出
         const wand = fx.querySelector('.wand');
@@ -3087,7 +3001,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           { opacity: .16, transform: haloScale(.55), offset: .28 },
           { opacity: 0, transform: haloScale(1.1) }
         ], { duration: 500, delay: HIT, fill: 'both', easing: 'cubic-bezier(.23, 1, .32, 1)' });
-        // 墨水擴散到中段時顯示咒語。Lumos 向上蒸散，Nox 從上方落下收合。
+        // 光環擴散到中段時顯示咒語。Lumos 向上蒸散，Nox 從上方落下收合。
         const mid = (word.length - 1) / 2;
         const spellStart = HIT + SPREAD / 2, spellOut = 1230, spellEnd = DUR - 15;
         const easeOut = 'cubic-bezier(.23, 1, .32, 1)';
@@ -3156,8 +3070,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         clearTimeout(watchdog);
         listeners.abort();
         fx.remove();
-        de.style.removeProperty('--wand-ink-mask');
-        de.classList.remove('vt-wand', 'vt-wand-ink', 'vt-wand-quick');
+        de.classList.remove('vt-wand', 'vt-wand-quick');
         shBusy = false;
       };
       vt.finished.then(cleanUp, cleanUp);

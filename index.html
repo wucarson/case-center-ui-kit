@@ -838,7 +838,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .shell { transition: margin-right calc(420ms * var(--dur)) var(--ease); }
 /* 面板開著時元件牆讓位：調設定永遠看得到即時變化 */
 /* 面板開著時：元件牆自己捲動，捲軸在內容區右側（面板左邊），不和面板疊在一起 */
-@media (min-width: 761px) { html:has(> body.cz-open) { overflow: hidden; } body.cz-open { position: fixed; inset: 0 420px 0 0; overflow-y: auto; overscroll-behavior: contain; } }
+@media (min-width: 761px) { html:has(> body.cz-open) { overflow: hidden; } body.cz-open { position: fixed; inset: 0 460px 0 0; overflow-y: auto; overscroll-behavior: contain; } }
 @media (min-width: 761px) { body.cz-open .top { top: -28px; } }   /* 面板開著時捲動容器換成 body：固定的標題列抵掉 body 的上內距（28px），貼齊頂端 */
 @media (max-width: 760px) { body.cz-open, body.doc-open { padding-bottom: 62vh; } }
 
@@ -1311,7 +1311,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 }
 @media (max-width: 540px), (pointer: coarse) { .ck-f { display: none; } }
 .ck-f kbd { padding: 0 4px; border: 1px solid var(--line); border-radius: 4px; font: 11px/16px ui-monospace, Consolas, monospace; }
-.cz { position: fixed; z-index: 30; top: 0; right: 0; bottom: 0; width: 420px; max-width: 100%; display: flex; flex-direction: column; background: var(--surface); border-left: 1px solid var(--line); box-shadow: var(--shadow-pop); transform: translateX(105%); transition: transform calc(520ms * var(--dur)) var(--spring-soft); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-right: env(safe-area-inset-right, 0px); }
+.cz { position: fixed; z-index: 30; top: 0; right: 0; bottom: 0; width: 460px; max-width: 100%; display: flex; flex-direction: column; background: var(--surface); border-left: 1px solid var(--line); box-shadow: var(--shadow-pop); transform: translateX(105%); transition: transform calc(520ms * var(--dur)) var(--spring-soft); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-right: env(safe-area-inset-right, 0px); }
 .cz.open { transform: none; }
 @media (max-width: 760px) {
   .cz { top: auto; left: 0; width: auto; height: 60vh; border-left: 0; border-top: 1px solid var(--line); border-radius: var(--r-2xl) var(--r-2xl) 0 0; transform: translateY(105%); padding-left: env(safe-area-inset-left, 0px); }
@@ -2017,7 +2017,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   --ev-glow: color-mix(in srgb, var(--primary) 42%, transparent);
   --ev-sel: color-mix(in srgb, var(--primary) 14%, transparent);
   --ev-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
-  top: 24px; right: 24px; bottom: 24px; width: 420px; max-width: calc(100% - 48px);
+  top: 24px; right: 24px; bottom: 24px; width: 460px; max-width: calc(100% - 48px);
   border: 1px solid var(--ev-line-2); border-radius: 22px; overflow: hidden;
   background: var(--ev-glass); -webkit-backdrop-filter: blur(28px) saturate(170%); backdrop-filter: blur(28px) saturate(170%);
   box-shadow: 0 28px 70px -28px rgb(15 30 60 / .35), 0 2px 6px rgb(15 30 60 / .06), inset 0 1px 0 rgb(255 255 255 / .55);
@@ -2039,7 +2039,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   .cz { top: auto; left: 24px; right: 24px; bottom: 24px; width: auto; max-width: none; height: calc(60vh - 24px); border: 1px solid var(--ev-line-2); border-radius: 22px; transform: translateY(calc(100% + 40px)); }
 }
 @media (min-width: 761px) {
-  body.cz-open { inset: 0 444px 0 0; margin: 0; scrollbar-width: none; }   /* 讓出面板寬＋右邊界；元件區照常捲動但不顯示捲動軸 */
+  body.cz-open { inset: 0 484px 0 0; margin: 0; scrollbar-width: none; }   /* 讓出面板寬＋右邊界；元件區照常捲動但不顯示捲動軸 */
   body.cz-open::-webkit-scrollbar { display: none; }
 }
 
@@ -2169,6 +2169,83 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz .cz-split > .cz-btn + .cz-caret { border-radius: 0 12px 12px 0; }
 .cz .cz-split > #cz-share { border-radius: 12px; }
 .cz .cz-menu { border-radius: 14px; border-color: var(--ev-line-2); background: var(--ev-glass); -webkit-backdrop-filter: blur(24px) saturate(170%); backdrop-filter: blur(24px) saturate(170%); }
+
+/* ---- 外觀面板（2026-11-26）：左側圖示欄、浮起卡片、凹槽＋凸起選中片 ----
+   材質三階：凹槽（well，分段切換／數值框／圖示欄）→ 卡片（card，每個設定項目）→ 凸鈕（knob，選中片／選項格） */
+.cz {
+  --cz-card: color-mix(in srgb, var(--surface) 82%, transparent);
+  --cz-card-hi: var(--surface);
+  --cz-card-sh: inset 0 1px 0 rgb(255 255 255 / .9), 0 0 0 1px rgb(15 30 60 / .07), 0 1px 2px rgb(15 30 60 / .06), 0 6px 16px -9px rgb(15 30 60 / .28);
+  --cz-sub-sh: inset 0 0 0 1px rgb(15 30 60 / .07);
+  --cz-well: color-mix(in srgb, var(--ink) 6%, transparent);
+  --cz-well-sh: inset 0 1px 2px rgb(15 30 60 / .14), inset 0 0 0 1px rgb(15 30 60 / .05), 0 1px 0 rgb(255 255 255 / .7);
+  --cz-knob: var(--surface);
+  --cz-knob-sh: inset 0 1px 0 rgb(255 255 255 / .95), 0 0 0 1px rgb(15 30 60 / .08), 0 1px 2px rgb(15 30 60 / .16), 0 3px 8px -3px rgb(15 30 60 / .22);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cz {
+    --cz-card: rgb(255 255 255 / .075); --cz-card-hi: rgb(255 255 255 / .105);
+    --cz-card-sh: inset 0 1px 0 rgb(255 255 255 / .1), 0 0 0 1px rgb(255 255 255 / .06), 0 10px 20px -12px rgb(0 0 0 / .85);
+    --cz-sub-sh: inset 0 0 0 1px rgb(255 255 255 / .06);
+    --cz-well: rgb(0 0 0 / .3); --cz-well-sh: inset 0 1px 3px rgb(0 0 0 / .55), inset 0 0 0 1px rgb(255 255 255 / .05), 0 1px 0 rgb(255 255 255 / .06);
+    --cz-knob: rgb(255 255 255 / .15); --cz-knob-sh: inset 0 1px 0 rgb(255 255 255 / .2), 0 0 0 1px rgb(255 255 255 / .08), 0 2px 5px rgb(0 0 0 / .55);
+  }
+}
+:root[data-theme="dark"] .cz {
+  --cz-card: rgb(255 255 255 / .075); --cz-card-hi: rgb(255 255 255 / .105);
+  --cz-card-sh: inset 0 1px 0 rgb(255 255 255 / .1), 0 0 0 1px rgb(255 255 255 / .06), 0 10px 20px -12px rgb(0 0 0 / .85);
+  --cz-sub-sh: inset 0 0 0 1px rgb(255 255 255 / .06);
+  --cz-well: rgb(0 0 0 / .3); --cz-well-sh: inset 0 1px 3px rgb(0 0 0 / .55), inset 0 0 0 1px rgb(255 255 255 / .05), 0 1px 0 rgb(255 255 255 / .06);
+  --cz-knob: rgb(255 255 255 / .15); --cz-knob-sh: inset 0 1px 0 rgb(255 255 255 / .2), 0 0 0 1px rgb(255 255 255 / .08), 0 2px 5px rgb(0 0 0 / .55);
+}
+/* 版面：電腦版＝左側直排圖示欄；手機版＝上方橫排圖示 */
+.cz-main { flex: 1; min-height: 0; display: flex; }
+.cz-main > .cz-body { flex: 1; min-width: 0; }
+.cz.cz .cz-tabs { position: relative; flex: none; flex-direction: column; align-self: flex-start; gap: 4px; width: 46px; margin: 14px 0 14px 12px; padding: 4px; overflow: visible; border-radius: 15px; background: var(--cz-well); box-shadow: var(--cz-well-sh); }
+.cz.cz .cz-tabs button { position: relative; z-index: 1; flex: none; width: 38px; height: 38px; padding: 0; border-radius: 11px; background: transparent; box-shadow: none; color: var(--ev-dim, var(--weak)); }
+.cz.cz .cz-tabs button:hover { color: var(--ink); }
+.cz.cz .cz-tabs button[aria-selected="true"] { background: transparent; box-shadow: none; color: var(--ink); }
+.cz.cz .cz-tabs button svg { width: 19px; height: 19px; transition: scale calc(.3s * var(--dur)) var(--spring, ease); }
+.cz.cz .cz-tabs button[aria-selected="true"] svg { scale: 1.08; }
+.cz.cz .cz-tabs small { position: absolute; top: 2px; right: 1px; min-width: 14px; height: 14px; padding: 0 3px; box-shadow: 0 0 0 2px var(--ev-glass, var(--surface)); }
+/* 名稱提示：滑過或用鍵盤聚焦時浮在圖示右邊 */
+.cz-tabs button::after { content: attr(data-tip); position: absolute; left: calc(100% + 10px); top: 50%; translate: -4px -50%; padding: 4px 9px; border-radius: 8px; background: var(--ink); color: var(--surface); font-size: 12px; font-weight: 600; line-height: 18px; white-space: nowrap; opacity: 0; pointer-events: none; box-shadow: 0 6px 16px -6px rgb(0 0 0 / .4); transition: opacity calc(.15s * var(--dur)), translate calc(.15s * var(--dur)); z-index: 5; }
+.cz-tabs button:is(:hover, :focus-visible)::after { opacity: 1; translate: 0 -50%; }
+@media (max-width: 760px) {
+  .cz-main { flex-direction: column; }
+  .cz.cz .cz-tabs { flex-direction: row; align-self: stretch; width: auto; margin: 0 14px 6px; }
+  .cz.cz .cz-tabs button { flex: 1; width: auto; height: 40px; min-height: 40px; }
+  .cz-tabs button::after { display: none; }
+}
+/* 選中片：一塊凸起的滑塊，切換時從舊位置滑到新位置（程式放在 .cz-ind） */
+.cz-ind { position: absolute; z-index: 0; border-radius: inherit; background: var(--cz-knob); box-shadow: var(--cz-knob-sh); pointer-events: none; }
+.cz-tabs > .cz-ind { border-radius: 11px; box-shadow: var(--cz-knob-sh), 0 0 14px -6px var(--ev-glow); }
+.cz.cz .cz-seg { position: relative; background: var(--cz-well); box-shadow: var(--cz-well-sh); }
+.cz.cz .cz-seg > .cz-ind { border-radius: 9px; }
+.cz.cz .cz-seg button { z-index: 1; }
+.cz.cz .cz-seg:has(> .cz-ind) button[aria-pressed="true"] { background: transparent; box-shadow: none; }
+/* 每個設定項目：比面板亮一階的浮起卡片（頂部高光＋柔和陰影）；細項接在下方、平貼一階 */
+.cz.cz .cz-sets { gap: 8px; }
+.cz.cz .cz-set { background: var(--cz-card); box-shadow: var(--cz-card-sh); transition: background calc(.15s * var(--dur)), box-shadow calc(.2s * var(--dur)); }
+.cz.cz .cz-set:hover { background: var(--cz-card-hi); }
+.cz.cz .cz-set.sub { background: color-mix(in srgb, var(--cz-card) 55%, transparent); box-shadow: var(--cz-sub-sh); }
+/* 選項格（風格、圓角、字型、動畫…）：凸鈕，滑過微微浮起；選中＝主色淡底＋主色框＋柔光 */
+.cz.cz :is(.cz-style, .cz-opt, .cz-tile) { position: relative; background: var(--cz-knob); box-shadow: var(--cz-knob-sh); transition: background calc(.2s * var(--dur)), box-shadow calc(.2s * var(--dur)), translate calc(.25s * var(--dur)) var(--spring, ease), scale calc(.3s * var(--dur)) var(--spring, ease); }
+.cz.cz :is(.cz-style, .cz-opt, .cz-tile):hover:not(:disabled) { translate: 0 -1px; box-shadow: var(--cz-knob-sh), 0 6px 14px -8px rgb(0 0 0 / .35); }
+.cz.cz :is(.cz-style, .cz-opt, .cz-tile):active:not(:disabled) { translate: 0; scale: .95; }
+.cz.cz :is(.cz-style[aria-pressed="true"], .cz-opt[aria-pressed="true"]) { background: color-mix(in srgb, var(--primary) 16%, var(--cz-knob)); box-shadow: inset 0 1px 0 rgb(255 255 255 / .18), inset 0 0 0 1.5px var(--ev-acc), 0 0 18px -5px var(--ev-glow); }
+.cz.cz .cz-swatch { position: relative; transition: scale calc(.3s * var(--dur)) var(--spring, ease), box-shadow calc(.2s * var(--dur)); }
+.cz.cz .cz-swatch:active { scale: .88; }
+/* 數值框、步進器：凹槽 */
+.cz.cz :is(.cz-num, .cz-step) { background: var(--cz-well); box-shadow: var(--cz-well-sh); }
+.cz.cz .cz-num:focus-within { box-shadow: var(--cz-well-sh), 0 0 0 2px var(--primary); }
+.cz :is(.cz-numi, .cz-step output) { display: inline-block; }
+/* 滑桿：拖動時圓鈕放大＋主色光圈 */
+.cz .cz-trk input[type="range"]::-webkit-slider-thumb { transition: transform calc(.25s * var(--dur)) var(--spring, ease), box-shadow calc(.2s * var(--dur)); }
+.cz .cz-trk input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.25); box-shadow: 0 1px 4px rgb(0 0 0 / .3), 0 0 0 6px var(--ev-sel), 0 0 14px var(--ev-glow); }
+.cz .cz-trk input[type="range"]:active::-moz-range-thumb { transform: scale(1.25); box-shadow: 0 1px 4px rgb(0 0 0 / .3), 0 0 0 6px var(--ev-sel), 0 0 14px var(--ev-glow); }
+/* 選中時的光圈擴散 */
+.cz-ring { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: 0 0 0 0 var(--rc, var(--primary)); }
 </style>
 
 <div class="shell">
@@ -2615,8 +2692,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   <div class="cz-cur">
     <select id="cz-theme" aria-label="主題"></select>
   </div>
-  <div class="cz-tabs" id="cz-tabs" role="tablist" aria-label="設定分類"></div>
-  <div class="cz-body" id="cz-panel" role="tabpanel"></div>
+  <div class="cz-main">
+    <div class="cz-tabs" id="cz-tabs" role="tablist" aria-label="設定分類"></div>
+    <div class="cz-body" id="cz-panel" role="tabpanel"></div>
+  </div>
   <div class="cz-keys" aria-hidden="true"><span><kbd>↑</kbd><kbd>↓</kbd> 選擇</span><span><kbd>←</kbd><kbd>→</kbd> 調整</span><span><kbd>Q</kbd><kbd>E</kbd> 分類</span><span><kbd>Esc</kbd> 關閉</span></div>
   <div class="cz-foot">
     <p class="cz-note" id="cz-note" aria-live="polite"></p>
@@ -5454,6 +5533,7 @@ void main(){
       resetBtn.disabled = same(theme, DEFAULT);
     }
     const seg = (path, opts, label) => el('div', { class: 'cz-seg', role: 'group', 'aria-label': label }, opts.map(([v, t]) => el('button', { type: 'button', 'aria-pressed': String(getPath(theme, path) === v), onclick: (e) => { setPath(theme, path, v); e.currentTarget.parentElement.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === e.currentTarget))); changed(); } }, t)));
+    const czRoll = (node, dir) => { const K = czK(); if (!(K > 0) || !dir) return; node.animate([{ transform: `translateY(${dir * 9}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 280 * K, easing: 'cubic-bezier(.2, .9, .3, 1.2)' }); };   // 數值換新：變大從下往上、變小從上往下
     // 滑桿：ends＝兩端的意義（例如 ['快', '慢']）；右邊數值框可直接輸入，− ＋ 一次一格；拖動時圓鈕上方顯示數值
     const range = (path, min, max, step, fmt, label, ends) => {
       const unit = fmt(0).replace(/^[-+\d.]+/, '');
@@ -5469,7 +5549,9 @@ void main(){
       const paint = (v) => { const f = (v - min) / (max - min); trk.style.setProperty('--p', f * 100 + '%'); trk.style.setProperty('--pf', f); minus.disabled = v <= min; plus.disabled = v >= max; };
       function set(v, final) {
         v = Number.isFinite(v) ? snap(v) : getPath(theme, path);
-        setPath(theme, path, v); inp.value = v; num.value = String(v); bub.textContent = fmt(v); inp.setAttribute('aria-valuetext', fmt(v)); paint(v);
+        const old = getPath(theme, path);
+        setPath(theme, path, v);
+        if (final) czRoll(num, Math.sign(v - old)); inp.value = v; num.value = String(v); bub.textContent = fmt(v); inp.setAttribute('aria-valuetext', fmt(v)); paint(v);
         changed(final);
       }
       paint(getPath(theme, path));
@@ -6001,7 +6083,7 @@ void main(){
     }));
     const sizeStep = (k, n) => {
       const out = el('output', {}, theme.type.levels[k].size + 'px');
-      const go = (d) => { const lv = theme.type.levels[k], v = Math.min(64, Math.max(8, lv.size + d)); lv.size = v; lv.lh = autoLh(v); lv.ls = autoLs(v); out.textContent = v + 'px'; changed(); };
+      const go = (d) => { const lv = theme.type.levels[k], v = Math.min(64, Math.max(8, lv.size + d)); const old = lv.size; lv.size = v; lv.lh = autoLh(v); lv.ls = autoLs(v); out.textContent = v + 'px'; czRoll(out, Math.sign(v - old)); changed(); };
       return el('div', { class: 'cz-step', role: 'group', 'aria-label': n + '字級' }, el('button', { type: 'button', 'aria-label': '縮小', onclick: () => go(-1) }, '−'), out, el('button', { type: 'button', 'aria-label': '放大', onclick: () => go(1) }, '＋'));
     };
     function primaryEl() {
@@ -6094,16 +6176,42 @@ void main(){
     const subsOf = (k) => SETTINGS.filter((x) => x.sub === k);
     const isChanged = (x) => x.paths.some((p) => !same(getPath(theme, p), getPath(DEFAULT, p)));
     var paintCounts = () => {
-      $$('button', czTabs).forEach((b) => { const n = inCat(b.dataset.cat).filter(isChanged).length, sm = $('small', b); sm.hidden = !n; sm.textContent = n; sm.setAttribute('aria-label', `改過 ${n} 項`); });
+      $$('button', czTabs).forEach((b) => { const n = inCat(b.dataset.cat).filter(isChanged).length, sm = $('small', b); sm.hidden = !n; sm.textContent = n; b.setAttribute('aria-label', n ? `${b.dataset.tip}，改過 ${n} 項` : b.dataset.tip); });
       $$('.cz-more', panel).forEach((b) => b.classList.toggle('changed', subsOf(b.dataset.for).some(isChanged)));   // 細調裡有改過的：按鈕上加小點
     };
+    const czK = () => { const v = parseFloat(getComputedStyle(root).getPropertyValue('--dur')); return Number.isFinite(v) ? v : 1; };   // 動畫速度設定；減少動態時為 0
     const toggleMore = (k, on) => {
       on ? czOpen.add(k) : czOpen.delete(k); try { localStorage.setItem('wall-cz-open', JSON.stringify([...czOpen])); } catch (e) {}
-      $$(`.cz-set.sub[data-for="${k}"]`, panel).forEach((r) => { r.hidden = !on; });
+      const subs = $$(`.cz-set.sub[data-for="${k}"]`, panel), K = czK();
+      // 細項：高度從 0 長出、依序淡入；收合時高度收回再隱藏
+      const shut = { height: '0px', minHeight: '0px', paddingTop: '0px', paddingBottom: '0px', marginTop: '-8px', opacity: 0, transform: 'translateY(-4px)' };
+      if (on) subs.forEach((r, i) => {
+        r.hidden = false; r.getAnimations().forEach((a) => a.cancel());
+        if (!(K > 0)) return;
+        const cs = getComputedStyle(r), full = { height: r.offsetHeight + 'px', minHeight: cs.minHeight, paddingTop: cs.paddingTop, paddingBottom: cs.paddingBottom, marginTop: '0px', opacity: 1, transform: 'none' };
+        r.style.overflow = 'hidden';
+        r.animate([shut, full], { duration: 320 * K, delay: i * 45 * K, easing: 'cubic-bezier(.2, .8, .2, 1)', fill: 'backwards' }).finished.then(() => { r.style.overflow = ''; }, () => {});
+      });
+      else subs.forEach((r) => {
+        if (!(K > 0) || r.hidden) { r.hidden = true; return; }
+        const cs = getComputedStyle(r);
+        r.style.overflow = 'hidden';
+        r.animate([{ height: r.offsetHeight + 'px', minHeight: cs.minHeight, paddingTop: cs.paddingTop, paddingBottom: cs.paddingBottom, marginTop: '0px', opacity: 1 }, shut], { duration: 220 * K, easing: 'cubic-bezier(.4, 0, 1, 1)' })
+          .finished.then(() => { r.style.overflow = ''; if (!czOpen.has(k)) r.hidden = true; }, () => { r.style.overflow = ''; });
+      });
+      if (on) requestAnimationFrame(placeInds);
       const b = $(`.cz-more[data-for="${k}"]`, panel); b?.setAttribute('aria-expanded', String(on));
     };
+    const CZ_ICON = {   // 分類圖示：風格＝星芒、色彩＝水滴、字型＝T、動態＝波形、版面＝格子
+      style: '<path d="M12 3.5l1.9 4.6 4.6 1.9-4.6 1.9L12 16.5l-1.9-4.6L5.5 10l4.6-1.9z"/><path d="M18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/>',
+      color: '<path d="M12 3.5c3 3.6 6 6.9 6 10.5a6 6 0 0 1-12 0c0-3.6 3-6.9 6-10.5z"/><path d="M9 14.5a3 3 0 0 0 3 3"/>',
+      type: '<path d="M5 7V5h14v2M12 5v14M9 19h6"/>',
+      motion: '<path d="M3 12h3l2.5-6 4 12 3-9 2 3H21"/>',
+      layout: '<rect x="4" y="4" width="7" height="7" rx="1.8"/><rect x="13" y="4" width="7" height="7" rx="1.8"/><rect x="4" y="13" width="7" height="7" rx="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.8"/>',
+    };
     function paintTabs() {
-      czTabs.replaceChildren(...CZ_CATS.map(([k, n]) => el('button', { type: 'button', role: 'tab', id: 'cz-t-' + k, 'data-cat': k, 'aria-selected': String(k === czCat), 'aria-controls': 'cz-panel', tabindex: k === czCat ? '0' : '-1', onclick: () => setCzCat(k) }, n, el('small', { hidden: true }))));
+      czTabs.replaceChildren(...CZ_CATS.map(([k, n]) => el('button', { type: 'button', role: 'tab', id: 'cz-t-' + k, 'data-cat': k, 'data-tip': n, 'aria-label': n, 'aria-selected': String(k === czCat), 'aria-controls': 'cz-panel', tabindex: k === czCat ? '0' : '-1', onclick: () => setCzCat(k) },
+        Object.assign(el('span', { 'aria-hidden': 'true', style: 'display:contents' }), { innerHTML: `<svg viewBox="0 0 24 24">${CZ_ICON[k]}</svg>` }), el('small', { hidden: true, 'aria-hidden': 'true' }))));
       panel.setAttribute('aria-labelledby', 'cz-t-' + czCat);
       $('[aria-selected="true"]', czTabs)?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     }
@@ -6125,6 +6233,40 @@ void main(){
       rows.push(r); return r;
     }
     const panel = $('#cz-panel');
+    // 選中滑塊：每組分段切換（含分類圖示欄）放一塊凸起的 .cz-ind，選項改變時從舊位置滑到新位置（帶一點回彈）
+    const indPos = new Map();
+    function placeInds() {
+      const K = czK();
+      [czTabs, ...$$('.cz-seg', panel)].forEach((g) => {
+        const row = g.closest('.cz-set'), key = g === czTabs ? 'tabs' : (row?.dataset.key || '') + ':' + $$('.cz-seg', row || panel).indexOf(g);
+        const on = $(':scope > [aria-pressed="true"], :scope > [aria-selected="true"]', g);
+        let ind = $(':scope > .cz-ind', g);
+        if (!on || !g.offsetWidth) { if (ind) ind.style.opacity = '0'; return; }
+        if (!ind) { ind = el('i', { class: 'cz-ind', 'aria-hidden': 'true' }); g.prepend(ind); }
+        const r = { x: on.offsetLeft, y: on.offsetTop, w: on.offsetWidth, h: on.offsetHeight }, p = indPos.get(key);
+        Object.assign(ind.style, { opacity: '1', left: r.x + 'px', top: r.y + 'px', width: r.w + 'px', height: r.h + 'px' });
+        indPos.set(key, r);
+        if (p && K > 0 && (p.x !== r.x || p.y !== r.y || p.w !== r.w || p.h !== r.h))
+          ind.animate([{ transform: `translate(${p.x - r.x}px, ${p.y - r.y}px)`, width: p.w + 'px', height: p.h + 'px' }, { transform: 'none', width: r.w + 'px', height: r.h + 'px' }], { duration: 420 * K, easing: 'cubic-bezier(.3, 1.3, .5, 1)' });
+      });
+    }
+    // 按下回饋：選項格、色票選中後彈一下並擴散一圈光（畫面重畫後找回同一個選項）
+    let czPulse = null;
+    panel.addEventListener('click', (e) => {
+      const b = e.target.closest('.cz-opt, .cz-style, .cz-swatch');
+      if (b && !b.disabled) czPulse = [b.closest('.cz-set')?.dataset.key, b.classList[0], $$('.' + b.classList[0], b.parentElement).indexOf(b)];
+      requestAnimationFrame(() => {
+        placeInds();
+        if (!czPulse) return; const [k, c, i] = czPulse; czPulse = null;
+        const row = panel.querySelector(`.cz-set[data-key="${k}"]`), t = row && $$('.' + c, row)[i], K = czK();
+        if (!t || !(K > 0)) return;
+        t.animate([{ scale: .9 }, { scale: 1.05, offset: .45 }, { scale: 1 }], { duration: 460 * K, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+        const ring = el('i', { class: 'cz-ring', 'aria-hidden': 'true' }); if (c === 'cz-swatch') ring.style.setProperty('--rc', getComputedStyle(t).getPropertyValue('--c'));
+        t.append(ring);
+        ring.animate([{ boxShadow: '0 0 0 0 var(--rc, var(--primary))', opacity: .7 }, { boxShadow: '0 0 0 12px var(--rc, var(--primary))', opacity: 0 }], { duration: 560 * K, easing: 'cubic-bezier(.2, .8, .2, 1)' }).finished.then(() => ring.remove(), () => ring.remove());
+      });
+    }, true);
+    addEventListener('resize', () => requestAnimationFrame(placeInds));
     function renderAll() {
       rows.length = 0; quick = [];
       const top = panel.scrollTop;
@@ -6137,6 +6279,7 @@ void main(){
       cur?.classList.add('cur');
       if (czReveal) { czReveal = false; panel.scrollTop = 0; cur?.scrollIntoView({ block: 'nearest' }); } else panel.scrollTop = top;
       paintMarks(); renderLib(); paintHist();
+      placeInds();
     }
     // 頁面右上的淺色／深色鈕切換時，選項跟著更新
     new MutationObserver(() => { if ($('#cz').classList.contains('open')) { paintMarks(); if (czCat === 'style') renderAll(); } }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });

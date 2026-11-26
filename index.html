@@ -2310,14 +2310,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 :root[data-ui="swiss"] #wall > .cell, :root[data-ui="swiss"] #wall > .cell:hover { transition: none; }
 :root[data-ui="swiss"] #wall > .cell:hover { border-color: var(--ink); box-shadow: inset 0 6px 0 var(--ink); }
 :root[data-ui="y2k"] #wall > .cell { position: relative; }
-@property --y2k-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
-/* 流光只畫在 1.5px 外框上（遮罩挖掉內容區），不蓋到卡片內容 */
-:root[data-ui="y2k"] #wall > .cell::after { content: ""; position: absolute; inset: 0; z-index: 3; padding: 2px; border-radius: inherit; pointer-events: none; opacity: 0;
-  background: conic-gradient(from var(--y2k-a), transparent 0 68%, rgb(70 170 255) 79%, #ffffff 86%, rgb(220 110 255) 93%, transparent);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
-:root[data-ui="y2k"] #wall > .cell::after { transition: opacity calc(.3s * var(--dur)) var(--ease); }
-:root[data-ui="y2k"] #wall > .cell:hover::after { opacity: 1; animation: y2k-orbit calc(2.4s * var(--dur)) linear infinite; }   /* 滑過期間沿外框不停繞行（約 2.4 秒一圈）*/
-@keyframes y2k-orbit { from { --y2k-a: 0deg; } to { --y2k-a: 360deg; } }
+/* Y2K：滑過時外框維持原寬度，全息漸層色持續流轉（藍→粉→紫輪替；動的是鉻邊三個色標，不另外疊光） */
+:root[data-ui="y2k"] #wall > .cell:hover { animation: y2k-holo calc(3s * var(--dur)) linear infinite; }
+@keyframes y2k-holo { 0%, 100% { --y2k-r1: #7fd0ff; --y2k-r2: #f0a0ff; --y2k-r3: #a89aff; } 33% { --y2k-r1: #f0a0ff; --y2k-r2: #a89aff; --y2k-r3: #7fd0ff; } 66% { --y2k-r1: #a89aff; --y2k-r2: #7fd0ff; --y2k-r3: #f0a0ff; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] #wall > .cell:hover { animation-name: y2k-holo-dk; } }
+:root[data-theme="dark"][data-ui="y2k"] #wall > .cell:hover { animation-name: y2k-holo-dk; }
+@keyframes y2k-holo-dk { 0%, 100% { --y2k-r1: #6fd0ff; --y2k-r2: #e58cff; --y2k-r3: #9b86ff; } 33% { --y2k-r1: #e58cff; --y2k-r2: #9b86ff; --y2k-r3: #6fd0ff; } 66% { --y2k-r1: #9b86ff; --y2k-r2: #6fd0ff; --y2k-r3: #e58cff; } }
+:root[data-ui="y2k"] body.reduce #wall > .cell:hover { animation: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="y2k"] #wall > .cell:hover { animation: none; } }
 /* 減少動態：只留顏色變化，不浮、不掃光 */
 body.reduce #wall > .cell::after { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { #wall > .cell::after { animation: none !important; } }

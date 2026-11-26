@@ -1878,9 +1878,9 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] .cell { --y2k-r1: #d9dce0; --y2k-r2: #7d828a; --y2k-r3: #3f434a; } }
 :root[data-theme="dark"][data-ui="y2k"] .cell { --y2k-r1: #d9dce0; --y2k-r2: #7d828a; --y2k-r3: #3f434a; }   /* 深色：亮銀 → 暗銀 */
 /* 滑過：外框轉成淡淡的全息色（藍→粉→紫） */
-:root[data-ui="y2k"] .cell:hover { --y2k-r1: #9fdcff; --y2k-r2: #f3b4ff; --y2k-r3: #b4a6ff; box-shadow: inset 0 1px 0 var(--y2k-in1), inset 0 0 0 1px var(--y2k-in2), var(--y2k-glow), 0 18px 36px -14px rgb(var(--sh-rgb, 60 90 150) / .35); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"][data-ui="y2k"] .cell:hover { --y2k-r1: #6fd0ff; --y2k-r2: #e58cff; --y2k-r3: #9b86ff; box-shadow: inset 0 1px 0 var(--y2k-in1), inset 0 0 0 1px var(--y2k-in2), 0 20px 40px -12px rgb(from var(--sh-dk) r g b / .95); } }
-:root[data-theme="dark"][data-ui="y2k"][data-ui="y2k"] .cell:hover { --y2k-r1: #6fd0ff; --y2k-r2: #e58cff; --y2k-r3: #9b86ff; box-shadow: inset 0 1px 0 var(--y2k-in1), inset 0 0 0 1px var(--y2k-in2), 0 20px 40px -12px rgb(from var(--sh-dk) r g b / .95); }   /* 深色滑過：落影加深加大，只用底色調 */
+:root[data-ui="y2k"] .cell:hover { --y2k-r1: #9fdcff; --y2k-r2: #f3b4ff; --y2k-r3: #b4a6ff; box-shadow: inset 0 1px 0 var(--y2k-in1), inset 0 0 0 1px var(--y2k-in2), var(--y2k-glow), 0 18px 36px -14px rgb(var(--sh-rgb, 60 90 150) / .35), 0 0 6px var(--y2k-halo, transparent), 0 0 18px var(--y2k-halo, transparent); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"][data-ui="y2k"] .cell:hover { --y2k-r1: #6fd0ff; --y2k-r2: #e58cff; --y2k-r3: #9b86ff; box-shadow: inset 0 1px 0 var(--y2k-in1), inset 0 0 0 1px var(--y2k-in2), 0 20px 40px -12px rgb(from var(--sh-dk) r g b / .95), 0 0 6px var(--y2k-halo, transparent), 0 0 18px var(--y2k-halo, transparent); } }
+:root[data-theme="dark"][data-ui="y2k"][data-ui="y2k"] .cell:hover { --y2k-r1: #6fd0ff; --y2k-r2: #e58cff; --y2k-r3: #9b86ff; box-shadow: inset 0 1px 0 var(--y2k-in1), inset 0 0 0 1px var(--y2k-in2), 0 20px 40px -12px rgb(from var(--sh-dk) r g b / .95), 0 0 6px var(--y2k-halo, transparent), 0 0 18px var(--y2k-halo, transparent); }   /* 深色滑過：落影加深加大，只用底色調 */
 /* 牆上卡片原本的轉場（#wall > .cell）權重較高，要在同一層補上鉻邊色標的過渡 */
 :root[data-ui="y2k"] #wall > .cell { transition: transform calc(.55s * var(--dur)) var(--spring-soft), box-shadow calc(.4s * var(--dur)) var(--ease), border-color calc(.25s * var(--dur)) var(--ease), --y2k-r1 calc(.5s * var(--dur)) var(--ease), --y2k-r2 calc(.5s * var(--dur)) var(--ease), --y2k-r3 calc(.5s * var(--dur)) var(--ease); }
 /* 選中狀態：鉻泡泡（分段、期間選擇、詳情頁籤） */
@@ -2310,11 +2310,16 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 :root[data-ui="swiss"] #wall > .cell, :root[data-ui="swiss"] #wall > .cell:hover { transition: none; }
 :root[data-ui="swiss"] #wall > .cell:hover { border-color: var(--ink); box-shadow: inset 0 6px 0 var(--ink); }
 :root[data-ui="y2k"] #wall > .cell { position: relative; }
-/* Y2K：滑過時外框維持原寬度，全息漸層色持續流轉（藍→粉→紫輪替；動的是鉻邊三個色標，不另外疊光） */
-:root[data-ui="y2k"] #wall > .cell:hover { animation: y2k-holo calc(3s * var(--dur)) linear infinite; }
-@keyframes y2k-holo { 0%, 100% { --y2k-r1: #7fd0ff; --y2k-r2: #f0a0ff; --y2k-r3: #a89aff; } 33% { --y2k-r1: #f0a0ff; --y2k-r2: #a89aff; --y2k-r3: #7fd0ff; } 66% { --y2k-r1: #a89aff; --y2k-r2: #7fd0ff; --y2k-r3: #f0a0ff; } }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] #wall > .cell:hover { animation-name: y2k-holo-dk; } }
-:root[data-theme="dark"][data-ui="y2k"] #wall > .cell:hover { animation-name: y2k-holo-dk; }
+/* Y2K：滑過時外框維持原寬度，全息漸層色持續流轉（藍→粉→紫輪替），外圍光暈慢慢一亮一暗（約 2.4 秒一個循環）、顏色跟著外框走
+   對比：淺色底很亮，光暈混入深藍紫加飽和、最暗時仍留 15%；深色底光暈本來就明顯，最亮 45% 避免刺眼 */
+@property --y2k-ha { syntax: "<number>"; inherits: false; initial-value: 0; }
+:root[data-ui="y2k"] #wall > .cell { --y2k-deep: 42%; --y2k-hmax: 1; --y2k-halo: color-mix(in srgb, color-mix(in srgb, var(--y2k-r2), #3b2fd0 var(--y2k-deep)) calc(var(--y2k-ha) * var(--y2k-hmax) * 100%), transparent); }
+:root[data-ui="y2k"] #wall > .cell:hover { animation: y2k-holo calc(3s * var(--dur)) linear infinite, y2k-pulse calc(1.2s * var(--dur)) ease-in-out infinite alternate; }
+@keyframes y2k-pulse { from { --y2k-ha: .15; } to { --y2k-ha: .55; } }
+@keyframes y2k-holo { 0%, 100% { --y2k-r1: #5fb8ff; --y2k-r2: #e07cf5; --y2k-r3: #8f7cff; } 33% { --y2k-r1: #e07cf5; --y2k-r2: #8f7cff; --y2k-r3: #5fb8ff; } 66% { --y2k-r1: #8f7cff; --y2k-r2: #5fb8ff; --y2k-r3: #e07cf5; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] #wall > .cell { --y2k-deep: 0%; --y2k-hmax: .82; } :root:not([data-theme="light"])[data-ui="y2k"] #wall > .cell:hover { animation-name: y2k-holo-dk, y2k-pulse; } }
+:root[data-theme="dark"][data-ui="y2k"] #wall > .cell { --y2k-deep: 0%; --y2k-hmax: .82; }
+:root[data-theme="dark"][data-ui="y2k"] #wall > .cell:hover { animation-name: y2k-holo-dk, y2k-pulse; }
 @keyframes y2k-holo-dk { 0%, 100% { --y2k-r1: #6fd0ff; --y2k-r2: #e58cff; --y2k-r3: #9b86ff; } 33% { --y2k-r1: #e58cff; --y2k-r2: #9b86ff; --y2k-r3: #6fd0ff; } 66% { --y2k-r1: #9b86ff; --y2k-r2: #6fd0ff; --y2k-r3: #e58cff; } }
 :root[data-ui="y2k"] body.reduce #wall > .cell:hover { animation: none; }
 @media (prefers-reduced-motion: reduce) { :root[data-ui="y2k"] #wall > .cell:hover { animation: none; } }

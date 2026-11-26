@@ -3014,7 +3014,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       flow.style.webkitMaskImage = flow.style.maskImage = `url("${art.wandUrl}")`;
       // 杖尖火花：三色＋白，避開杖身方向（往右下 42°）往外噴
       const SPARKS = ['#ffffff', '#ffb347', '#ff4f8b', '#3d8bff'];
-      const sparks = Array.from({ length: 28 }, (_, i) => {   // 28 道：長光條、短光條、小光點混合
+      const sparks = Array.from({ length: 40 }, (_, i) => {   // 40 道：長光條、短光條、小光點混合
         const s = document.createElement('i');
         s.className = 'wand-spark' + (i % 3 === 2 ? ' dot' : '');
         s.style.cssText = `left:${tip[0]}px;top:${tip[1]}px;--c:${SPARKS[i % SPARKS.length]}` + (i % 3 === 2 ? '' : `;width:${(8 + Math.random() * 16).toFixed(0)}px`);
@@ -3155,8 +3155,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
             { transform: at(d, .15), opacity: 0 }
           ], { duration: dur, delay: HIT - 10, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' });
         });
-        // 點下的衝擊：整個畫面（新舊配色與特效層一起）震 6px，約 0.3 秒收掉
-        const shake = [[0, 0], [6, -4], [-6, 3], [4, -2.5], [-2, 1], [1, -.5], [0, 0]].map(([x, y]) => ({ transform: `translate(${x}px, ${y}px)` }));
+        // 點下的衝擊：整個畫面（新舊配色與特效層一起）震 8px，約 0.3 秒收掉
+        const shake = [[0, 0], [8, -5], [-8, 4], [5, -3], [-3, 1.5], [1, -.5], [0, 0]].map(([x, y]) => ({ transform: `translate(${x}px, ${y}px)` }));
         for (const pe of ['::view-transition-group(root)', '::view-transition-group(wand)'])
           de.animate(shake, { pseudoElement: pe, duration: 300, delay: HIT, easing: 'linear' });
         // 杖尖：Lumos 施咒時亮起；Nox 先亮著、施咒時熄滅

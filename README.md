@@ -85,6 +85,15 @@ import { Button, DataTable } from '@wucarson/facet-angular';
 - 勾選必填用 `Validators.requiredTrue`
 - 原本的 `[(value)]`、`[(checked)]` 寫法照常可用
 
+```html
+<!-- Vue：標準 v-model；停用用 disabled，碰過用 @blur（例：VeeValidate 的 handleBlur） -->
+<TextField v-model="form.title" label="工單名稱" :error="errors.title" @blur="touch('title')" />
+<Combo v-model="form.kind" :items="kinds" label="工作類型" :disabled="locked" />
+<Switch v-model="form.remind" label="到期前提醒" />
+```
+
+- 原本的 `v-model:value`、`v-model:checked` 照常可用
+
 ### 開發
 
 ```sh
@@ -94,7 +103,7 @@ npm run build:apps         # 建置三個展示頁（比對工具截圖用）
 npm run pack:check         # 安裝測試：打包後裝進全新專案，檢查載入與 React／Vue／Angular 型別
 cd tools && node export.mjs          # 展示牆改了之後：匯出樣式、token、比對樣本到套件
 cd tools && node compare.mjs react   # 逐像素比對（react｜vue｜angular）
-cd tools && node form-check.mjs angular   # 表單整合：綁定、改值、寫入、停用、碰過、重設、送出
+cd tools && node form-check.mjs vue       # 表單整合（angular｜vue）：綁定、改值、寫入、停用、碰過、重設、送出
 ```
 
 ## 檔案

@@ -1949,6 +1949,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .vt-wand-quick::view-transition-old(root) { mask-image: none; }
 .vt-wand::view-transition-group(root) { animation: none; }
 .wand-ink { position: absolute; z-index: 2; left: 50%; top: 50%; width: 384px; height: 384px; opacity: 0; }
+.wand-glow { position: absolute; z-index: 2; left: 50%; top: 50%; width: 464px; height: 464px; opacity: 0; }   /* 384 + 四邊各 40（GLOW_PAD），縮放倍率同墨水 */
 .vt-wand * { transition: none !important; }
 ::view-transition-group(wand) { z-index: 3; }
 .wand-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; view-transition-name: wand; }
@@ -2798,7 +2799,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       setTimeout(() => { layer.remove(); shBusy = false; }, TOTAL + 40);
     }
     /* 深淺色轉場（魔杖，約 1.45 秒）：杖尖在中央點一下。
-       墨水先朝杖尖回縮，再向外快速擴散（0.45 秒）；墨色為 AI 三色（暖橘、粉、藍）。Lumos 揭開淺色，Nox 揭開深色。
+       墨水先朝杖尖回縮，再向外擴散（1.0 秒，由慢到快）；墨色為 AI 三色（暖橘、粉、藍），前緣帶柔光暈。Lumos 揭開淺色，Nox 揭開深色。
        舊畫面沿柔邊墨流淡出，新畫面留在底層，交界保留一層舊配色殘影。 */
     document.fonts?.load('600 40px "Cormorant Garamond"', 'LumosNox').catch(() => {});
     // 接骨木魔杖（Canvas，轉場開始前畫一次）：杖尖在左（x = 0），杖身由尖漸粗、沿途 8 個節瘤（越靠握把越大），
@@ -2853,6 +2854,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       g.strokeStyle = 'rgba(30,22,15,.35)'; g.lineWidth = Math.max(0.6, Hh * 0.012); g.beginPath(); g.moveTo(0, c - rs[0]); for (let x = 1; x <= N; x += 2) g.lineTo(x, c - rs[x]); for (let x = N; x >= 0; x -= 2) g.lineTo(x, c + rs[x]); g.closePath(); g.stroke();
     }
     let wandArt;
+    const GLOW_PAD = 40;   // 光暈畫布四邊外擴（同 CSS .wand-glow 尺寸 384 + 80）
     function prepareWandArt() {
       if (wandArt) return wandArt;
       const size = 384, center = size / 2, radius = size * .366, band = radius * .076;
@@ -2921,6 +2923,15 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       // 墨色用 AI 三色（Afterglow）：前緣外側暈開的暖橘、前緣粉、後方紋路藍；淺深兩向共用
       const lumos = pigment(['#ffb347', '#ff4f8b', '#3d8bff']);
       const nox = lumos;
+      // 前緣光暈：沿墨水輪廓描三層柔光（外粉大暈、暖橘中暈、白熱細線）。畫在四邊各多 GLOW_PAD 的畫布上，柔光才不會被裁掉
+      const gc = document.createElement('canvas');
+      gc.width = gc.height = size + GLOW_PAD * 2;
+      const gg = gc.getContext('2d');
+      gg.translate(GLOW_PAD, GLOW_PAD);
+      gg.lineJoin = 'round';
+      [[crest, 'blur(10px)', .7, '#ff4f8b', band * 2.2], [outline(() => band * .5), 'blur(5px)', .65, '#ffb347', band * 1.1], [crest, 'blur(1.2px)', .9, '#ffffff', band * .25]]
+        .forEach(([path, filter, alpha, color, width]) => { gg.filter = filter; gg.globalAlpha = alpha; gg.strokeStyle = color; gg.lineWidth = width; gg.stroke(path); });
+      const glow = gc.toDataURL();
       // 預先畫咒語的剝落邊緣。只有筆畫遮罩會取樣這張圖。
       const ashWidth = 256, ashHeight = 144;
       canvas.width = ashWidth;
@@ -2941,7 +2952,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       wand.width = 720;
       wand.height = Math.round(wand.width * .07);
       drawElder(wand, wand.width, wand.height);
-      wandArt = { mask, lumos, nox, spellAsh, wand, size, radius };
+      wandArt = { mask, lumos, nox, glow, spellAsh, wand, size, radius };
       return wandArt;
     }
 
@@ -2995,6 +3006,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       pigment.alt = '';
       pigment.src = lumos ? art.lumos : art.nox;
       fx.prepend(pigment);
+      const edgeGlow = new Image();
+      edgeGlow.className = 'wand-glow';
+      edgeGlow.alt = '';
+      edgeGlow.src = art.glow;
+      pigment.after(edgeGlow);
       const de = document.documentElement;
       de.classList.add('vt-wand');
       shBusy = true;
@@ -3029,10 +3045,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           });
           return;
         }
-        const DUR = 1450, C0 = 95, HIT = 150, SPREAD = 450;   // 擴散 0.45 秒（原 1.03 秒），快速推出去
+        const DUR = 1450, C0 = 95, HIT = 150, SPREAD = 1000;   // 擴散 1.0 秒
         const motion = { pseudoElement: '::view-transition-old(root)', duration: DUR, fill: 'both' };
         const startSpread = HIT / DUR, endSpread = (HIT + SPREAD) / DUR;
-        const spreadEase = 'cubic-bezier(.42, 0, .30, 1)';
+        const spreadEase = 'cubic-bezier(.55, 0, .9, .4)';   // 由慢到快：起步慢慢滲開，越推越快衝出畫面
         const contractSize = textureSpan(seedRadius * .68);
         const seedRelease = (HIT + 85) / DUR;
         const feather = Math.round(Math.max(36, Math.min(84, Math.min(W, H) * .095)));
@@ -3056,7 +3072,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         }
 
         const inkTransform = span => `translate(-50%, -50%) scale(${span / art.size})`;
-        pigment.animate([
+        const inkFrames = [
           { opacity: 0, transform: inkTransform(textureSpan(seedRadius)), easing: 'ease-out' },
           { opacity: 1, offset: 55 / DUR },
           { opacity: 1, transform: inkTransform(contractSize), offset: startSpread, easing: 'ease-out' },
@@ -3064,7 +3080,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           { opacity: 1, offset: (HIT + SPREAD * .65) / DUR },
           { transform: inkTransform(finalSpan), offset: endSpread },
           { opacity: 0, transform: inkTransform(finalSpan), offset: 1 }
-        ], { duration: DUR, fill: 'both' });
+        ];
+        pigment.animate(inkFrames, { duration: DUR, fill: 'both' });
+        edgeGlow.animate(inkFrames, { duration: DUR, fill: 'both' });   // 光暈跟墨水同一組縮放，永遠貼在前緣
 
         // 魔杖直接在中央亮起並點擊，不再由畫外滑入；點擊後迅速淡出
         const wand = fx.querySelector('.wand');

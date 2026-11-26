@@ -59,8 +59,6 @@ jobs:
         run: node check-contracts.mjs ${{ matrix.fw }}
         working-directory: tools
       - name: 表單整合
-        # 依序完成：Angular → Vue → React；完成的框架加進來
-        if: matrix.fw != 'react'
         run: node form-check.mjs ${{ matrix.fw }}
         working-directory: tools
       - name: 逐像素比對

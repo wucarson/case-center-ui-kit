@@ -5,6 +5,7 @@ import '@wucarson/facet-styles/components.css';
 import '../../shared/case.css';
 import { AvatarGroup, Button, Callout, Checkbox, CheckboxList, Combo, ConfirmDialog, DatePicker, DetailTabs, EmptyState, FormField, InfoPopover, Menu, MenuPanel, MultiSelect, Pagination, PeriodPicker, RadioGroup, Segmented, Sidebar, Skeleton, StarToggle, StatusBadge, Stepper, Switch, Tabs, TextField, TimePicker, Timeline, Toast, DragSort, FilterChips, HoldConfirm, SegmentedBar, StatRow, TagSearch, Upload, DataTable, DueCell, SortTh } from '@wucarson/facet-react';
 import { styleOf } from './style';
+import { FormsDemo } from './forms';
 
 /** 展示頁：把 shared/cases.ts 的每個案例用元件畫出來，給 tools/compare.mjs 截圖比對 */
 const RENDER: Record<string, ComponentType<any>> = {
@@ -57,7 +58,8 @@ function CaseView({ name, c }: { name: string; c: Case }) {
 }
 
 const only = new URLSearchParams(location.search).get('c');
-createRoot(document.getElementById('root')!).render(
+// ?forms：表單整合測試頁；其餘是比對工具截圖用的展示頁
+createRoot(document.getElementById('root')!).render(new URLSearchParams(location.search).has('forms') ? <FormsDemo /> :
   <main className="cases">
     {Object.entries(CASES).filter(([n]) => (!only || n === only) && RENDER[n]).flatMap(([n, list]) => list.map((c) => <CaseView key={n + c.id} name={n} c={c} />))}
   </main>,

@@ -5118,11 +5118,11 @@ void main(){
     // 風格只換外觀（形狀、陰影、光暈）；動畫速度與彈跳感由「動畫」設定決定，換風格不會改
     const STYLES = [
       ['standard', '標準', { shape: DEFAULT.shape, depth: DEFAULT.depth }],
-      ['flat', '扁平', { shape: { card: 12, control: 8, pill: 'soft' }, depth: { shadow: 0, glow: 0, border: 'standard' } }],
-      ['glass', '液態玻璃', { shape: { card: 24, control: 12, pill: 'full' }, depth: { shadow: 1, glow: 80, border: 'subtle' } }],
-      ['neu', 'Neumorphism', { shape: { card: 20, control: 14, pill: 'full' }, depth: { shadow: 2, glow: 0, border: 'standard' } }],
+      ['flat', '扁平', { shape: DEFAULT.shape, depth: { shadow: 0, glow: 0, border: 'standard' } }],
+      ['glass', '液態玻璃', { shape: DEFAULT.shape, depth: { shadow: 1, glow: 80, border: 'subtle' } }],
+      ['neu', 'Neumorphism', { shape: DEFAULT.shape, depth: { shadow: 2, glow: 0, border: 'standard' } }],
       ['swiss', 'Swiss Style', { shape: { card: 0, control: 2, pill: 'soft' }, depth: { shadow: 0, glow: 0, border: 'strong' } }],
-      ['y2k', 'Y2K 鉻金屬', { shape: { card: 28, control: 16, pill: 'full' }, depth: { shadow: 2, glow: 80, border: 'standard' } }],
+      ['y2k', 'Y2K 鉻金屬', { shape: DEFAULT.shape, depth: { shadow: 2, glow: 80, border: 'standard' } }],
     ];
     const stylesEl = () => el('div', { class: 'cz-styles', role: 'group', 'aria-label': '介面風格' }, STYLES.map(([key, name, s]) => el('button', { type: 'button', class: 'cz-style', 'aria-pressed': String(theme.style.ui === key), onclick: () => {
       theme.style.ui = key; theme.shape = clone(s.shape); theme.depth = clone(s.depth); 

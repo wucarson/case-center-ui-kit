@@ -2310,19 +2310,32 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 :root[data-ui="swiss"] #wall > .cell, :root[data-ui="swiss"] #wall > .cell:hover { transition: none; }
 :root[data-ui="swiss"] #wall > .cell:hover { border-color: var(--ink); box-shadow: inset 0 6px 0 var(--ink); }
 :root[data-ui="y2k"] #wall > .cell { position: relative; }
-/* Y2K：滑過時外框維持原寬度，全息漸層色持續流轉（藍→粉→紫輪替），外圍光暈慢慢一亮一暗（約 2.4 秒一個循環）、顏色跟著外框走
-   對比：淺色底很亮，光暈混入深藍紫加飽和、最暗時仍留 15%；深色底光暈本來就明顯，最亮 45% 避免刺眼 */
-@property --y2k-ha { syntax: "<number>"; inherits: false; initial-value: 0; }
-:root[data-ui="y2k"] #wall > .cell { --y2k-deep: 42%; --y2k-hmax: 1; --y2k-halo: color-mix(in srgb, color-mix(in srgb, var(--y2k-r2), #3b2fd0 var(--y2k-deep)) calc(var(--y2k-ha) * var(--y2k-hmax) * 100%), transparent); }
-:root[data-ui="y2k"] #wall > .cell:hover { animation: y2k-holo calc(3s * var(--dur)) linear infinite, y2k-pulse calc(1.2s * var(--dur)) ease-in-out infinite alternate;; transition-property: transform; }   /* 滑過期間不讓陰影走 0.4 秒過渡：光暈每格都在變，過渡會一直重來、光暈延遲跟不上 */
-@keyframes y2k-pulse { from { --y2k-ha: .38; } to { --y2k-ha: .1; } }   /* 一滑過就是最亮，再慢慢呼吸 */
-@keyframes y2k-holo { 0%, 100% { --y2k-r1: #5fb8ff; --y2k-r2: #e07cf5; --y2k-r3: #8f7cff; } 33% { --y2k-r1: #e07cf5; --y2k-r2: #8f7cff; --y2k-r3: #5fb8ff; } 66% { --y2k-r1: #8f7cff; --y2k-r2: #5fb8ff; --y2k-r3: #e07cf5; } }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] #wall > .cell { --y2k-deep: 0%; --y2k-hmax: .82; } :root:not([data-theme="light"])[data-ui="y2k"] #wall > .cell:hover { animation-name: y2k-holo-dk, y2k-pulse; } }
-:root[data-theme="dark"][data-ui="y2k"] #wall > .cell { --y2k-deep: 0%; --y2k-hmax: .82; }
-:root[data-theme="dark"][data-ui="y2k"] #wall > .cell:hover { animation-name: y2k-holo-dk, y2k-pulse; }
-@keyframes y2k-holo-dk { 0%, 100% { --y2k-r1: #6fd0ff; --y2k-r2: #e58cff; --y2k-r3: #9b86ff; } 33% { --y2k-r1: #e58cff; --y2k-r2: #9b86ff; --y2k-r3: #6fd0ff; } 66% { --y2k-r1: #9b86ff; --y2k-r2: #6fd0ff; --y2k-r3: #e58cff; } }
-:root[data-ui="y2k"] body.reduce #wall > .cell:hover { animation: none; }
-@media (prefers-reduced-motion: reduce) { :root[data-ui="y2k"] #wall > .cell:hover { animation: none; } }
+/* Y2K：滑過時「訊號不穩」——外框內緣一圈電光細線不規則扭動（SVG 位移濾鏡 #y2k-zap），底層雜訊約每 1.5 秒閃一陣（2、3 下）並有細橫帶跳動
+   資訊要清楚：電光與雜訊都畫在內容下面（卡片 isolation、偽元素 z-index -1），文字、圖表不套濾鏡也不位移；雜訊最多 16% */
+:root[data-ui="y2k"] #wall > .cell { isolation: isolate; --zap-1: #8fd3ff; --zap-2: #1f9dff; --zap-3: #1466d6; --zap-glow: rgb(31 157 255 / .3); --static: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3CfeColorMatrix%20values%3D'0%200%200%200%200.06%20%200%200%200%200%200.1%20%200%200%200%200%200.2%20%200%200%200%201.6%20-.55'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%23n)'%2F%3E%3C%2Fsvg%3E"); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] #wall > .cell { --zap-1: #b5ecff; --zap-2: #66d6ff; --zap-3: #2a8fe0; --zap-glow: rgb(102 214 255 / .4); --static: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3CfeColorMatrix%20values%3D'0%200%200%200%201%20%200%200%200%200%201%20%200%200%200%200%201%20%200%200%200%201.6%20-.55'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%23n)'%2F%3E%3C%2Fsvg%3E"); } }
+:root[data-theme="dark"][data-ui="y2k"] #wall > .cell { --zap-1: #b5ecff; --zap-2: #66d6ff; --zap-3: #2a8fe0; --zap-glow: rgb(102 214 255 / .4); --static: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3CfeColorMatrix%20values%3D'0%200%200%200%201%20%200%200%200%200%201%20%200%200%200%200%201%20%200%200%200%201.6%20-.55'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%23n)'%2F%3E%3C%2Fsvg%3E"); }
+:root[data-ui="y2k"] #wall > .cell::before, :root[data-ui="y2k"] #wall > .cell::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0; }
+:root[data-ui="y2k"] #wall > .cell::before { border: 1.5px solid var(--zap-2); box-shadow: inset 0 0 10px var(--zap-glow); filter: url(#y2k-zap); transition: opacity calc(.2s * var(--dur)) var(--ease); }
+:root[data-ui="y2k"] #wall > .cell::after { background: linear-gradient(180deg, transparent 46%, var(--zap-glow) 49% 51%, transparent 54%) 0 0 / 100% 300% no-repeat, var(--static) 0 0 / 160px 160px; }
+:root[data-ui="y2k"] #wall > .cell:hover { --y2k-r1: var(--zap-1); --y2k-r2: var(--zap-2); --y2k-r3: var(--zap-3); --y2k-halo: var(--zap-glow); }
+:root[data-ui="y2k"] #wall > .cell:hover::before { opacity: 1; }
+:root[data-ui="y2k"] #wall > .cell:hover::after { animation: y2k-static calc(2.6s * var(--dur)) steps(1, end) infinite; }
+@keyframes y2k-static {
+  0%, 3% { opacity: 0; }
+  4% { opacity: .12; background-position: 0 30%, 13px 41px; }
+  6% { opacity: 0; }
+  9% { opacity: .16; background-position: 0 72%, 77px 9px; }
+  11%, 58% { opacity: 0; }
+  59% { opacity: .1; background-position: 0 12%, 31px 120px; }
+  61% { opacity: .15; background-position: 0 55%, 102px 64px; }
+  62% { opacity: 0; }
+  65% { opacity: .12; background-position: 0 88%, 5px 87px; }
+  67%, 100% { opacity: 0; }
+}
+/* 減少動態：不閃、不扭，只留靜態電光外框 */
+:root[data-ui="y2k"] body.reduce #wall > .cell::before { filter: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="y2k"] #wall > .cell::before { filter: none; } }
 /* 減少動態：只留顏色變化，不浮、不掃光 */
 body.reduce #wall > .cell::after { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { #wall > .cell::after { animation: none !important; } }
@@ -2383,6 +2396,7 @@ body.reduce #wall > .cell::after { animation: none !important; }
   <div class="wf" id="wf"><nav class="wf-c" id="wf-c" aria-label="元件分類"></nav><div class="wq" role="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input id="wq" type="search" placeholder="篩選元件" aria-label="篩選元件（名稱、英文、程式名稱）" autocomplete="off" spellcheck="false" enterkeyhint="search"><button class="wq-x" id="wq-x" type="button" aria-label="清除篩選" hidden><svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div></div>
 
   <p class="wq-none" id="wq-none" role="status" hidden></p>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="y2k-zap" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="turbulence" baseFrequency="0.018 0.07" numOctaves="2" seed="1" result="t"><animate attributeName="seed" values="1;2;3;4;5;6;7;8;9;10" dur="1s" calcMode="discrete" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="t" scale="4" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
   <div class="wall" id="wall">
     <section class="cell h2" id="c-dd">
       <header>下拉選單<em>combo</em></header>

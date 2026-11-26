@@ -1949,6 +1949,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .vt-wand-quick::view-transition-old(root) { mask-image: none; }
 .vt-wand::view-transition-group(root) { animation: none; }
 .wand-ink { position: absolute; z-index: 2; left: 50%; top: 50%; width: 384px; height: 384px; opacity: 0; }
+.wand-haze { position: absolute; z-index: 2; inset: 0; filter: url(#wand-haze-f); }
+.wand-haze > svg { position: absolute; }
 .wand-glow { position: absolute; z-index: 2; left: 50%; top: 50%; width: 464px; height: 464px; opacity: 0; }   /* 384 + 四邊各 40（GLOW_PAD），縮放倍率同墨水 */
 .vt-wand * { transition: none !important; }
 ::view-transition-group(wand) { z-index: 3; }
@@ -3005,12 +3007,16 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       pigment.className = 'wand-ink';
       pigment.alt = '';
       pigment.src = lumos ? art.lumos : art.nox;
-      fx.prepend(pigment);
       const edgeGlow = new Image();
       edgeGlow.className = 'wand-glow';
       edgeGlow.alt = '';
       edgeGlow.src = art.glow;
-      pigment.after(edgeGlow);
+      // 熱浪扭曲：墨水與光暈包在全螢幕的一層裡套位移濾鏡（螢幕座標，波紋大小不隨墨水放大而變粗）
+      const haze = document.createElement('div');
+      haze.className = 'wand-haze';
+      haze.innerHTML = '<svg width="0" height="0" aria-hidden="true"><filter id="wand-haze-f" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".011 .03" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></svg>';
+      haze.append(pigment, edgeGlow);
+      fx.prepend(haze);
       const de = document.documentElement;
       de.classList.add('vt-wand');
       shBusy = true;
@@ -3083,6 +3089,21 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         ];
         pigment.animate(inkFrames, { duration: DUR, fill: 'both' });
         edgeGlow.animate(inkFrames, { duration: DUR, fill: 'both' });   // 光暈跟墨水同一組縮放，永遠貼在前緣
+        // 熱浪：擴散期間邊緣像海市蜃樓一樣不規則扭動——噪聲頻率緩慢飄移，位移量隨擴散加速增強、尾段收掉
+        const turb = haze.querySelector('feTurbulence'), disp = haze.querySelector('feDisplacementMap');
+        const hazeFrom = performance.now() + HIT, hazeLen = SPREAD + 250;
+        const wobble = (now) => {
+          if (!fx.isConnected) return;
+          const p = (now - hazeFrom) / hazeLen;
+          if (p >= 1) { disp.setAttribute('scale', '0'); return; }
+          if (p > 0) {
+            const t = now / 1000;
+            turb.setAttribute('baseFrequency', `${(.011 + .003 * Math.sin(t * 5.1)).toFixed(4)} ${(.03 + .008 * Math.sin(t * 7.3 + 1.2)).toFixed(4)}`);
+            disp.setAttribute('scale', (34 * Math.sin(Math.PI * Math.min(1, p * 1.15)) ** .8).toFixed(1));
+          }
+          requestAnimationFrame(wobble);
+        };
+        requestAnimationFrame(wobble);
 
         // 魔杖直接在中央亮起並點擊，不再由畫外滑入；點擊後迅速淡出
         const wand = fx.querySelector('.wand');

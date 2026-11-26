@@ -2310,15 +2310,21 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 :root[data-ui="swiss"] #wall > .cell, :root[data-ui="swiss"] #wall > .cell:hover { transition: none; }
 :root[data-ui="swiss"] #wall > .cell:hover { border-color: var(--ink); box-shadow: inset 0 6px 0 var(--ink); }
 :root[data-ui="y2k"] #wall > .cell { position: relative; }
-/* Y2K：滑過時像閃卡——卡片跟著滑鼠輕微 3D 傾斜（最多約 6°），一道斜向彩虹全息光帶跟著滑鼠移動，外框轉全息色
-   資訊要清楚：反光畫在內容下面（卡片 isolation、偽元素 z-index -1），文字、圖表不被彩光蓋到；--px／--py 由滑鼠位置換算（0～1） */
-:root[data-ui="y2k"] #wall > .cell { isolation: isolate; --px: .5; --py: .5; --holo-a: .55; --holo: rgb(255 150 210 / .5), rgb(255 215 120 / .45), rgb(140 235 180 / .45), rgb(120 200 255 / .5), rgb(185 160 255 / .5); --holo-spot: rgb(255 255 255 / .55); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] #wall > .cell { --holo-a: .5; --holo: rgb(255 120 200 / .55), rgb(255 200 90 / .5), rgb(110 240 170 / .5), rgb(90 190 255 / .55), rgb(170 130 255 / .55); --holo-spot: rgb(255 255 255 / .12); } }
-:root[data-theme="dark"][data-ui="y2k"] #wall > .cell { --holo-a: .5; --holo: rgb(255 120 200 / .55), rgb(255 200 90 / .5), rgb(110 240 170 / .5), rgb(90 190 255 / .55), rgb(170 130 255 / .55); --holo-spot: rgb(255 255 255 / .12); }
-:root[data-ui="y2k"] #wall > .cell::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0;
-  background: radial-gradient(farthest-corner circle at calc(var(--px) * 100%) calc(var(--py) * 100%), var(--holo-spot), transparent 55%), linear-gradient(115deg, transparent 25%, var(--holo), transparent 75%) calc(var(--px) * 100%) calc(var(--py) * 100%) / 300% 300%;
-  transition: opacity calc(.3s * var(--dur)) var(--ease); }
-:root[data-ui="y2k"] #wall > .cell:hover::before { opacity: var(--holo-a); }
+/* Y2K：滑過時像閃卡——卡片跟著滑鼠輕微 3D 傾斜（最多約 6°）；箔片細彩虹條紋只在一道斜向光帶內出現、跟著滑鼠移動，滑鼠處有一點銳利白色反光；外框轉全息色
+   資訊要清楚：反光畫在內容下面（卡片 isolation、偽元素 z-index -1），文字、圖表不被彩光蓋到；--px／--py 由滑鼠位置換算（0～1）
+   淺色：條紋用相乘，白底上才顯色；深色：用濾色疊亮，彩虹發亮不混成灰 */
+:root[data-ui="y2k"] #wall > .cell { isolation: isolate; --px: .5; --py: .5; --foil: #ff6fbf, #ffc23d, #4fe08f, #3fb0ff, #9b7bff, #ff6fbf; --foil-a: .3; --foil-blend: multiply; --glare: rgb(255 255 255 / .95); --glare-a: .9; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] #wall > .cell { --foil: #ff7ccf, #ffd060, #62f0a8, #5cc4ff, #b398ff, #ff7ccf; --foil-a: .5; --foil-blend: screen; --glare: rgb(255 255 255 / .5); --glare-a: .7; } }
+:root[data-theme="dark"][data-ui="y2k"] #wall > .cell { --foil: #ff7ccf, #ffd060, #62f0a8, #5cc4ff, #b398ff, #ff7ccf; --foil-a: .5; --foil-blend: screen; --glare: rgb(255 255 255 / .5); --glare-a: .7; }
+:root[data-ui="y2k"] #wall > .cell::before, :root[data-ui="y2k"] #wall > .cell::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity calc(.3s * var(--dur)) var(--ease); }
+:root[data-ui="y2k"] #wall > .cell::before {   /* 箔片：細條紋，位置跟著滑鼠滑動（一動就閃）；遮罩成一道斜向光帶 */
+  background: repeating-linear-gradient(115deg, var(--foil) 64px) calc(var(--px) * 100%) calc(var(--py) * 100%) / 200% 200% no-repeat;   /* 底圖兩倍大、不重複：移動時不會露出拼接縫 */
+  -webkit-mask: linear-gradient(115deg, transparent 22%, #000 42% 58%, transparent 78%) calc(var(--px) * 100%) calc(var(--py) * 100%) / 300% 300% no-repeat;
+  mask: linear-gradient(115deg, transparent 22%, #000 42% 58%, transparent 78%) calc(var(--px) * 100%) calc(var(--py) * 100%) / 300% 300% no-repeat;
+  mix-blend-mode: var(--foil-blend); }
+:root[data-ui="y2k"] #wall > .cell::after { background: radial-gradient(circle at calc(var(--px) * 100%) calc(var(--py) * 100%), var(--glare) 0, rgb(255 255 255 / .18) 70px, transparent 160px); }   /* 鏡面反光：中心銳利、很快淡掉 */
+:root[data-ui="y2k"] #wall > .cell:hover::before { opacity: var(--foil-a); }
+:root[data-ui="y2k"] #wall > .cell:hover::after { opacity: var(--glare-a); }
 :root[data-ui="y2k"] #wall > .cell:hover { --y2k-halo: rgb(150 140 255 / .18); transform: perspective(900px) translateY(-4px) rotateX(calc((.5 - var(--py)) * 12deg)) rotateY(calc((var(--px) - .5) * 12deg)); transition: transform calc(.18s * var(--dur)) var(--ease), box-shadow calc(.4s * var(--dur)) var(--ease), --y2k-r1 calc(.5s * var(--dur)) var(--ease), --y2k-r2 calc(.5s * var(--dur)) var(--ease), --y2k-r3 calc(.5s * var(--dur)) var(--ease); }
 /* 減少動態：不傾斜，只留反光 */
 :root[data-ui="y2k"] body.reduce #wall > .cell:hover { transform: none; }

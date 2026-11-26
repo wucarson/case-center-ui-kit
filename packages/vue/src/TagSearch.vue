@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useFormBlur, useFormValue } from './form';
 import { computed, ref, useId, watch } from 'vue';
 import { searchBoxClass, suggestionClass, suggestionId, suggestionListLabel, tagMatches, tagSearchKey, type TagSuggestion } from '@wucarson/facet-core/search';
 import Icon from './Icon.vue';
@@ -9,6 +10,10 @@ const props = withDefaults(defineProps<{
   /** 可建議的標籤 */
   tags: TagSuggestion[];
   value?: string;
+  /** 標準 v-model */
+  modelValue?: string;
+  /** 停用：輸入框停用（展示牆尚無停用樣式） */
+  disabled?: boolean;
   /** 讀屏名稱，例：「搜尋公告」 */
   label: string;
   placeholder?: string;
@@ -16,17 +21,19 @@ const props = withDefaults(defineProps<{
   max?: number;
   style?: StyleProp;
 }>(), { value: '', placeholder: '搜尋公告標題或標籤' });
-const emit = defineEmits<{ 'update:value': [string]; pick: [TagSuggestion] }>();
+const emit = defineEmits<{ 'update:value': [string]; 'update:modelValue': [string]; pick: [TagSuggestion]; blur: [] }>();
+const { val, set: setVal } = useFormValue(props, 'value', emit, '');
+const onOut = useFormBlur(emit);
 const inputId = useId();
 const listId = inputId + '-list';
-const query = ref(props.value);
-watch(() => props.value, (v) => { query.value = v; });
+const query = ref(val.value);
+watch(val, (v) => { query.value = v; });
 const focus = ref(false);
 const closed = ref(false);
 const cursor = ref(0);
 const shown = computed(() => tagMatches(props.tags, query.value, props.max));
 const open = computed(() => focus.value && !closed.value && shown.value.length > 0);
-const set = (v: string) => { query.value = v; closed.value = false; cursor.value = 0; emit('update:value', v); };
+const set = (v: string) => { query.value = v; closed.value = false; cursor.value = 0; setVal(v); };
 const pick = (t: TagSuggestion) => { set(t.label); closed.value = true; emit('pick', t); };
 const onKey = (e: KeyboardEvent) => {
   const r = tagSearchKey(open.value, cursor.value, shown.value.length, e.key);
@@ -39,5 +46,5 @@ const onKey = (e: KeyboardEvent) => {
 </script>
 
 <template>
-  <div class="tsr" :style="style"><div :class="searchBoxClass(focus)"><Icon name="search" /><input :id="inputId" class="ff-real" role="combobox" :aria-label="label" :aria-expanded="open" :aria-controls="listId" aria-autocomplete="list" :aria-activedescendant="open ? suggestionId(inputId, cursor) : undefined" autocomplete="off" :placeholder="placeholder" :value="query" @input="set(($event.target as HTMLInputElement).value)" @focus="focus = true" @blur="focus = false" @keydown="onKey" /></div><div v-if="open" :id="listId" class="results show" role="listbox" :aria-label="suggestionListLabel(label)"><div v-for="(t, i) in shown" :id="suggestionId(inputId, i)" :key="t.label" :class="suggestionClass(i === cursor)" role="option" :aria-selected="i === cursor" @mousedown.prevent="pick(t)" @mousemove="cursor = i"><span>{{ t.label }}</span><em v-if="t.count">{{ t.count }}</em></div></div></div>
+  <div class="tsr" :style="style" @focusout="onOut"><div :class="searchBoxClass(focus)"><Icon name="search" /><input :id="inputId" class="ff-real" role="combobox" :aria-label="label" :aria-expanded="open" :aria-controls="listId" aria-autocomplete="list" :aria-activedescendant="open ? suggestionId(inputId, cursor) : undefined" autocomplete="off" :placeholder="placeholder" :value="query" :disabled="disabled" @input="set(($event.target as HTMLInputElement).value)" @focus="focus = true" @blur="focus = false" @keydown="onKey" /></div><div v-if="open" :id="listId" class="results show" role="listbox" :aria-label="suggestionListLabel(label)"><div v-for="(t, i) in shown" :id="suggestionId(inputId, i)" :key="t.label" :class="suggestionClass(i === cursor)" role="option" :aria-selected="i === cursor" @mousedown.prevent="pick(t)" @mousemove="cursor = i"><span>{{ t.label }}</span><em v-if="t.count">{{ t.count }}</em></div></div></div>
 </template>

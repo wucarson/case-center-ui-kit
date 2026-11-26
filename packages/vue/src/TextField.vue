@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useFormBlur, useFormValue } from './form';
 import { computed, useId } from 'vue';
 import { fieldCount } from '@wucarson/facet-core/field';
 import type { IconName } from '@wucarson/facet-core/icons';
@@ -13,6 +14,8 @@ import type { StyleProp } from './util';
 const props = defineProps<{
   label: string;
   value?: string;
+  /** 標準 v-model */
+  modelValue?: string;
   placeholder?: string;
   required?: boolean;
   optional?: boolean;
@@ -34,13 +37,15 @@ const props = defineProps<{
   id?: string;
   style?: StyleProp;
 }>();
-const emit = defineEmits<{ 'update:value': [string] }>();
+const emit = defineEmits<{ 'update:value': [string]; 'update:modelValue': [string]; blur: [] }>();
+const { val, set } = useFormValue(props, 'value', emit, '');
+const onOut = useFormBlur(emit);
 const auto = useId();
 const fid = computed(() => props.id ?? auto);
-const count = computed(() => fieldCount(props.value, props.maxLength, props.showCount, props.counter));
-const onInput = (e: Event) => emit('update:value', (e.target as HTMLInputElement).value);
+const count = computed(() => fieldCount(val.value, props.maxLength, props.showCount, props.counter));
+const onInput = (e: Event) => set((e.target as HTMLInputElement).value);
 </script>
 
 <template>
-  <FormField v-bind="{ label, required, optional, readOnly, disabled, empty, emptyLabel, help, error, multiline, style }" :counter="count" :html-for="fid"><Icon v-if="prefix" :name="prefix" /><textarea v-if="multiline" :id="fid" :value="value" :placeholder="placeholder" :readonly="readOnly" :disabled="disabled" :maxlength="maxLength" :aria-invalid="error ? true : undefined" :aria-required="required || undefined" @input="onInput" /><input v-else :id="fid" :value="value" :placeholder="placeholder" :readonly="readOnly" :disabled="disabled" :maxlength="maxLength" :aria-invalid="error ? true : undefined" :aria-required="required || undefined" @input="onInput" /><span v-if="suffix" class="unit">{{ suffix }}</span><Icon v-if="readOnly" name="lock" /></FormField>
+  <FormField v-bind="{ label, required, optional, readOnly, disabled, empty, emptyLabel, help, error, multiline, style }" :counter="count" :html-for="fid"><Icon v-if="prefix" :name="prefix" /><textarea v-if="multiline" :id="fid" :value="val" :placeholder="placeholder" :readonly="readOnly" :disabled="disabled" :maxlength="maxLength" :aria-invalid="error ? true : undefined" :aria-required="required || undefined" @input="onInput" @focusout="onOut" /><input v-else :id="fid" :value="val" :placeholder="placeholder" :readonly="readOnly" :disabled="disabled" :maxlength="maxLength" :aria-invalid="error ? true : undefined" :aria-required="required || undefined" @input="onInput" @focusout="onOut" /><span v-if="suffix" class="unit">{{ suffix }}</span><Icon v-if="readOnly" name="lock" /></FormField>
 </template>

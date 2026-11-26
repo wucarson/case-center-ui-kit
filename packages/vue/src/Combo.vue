@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useFormBlur, useFormValue } from './form';
 import { computed, onBeforeUnmount, ref, useId, watch } from 'vue';
 import { onOutsidePointer } from '@wucarson/facet-core/dom';
 import { COMBO_EMPTY, comboClass, comboIcon, comboKey, comboListId, comboOptionClass, comboOptionId, filterItems } from '@wucarson/facet-core/listbox';
@@ -9,6 +10,10 @@ import type { StyleProp } from './util';
 const props = withDefaults(defineProps<{
   items: string[];
   value?: string;
+  /** 標準 v-model */
+  modelValue?: string;
+  /** 停用：輸入框停用（放在 FormField 裡由欄位畫停用樣式） */
+  disabled?: boolean;
   placeholder?: string;
   /** 欄位名稱：給清單與展開鈕念 */
   label: string;
@@ -24,7 +29,9 @@ const props = withDefaults(defineProps<{
   id?: string;
   style?: StyleProp;
 }>(), { value: '' });
-const emit = defineEmits<{ 'update:value': [string] }>();
+const emit = defineEmits<{ 'update:value': [string]; 'update:modelValue': [string]; blur: [] }>();
+const { val, set } = useFormValue(props, 'value', emit, '');
+const onOut = useFormBlur(emit);
 const auto = useId();
 const inputId = computed(() => props.id ?? auto);
 const listId = computed(() => comboListId(inputId.value));
@@ -34,7 +41,7 @@ const query = ref<string | null>(props.defaultQuery ?? null);
 const cursor = ref(props.defaultQuery ? 0 : -1);
 const shown = computed(() => filterItems(props.items, query.value));
 const close = () => { open.value = false; query.value = null; cursor.value = -1; };
-const pick = (t: string) => { emit('update:value', t); close(); };
+const pick = (t: string) => { set(t); close(); };
 let off: (() => void) | undefined;
 watch(open, (o) => { off?.(); off = o && root.value ? onOutsidePointer(root.value, close) : undefined; }, { flush: 'post', immediate: true });
 onBeforeUnmount(() => off?.());
@@ -52,6 +59,6 @@ const active = computed(() => (open.value && cursor.value >= 0 ? comboOptionId(i
 </script>
 
 <template>
-  <template v-if="inField"><input :id="inputId" role="combobox" :aria-expanded="open" :aria-controls="listId" :aria-activedescendant="active" aria-autocomplete="list" :aria-invalid="invalid || undefined" :aria-label="selfLabelled ? label : undefined" autocomplete="off" :placeholder="placeholder" :value="query ?? value" @input="onInput" @focus="open = true" @keydown="onKey" /><span class="unit" aria-hidden="true"><Icon name="chevronDown" /></span></template>
-  <div v-else ref="root" :class="comboClass({ open, inlineMenu, invalid })" :style="style"><div class="dd-t"><input :id="inputId" role="combobox" :aria-expanded="open" :aria-controls="listId" :aria-activedescendant="active" aria-autocomplete="list" :aria-invalid="invalid || undefined" :aria-label="selfLabelled ? label : undefined" autocomplete="off" :placeholder="placeholder" :value="query ?? value" @input="onInput" @focus="open = true" @keydown="onKey" /><Icon :name="comboIcon(open)" /></div><div v-if="open" :id="listId" class="dd-m" role="listbox" :aria-label="label"><template v-if="shown.length"><div v-for="(t, i) in shown" :id="comboOptionId(inputId, i)" :key="t" role="option" :aria-selected="t === value" :class="comboOptionClass(t === value, i === cursor) || undefined" @mousedown.prevent="pick(t)" @mousemove="cursor = i">{{ t }}<Icon name="check" /></div></template><div v-else class="none">{{ COMBO_EMPTY }}</div></div></div>
+  <template v-if="inField"><input :id="inputId" role="combobox" :aria-expanded="open" :aria-controls="listId" :aria-activedescendant="active" aria-autocomplete="list" :aria-invalid="invalid || undefined" :aria-label="selfLabelled ? label : undefined" autocomplete="off" :placeholder="placeholder" :value="query ?? val" :disabled="disabled" @input="onInput" @focus="open = true" @keydown="onKey" @focusout="onOut" /><span class="unit" aria-hidden="true"><Icon name="chevronDown" /></span></template>
+  <div v-else ref="root" :class="comboClass({ open, inlineMenu, invalid })" :style="style" @focusout="onOut"><div class="dd-t"><input :id="inputId" role="combobox" :aria-expanded="open" :aria-controls="listId" :aria-activedescendant="active" aria-autocomplete="list" :aria-invalid="invalid || undefined" :aria-label="selfLabelled ? label : undefined" autocomplete="off" :placeholder="placeholder" :value="query ?? val" :disabled="disabled" @input="onInput" @focus="open = true" @keydown="onKey" /><Icon :name="comboIcon(open)" /></div><div v-if="open" :id="listId" class="dd-m" role="listbox" :aria-label="label"><template v-if="shown.length"><div v-for="(t, i) in shown" :id="comboOptionId(inputId, i)" :key="t" role="option" :aria-selected="t === val" :class="comboOptionClass(t === val, i === cursor) || undefined" @mousedown.prevent="pick(t)" @mousemove="cursor = i">{{ t }}<Icon name="check" /></div></template><div v-else class="none">{{ COMBO_EMPTY }}</div></div></div>
 </template>

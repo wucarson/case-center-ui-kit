@@ -926,9 +926,9 @@ svg.ic { width: 16px; height: 16px; fill: none; stroke: currentcolor; stroke-wid
 .ff-real::placeholder { color: var(--label); }
 .btn { gap: 6px; }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) :is(.seg, .sp-seg) > i { background: var(--hover); box-shadow: rgba(255, 255, 255, 0.1) 0px 1px 0px inset, rgba(0, 0, 0, 0.45) 0px 1px 3px; }
+  :root:not([data-theme="light"]) :is(.seg, .sp-seg):not(.dis) > i { background: var(--hover); box-shadow: rgba(255, 255, 255, 0.1) 0px 1px 0px inset, rgba(0, 0, 0, 0.45) 0px 1px 3px; }
 }
-:root[data-theme="dark"] :is(.seg, .sp-seg) > i { background: var(--hover); box-shadow: rgba(255, 255, 255, 0.1) 0px 1px 0px inset, rgba(0, 0, 0, 0.45) 0px 1px 3px; }
+:root[data-theme="dark"] :is(.seg, .sp-seg):not(.dis) > i { background: var(--hover); box-shadow: rgba(255, 255, 255, 0.1) 0px 1px 0px inset, rgba(0, 0, 0, 0.45) 0px 1px 3px; }
 :is(.dd-t, .search, .ms-t, .dp-f).hv,
 .ff.hv .ff-i { border-color: var(--line-strong); }
 @keyframes sh-ok { 

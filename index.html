@@ -2049,12 +2049,12 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 /* 分類：7 類，放不下時橫向捲動；改過的項目數顯示在名稱旁 */
 .cz-tabs { flex: none; display: flex; gap: 2px; margin: 0 14px 4px; padding: 3px; overflow-x: auto; scrollbar-width: none; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--ev-line, var(--line)); }
 .cz-tabs::-webkit-scrollbar { display: none; }
-.cz-tabs button { flex: 1 0 auto; height: 30px; padding: 0 9px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 0; border-radius: 9px; background: transparent; color: var(--ev-dim, var(--weak)); font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: color calc(.15s * var(--dur)), background calc(.15s * var(--dur)); }
+.cz-tabs button { flex: 1 0 auto; height: 30px; padding: 0 5px; display: inline-flex; align-items: center; justify-content: center; gap: 2px; border: 0; border-radius: 9px; background: transparent; color: var(--ev-dim, var(--weak)); font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: color calc(.15s * var(--dur)), background calc(.15s * var(--dur)); }
 .cz-tabs button:hover { color: var(--ink); }
 .cz-tabs button:active { scale: .96; }
 .cz-tabs button[aria-selected="true"] { background: var(--ev-cell, var(--soft)); color: var(--ink); box-shadow: inset 0 0 0 1px var(--ev-line-2, var(--line)); }
 .cz-tabs button:focus-visible { outline: 3px solid var(--focus); outline-offset: -1px; }
-.cz-tabs small { min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--primary); color: var(--on-primary); font-size: 10px; line-height: 16px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+.cz-tabs small { min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px; background: var(--primary); color: var(--on-primary); font-size: 10px; line-height: 14px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
 .cz-tabs small[hidden] { display: none; }
 /* 設定列：名稱在左、控制在右（寬的控制項放名稱下方）；選到的列淡底並展開一句說明 */
 .cz.cz .cz-sets { gap: 6px; padding: 0; border: 0; background: transparent; }   /* 每個項目自成一塊，用底色分隔（不用水平線） */

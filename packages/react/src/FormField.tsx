@@ -1,4 +1,4 @@
-import { useId, useState, type CSSProperties, type InputHTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, useId, useState, type CSSProperties, type InputHTMLAttributes, type ReactNode } from 'react';
 import { SR_ONLY_STYLE, fieldClass, fieldCount, fieldInputClass, fieldMark, leftField } from '@wucarson/facet-core/field';
 import type { IconName } from '@wucarson/facet-core/icons';
 import { Icon } from './Icon';
@@ -68,11 +68,11 @@ export interface TextFieldProps extends Omit<FormFieldProps, 'children' | 'htmlF
  * 文字欄位＝FormField＋輸入框。
  *   <TextField label="工單名稱" required maxLength={50} showCount value={v} onChange={…} />
  */
-export function TextField({ label, required, optional, readOnly, disabled, empty, emptyLabel, help, counter, error, multiline, prefix, suffix, showCount, className, style, id, ...input }: TextFieldProps) {
+export const TextField = forwardRef<HTMLInputElement & HTMLTextAreaElement, TextFieldProps>(function TextField({ label, required, optional, readOnly, disabled, empty, emptyLabel, help, counter, error, multiline, prefix, suffix, showCount, className, style, id, ...input }, ref) {
   const auto = useId();
   const fid = id ?? auto;
   const count = fieldCount(String(input.value ?? input.defaultValue ?? ''), input.maxLength, showCount, counter);
-  const common = { id: fid, readOnly, disabled, 'aria-invalid': error ? true : undefined, 'aria-required': required || undefined, ...input };
+  const common = { ref, id: fid, readOnly, disabled, 'aria-invalid': error ? true : undefined, 'aria-required': required || undefined, ...input };
   return (
     <FormField {...{ label, required, optional, readOnly, disabled, empty, emptyLabel, help, error, multiline, className, style }} counter={count} htmlFor={fid}>
       {prefix && <Icon name={prefix} />}
@@ -81,4 +81,4 @@ export function TextField({ label, required, optional, readOnly, disabled, empty
       {readOnly && <Icon name="lock" />}
     </FormField>
   );
-}
+});

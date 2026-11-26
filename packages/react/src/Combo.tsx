@@ -1,12 +1,16 @@
-import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
+import { forwardRef, useEffect, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { onOutsidePointer } from '@wucarson/facet-core/dom';
 import { COMBO_EMPTY, comboClass, comboIcon, comboKey, comboListId, comboOptionClass, comboOptionId, filterItems } from '@wucarson/facet-core/listbox';
+import { FormValue, leaveHandler, useControlled, useFieldRef, type FieldProps } from './form';
 import { Icon } from './Icon';
 import { cx, styleOf } from './util';
 
-export interface ComboProps {
+export interface ComboProps extends FieldProps {
   items: string[];
+  /** 受控：選中的值 */
   value?: string;
+  /** 非受控：初始值 */
+  defaultValue?: string;
   onChange?: (value: string) => void;
   placeholder?: string;
   /** 欄位名稱：給清單與展開鈕念 */
@@ -26,7 +30,11 @@ export interface ComboProps {
 }
 
 /** 下拉選單：從固定清單選一個值；打字可篩選。↑↓ 移動、Enter 選取、Esc 關閉。規則在 core/listbox.ts。 */
-export function Combo({ items, value = '', onChange, placeholder, label, selfLabelled, invalid, inField, inlineMenu, defaultOpen, defaultQuery, id, className, style }: ComboProps) {
+/** 表單：受控 value＋onChange，或非受控 defaultValue＋name。ref 指向輸入框 */
+export const Combo = forwardRef<HTMLInputElement, ComboProps>(function Combo({ items, value: v, defaultValue, onChange, placeholder, label, selfLabelled, invalid, inField, inlineMenu, defaultOpen, defaultQuery, id, disabled, name, onBlur, className, style }, ref) {
+  const [value, set] = useControlled(v, defaultValue, onChange, '');
+  const leave = leaveHandler(onBlur);
+  const hidden = <FormValue name={name} value={value} disabled={disabled} />;
   const auto = useId();
   const inputId = id ?? auto;
   const listId = comboListId(inputId);
@@ -37,7 +45,7 @@ export function Combo({ items, value = '', onChange, placeholder, label, selfLab
   const shown = useMemo(() => filterItems(items, query), [items, query]);
   const close = () => { setOpen(false); setQuery(null); setCursor(-1); };
   useEffect(() => (open && root.current ? onOutsidePointer(root.current, close) : undefined), [open]);
-  const pick = (t: string) => { onChange?.(t); close(); };
+  const pick = (t: string) => { set(t); close(); };
   const onKeyDown = (e: KeyboardEvent) => {
     const r = comboKey(open, cursor, shown.length, e.key);
     if (!r) return;
@@ -49,8 +57,10 @@ export function Combo({ items, value = '', onChange, placeholder, label, selfLab
   };
   const input = (
     <input
+      ref={ref}
       id={inputId}
       role="combobox"
+      disabled={disabled}
       aria-expanded={open}
       aria-controls={listId}
       aria-activedescendant={open && cursor >= 0 ? comboOptionId(inputId, cursor) : undefined}
@@ -63,6 +73,7 @@ export function Combo({ items, value = '', onChange, placeholder, label, selfLab
       onChange={(e) => { setQuery(e.target.value); setOpen(true); setCursor(0); }}
       onFocus={() => setOpen(true)}
       onKeyDown={onKeyDown}
+      onBlur={inField ? leave : undefined}
     />
   );
   const menu = open && (
@@ -80,13 +91,15 @@ export function Combo({ items, value = '', onChange, placeholder, label, selfLab
         {input}
         <span className="unit" aria-hidden="true"><Icon name="chevronDown" /></span>
         {menu}
+        {hidden}
       </>
     );
   }
   return (
-    <div ref={root} className={cx(comboClass({ open, inlineMenu, invalid }), className)} style={styleOf(style)}>
+    <div ref={root} className={cx(comboClass({ open, inlineMenu, invalid }), className)} style={styleOf(style)} onBlur={leave}>
       <div className="dd-t">{input}<Icon name={comboIcon(open)} /></div>
       {menu}
+      {hidden}
     </div>
   );
-}
+});

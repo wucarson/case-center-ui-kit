@@ -94,6 +94,20 @@ import { Button, DataTable } from '@wucarson/facet-angular';
 
 - 原本的 `v-model:value`、`v-model:checked` 照常可用
 
+```tsx
+// React：受控（value＋onChange）或非受控（defaultValue＋name）；name 會輸出隱藏欄位，原生 <form> 送得出去
+<form action="/save">
+  <TextField name="title" label="工單名稱" defaultValue="設備巡檢" />
+  <Combo name="kind" items={kinds} label="工作類型" defaultValue="巡檢" />
+  <Switch name="remind" label="到期前提醒" defaultChecked />
+</form>
+
+// React Hook Form：用 Controller，field 直接展開（value、onChange、onBlur、name、ref 都對得上）
+<Controller name="kind" control={control} render={({ field }) => <Combo {...field} items={kinds} label="工作類型" />} />
+```
+
+- `ref` 指向可聚焦的元素（錯誤時自動聚焦）；`onBlur` 在焦點離開整個元件時呼叫
+
 ### 開發
 
 ```sh
@@ -103,7 +117,7 @@ npm run build:apps         # 建置三個展示頁（比對工具截圖用）
 npm run pack:check         # 安裝測試：打包後裝進全新專案，檢查載入與 React／Vue／Angular 型別
 cd tools && node export.mjs          # 展示牆改了之後：匯出樣式、token、比對樣本到套件
 cd tools && node compare.mjs react   # 逐像素比對（react｜vue｜angular）
-cd tools && node form-check.mjs vue       # 表單整合（angular｜vue）：綁定、改值、寫入、停用、碰過、重設、送出
+cd tools && node form-check.mjs react     # 表單整合（react｜vue｜angular）：綁定、改值、寫入、停用、碰過、重設、送出
 ```
 
 ## 檔案

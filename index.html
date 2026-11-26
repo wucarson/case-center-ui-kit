@@ -2310,32 +2310,19 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 :root[data-ui="swiss"] #wall > .cell, :root[data-ui="swiss"] #wall > .cell:hover { transition: none; }
 :root[data-ui="swiss"] #wall > .cell:hover { border-color: var(--ink); box-shadow: inset 0 6px 0 var(--ink); }
 :root[data-ui="y2k"] #wall > .cell { position: relative; }
-/* Y2K：滑過時「訊號不穩」——外框內緣一圈電光細線不規則扭動（SVG 位移濾鏡 #y2k-zap），底層雜訊約每 1.5 秒閃一陣（2、3 下）並有細橫帶跳動
-   資訊要清楚：電光與雜訊都畫在內容下面（卡片 isolation、偽元素 z-index -1），文字、圖表不套濾鏡也不位移；雜訊最多 16% */
-:root[data-ui="y2k"] #wall > .cell { isolation: isolate; --zap-1: #8fd3ff; --zap-2: #1f9dff; --zap-3: #1466d6; --zap-glow: rgb(31 157 255 / .3); --static: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3CfeColorMatrix%20values%3D'0%200%200%200%200.06%20%200%200%200%200%200.1%20%200%200%200%200%200.2%20%200%200%200%201.6%20-.55'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%23n)'%2F%3E%3C%2Fsvg%3E"); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] #wall > .cell { --zap-1: #b5ecff; --zap-2: #66d6ff; --zap-3: #2a8fe0; --zap-glow: rgb(102 214 255 / .4); --static: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3CfeColorMatrix%20values%3D'0%200%200%200%201%20%200%200%200%200%201%20%200%200%200%200%201%20%200%200%200%201.6%20-.55'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%23n)'%2F%3E%3C%2Fsvg%3E"); } }
-:root[data-theme="dark"][data-ui="y2k"] #wall > .cell { --zap-1: #b5ecff; --zap-2: #66d6ff; --zap-3: #2a8fe0; --zap-glow: rgb(102 214 255 / .4); --static: url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'160'%20height%3D'160'%3E%3Cfilter%20id%3D'n'%3E%3CfeTurbulence%20type%3D'fractalNoise'%20baseFrequency%3D'.85'%20numOctaves%3D'2'%20stitchTiles%3D'stitch'%2F%3E%3CfeColorMatrix%20values%3D'0%200%200%200%201%20%200%200%200%200%201%20%200%200%200%200%201%20%200%200%200%201.6%20-.55'%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D'100%25'%20height%3D'100%25'%20filter%3D'url(%23n)'%2F%3E%3C%2Fsvg%3E"); }
-:root[data-ui="y2k"] #wall > .cell::before, :root[data-ui="y2k"] #wall > .cell::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0; }
-:root[data-ui="y2k"] #wall > .cell::before { border: 1.5px solid var(--zap-2); box-shadow: inset 0 0 10px var(--zap-glow); filter: url(#y2k-zap); transition: opacity calc(.2s * var(--dur)) var(--ease); }
-:root[data-ui="y2k"] #wall > .cell::after { background: linear-gradient(180deg, transparent 46%, var(--zap-glow) 49% 51%, transparent 54%) 0 0 / 100% 300% no-repeat, var(--static) 0 0 / 160px 160px; }
-:root[data-ui="y2k"] #wall > .cell:hover { --y2k-r1: var(--zap-1); --y2k-r2: var(--zap-2); --y2k-r3: var(--zap-3); --y2k-halo: var(--zap-glow); }
-:root[data-ui="y2k"] #wall > .cell:hover::before { opacity: 1; }
-:root[data-ui="y2k"] #wall > .cell:hover::after { animation: y2k-static calc(2.6s * var(--dur)) steps(1, end) infinite; }
-@keyframes y2k-static {
-  0%, 3% { opacity: 0; }
-  4% { opacity: .12; background-position: 0 30%, 13px 41px; }
-  6% { opacity: 0; }
-  9% { opacity: .16; background-position: 0 72%, 77px 9px; }
-  11%, 58% { opacity: 0; }
-  59% { opacity: .1; background-position: 0 12%, 31px 120px; }
-  61% { opacity: .15; background-position: 0 55%, 102px 64px; }
-  62% { opacity: 0; }
-  65% { opacity: .12; background-position: 0 88%, 5px 87px; }
-  67%, 100% { opacity: 0; }
-}
-/* 減少動態：不閃、不扭，只留靜態電光外框 */
-:root[data-ui="y2k"] body.reduce #wall > .cell::before { filter: none; }
-@media (prefers-reduced-motion: reduce) { :root[data-ui="y2k"] #wall > .cell::before { filter: none; } }
+/* Y2K：滑過時像閃卡——卡片跟著滑鼠輕微 3D 傾斜（最多約 6°），一道斜向彩虹全息光帶跟著滑鼠移動，外框轉全息色
+   資訊要清楚：反光畫在內容下面（卡片 isolation、偽元素 z-index -1），文字、圖表不被彩光蓋到；--px／--py 由滑鼠位置換算（0～1） */
+:root[data-ui="y2k"] #wall > .cell { isolation: isolate; --px: .5; --py: .5; --holo-a: .55; --holo: rgb(255 150 210 / .5), rgb(255 215 120 / .45), rgb(140 235 180 / .45), rgb(120 200 255 / .5), rgb(185 160 255 / .5); --holo-spot: rgb(255 255 255 / .55); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"])[data-ui="y2k"] #wall > .cell { --holo-a: .5; --holo: rgb(255 120 200 / .55), rgb(255 200 90 / .5), rgb(110 240 170 / .5), rgb(90 190 255 / .55), rgb(170 130 255 / .55); --holo-spot: rgb(255 255 255 / .12); } }
+:root[data-theme="dark"][data-ui="y2k"] #wall > .cell { --holo-a: .5; --holo: rgb(255 120 200 / .55), rgb(255 200 90 / .5), rgb(110 240 170 / .5), rgb(90 190 255 / .55), rgb(170 130 255 / .55); --holo-spot: rgb(255 255 255 / .12); }
+:root[data-ui="y2k"] #wall > .cell::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0;
+  background: radial-gradient(farthest-corner circle at calc(var(--px) * 100%) calc(var(--py) * 100%), var(--holo-spot), transparent 55%), linear-gradient(115deg, transparent 25%, var(--holo), transparent 75%) calc(var(--px) * 100%) calc(var(--py) * 100%) / 300% 300%;
+  transition: opacity calc(.3s * var(--dur)) var(--ease); }
+:root[data-ui="y2k"] #wall > .cell:hover::before { opacity: var(--holo-a); }
+:root[data-ui="y2k"] #wall > .cell:hover { --y2k-halo: rgb(150 140 255 / .18); transform: perspective(900px) translateY(-4px) rotateX(calc((.5 - var(--py)) * 12deg)) rotateY(calc((var(--px) - .5) * 12deg)); transition: transform calc(.18s * var(--dur)) var(--ease), box-shadow calc(.4s * var(--dur)) var(--ease), --y2k-r1 calc(.5s * var(--dur)) var(--ease), --y2k-r2 calc(.5s * var(--dur)) var(--ease), --y2k-r3 calc(.5s * var(--dur)) var(--ease); }
+/* 減少動態：不傾斜，只留反光 */
+:root[data-ui="y2k"] body.reduce #wall > .cell:hover { transform: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="y2k"] #wall > .cell:hover { transform: none; } }
 /* 減少動態：只留顏色變化，不浮、不掃光 */
 body.reduce #wall > .cell::after { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { #wall > .cell::after { animation: none !important; } }
@@ -2396,7 +2383,6 @@ body.reduce #wall > .cell::after { animation: none !important; }
   <div class="wf" id="wf"><nav class="wf-c" id="wf-c" aria-label="元件分類"></nav><div class="wq" role="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input id="wq" type="search" placeholder="篩選元件" aria-label="篩選元件（名稱、英文、程式名稱）" autocomplete="off" spellcheck="false" enterkeyhint="search"><button class="wq-x" id="wq-x" type="button" aria-label="清除篩選" hidden><svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div></div>
 
   <p class="wq-none" id="wq-none" role="status" hidden></p>
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="y2k-zap" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="turbulence" baseFrequency="0.018 0.07" numOctaves="2" seed="1" result="t"><animate attributeName="seed" values="1;2;3;4;5;6;7;8;9;10" dur="1s" calcMode="discrete" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="t" scale="4" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
   <div class="wall" id="wall">
     <section class="cell h2" id="c-dd">
       <header>下拉選單<em>combo</em></header>
@@ -5488,11 +5474,13 @@ void main(){
     const catOf = (id) => Object.keys(CAT).find((k) => CAT[k].includes(id)) || '其他';
     const cells = $$('#wall > .cell').map((el) => ({ id: el.id, el, name: (el.querySelector('header')?.firstChild?.textContent || el.id).trim(), cat: catOf(el.id) }));
     const naturalOrder = cells.map((c) => c.id);
-    // 液態玻璃：滑過卡片時，光澤跟著滑鼠位置
+    // 液態玻璃：滑過卡片時，光澤跟著滑鼠位置；Y2K：閃卡傾斜與全息光帶跟著滑鼠（--px／--py：0～1）
     $('#wall').addEventListener('pointermove', (e) => {
-      if (document.documentElement.dataset.ui !== 'glass') return;
+      const ui = document.documentElement.dataset.ui; if (ui !== 'glass' && ui !== 'y2k') return;
       const c = e.target.closest('#wall > .cell'); if (!c) return;
-      const b = c.getBoundingClientRect(); c.style.setProperty('--mx', (e.clientX - b.left) + 'px'); c.style.setProperty('--my', (e.clientY - b.top) + 'px');
+      const b = c.getBoundingClientRect(); const x = e.clientX - b.left, y = e.clientY - b.top;
+      if (ui === 'glass') { c.style.setProperty('--mx', x + 'px'); c.style.setProperty('--my', y + 'px'); }
+      else { c.style.setProperty('--px', Math.min(1, Math.max(0, x / b.width)).toFixed(3)); c.style.setProperty('--py', Math.min(1, Math.max(0, y / b.height)).toFixed(3)); }
     }, { passive: true });
     const orderOf = () => naturalOrder.slice();   // 照原本分類順序（拖移排序已拿掉）
     let wallCat = '';   // 分類篩選（空＝全部）

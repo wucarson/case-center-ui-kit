@@ -1950,7 +1950,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .vt-dim::view-transition-old(root), .vt-dim::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 .vt-wand::view-transition-old(root) { z-index: 2; }
 /* 徑向遮罩是墨流遮罩無法使用時的備援。 */
-.vt-wand::view-transition-old(root) { mask-image: radial-gradient(circle, transparent calc(var(--wr) - var(--wf)), #000 var(--wr)); }
+.vt-wand::view-transition-old(root) { mask-image: radial-gradient(circle at var(--wcx, 50%) var(--wcy, 50%), transparent calc(var(--wr) - var(--wf)), #000 var(--wr)); }
 .vt-wand-ink::view-transition-old(root) {
   mask-image: linear-gradient(#000, #000), var(--wand-ink-mask);
   mask-position: center; mask-repeat: no-repeat; mask-size: 100% 100%, 0px 0px;
@@ -3129,12 +3129,14 @@ void main(){
       try { art = prepareWandArt(); }
       catch { apply(); return; }
       const lumos = next === 'light', W = innerWidth, H = innerHeight, C = [W / 2, H / 2];
-      const tip = C;   // 直接在畫面中央點擊施法，不從畫外滑入
-      const th = wandPhoto ? 44.8 : 42;   // 杖身朝右下，杖尖落在點擊位置；照片魔杖照照片本身的角度
-
-      // 魔杖長度：照片魔杖整支放進畫面（杖尖到畫面邊緣距離的 0.94 倍），程式畫的魔杖維持 1.5 倍、下緣伸出畫面外
-      const dx = Math.cos(th * Math.PI / 180), dy = Math.sin(th * Math.PI / 180), exit = Math.min((W - tip[0]) / dx, (H - tip[1]) / dy), WL = exit * (wandPhoto ? .94 : 1.5), WH = WL * (wandPhoto ? wandPhoto.H / wandPhoto.W : 0.07);   // 照片魔杖照圖片比例
-      const RV = Math.hypot(W, H) / 2 + 140;
+      const th = wandPhoto ? 44.8 : 42;   // 杖身朝右下；照片魔杖照照片本身的角度
+      const dx = Math.cos(th * Math.PI / 180), dy = Math.sin(th * Math.PI / 180);
+      // 照片魔杖：跟照片一樣斜跨整個畫面、整支可見——長度取放得進畫面的 88%，杖身中點對齊畫面中央，杖尖（施法點）落在左上
+      // 程式畫的魔杖：杖尖在畫面中央，長度為杖尖到畫面邊緣距離 × 1.5（下緣伸出畫面外）
+      const WL = wandPhoto ? Math.min(W / dx, H / dy) * .88 : Math.min(C[0] / dx, C[1] / dy) * 1.5;
+      const tip = wandPhoto ? [C[0] - dx * WL / 2, C[1] - dy * WL / 2] : C;
+      const WH = WL * (wandPhoto ? wandPhoto.H / wandPhoto.W : 0.07);   // 照片魔杖照圖片比例
+      const RV = Math.max(...[[0, 0], [W, 0], [0, H], [W, H]].map(([x, y]) => Math.hypot(x - tip[0], y - tip[1]))) + 140;   // 墨水從杖尖擴散到最遠的角落
       const useInkMask = CSS.supports('mask-composite', 'exclude');
       const seedRadius = Math.max(23, Math.min(52, Math.min(W, H) * .072));
       const textureSpan = (radius) => radius * art.size / art.radius;
@@ -3148,7 +3150,7 @@ void main(){
       const ashBounds = `x="${C[0] - total / 2 - FS}" y="${C[1] - 2.5 * FS}" width="${total + 2 * FS}" height="${5 * FS}"`;
       const fx = document.createElement('div'); fx.className = 'wand-fx' + (lumos ? ' lumos' : ' nox'); fx.setAttribute('aria-hidden', 'true');
       fx.innerHTML = `
-        <div class="wand-halo" style="left:${C[0]}px;top:${C[1]}px"></div>
+        <div class="wand-halo" style="left:${tip[0]}px;top:${tip[1]}px"></div>
         <div class="wand" style="left:${tip[0]}px;top:${(tip[1] - WH / 2).toFixed(1)}px;width:${WL.toFixed(0)}px;height:${WH.toFixed(1)}px;rotate:${th}deg"><canvas class="wand-cv"></canvas><span class="wand-flow"><i></i></span><i class="wand-tip"></i></div>
         <svg class="wand-word" width="${W}" height="${H}" style="font-size:${FS.toFixed(1)}px"><defs>
           <mask id="ww-ash-mask" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" mask-type="alpha" ${ashBounds}>
@@ -3175,6 +3177,7 @@ void main(){
       // 杖身光流只出現在杖身輪廓內：用魔杖圖當遮罩
       const flow = fx.querySelector('.wand-flow');
       flow.style.webkitMaskImage = flow.style.maskImage = `url("${photo ? photo.url : art.wandUrl}")`;
+      if (PG || photo) flow.style.display = 'none';   // 照片魔杖：不疊 CSS 光流（screen 疊色會蓋掉照片紋理），光流改由 WebGL 打在杖身上
       // 杖尖火花（煙火）：全螢幕畫布，每顆火花受阻力減速、受重力下墜，拖出彎曲的光尾
       const sparkCv = document.createElement('canvas');
       sparkCv.className = 'wand-sparks';
@@ -3183,10 +3186,12 @@ void main(){
       fx.append(sparkCv);
       const pigment = new Image();
       pigment.className = 'wand-ink';
+      pigment.style.left = tip[0] + 'px'; pigment.style.top = tip[1] + 'px';   // 墨水從杖尖擴散
       pigment.alt = '';
       pigment.src = lumos ? art.lumos : art.nox;
       const edgeGlow = new Image();
       edgeGlow.className = 'wand-glow';
+      edgeGlow.style.left = tip[0] + 'px'; edgeGlow.style.top = tip[1] + 'px';
       edgeGlow.alt = '';
       edgeGlow.src = art.glow;
       // WebGL 版：畫布畫墨水邊緣與光暈；墨水圖只當驅動器（照跑動畫、不顯示），每幀讀它的縮放與透明度
@@ -3194,7 +3199,7 @@ void main(){
       try { G = getWandGl(); } catch { G = null; }
       let haze = null;
       if (G) {
-        G.size(W, H, DPR, C);
+        G.size(W, H, DPR, tip);
         pigment.style.visibility = 'hidden';
         fx.prepend(G.cv, pigment);
       } else {
@@ -3253,16 +3258,18 @@ void main(){
         const seedRelease = (HIT + 85) / DUR;
         const feather = Math.round(Math.max(36, Math.min(84, Math.min(W, H) * .095)));
         if (useInkMask) {
-          const maskSize = (span) => `100% 100%, ${span}px ${span}px`;
+          // 遮罩以杖尖為中心：尺寸變化時位置跟著補，墨水形狀的中心永遠在杖尖
+          const mk = (span) => ({ maskSize: `100% 100%, ${span}px ${span}px`, maskPosition: `0px 0px, ${(tip[0] - span / 2).toFixed(1)}px ${(tip[1] - span / 2).toFixed(1)}px` });
           de.animate([
-            { maskSize: maskSize(0), offset: 0 },
-            { maskSize: maskSize(0), offset: startSpread, easing: 'cubic-bezier(.2, 0, .35, 1)' },
-            { maskSize: maskSize(contractSize * 1.12), offset: seedRelease, easing: spreadEase },
-            { maskSize: maskSize(finalSpan), offset: endSpread },
-            { maskSize: maskSize(finalSpan), offset: 1 }
+            { ...mk(0), offset: 0 },
+            { ...mk(0), offset: startSpread, easing: 'cubic-bezier(.2, 0, .35, 1)' },
+            { ...mk(contractSize * 1.12), offset: seedRelease, easing: spreadEase },
+            { ...mk(finalSpan), offset: endSpread },
+            { ...mk(finalSpan), offset: 1 }
           ], motion);
           de.classList.add('vt-wand-ink');
         } else {
+          de.style.setProperty('--wcx', tip[0] + 'px'); de.style.setProperty('--wcy', tip[1] + 'px');   // 圓形遮罩也以杖尖為中心
           de.animate([
             { '--wr': '0px', '--wf': `${feather}px`, offset: 0 },
             { '--wr': '0px', '--wf': `${feather}px`, offset: startSpread, easing: spreadEase },
@@ -3485,6 +3492,7 @@ void main(){
         fx.remove();
         de.style.removeProperty('--wand-ink-mask');
         de.classList.remove('vt-wand', 'vt-wand-ink', 'vt-wand-quick');
+        de.style.removeProperty('--wcx'); de.style.removeProperty('--wcy');
         shBusy = false;
       };
       vt.finished.then(cleanUp, cleanUp);

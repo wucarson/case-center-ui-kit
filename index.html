@@ -1952,6 +1952,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .wand-haze { position: absolute; z-index: 2; inset: 0; filter: url(#wand-haze-f); }
 .wand-haze > svg { position: absolute; }
 .wand-glow { position: absolute; z-index: 2; left: 50%; top: 50%; width: 464px; height: 464px; opacity: 0; }   /* 384 + 四邊各 40（GLOW_PAD），縮放倍率同墨水 */
+.wand-gl { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; pointer-events: none; }   /* WebGL 墨水邊緣＋光暈（取代上面兩張圖與熱浪濾鏡） */
 .vt-wand * { transition: none !important; }
 ::view-transition-group(wand) { z-index: 3; }
 .wand-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; view-transition-name: wand; }
@@ -2806,7 +2807,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       setTimeout(() => { layer.remove(); shBusy = false; }, TOTAL + 40);
     }
     /* 深淺色轉場（魔杖，約 1.45 秒）：魔杖在中央後仰蓄力（三色光沿杖身灌注），甩下點擊時噴出火花、畫面輕震。
-       墨水先朝杖尖回縮，再向外擴散（0.85 秒，由慢到快）；墨色為 AI 三色（暖橘、粉、藍），前緣帶柔光暈。Lumos 揭開淺色，Nox 揭開深色。
+       墨水先朝杖尖回縮，再向外擴散（0.85 秒，由慢到快）；墨水邊緣與光暈由 WebGL 逐幀畫（虹彩三色沿邊緣流轉、前緣白熱線），不支援時改用預畫的墨色圖。Lumos 揭開淺色，Nox 揭開深色。
        舊畫面沿柔邊墨流淡出，新畫面留在底層，交界保留一層舊配色殘影。 */
     document.fonts?.load('600 40px "Cormorant Garamond"', 'LumosNox').catch(() => {});
     // 接骨木魔杖（Canvas，轉場開始前畫一次）：杖尖在左（x = 0），杖身由尖漸粗、沿途 8 個節瘤（越靠握把越大），
@@ -2962,6 +2963,73 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       wandArt = { mask, lumos, nox, glow, spellAsh, wand, wandUrl: wand.toDataURL(), size, radius };   // wandUrl：杖身光流的遮罩
       return wandArt;
     }
+    /* 魔杖墨水的 WebGL 版：依實際螢幕解析度逐幀畫墨水邊緣與光暈（不會像放大的圖一樣糊）。
+       · 輪廓：照抄 prepareWandArt() 的「角度 → 半徑」公式，縮放倍率每幀從墨水元素（當驅動器、不顯示）讀，和 CSS 換色遮罩同一組關鍵影格，一定對齊
+       · 熱浪：先用低頻噪聲偏移像素座標再算距離（取代 SVG 位移濾鏡）
+       · 流動滲開：邊緣疊兩層隨時間流動的噪聲（毛邊、濃淡），後方拉長噪聲做藍色紋路
+       · 虹彩：橘→粉→藍依邊緣角度＋時間循環；前緣白熱細線＋外圈約 40px 柔光
+       畫布與程式只建立一次、之後每次轉場重用；不支援或 context 遺失時回傳 null，改用圖片版 */
+    let wandGl;
+    function getWandGl() {
+      if (wandGl !== undefined) return wandGl;
+      wandGl = null;
+      const cv = document.createElement('canvas');
+      cv.className = 'wand-gl';
+      cv.setAttribute('aria-hidden', 'true');
+      const gl = cv.getContext('webgl', { premultipliedAlpha: true, antialias: false, alpha: true });
+      if (!gl) return null;
+      const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+      const FS = `precision highp float;
+uniform vec2 R,C;uniform float K,A,T,HZ,D;
+const float RAD=140.544,BAND=10.681;
+float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float n2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+1.),f.x),f.y);}
+float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*n2(p);p=p*2.03+17.;a*=.5;}return s;}
+float shape(float a){
+  float co=sin(3.*a+.9)*.44+sin(5.*a-1.7)*.31+sin(8.*a+.5)*.25;
+  float w=a+.063*sin(7.*a)+.034*sin(13.*a-.8);
+  float fi=sin(14.*w+.9)*.48+sin(23.*w-1.1)*.34+sin(32.*w)*.18;
+  return RAD*(1.+.22*(co+.42*fi));
+}
+vec3 iri(float x){x=fract(x)*3.;vec3 o=vec3(1.,.702,.278),pk=vec3(1.,.31,.545),b=vec3(.239,.545,1.);return x<1.?mix(o,pk,x):x<2.?mix(pk,b,x-1.):mix(b,o,x-2.);}
+void main(){
+  vec2 q=vec2(gl_FragCoord.x,R.y-gl_FragCoord.y);
+  vec2 hz=vec2(n2(q*.018/D+vec2(T*2.1,-T*1.3)),n2(q*.022/D+vec2(-T*1.7,T*2.4)+9.))-.5;
+  q+=hz*HZ*D;
+  vec2 v=q-C;float a=atan(v.y,v.x);
+  float d=length(v)-K*shape(a);
+  float w=max(K*BAND,6.*D);
+  float df=d+(fbm(q*.04/D+vec2(T*.8,-T*.5))-.5)*9.*D+(n2(q*.13/D-T*1.5)-.5)*3.*D;
+  float ph=a/6.2832*2.+T*.35;
+  vec3 tint=iri(ph),warm=iri(ph-.15),cool=iri(ph+.25);
+  float wash=(1.-smoothstep(0.,w*.9,df))*step(0.,df)*.3*(.6+.8*fbm(q*.06/D+T));
+  float rim=smoothstep(-w*.45,-w*.05,df)*(1.-smoothstep(-w*.02,w*.08,df))*.55;
+  float vn=fbm(vec2(a*38.,df/w*2.2-T*1.2));
+  float veins=smoothstep(.55,.75,vn)*smoothstep(-w*1.3,-w*.4,df)*(1.-smoothstep(-w*.3,0.,df))*.6;
+  float line=exp(-abs(df)/(1.6*D));
+  float glow=exp(-max(df,0.)/(40.*D))*smoothstep(-w*.3,0.,df)*.45;
+  vec3 col=warm*wash+tint*rim+cool*veins+tint*glow+vec3(.9)*line;
+  float al=clamp(wash+rim+veins+glow*.6+line*.8,0.,1.);
+  col=1.-exp(-col*1.15);
+  gl_FragColor=vec4(col,al)*A;
+}`;
+      const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error('wandSwap shader', gl.getShaderInfoLog(s)); return s; };
+      const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null;
+      gl.useProgram(pr);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const al = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
+      const U = {}; for (const k of ['R', 'C', 'K', 'A', 'T', 'HZ', 'D']) U[k] = gl.getUniformLocation(pr, k);
+      cv.addEventListener('webglcontextlost', (e) => { e.preventDefault(); wandGl = null; });
+      wandGl = {
+        cv, gl,
+        // 每次轉場開始：依畫面尺寸設定畫布
+        size(W, H, D, center) { cv.width = Math.round(W * D); cv.height = Math.round(H * D); gl.viewport(0, 0, cv.width, cv.height); gl.uniform2f(U.R, cv.width, cv.height); gl.uniform2f(U.C, center[0] * D, center[1] * D); gl.uniform1f(U.D, D); this.D = D; },
+        // k＝墨水目前的縮放倍率（每個貼圖 px 對應幾個 CSS px）；alpha＝墨水透明度；t＝秒；hz＝熱浪位移 px
+        draw(k, alpha, t, hz) { gl.uniform1f(U.K, k * this.D); gl.uniform1f(U.A, alpha); gl.uniform1f(U.T, t); gl.uniform1f(U.HZ, hz); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLES, 0, 3); },
+      };
+      return wandGl;
+    }
 
     function wandSwap(next, apply) {
       if (shBusy) return;
@@ -3025,8 +3093,17 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       edgeGlow.className = 'wand-glow';
       edgeGlow.alt = '';
       edgeGlow.src = art.glow;
-      // 熱浪扭曲：墨水與光暈包在全螢幕的一層裡套位移濾鏡（螢幕座標，波紋大小不隨墨水放大而變粗）
-      const haze = document.createElement('div');
+      // WebGL 版：畫布畫墨水邊緣與光暈；墨水圖只當驅動器（照跑動畫、不顯示），每幀讀它的縮放與透明度
+      let G = null;
+      try { G = getWandGl(); } catch { G = null; }
+      let haze = null;
+      if (G) {
+        G.size(W, H, DPR, C);
+        pigment.style.visibility = 'hidden';
+        fx.prepend(G.cv, pigment);
+      } else {
+      // 熱浪扭曲（圖片版）：墨水與光暈包在全螢幕的一層裡套位移濾鏡（螢幕座標，波紋大小不隨墨水放大而變粗）
+      haze = document.createElement('div');
       haze.className = 'wand-haze';
       // 噪點只產生一次：每格約 30px 的隨機值畫在小畫布上，濾鏡放大成全螢幕時自然變成柔和波紋（不必每幀跑 feTurbulence）
       const nw = Math.ceil(W / 30) + 4, nh = Math.ceil(H / 30) + 4, nc = document.createElement('canvas');
@@ -3037,6 +3114,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       haze.innerHTML = `<svg width="0" height="0" aria-hidden="true"><filter id="wand-haze-f" filterUnits="userSpaceOnUse" x="-40" y="-40" width="${W + 80}" height="${H + 80}" color-interpolation-filters="sRGB"><feImage href="${nc.toDataURL()}" x="-60" y="-60" width="${W + 120}" height="${H + 120}" preserveAspectRatio="none" result="n0"/><feOffset in="n0" dx="0" dy="0" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></svg>`;
       haze.append(pigment, edgeGlow);
       fx.prepend(haze);
+      }
       const de = document.documentElement;
       de.classList.add('vt-wand');
       shBusy = true;
@@ -3108,10 +3186,24 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           { opacity: 0, transform: inkTransform(finalSpan), offset: 1 }
         ];
         pigment.animate(inkFrames, { duration: DUR, fill: 'both' });
+        // 熱浪強度：擴散期間隨擴散加速增強、尾段收掉（最大 34px）
+        const hazeFrom = performance.now() + HIT, hazeLen = SPREAD + 250;
+        const hazeAt = (now) => { const p = (now - hazeFrom) / hazeLen; return p > 0 && p < 1 ? 34 * Math.sin(Math.PI * Math.min(1, p * 1.15)) ** .8 : 0; };
+        if (G) {
+          // WebGL 版：每幀讀驅動器的縮放（transform 矩陣）與透明度，畫一次
+          const t0 = performance.now();
+          const frame = (now) => {
+            if (!fx.isConnected || G.gl.isContextLost()) { if (fx.isConnected) pigment.style.visibility = ''; return; }   // context 遺失：露出墨水圖
+            const cs = getComputedStyle(pigment);
+            const m = cs.transform && cs.transform !== 'none' ? new DOMMatrixReadOnly(cs.transform) : null;
+            G.draw(m ? Math.hypot(m.a, m.b) : 0, +cs.opacity || 0, (now - t0) / 1000, hazeAt(now));
+            requestAnimationFrame(frame);
+          };
+          requestAnimationFrame(frame);
+        } else {
         edgeGlow.animate(inkFrames, { duration: DUR, fill: 'both' });   // 光暈跟墨水同一組縮放，永遠貼在前緣
         // 熱浪：擴散期間邊緣像海市蜃樓一樣不規則扭動——噪點來回漂移，位移量隨擴散加速增強、尾段收掉
         const drift = haze.querySelector('feOffset'), disp = haze.querySelector('feDisplacementMap');
-        const hazeFrom = performance.now() + HIT, hazeLen = SPREAD + 250;
         const wobble = (now) => {
           if (!fx.isConnected) return;
           const p = (now - hazeFrom) / hazeLen;
@@ -3119,11 +3211,12 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           if (p > 0) {
             const t = now / 1000;
             drift.setAttribute('dx', (14 * Math.sin(t * 6.1)).toFixed(1)); drift.setAttribute('dy', (20 * Math.sin(t * 8.3 + 1.2)).toFixed(1));   // 噪點來回漂移＝波紋扭動
-            disp.setAttribute('scale', (34 * Math.sin(Math.PI * Math.min(1, p * 1.15)) ** .8).toFixed(1));
+            disp.setAttribute('scale', hazeAt(now).toFixed(1));
           }
           requestAnimationFrame(wobble);
         };
         requestAnimationFrame(wobble);
+        }
 
         // 揮杖：在中央亮起 → 以握柄為軸往後仰蓄力（杖尖退約 90px）→ 加速甩下、稍微超過 → 回彈定位，之後淡出
         const wand = fx.querySelector('.wand');
@@ -3303,7 +3396,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途
     if ('requestIdleCallback' in window && document.startViewTransition
         && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      requestIdleCallback(() => { try { prepareWandArt(); } catch { /* 按下切換時可直接換色 */ } });
+      requestIdleCallback(() => { try { prepareWandArt(); getWandGl(); } catch { /* 按下切換時可直接換色 */ } });   // 墨水圖與 WebGL 程式都先準備好，點擊時不卡
     }
     /* 深淺色轉場（黑洞／白洞，兩個方向都約 1.45 秒）：黑洞的外觀不變，畫面像海水漩渦一樣被捲進洞裡（白洞反過來湧出）
        · 做法：View Transitions 拍下舊畫面；被捲走的那一層（黑洞＝舊畫面、白洞＝新畫面）套 SVG 濾鏡 #bh-lens：

@@ -26,11 +26,11 @@
     "build": "vite build && vue-tsc -p tsconfig.json --declaration --emitDeclarationOnly --outDir dist"
   },
   "peerDependencies": {
-    "vue": "^3.3.0",
-    "@wucarson/facet-styles": "0.1.0"
+    "vue": "^3.3.0"
   },
   "dependencies": {
-    "@wucarson/facet-core": "0.1.0"
+    "@wucarson/facet-core": "0.1.0",
+    "@wucarson/facet-styles": "0.1.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",

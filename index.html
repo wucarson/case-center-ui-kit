@@ -5996,7 +5996,7 @@ void main(){
 uniform vec2 R;uniform float T,DPR;uniform vec4 RC[N],ST[N];uniform vec3 COL,THIN;uniform float AMAX,SHA;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+1.),f.x),f.y);}
-float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*vn(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return s;}
+float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<3;i++){s+=a*vn(p);p=p*2.03+vec2(1.7,9.2);a*=.5;}return s/.875;}
 float sdRR(vec2 p,vec2 b,float r){vec2 q=abs(p)-b+r;return length(max(q,0.))+min(max(q.x,q.y),0.)-r;}
 void main(){
   vec2 p=vec2(gl_FragCoord.x,R.y-gl_FragCoord.y)/DPR;float t=T*.001;
@@ -6011,31 +6011,31 @@ void main(){
       /* 蒸發：整團往右漂、被流場拉扯；左邊先散，邊緣越來越柔 */
       q=e-vec2(u*u*170.+u*30.,-u*28.)-w*u*150.;
       float n=fbm(q*vec2(.006,.02)+s.z*17.+vec2(-t*.9,0.));                                  /* 橫向拉長的紋理：像被風吹開的水氣 */
-      float soft=3.+u*60.;
+      float soft=6.+u*80.;
       vec2 qo=q+vec2(n-.5,(n-.5)*.3)*u*220.;                                                    /* 輪廓跟著紋理起伏，不留直邊 */
-      float body=1.-smoothstep(-soft,soft,sdRR(qo,b,s.w)),bodyS=1.-smoothstep(-soft-16.,soft+16.,sdRR(qo-vec2(0.,14.),b,s.w));
+      float body=1.-smoothstep(-soft,soft,sdRR(qo,b,s.w)),bodyS=1.-smoothstep(-soft-24.,soft+24.,sdRR(qo-vec2(0.,12.),b,s.w));
       float xn=clamp((q.x+b.x)/(2.*b.x),0.,1.),th=u*1.5-.25;
-      float f=smoothstep(th,th+.28,xn*.45+n*.75)*smoothstep(0.,.22,u)*(.7+.3*n);
+      float f=smoothstep(th,th+.45,xn*.45+n*.75)*smoothstep(0.,.25,u)*(.8+.2*n);
       dens=body*f;densS=bodyS*f;
     }else{
       /* 凝聚：從大一圈的稀薄霧團原地變濃、收攏成卡片；收尾依紋理一塊一塊散開（邊緣、薄處先散，往中心推進），碎片往上飄 */
       float g=smoothstep(0.,.72,u),k=smoothstep(.6,1.,u);
       q=e/mix(1.3,1.,g)+w*((1.-g)*160.+k*110.)+vec2(0.,k*k*60.);
-      float soft=mix(90.,2.,g)+k*20.;
+      float soft=mix(100.,6.,g)+k*30.;
       float sd=sdRR(q,b,s.w);
-      float body=1.-smoothstep(-soft,soft,sd),bodyS=1.-smoothstep(-soft-16.,soft+16.,sdRR(q-vec2(0.,14.),b,s.w));
+      float body=1.-smoothstep(-soft,soft,sd),bodyS=1.-smoothstep(-soft-24.,soft+24.,sdRR(q-vec2(0.,12.),b,s.w));
       float n=fbm(q*.011+s.z*17.+vec2(t*.25,t*.4));
       float cov=mix(.78,-.2,g),core=clamp(-sd/min(b.x,b.y),0.,1.),th=k*1.5-.2;
-      float f=smoothstep(cov,cov+.32,n+.12)*mix(.4,1.,g)*(.78+.22*n)*smoothstep(th,th+.14,n*.75+core*.5)*smoothstep(0.,.12,u);
+      float f=smoothstep(cov,cov+.5,n+.12)*mix(.4,1.,g)*(.85+.15*n)*smoothstep(th,th+.3,n*.75+core*.5)*smoothstep(0.,.15,u);
       dens=body*f;densS=bodyS*f;
     }
     if(dens>acc){acc=dens;nn=fbm(q*.02+s.z*5.+vec2(t*.2,-t*.15));}
     sha=max(sha,densS);
   }
   float a=clamp(acc,0.,1.)*AMAX;
-  vec3 col=mix(THIN,COL,clamp(acc*.7+(nn-.4)*1.3*(1.-acc*.55),0.,1.));                                     /* 細紋理決定明暗：稀薄處、霧的凹處偏灰，凸起處偏白，看得出體積 */
+  vec3 col=mix(THIN,COL,clamp(acc*.75+(nn-.42)*.8*(1.-acc*.55),0.,1.));                                     /* 細紋理決定明暗：稀薄處、霧的凹處偏灰，凸起處偏白，看得出體積 */
   float sa=clamp(sha,0.,1.)*SHA*(1.-a);                                                        /* 霧底下的柔和陰影（淺色才有）：跟淺底拉開層次 */
-  gl_FragColor=vec4(col*a+vec3(.16,.22,.36)*sa,a+sa);
+  gl_FragColor=vec4(col*a+vec3(.3,.34,.42)*sa,a+sa);
 }`;
       const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error('smoke shader', gl.getShaderInfoLog(s)); return s; };
       const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}')); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
@@ -6058,7 +6058,7 @@ void main(){
       if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
       gl.viewport(0, 0, W, H); gl.uniform2f(U.R, W, H); gl.uniform1f(U.DPR, DPR);
       const de = document.documentElement, dk = de.dataset.theme ? de.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-      gl.uniform3f(U.COL, ...(dk ? [0.86, 0.88, 0.92] : [1, 1, 1])); gl.uniform3f(U.THIN, ...(dk ? [0.55, 0.58, 0.64] : [0.56, 0.63, 0.75])); gl.uniform1f(U.AMAX, dk ? 0.62 : 0.96); gl.uniform1f(U.SHA, dk ? 0 : 0.16);   // 淺色：暗面加深成冷灰藍、霧底下墊淡陰影
+      gl.uniform3f(U.COL, ...(dk ? [0.86, 0.88, 0.92] : [1, 1, 1])); gl.uniform3f(U.THIN, ...(dk ? [0.55, 0.58, 0.64] : [0.76, 0.79, 0.84])); gl.uniform1f(U.AMAX, dk ? 0.48 : 0.72); gl.uniform1f(U.SHA, dk ? 0 : 0.07);   // 淺色：暗面只帶一點冷灰、霧底下墊很淡的陰影
       if (!cv.isConnected) document.body.append(cv);
       if (!smoke.raf) smoke.raf = requestAnimationFrame(smokeLoop);
       return true;

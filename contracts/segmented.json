@@ -9,7 +9,7 @@
   "instead": [{ "when": "選項文字長或需要說明", "use": "radio-group" }],
   "form": { "value": "number", "prop": "value", "format": "選中的索引", "empty": 0 },
   "parts": [
-    { "name": "root", "selector": ".seg", "element": "div", "classes": { "seg": "分段切換", "sm": "小號：對話框、卡片內" }, "attrs": { "role": { "values": ["radiogroup"], "required": true }, "aria-label": {} } },
+    { "name": "root", "selector": ".seg", "element": "div", "classes": { "seg": "分段切換", "sm": "小號：對話框、卡片內", "dis": "停用：同表單欄位停用，不能操作" }, "attrs": { "role": { "values": ["radiogroup"], "required": true }, "aria-label": {}, "aria-disabled": { "values": ["true"] } }, "sync": [{ "class": "dis", "attr": "aria-disabled", "value": "true" }] },
     { "name": "thumb", "selector": ".seg > i", "element": "i", "classes": {} },
     {
       "name": "option",
@@ -23,7 +23,7 @@
       },
       "sync": [
         { "class": "on", "attr": "aria-checked", "value": "true" },
-        { "class": "on", "attr": "tabindex", "value": "0" }
+        { "class": "on", "attr": "tabindex", "value": "0", "except": ".dis" }
       ]
     }
   ],

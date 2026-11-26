@@ -28,7 +28,7 @@ export const TimePicker = forwardRef<HTMLElement, TimePickerProps>(function Time
   const inc = (part: TimePart, d: 1 | -1) => { if (!disabled) set(timeStep(value, part, d, step)); };
   const onKeyDown = (part: TimePart) => (e: KeyboardEvent) => { const d = timeKey(e.key); if (d) { e.preventDefault(); inc(part, d); } };
   return (
-    <div className={cx('tp', className)} style={styleOf(style)} role="group" aria-label={label} aria-disabled={disabled || undefined} ref={root} onBlur={leaveHandler(onBlur)}>
+    <div className={cx('tp', disabled && 'dis', className)} style={styleOf(style)} role="group" aria-label={label} aria-disabled={disabled || undefined} ref={root} onBlur={leaveHandler(onBlur)}>
       <div className="tp-f" aria-hidden="true"><span className="roll"><span>{value}</span></span><Icon name="clock" /></div>
       <div className="tp-c">
         {TIME_COLS.map((c, i) => [

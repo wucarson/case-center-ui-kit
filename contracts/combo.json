@@ -12,7 +12,7 @@
   ],
   "form": { "value": "string", "prop": "value", "empty": "" },
   "parts": [
-    { "name": "root", "selector": ".dd", "element": "div", "classes": { "dd": "下拉", "open": "清單打開中", "pin": "清單跟在欄位下方、不浮起", "bad": "有錯誤" } },
+    { "name": "root", "selector": ".dd", "element": "div", "classes": { "dd": "下拉", "open": "清單打開中", "pin": "清單跟在欄位下方、不浮起", "bad": "有錯誤", "dis": "停用：同表單欄位停用，不能操作" } },
     { "name": "field", "selector": ".dd > .dd-t", "element": "div", "classes": { "dd-t": "欄位" } },
     {
       "name": "input",

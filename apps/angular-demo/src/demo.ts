@@ -83,29 +83,29 @@ const only = new URLSearchParams(location.search).get('c');
     @else {<div ccCheckbox [attr.aria-label]="p['aria-label'] ?? null" [checked]="!!p.checked" [indeterminate]="!!p.indeterminate" [selectAll]="!!p.selectAll" [disabled]="!!p.disabled" [label]="p.label" [style]="p.style ?? null"></div>}
   </ng-template>
   <ng-template #tRadio let-p><div ccRadioGroup [options]="p.options" [value]="p.value" [single]="!!p.single" [style]="p.style ?? null"></div></ng-template>
-  <ng-template #tSegmented let-p><div ccSegmented [options]="p.options" [value]="p.value" [size]="p.size ?? 'md'" [style]="p.style ?? null"></div></ng-template>
+  <ng-template #tSegmented let-p><div ccSegmented [disabled]="!!p.disabled" [options]="p.options" [value]="p.value" [size]="p.size ?? 'md'" [style]="p.style ?? null"></div></ng-template>
   <ng-template #tTabs let-p><div ccTabs [tabs]="p.tabs" [value]="p.value" [style]="p.style ?? null"></div></ng-template>
   <ng-template #tDetailTabs let-p><div ccDetailTabs [tabs]="p.tabs" [value]="p.value" [groupStarts]="p.groupStarts ?? []" [label]="p.label" [style]="p.style ?? null"></div></ng-template>
   <ng-template #tStar let-p><span ccStarToggle [on]="p.on" [label]="p.label"></span></ng-template>
   <ng-template #tPagination let-p><div ccPagination [total]="p.total" [page]="p.page" [pageSize]="p.pageSize" [showSize]="p.showSize ?? true" [style]="p.style ?? null"></div></ng-template>
-  <ng-template #tTime let-p><div ccTimePicker [value]="p.value" [label]="p.label"></div></ng-template>
+  <ng-template #tTime let-p><div ccTimePicker [disabled]="!!p.disabled" [value]="p.value" [label]="p.label"></div></ng-template>
   <ng-template #tField let-p>@let fid = fieldId(p);<div ccFormField [label]="p.label" [required]="!!p.required" [optional]="!!p.optional" [readOnly]="!!p.readOnly" [disabled]="!!p.disabled" [empty]="!!p.empty" [help]="p.help" [error]="p.error" [multiline]="!!p.multiline" [counter]="count(p)" [htmlFor]="fid">@if (p.prefix) {<svg [ccIcon]="p.prefix"></svg>}@if (p.multiline) {<textarea ccFieldControl [id]="fid" [value]="p.value" [attr.placeholder]="p.placeholder ?? null" [attr.maxlength]="p.maxLength ?? null"></textarea>} @else {<input ccFieldControl [id]="fid" [value]="p.value" [attr.placeholder]="p.placeholder ?? null" [attr.maxlength]="p.maxLength ?? null" />}@if (p.suffix) {<span class="unit">{{ p.suffix }}</span>}@if (p.readOnly) {<svg ccIcon="lock"></svg>}</div></ng-template>
   <ng-template #tCombo let-p>
     @if (p.field) {<div ccFormField [label]="p.field.label" [required]="!!p.field.required" [error]="p.field.error"><div ccCombo [items]="p.items" [value]="p.value ?? ''" [label]="p.label" [placeholder]="p.placeholder" [invalid]="!!p.invalid"></div></div>}
-    @else {<div ccCombo [items]="p.items" [value]="p.value ?? ''" [label]="p.label" [placeholder]="p.placeholder" [selfLabelled]="!!p.selfLabelled" [invalid]="!!p.invalid" [inlineMenu]="!!p.inlineMenu" [open]="!!p.defaultOpen" [defaultQuery]="p.defaultQuery"></div>}
+    @else {<div ccCombo [disabled]="!!p.disabled" [items]="p.items" [value]="p.value ?? ''" [label]="p.label" [placeholder]="p.placeholder" [selfLabelled]="!!p.selfLabelled" [invalid]="!!p.invalid" [inlineMenu]="!!p.inlineMenu" [open]="!!p.defaultOpen" [defaultQuery]="p.defaultQuery"></div>}
   </ng-template>
   <ng-template #tMulti let-p>
     @if (p.field) {<div ccFormField [label]="p.field.label"><div ccMultiSelect [options]="p.options" [value]="p.value" [noun]="p.noun"></div></div>}
-    @else {<div ccMultiSelect [options]="p.options" [value]="p.value" [noun]="p.noun" [single]="!!p.single" [inlineMenu]="!!p.inlineMenu" [open]="!!p.defaultOpen" [defaultQuery]="p.defaultQuery"></div>}
+    @else {<div ccMultiSelect [disabled]="!!p.disabled" [options]="p.options" [value]="p.value" [noun]="p.noun" [single]="!!p.single" [inlineMenu]="!!p.inlineMenu" [open]="!!p.defaultOpen" [defaultQuery]="p.defaultQuery"></div>}
   </ng-template>
   <ng-template #tDialog let-p><div ccConfirmDialog [open]="p.open" [inline]="!!p.inline" [title]="p.title" [body]="p.body" [note]="p.note" [destructive]="!!p.destructive"></div></ng-template>
   <ng-template #tToast let-p><div ccToast [title]="p.title" [detail]="p.detail" [tone]="p.tone ?? 'ok'" [action]="p.action"></div></ng-template>
   <ng-template #tPopover let-p><div ccInfoPopover [label]="p.label" [value]="p.value" [valueNote]="p.valueNote" [defaultOpen]="!!p.defaultOpen" [openDelay]="p.openDelay ?? 150">{{ p.children }}</div></ng-template>
-  <ng-template #tDate let-p><div ccDatePicker [value]="p.value" [label]="p.label" [help]="p.help" [min]="p.min" [today]="p.today" [open]="!!p.defaultOpen"></div></ng-template>
-  <ng-template #tPeriod let-p><div ccPeriodPicker [value]="p.value" [today]="p.today" [custom]="p.custom" [style]="p.style ?? null"></div></ng-template>
+  <ng-template #tDate let-p><div ccDatePicker [disabled]="!!p.disabled" [value]="p.value" [label]="p.label" [help]="p.help" [min]="p.min" [today]="p.today" [open]="!!p.defaultOpen"></div></ng-template>
+  <ng-template #tPeriod let-p><div ccPeriodPicker [disabled]="!!p.disabled" [value]="p.value" [today]="p.today" [custom]="p.custom" [style]="p.style ?? null"></div></ng-template>
   <ng-template #tSidebar let-p><div ccSidebar [groups]="p.groups" [value]="p.value" [collapsed]="!!p.collapsed" [brand]="p.brand" [user]="p.user"></div></ng-template>
   <ng-template #tAvatar let-p><div ccAvatarGroup [people]="p.people"></div></ng-template>
-  <ng-template #tTagSearch let-p><div ccTagSearch [tags]="p.tags" [value]="p.value" [label]="p.label"></div></ng-template>
+  <ng-template #tTagSearch let-p><div ccTagSearch [disabled]="!!p.disabled" [tags]="p.tags" [value]="p.value" [label]="p.label"></div></ng-template>
   <ng-template #tHold let-p><div ccHoldConfirm [label]="p.label" [progress]="p.progress" [done]="!!p.done" [disabled]="!!p.disabled"></div></ng-template>
   <ng-template #tDrag let-p><div ccDragSort [items]="p.items"></div></ng-template>
   <ng-template #tUpload let-p><div ccUpload [name]="p.name" [status]="p.status" [progress]="p.progress ?? 0" [size]="p.size"></div></ng-template>

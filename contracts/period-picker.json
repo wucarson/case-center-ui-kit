@@ -9,7 +9,7 @@
   "instead": [{ "when": "只選一天", "use": "date-picker" }],
   "form": { "value": "string", "prop": "value", "format": "month｜30d｜90d｜custom", "empty": "month" },
   "parts": [
-    { "name": "group", "selector": ".ps", "element": "div", "classes": { "ps": "期間" }, "attrs": { "role": { "values": ["radiogroup"], "required": true }, "aria-label": { "required": true } } },
+    { "name": "group", "selector": ".ps", "element": "div", "classes": { "ps": "期間", "dis": "停用：同表單欄位停用，不能操作" }, "attrs": { "role": { "values": ["radiogroup"], "required": true }, "aria-label": { "required": true }, "aria-disabled": { "values": ["true"] } }, "sync": [{ "class": "dis", "attr": "aria-disabled", "value": "true" }] },
     { "name": "pill", "selector": ".ps > i", "element": "i", "classes": {} },
     {
       "name": "option",
@@ -19,7 +19,7 @@
       "attrs": { "role": { "values": ["radio"], "required": true }, "aria-checked": { "values": ["true", "false"], "required": true }, "tabindex": { "values": ["0", "-1"], "required": true } },
       "sync": [
         { "class": "on", "attr": "aria-checked", "value": "true" },
-        { "class": "on", "attr": "tabindex", "value": "0" }
+        { "class": "on", "attr": "tabindex", "value": "0", "except": ".dis" }
       ]
     },
     { "name": "range", "selector": ".ps-r", "element": "div", "classes": { "ps-r": "範圍文字" } }

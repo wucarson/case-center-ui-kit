@@ -1,5 +1,5 @@
-import { Component, ElementRef, computed, inject, input, model, output, signal } from '@angular/core';
-import { isFocusVisible } from '@wucarson/facet-core/dom';
+import { booleanAttribute, Component, ElementRef, computed, inject, input, model, output, signal } from '@angular/core';
+import { cx, isFocusVisible } from '@wucarson/facet-core/dom';
 import {
   STAR_PATH, checkboxAttrs, checkboxClass, checkboxNext, focusNth, isCheckboxToggleKey, isStarToggleKey, radioClass, radioKey, radioMove,
   radioTabIndex, segmentedClass, segmentedColumns, segmentedKey, segmentedThumb, starClass,
@@ -84,11 +84,14 @@ export class RadioGroup {
   readonly value = model<string>();
   /** 只有一個選項、不包外層清單（展示單一狀態用） */
   readonly single = input(false);
+  /** 停用（表單停用也會停用） */
+  readonly disabled = input(false, { transform: booleanAttribute });
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   protected readonly form = inject<FormBridge<string | undefined>>(FormBridge).attach(this.value, undefined);
+  protected readonly off = computed(() => this.disabled() || this.form.disabled());
   /** 表單停用時每個選項都停用 */
-  protected readonly opts = computed(() => (this.form.disabled() ? this.options().map((o) => ({ ...o, disabled: true })) : this.options()));
+  protected readonly opts = computed(() => (this.off() ? this.options().map((o) => ({ ...o, disabled: true })) : this.options()));
   protected readonly focusAt = signal(-1);
   protected tab(i: number) { return radioTabIndex(this.opts(), this.value(), i); }
   protected radioCls(o: RadioOption) { return radioClass(o, o.value === this.value()); }
@@ -114,8 +117,8 @@ export class RadioGroup {
 @Component({
   selector: '[ccSegmented]',
   hostDirectives: [FormBridge],
-  host: { role: 'radiogroup', '[class]': 'cls()', '[style.grid-template-columns]': 'columns()', '[attr.aria-disabled]': 'form.disabled() || null' },
-  template: `<i [style]="thumb()"></i>@for (t of options(); track t) {<span role="radio" [attr.aria-checked]="$index === value()" [attr.tabindex]="$index === value() && !form.disabled() ? 0 : -1" [class.on]="$index === value()" (click)="select($index)" (keydown)="onKey($event, $index)">{{ t }}</span>}`,
+  host: { role: 'radiogroup', '[class]': 'cls()', '[style.grid-template-columns]': 'columns()', '[attr.aria-disabled]': 'off() || null' },
+  template: `<i [style]="thumb()"></i>@for (t of options(); track t) {<span role="radio" [attr.aria-checked]="$index === value()" [attr.tabindex]="$index === value() && !off() ? 0 : -1" [class.on]="$index === value()" (click)="select($index)" (keydown)="onKey($event, $index)">{{ t }}</span>}`,
 })
 export class Segmented {
   /** 2–4 個互斥選項 */
@@ -124,16 +127,19 @@ export class Segmented {
   readonly value = model(0);
   /** sm＝對話框、卡片內 */
   readonly size = input<'md' | 'sm'>('md');
+  /** 停用（表單停用也會停用） */
+  readonly disabled = input(false, { transform: booleanAttribute });
 
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   protected readonly form = inject<FormBridge<number>>(FormBridge).attach(this.value, 0);
-  protected readonly cls = computed(() => segmentedClass(this.size()));
-  protected select(i: number) { if (!this.form.disabled()) this.value.set(i); }
+  protected readonly off = computed(() => this.disabled() || this.form.disabled());
+  protected readonly cls = computed(() => cx(segmentedClass(this.size()), this.off() && 'dis'));
+  protected select(i: number) { if (!this.off()) this.value.set(i); }
   protected readonly columns = computed(() => segmentedColumns(this.options().length));
   protected readonly thumb = computed(() => segmentedThumb(this.options().length, this.value()));
   protected onKey(e: KeyboardEvent, i: number) {
     const r = segmentedKey(e.key, i, this.options().length);
-    if (!r || this.form.disabled()) return;
+    if (!r || this.off()) return;
     e.preventDefault();
     this.value.set(r.index);
     if (r.focus) focusNth(this.host.nativeElement, '[role="radio"]', r.index);

@@ -40,7 +40,7 @@ export const Segmented = forwardRef<HTMLElement, SegmentedProps>(function Segmen
       aria-label={aria['aria-label']}
       aria-disabled={disabled || undefined}
       onBlur={leaveHandler(onBlur)}
-      className={cx(segmentedClass(size), className)}
+      className={cx(segmentedClass(size), disabled && 'dis', className)}
       style={{ gridTemplateColumns: segmentedColumns(n), ...styleOf(style) }}
     >
       <i style={segmentedThumb(n, value)} />

@@ -96,7 +96,7 @@ export const Combo = forwardRef<HTMLInputElement, ComboProps>(function Combo({ i
     );
   }
   return (
-    <div ref={root} className={cx(comboClass({ open, inlineMenu, invalid }), className)} style={styleOf(style)} onBlur={leave}>
+    <div ref={root} className={cx(comboClass({ open, inlineMenu, invalid }), disabled && 'dis', className)} style={styleOf(style)} onBlur={leave}>
       <div className="dd-t">{input}<Icon name={comboIcon(open)} /></div>
       {menu}
       {hidden}

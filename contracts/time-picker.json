@@ -9,7 +9,7 @@
   "instead": [{ "when": "要選一段期間", "use": "period-picker" }],
   "form": { "value": "string", "prop": "value", "format": "HH:mm", "empty": "00:00" },
   "parts": [
-    { "name": "root", "selector": ".tp", "element": "div", "classes": { "tp": "時間選擇" }, "attrs": { "role": { "values": ["group"], "required": true }, "aria-label": { "required": true } } },
+    { "name": "root", "selector": ".tp", "element": "div", "classes": { "tp": "時間選擇", "dis": "停用：同表單欄位停用，不能操作" }, "attrs": { "role": { "values": ["group"], "required": true }, "aria-label": { "required": true }, "aria-disabled": { "values": ["true"] } }, "sync": [{ "class": "dis", "attr": "aria-disabled", "value": "true" }] },
     { "name": "field", "selector": ".tp > .tp-f", "element": "div", "classes": { "tp-f": "目前值" }, "attrs": { "aria-hidden": { "values": ["true"], "required": true } } },
     { "name": "columns", "selector": ".tp > .tp-c", "element": "div", "classes": { "tp-c": "時、分欄" } },
     { "name": "column", "selector": ".tp-c > .tp-col", "element": "div", "classes": { "tp-col": "一欄" } },
@@ -27,7 +27,7 @@
       "classes": { "v": "數值格" },
       "attrs": {
         "role": { "values": ["spinbutton"], "required": true },
-        "tabindex": { "values": ["0"], "required": true },
+        "tabindex": { "values": ["0", "-1"], "required": true },
         "aria-label": { "required": true },
         "aria-valuenow": { "required": true },
         "aria-valuemin": { "values": ["0"], "required": true },

@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, model, output, signal } from '@angular/core';
+import { booleanAttribute, Component, computed, inject, input, model, output, signal } from '@angular/core';
 import { searchBoxClass, suggestionClass, suggestionId, suggestionListLabel, tagMatches, tagSearchKey, type TagSuggestion } from '@wucarson/facet-core/search';
 import { FormBridge } from './form';
 import { Icon } from './icon';
@@ -16,8 +16,8 @@ let seq = 0;
   selector: '[ccTagSearch]',
   imports: [Icon],
   hostDirectives: [FormBridge],
-  host: { class: 'tsr' },
-  template: `<div [class]="boxCls()"><svg ccIcon="search"></svg><input [id]="inputId" class="ff-real" role="combobox" [attr.aria-label]="label()" [attr.aria-expanded]="open()" [attr.aria-controls]="listId" aria-autocomplete="list" [attr.aria-activedescendant]="open() ? optId(cursor()) : null" autocomplete="off" [attr.placeholder]="placeholder()" [value]="value()" [disabled]="form.disabled()" (input)="set($any($event.target).value)" (focus)="focus.set(true)" (blur)="focus.set(false)" (keydown)="onKey($event)" /></div>@if (open()) {<div [id]="listId" class="results show" role="listbox" [attr.aria-label]="listLabel()">@for (t of shown(); track t.label; let i = $index) {<div [id]="optId(i)" [class]="optCls(i)" role="option" [attr.aria-selected]="i === cursor()" (mousedown)="$event.preventDefault(); choose(t)" (mousemove)="cursor.set(i)"><span>{{ t.label }}</span>@if (t.count) {<em>{{ t.count }}</em>}</div>}</div>}`,
+  host: { class: 'tsr', '[class.dis]': 'off()' },
+  template: `<div [class]="boxCls()"><svg ccIcon="search"></svg><input [id]="inputId" class="ff-real" role="combobox" [attr.aria-label]="label()" [attr.aria-expanded]="open()" [attr.aria-controls]="listId" aria-autocomplete="list" [attr.aria-activedescendant]="open() ? optId(cursor()) : null" autocomplete="off" [attr.placeholder]="placeholder()" [value]="value()" [disabled]="off()" (input)="set($any($event.target).value)" (focus)="focus.set(true)" (blur)="focus.set(false)" (keydown)="onKey($event)" /></div>@if (open()) {<div [id]="listId" class="results show" role="listbox" [attr.aria-label]="listLabel()">@for (t of shown(); track t.label; let i = $index) {<div [id]="optId(i)" [class]="optCls(i)" role="option" [attr.aria-selected]="i === cursor()" (mousedown)="$event.preventDefault(); choose(t)" (mousemove)="cursor.set(i)"><span>{{ t.label }}</span>@if (t.count) {<em>{{ t.count }}</em>}</div>}</div>}`,
 })
 export class TagSearch {
   /** 可建議的標籤 */
@@ -28,10 +28,13 @@ export class TagSearch {
   readonly placeholder = input('搜尋公告標題或標籤');
   /** 最多幾個建議（預設 5） */
   readonly max = input(5);
+  /** 停用（表單停用也會停用） */
+  readonly disabled = input(false, { transform: booleanAttribute });
   readonly pick = output<TagSuggestion>();
 
   protected readonly inputId = `cc-ts-${++seq}`;
   protected readonly form = inject<FormBridge<string>>(FormBridge).attach(this.value, '');
+  protected readonly off = computed(() => this.disabled() || this.form.disabled());
   protected readonly listId = this.inputId + '-list';
   protected readonly focus = signal(false);
   private readonly closed = signal(false);

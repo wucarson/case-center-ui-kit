@@ -32,5 +32,5 @@ const onKey = (e: KeyboardEvent, i: number) => {
 </script>
 
 <template>
-  <div ref="root" role="radiogroup" :class="segmentedClass(size)" :style="[{ gridTemplateColumns: segmentedColumns(options.length) }, style as any]" :aria-disabled="disabled || undefined" @focusout="onOut"><i :style="segmentedThumb(options.length, val)" /><span v-for="(t, i) in options" :key="t" role="radio" :aria-checked="i === val" :tabindex="i === val && !disabled ? 0 : -1" :class="i === val ? 'on' : undefined" @click="select(i)" @keydown="onKey($event, i)">{{ t }}</span></div>
+  <div ref="root" role="radiogroup" :class="[segmentedClass(size), disabled && 'dis']" :style="[{ gridTemplateColumns: segmentedColumns(options.length) }, style as any]" :aria-disabled="disabled || undefined" @focusout="onOut"><i :style="segmentedThumb(options.length, val)" /><span v-for="(t, i) in options" :key="t" role="radio" :aria-checked="i === val" :tabindex="i === val && !disabled ? 0 : -1" :class="i === val ? 'on' : undefined" @click="select(i)" @keydown="onKey($event, i)">{{ t }}</span></div>
 </template>

@@ -53,7 +53,7 @@ export const MultiSelect = forwardRef<HTMLElement, MultiSelectProps>(function Mu
   const textEl = <span className={multiTextClass(value)}>{multiText(value, noun)}</span>;
   if (inField) return <>{textEl}<span className="unit" aria-hidden="true"><Icon name="chevronDown" /></span>{hidden}</>;
   return (
-    <div ref={root} className={cx(multiClass({ open, inlineMenu }), className)} style={styleOf(style)} onBlur={leaveHandler(onBlur)}>
+    <div ref={root} className={cx(multiClass({ open, inlineMenu }), disabled && 'dis', className)} style={styleOf(style)} onBlur={leaveHandler(onBlur)}>
       <div className="ms-t" role="combobox" tabIndex={disabled ? -1 : 0} aria-disabled={disabled || undefined} aria-expanded={open} aria-controls={listId} aria-haspopup="listbox" aria-label={multiTriggerLabel(noun, aria['aria-label'])} onClick={() => { if (!disabled) setOpen((o) => !o); }} onKeyDown={onKeyDown}>
         {textEl}
         {multiShowCount(value, single) && <span className="ms-n">{value.length}</span>}

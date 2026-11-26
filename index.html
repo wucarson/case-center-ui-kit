@@ -3014,7 +3014,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       // 杖尖火花（煙火）：全螢幕畫布，每顆火花受阻力減速、受重力下墜，拖出彎曲的光尾
       const sparkCv = document.createElement('canvas');
       sparkCv.className = 'wand-sparks';
-      const DPR = Math.min(2, devicePixelRatio || 1);
+      const DPR = Math.min(1.5, devicePixelRatio || 1);
       sparkCv.width = Math.round(W * DPR); sparkCv.height = Math.round(H * DPR);
       fx.append(sparkCv);
       const pigment = new Image();
@@ -3028,7 +3028,13 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       // 熱浪扭曲：墨水與光暈包在全螢幕的一層裡套位移濾鏡（螢幕座標，波紋大小不隨墨水放大而變粗）
       const haze = document.createElement('div');
       haze.className = 'wand-haze';
-      haze.innerHTML = '<svg width="0" height="0" aria-hidden="true"><filter id="wand-haze-f" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".011 .03" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></svg>';
+      // 噪點只產生一次：每格約 30px 的隨機值畫在小畫布上，濾鏡放大成全螢幕時自然變成柔和波紋（不必每幀跑 feTurbulence）
+      const nw = Math.ceil(W / 30) + 4, nh = Math.ceil(H / 30) + 4, nc = document.createElement('canvas');
+      nc.width = nw; nc.height = nh;
+      const nctx = nc.getContext('2d'), nd = nctx.createImageData(nw, nh);
+      for (let i = 0; i < nd.data.length; i += 4) { nd.data[i] = Math.random() * 255; nd.data[i + 1] = Math.random() * 255; nd.data[i + 2] = 128; nd.data[i + 3] = 255; }
+      nctx.putImageData(nd, 0, 0);
+      haze.innerHTML = `<svg width="0" height="0" aria-hidden="true"><filter id="wand-haze-f" filterUnits="userSpaceOnUse" x="-40" y="-40" width="${W + 80}" height="${H + 80}" color-interpolation-filters="sRGB"><feImage href="${nc.toDataURL()}" x="-60" y="-60" width="${W + 120}" height="${H + 120}" preserveAspectRatio="none" result="n0"/><feOffset in="n0" dx="0" dy="0" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></svg>`;
       haze.append(pigment, edgeGlow);
       fx.prepend(haze);
       const de = document.documentElement;
@@ -3103,8 +3109,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         ];
         pigment.animate(inkFrames, { duration: DUR, fill: 'both' });
         edgeGlow.animate(inkFrames, { duration: DUR, fill: 'both' });   // 光暈跟墨水同一組縮放，永遠貼在前緣
-        // 熱浪：擴散期間邊緣像海市蜃樓一樣不規則扭動——噪聲頻率緩慢飄移，位移量隨擴散加速增強、尾段收掉
-        const turb = haze.querySelector('feTurbulence'), disp = haze.querySelector('feDisplacementMap');
+        // 熱浪：擴散期間邊緣像海市蜃樓一樣不規則扭動——噪點來回漂移，位移量隨擴散加速增強、尾段收掉
+        const drift = haze.querySelector('feOffset'), disp = haze.querySelector('feDisplacementMap');
         const hazeFrom = performance.now() + HIT, hazeLen = SPREAD + 250;
         const wobble = (now) => {
           if (!fx.isConnected) return;
@@ -3112,7 +3118,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           if (p >= 1) { disp.setAttribute('scale', '0'); return; }
           if (p > 0) {
             const t = now / 1000;
-            turb.setAttribute('baseFrequency', `${(.011 + .003 * Math.sin(t * 5.1)).toFixed(4)} ${(.03 + .008 * Math.sin(t * 7.3 + 1.2)).toFixed(4)}`);
+            drift.setAttribute('dx', (14 * Math.sin(t * 6.1)).toFixed(1)); drift.setAttribute('dy', (20 * Math.sin(t * 8.3 + 1.2)).toFixed(1));   // 噪點來回漂移＝波紋扭動
             disp.setAttribute('scale', (34 * Math.sin(Math.PI * Math.min(1, p * 1.15)) ** .8).toFixed(1));
           }
           requestAnimationFrame(wobble);
@@ -3144,7 +3150,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           const COLORS = ['#ffffff', '#ffb347', '#ff4f8b', '#3d8bff'];
           const sg = sparkCv.getContext('2d');
           sg.scale(DPR, DPR);
-          sg.lineCap = 'round';
+          sg.lineCap = sg.lineJoin = 'round';
           const TAU = 300, G = .0011, TRAIL = 14;   // 阻力時間常數（ms）、重力（px/ms²）、光尾保留幾個位置
           const ps = Array.from({ length: 40 }, (_, i) => {
             const a = (42 + 40 + (i / 40) * 280 + (Math.random() - .5) * 14) * Math.PI / 180;
@@ -3170,12 +3176,13 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
               p.x += p.vx * dt; p.y += p.vy * dt;
               p.tr.push([p.x, p.y]); if (p.tr.length > TRAIL) p.tr.shift();
               const fade = 1 - f * f;   // 前段亮、尾段快速熄
-              sg.strokeStyle = p.c; sg.shadowColor = p.c; sg.shadowBlur = 6;
-              for (let j = 1; j < p.tr.length; j++) {   // 光尾：越舊的段越細越淡
-                const q = j / p.tr.length;
-                sg.globalAlpha = fade * q * .9;
-                sg.lineWidth = p.w * (.3 + .7 * q);
-                sg.beginPath(); sg.moveTo(p.tr[j - 1][0], p.tr[j - 1][1]); sg.lineTo(p.tr[j][0], p.tr[j][1]); sg.stroke();
+              // 光尾：整條細線＋靠近火花頭的半段加粗，外面再描一筆寬而淡的光暈（不用 shadowBlur，省效能）
+              const tr = p.tr, n = tr.length, path = (from) => { sg.beginPath(); sg.moveTo(tr[from][0], tr[from][1]); for (let j = from + 1; j < n; j++) sg.lineTo(tr[j][0], tr[j][1]); };
+              sg.strokeStyle = p.c;
+              if (n > 1) {
+                path(0); sg.globalAlpha = fade * .18; sg.lineWidth = p.w * 3.2; sg.stroke();
+                sg.globalAlpha = fade * .45; sg.lineWidth = p.w * .45; sg.stroke();
+                const mid = n >> 1; if (n - mid > 1) { path(mid); sg.globalAlpha = fade * .9; sg.lineWidth = p.w; sg.stroke(); }
               }
               sg.globalAlpha = fade; sg.fillStyle = '#fff';   // 火花頭：白熱小點
               sg.beginPath(); sg.arc(p.x, p.y, p.w * .7, 0, Math.PI * 2); sg.fill();

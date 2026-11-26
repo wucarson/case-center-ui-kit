@@ -32,7 +32,7 @@
           "sync": {
             "type": "array",
             "description": "class 與屬性必須同時出現或同時不出現",
-            "items": { "type": "object", "required": ["class", "attr", "value"], "properties": { "class": { "type": "string" }, "attr": { "type": "string" }, "value": { "type": "string" } } }
+            "items": { "type": "object", "required": ["class", "attr", "value"], "properties": { "class": { "type": "string" }, "attr": { "type": "string" }, "value": { "type": "string" }, "except": { "type": "string", "description": "元素在這個選擇器裡（例：停用中的 .dis）時不檢查" } } }
           },
           "label": { "type": "string", "description": "需要讀屏名稱：有可見文字或 aria-label；缺少時列為警告" }
         }

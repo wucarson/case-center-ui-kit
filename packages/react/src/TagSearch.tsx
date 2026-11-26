@@ -49,7 +49,7 @@ export const TagSearch = forwardRef<HTMLInputElement, TagSearchProps>(function T
     else setClosed(true);
   };
   return (
-    <div className={cx('tsr', className)} style={styleOf(style)} onBlur={leaveHandler(onBlur)}>
+    <div className={cx('tsr', disabled && 'dis', className)} style={styleOf(style)} onBlur={leaveHandler(onBlur)}>
       <div className={searchBoxClass(focus)}>
         <Icon name="search" />
         <input

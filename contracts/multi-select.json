@@ -9,7 +9,7 @@
   "instead": [{ "when": "只能選一個", "use": "combo" }],
   "form": { "value": "string[]", "prop": "value", "empty": [] },
   "parts": [
-    { "name": "root", "selector": ".ms", "element": "div", "classes": { "ms": "多選", "open": "清單打開中", "pin": "清單跟在按鈕下方、不浮起" } },
+    { "name": "root", "selector": ".ms", "element": "div", "classes": { "ms": "多選", "open": "清單打開中", "pin": "清單跟在按鈕下方、不浮起", "dis": "停用：同表單欄位停用，不能操作" } },
     {
       "name": "trigger",
       "selector": ".ms > .ms-t",
@@ -17,7 +17,7 @@
       "classes": { "ms-t": "按鈕" },
       "attrs": {
         "role": { "values": ["combobox"], "required": true },
-        "tabindex": { "values": ["0"], "required": true },
+        "tabindex": { "values": ["0", "-1"], "required": true },
         "aria-haspopup": { "values": ["listbox"], "required": true },
         "aria-expanded": { "values": ["true", "false"], "required": true },
         "aria-label": { "required": true }

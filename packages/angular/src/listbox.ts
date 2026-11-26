@@ -1,6 +1,6 @@
 import { Component, ElementRef, booleanAttribute, computed, effect, inject, input, model, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { isActivateKey, onOutsidePointer } from '@wucarson/facet-core/dom';
+import { cx, isActivateKey, onOutsidePointer } from '@wucarson/facet-core/dom';
 import {
   COMBO_EMPTY, comboClass, comboIcon, comboKey, comboListId, comboOptionClass, comboOptionId, filterItems, multiClass, multiFooter, multiKey,
   multiSearchLabel, multiShowCount, multiText, multiTextClass, multiToggle, multiTriggerLabel,
@@ -24,7 +24,7 @@ let seq = 0;
   imports: [Icon, NgTemplateOutlet],
   providers: [{ provide: FIELD_BOX, useExisting: Combo }],
   host: { '[class]': 'cls()' },
-  template: `<ng-template #inp><input [id]="inputId()" role="combobox" [attr.aria-expanded]="open()" [attr.aria-controls]="listId()" [attr.aria-activedescendant]="active()" aria-autocomplete="list" [attr.aria-invalid]="bad() || null" [disabled]="form.disabled()" [attr.aria-label]="selfLabelled() ? label() : null" autocomplete="off" [attr.placeholder]="placeholder() ?? null" [value]="query() ?? value()" (input)="onInput($event)" (focus)="open.set(true)" (keydown)="onKey($event)" /></ng-template><ng-template #menu>@if (open()) {<div class="dd-m" [id]="listId()" role="listbox" [attr.aria-label]="label()">@for (t of shown(); track t; let i = $index) {<div [id]="optId(i)" role="option" [attr.aria-selected]="t === value()" [attr.class]="optCls(t, i)" (mousedown)="$event.preventDefault(); pick(t)" (mousemove)="cursor.set(i)">{{ t }}<svg ccIcon="check"></svg></div>} @empty {<div class="none">{{ empty }}</div>}</div>}</ng-template>@if (inField()) {<ng-container *ngTemplateOutlet="inp" /><span class="unit" aria-hidden="true"><svg ccIcon="chevronDown"></svg></span><ng-container *ngTemplateOutlet="menu" />} @else {<div class="dd-t"><ng-container *ngTemplateOutlet="inp" /><svg [ccIcon]="icon()"></svg></div><ng-container *ngTemplateOutlet="menu" />}`,
+  template: `<ng-template #inp><input [id]="inputId()" role="combobox" [attr.aria-expanded]="open()" [attr.aria-controls]="listId()" [attr.aria-activedescendant]="active()" aria-autocomplete="list" [attr.aria-invalid]="bad() || null" [disabled]="off()" [attr.aria-label]="selfLabelled() ? label() : null" autocomplete="off" [attr.placeholder]="placeholder() ?? null" [value]="query() ?? value()" (input)="onInput($event)" (focus)="open.set(true)" (keydown)="onKey($event)" /></ng-template><ng-template #menu>@if (open()) {<div class="dd-m" [id]="listId()" role="listbox" [attr.aria-label]="label()">@for (t of shown(); track t; let i = $index) {<div [id]="optId(i)" role="option" [attr.aria-selected]="t === value()" [attr.class]="optCls(t, i)" (mousedown)="$event.preventDefault(); pick(t)" (mousemove)="cursor.set(i)">{{ t }}<svg ccIcon="check"></svg></div>} @empty {<div class="none">{{ empty }}</div>}</div>}</ng-template>@if (inField()) {<ng-container *ngTemplateOutlet="inp" /><span class="unit" aria-hidden="true"><svg ccIcon="chevronDown"></svg></span><ng-container *ngTemplateOutlet="menu" />} @else {<div class="dd-t"><ng-container *ngTemplateOutlet="inp" /><svg [ccIcon]="icon()"></svg></div><ng-container *ngTemplateOutlet="menu" />}`,
 })
 export class Combo {
   readonly items = input.required<string[]>();
@@ -41,6 +41,8 @@ export class Combo {
   /** 一開始的輸入字（篩選） */
   readonly defaultQuery = input<string>();
   readonly id = input<string>();
+  /** 停用（表單停用也會停用） */
+  readonly disabled = input(false, { transform: booleanAttribute });
 
   private readonly field = inject(FormField, { optional: true });
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -48,6 +50,7 @@ export class Combo {
   protected readonly form = inject<FormBridge<string>>(FormBridge).attach(this.value, '');
   /** 錯誤：自己給 invalid，或表單驗證不通過且碰過 */
   protected readonly bad = computed(() => this.invalid() || this.form.invalid());
+  protected readonly off = computed(() => this.disabled() || this.form.disabled());
   protected readonly inField = computed(() => !!this.field);
   protected readonly query = signal<string | null>(null);
   protected readonly cursor = signal(-1);
@@ -57,7 +60,7 @@ export class Combo {
   protected readonly shown = computed(() => filterItems(this.items(), this.query()));
   protected readonly icon = computed(() => comboIcon(this.open()));
   protected readonly active = computed(() => (this.open() && this.cursor() >= 0 ? comboOptionId(this.inputId(), this.cursor()) : null));
-  protected readonly cls = computed(() => (this.inField() ? 'ff-i' : comboClass({ open: this.open(), inlineMenu: this.inlineMenu(), invalid: this.bad() })));
+  protected readonly cls = computed(() => (this.inField() ? 'ff-i' : cx(comboClass({ open: this.open(), inlineMenu: this.inlineMenu(), invalid: this.bad() }), this.off() && 'dis')));
   protected optId(i: number) { return comboOptionId(this.inputId(), i); }
   protected optCls(t: string, i: number) { return comboOptionClass(t === this.value(), i === this.cursor()) || null; }
 
@@ -94,7 +97,7 @@ export class Combo {
   imports: [Checkbox, Icon],
   providers: [{ provide: FIELD_BOX, useExisting: MultiSelect }],
   host: { '[class]': 'cls()' },
-  template: `@if (inField()) {<span [attr.class]="textCls()">{{ text() }}</span><span class="unit" aria-hidden="true"><svg ccIcon="chevronDown"></svg></span>} @else {<div class="ms-t" role="combobox" [attr.tabindex]="form.disabled() ? -1 : 0" [attr.aria-disabled]="form.disabled() || null" [attr.aria-expanded]="open()" [attr.aria-controls]="listId" aria-haspopup="listbox" [attr.aria-label]="triggerLabel()" (click)="!form.disabled() && open.set(!open())" (keydown)="onKey($event)"><span [attr.class]="textCls()">{{ text() }}</span>@if (showCount()) {<span class="ms-n">{{ value().length }}</span>}<svg ccIcon="chevronDown"></svg></div>@if (open()) {<div class="ms-p" [id]="listId" role="listbox" [attr.aria-multiselectable]="!single()"><div class="ms-s"><svg ccIcon="search"></svg><input [attr.aria-label]="searchLabel()" [attr.placeholder]="searchLabel()" [value]="query()" (input)="query.set($any($event.target).value)" (keydown)="onKey($event)" /></div><div class="ms-l">@for (t of shown(); track t) {<div ccCheckbox [label]="t" [checked]="value().includes(t)" (checkedChange)="toggle(t)"></div>}</div><div class="ms-f"><span>{{ footer() }}</span><u role="button" tabindex="0" (click)="clear()" (keydown)="onClearKey($event)">清除</u></div></div>}}`,
+  template: `@if (inField()) {<span [attr.class]="textCls()">{{ text() }}</span><span class="unit" aria-hidden="true"><svg ccIcon="chevronDown"></svg></span>} @else {<div class="ms-t" role="combobox" [attr.tabindex]="off() ? -1 : 0" [attr.aria-disabled]="off() || null" [attr.aria-expanded]="open()" [attr.aria-controls]="listId" aria-haspopup="listbox" [attr.aria-label]="triggerLabel()" (click)="!off() && open.set(!open())" (keydown)="onKey($event)"><span [attr.class]="textCls()">{{ text() }}</span>@if (showCount()) {<span class="ms-n">{{ value().length }}</span>}<svg ccIcon="chevronDown"></svg></div>@if (open()) {<div class="ms-p" [id]="listId" role="listbox" [attr.aria-multiselectable]="!single()"><div class="ms-s"><svg ccIcon="search"></svg><input [attr.aria-label]="searchLabel()" [attr.placeholder]="searchLabel()" [value]="query()" (input)="query.set($any($event.target).value)" (keydown)="onKey($event)" /></div><div class="ms-l">@for (t of shown(); track t) {<div ccCheckbox [label]="t" [checked]="value().includes(t)" (checkedChange)="toggle(t)"></div>}</div><div class="ms-f"><span>{{ footer() }}</span><u role="button" tabindex="0" (click)="clear()" (keydown)="onClearKey($event)">清除</u></div></div>}}`,
 })
 export class MultiSelect {
   readonly options = input.required<string[]>();
@@ -111,11 +114,14 @@ export class MultiSelect {
   readonly open = model(false);
   readonly defaultQuery = input<string>();
   readonly ariaLabel = input<string>(undefined, { alias: 'aria-label' });
+  /** 停用（表單停用也會停用） */
+  readonly disabled = input(false, { transform: booleanAttribute });
 
   private readonly field = inject(FormField, { optional: true });
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   protected readonly listId = `cc-ms-${++seq}`;
   protected readonly form = inject<FormBridge<string[]>>(FormBridge).attach(this.value, []);
+  protected readonly off = computed(() => this.disabled() || this.form.disabled());
   protected readonly inField = computed(() => !!this.field);
   protected readonly query = signal('');
   protected readonly shown = computed(() => filterItems(this.options(), this.query()));
@@ -125,7 +131,7 @@ export class MultiSelect {
   protected readonly triggerLabel = computed(() => multiTriggerLabel(this.noun(), this.ariaLabel()));
   protected readonly searchLabel = computed(() => multiSearchLabel(this.noun()));
   protected readonly footer = computed(() => multiFooter(this.value(), this.noun(), this.unit()));
-  protected readonly cls = computed(() => (this.inField() ? 'ff-i' : multiClass({ open: this.open(), inlineMenu: this.inlineMenu() })));
+  protected readonly cls = computed(() => (this.inField() ? 'ff-i' : cx(multiClass({ open: this.open(), inlineMenu: this.inlineMenu() }), this.off() && 'dis')));
 
   constructor() {
     effect((onCleanup) => { if (this.open() && !this.inField()) onCleanup(onOutsidePointer(this.host.nativeElement, () => this.open.set(false))); });
@@ -135,6 +141,6 @@ export class MultiSelect {
 
   protected toggle(t: string) { this.value.set(multiToggle(this.value(), t, this.single())); if (this.single()) this.open.set(false); }
   protected clear() { this.value.set([]); }
-  protected onKey(e: KeyboardEvent) { if (this.form.disabled()) return; const r = multiKey(this.open(), e.key); if (r) { e.preventDefault(); this.open.set(r === 'open'); } }
+  protected onKey(e: KeyboardEvent) { if (this.off()) return; const r = multiKey(this.open(), e.key); if (r) { e.preventDefault(); this.open.set(r === 'open'); } }
   protected onClearKey(e: KeyboardEvent) { if (isActivateKey(e.key)) { e.preventDefault(); this.clear(); } }
 }

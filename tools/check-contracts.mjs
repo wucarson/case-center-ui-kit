@@ -41,6 +41,7 @@ function check(contract) {
           if (rule.values && !rule.values.includes(v)) out.push({ id, level: 'error', msg: `${where}：${name}="${v}" 應為 ${rule.values.join('／')}` });
         }
         for (const s of part.sync || []) {
+          if (s.except && el.closest(s.except)) continue;   // 例：停用中的元件，選中項不必可聚焦
           if (el.classList.contains(s.class) !== (el.getAttribute(s.attr) === s.value)) out.push({ id, level: 'error', msg: `${where}：class「${s.class}」與 ${s.attr}="${s.value}" 不同步` });
         }
         if (part.label && !el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby') && !el.textContent.trim()) out.push({ id, level: 'warn', msg: `${where}：沒有讀屏名稱（${part.label}）` });

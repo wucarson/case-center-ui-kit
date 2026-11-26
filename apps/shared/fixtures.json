@@ -156,6 +156,10 @@
       [
         "Error",
         "<div class=\"dd bad\"><div class=\"dd-t\"><span class=\"ph\">請選擇所屬專案</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></div></div>"
+      ],
+      [
+        "Disabled",
+        "<div class=\"dd dis\"><div class=\"dd-t\"><span>變電站季度保養</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></div></div>"
       ]
     ]
   },
@@ -196,6 +200,10 @@
       [
         "Searchable",
         "<div class=\"ms open pin\"><div class=\"ms-t\"><span class=\"ph\">全部部門</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></div><div class=\"ms-p\"><div class=\"ms-s\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><span class=\"q\">研</span></div><div class=\"ms-l\"><div class=\"ck \"><i><svg class=\"ic chk\" viewBox=\"0 0 24 24\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg><svg class=\"ic dash\" viewBox=\"0 0 24 24\"><path d=\"M6 12h12\"/></svg></i><span>研發部</span></div></div><div class=\"ms-f\"><span>未選＝全部部門</span><u>清除</u></div></div></div>"
+      ],
+      [
+        "Disabled",
+        "<div class=\"ms dis\"><div class=\"ms-t\"><span class=\"\">設計部、研發部</span><span class=\"ms-n\">2</span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></div></div>"
       ]
     ]
   },
@@ -336,6 +344,10 @@
       [
         "Focus",
         "<div style=\"width:100%\"><div class=\"seg \" style=\"grid-template-columns:repeat(3,1fr)\"><i style=\"width:calc((100% - 6px) / 3);transform:translateX(0%)\"></i><span class=\"on is-focus\">日</span><span class=\" \">週</span><span class=\" \">月</span></div></div>"
+      ],
+      [
+        "Disabled",
+        "<div style=\"width:100%\"><div class=\"seg dis\" style=\"grid-template-columns:repeat(3,1fr)\"><i style=\"width:calc((100% - 6px) / 3);transform:translateX(100%)\"></i><span class=\" \">日</span><span class=\"on \">週</span><span class=\" \">月</span></div></div>"
       ]
     ]
   },
@@ -897,6 +909,10 @@
       [
         "Preset hover",
         "<div class=\"dp open\"><div class=\"dp-f\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"></rect><path d=\"M3.5 10h17M8 3v4M16 3v4\"></path></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div><div class=\"dp-p\"><div class=\"dp-pre\"><span>今天</span><span>明天</span><span class=\"on\">一週後</span><span class=\"hv\">月底</span></div><div class=\"dp-c\"><div class=\"dp-m\"><span>2026 年 11 月</span><span><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M15 6l-6 6 6 6\"></path></svg><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M9 6l6 6-6 6\"></path></svg></span></div><div class=\"dp-g\"><i class=\"dp-sel\" style=\"transform: translate(182px, 93px);\"></i><b>日</b><b>一</b><b>二</b><b>三</b><b>四</b><b>五</b><b>六</b><span class=\"off\">1</span><span class=\"off\">2</span><span class=\"off\">3</span><span class=\"off\">4</span><span class=\"off\">5</span><span class=\"off\">6</span><span class=\"off\">7</span><span class=\"off\">8</span><span class=\"off\">9</span><span class=\"off\">10</span><span class=\"off\">11</span><span class=\"off\">12</span><span class=\"today\">13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span class=\"on\">20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span></div></div></div></div>"
+      ],
+      [
+        "Disabled",
+        "<div class=\"dp dis\"><div class=\"dp-f\"><span class=\"roll\"><span>2026-11-20（五）</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"2.5\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/></svg></div><div class=\"dp-h\">結束日期・預設為一週後</div></div>"
       ]
     ]
   },
@@ -917,6 +933,10 @@
       [
         "Hover",
         "<div class=\"tp\"><div class=\"tp-f\"><span class=\"roll\"><span>09:30</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/></svg></div><div class=\"tp-c\"><div class=\"tp-col\"><u class=\"hv\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>09</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div><b>:</b><div class=\"tp-col\"><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>30</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div></div></div>"
+      ],
+      [
+        "Disabled",
+        "<div class=\"tp dis\"><div class=\"tp-f\"><span class=\"roll\"><span>09:30</span></span><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/></svg></div><div class=\"tp-c\"><div class=\"tp-col\"><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>09</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div><b>:</b><div class=\"tp-col\"><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 15l6-6 6 6\"/></svg></u><span class=\"v\"><span class=\"roll\"><span>30</span></span></span><u><svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"/></svg></u></div></div></div>"
       ]
     ]
   },
@@ -941,6 +961,10 @@
       [
         "自訂",
         "<div style=\"width:100%\"><div class=\"ps\"><i style=\"width: 66px; transform: translateX(195px);\"></i><span>本月</span><span>近 30 天</span><span>近 90 天</span><span class=\"on\">自訂<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"></path></svg></span></div><div class=\"ps-r\">2026-11-03 ～ 2026-11-12・共 10 天</div></div>"
+      ],
+      [
+        "Disabled",
+        "<div style=\"width:100%\"><div class=\"ps dis\"><i style=\"width: 72px; transform: translateX(53px);\"></i><span>本月</span><span class=\"on\">近 30 天</span><span>近 90 天</span><span>自訂<svg class=\"ic\" viewBox=\"0 0 24 24\"><path d=\"M6 9l6 6 6-6\"></path></svg></span></div><div class=\"ps-r\">2026-10-15 ～ 2026-11-13・共 30 天</div></div>"
       ]
     ]
   },
@@ -973,6 +997,10 @@
       [
         "No results",
         "<div class=\"tsr\"><div class=\"search focus\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><input class=\"ff-real\" placeholder=\"搜尋公告標題或標籤\" value=\"空調\"></div></div>"
+      ],
+      [
+        "Disabled",
+        "<div class=\"tsr dis\"><div class=\"search\"><svg class=\"ic\" viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l4 4\"/></svg><input class=\"ff-real\" placeholder=\"搜尋公告標題或標籤\" value=\"系統維護\"></div></div>"
       ]
     ]
   },

@@ -54,7 +54,7 @@ export const DatePicker = forwardRef<HTMLElement, DatePickerProps>(function Date
   };
   const [y, m] = view;
   return (
-    <div ref={root} className={cx('dp', open && 'open', className)} style={styleOf(style)} onBlur={leaveHandler(onBlur)}>
+    <div ref={root} className={cx('dp', open && 'open', disabled && 'dis', className)} style={styleOf(style)} onBlur={leaveHandler(onBlur)}>
       <div className="dp-f" role="button" tabIndex={disabled ? -1 : 0} aria-disabled={disabled || undefined} aria-label={dateFieldLabel(label, value)} aria-haspopup="dialog" aria-expanded={open} onClick={() => { if (!disabled) setOpen((o) => !o); }} onKeyDown={(e) => { if (!disabled && isDateOpenKey(e.key)) { e.preventDefault(); setOpen(true); } }}>
         <span className="roll"><span>{value ? fmtDay(value) : ''}</span></span><Icon name="calendar" />
       </div>

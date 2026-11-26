@@ -9,7 +9,7 @@
   "instead": [{ "when": "結構化篩選（部門、狀態）", "use": "combo" }],
   "form": { "value": "string", "prop": "value", "empty": "" },
   "parts": [
-    { "name": "root", "selector": ".tsr", "element": "div", "classes": { "tsr": "搜尋與建議" } },
+    { "name": "root", "selector": ".tsr", "element": "div", "classes": { "tsr": "搜尋與建議", "dis": "停用：同表單欄位停用，不能操作" } },
     { "name": "box", "selector": ".tsr > .search", "element": "div", "classes": { "search": "搜尋框", "focus": "聚焦中" } },
     {
       "name": "input",

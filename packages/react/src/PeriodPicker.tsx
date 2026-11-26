@@ -4,7 +4,7 @@ import { periodIndex, periodKey, periodText, placePeriodPill } from '@wucarson/f
 import { PERIODS, todayISO, type PeriodKey } from '@wucarson/facet-core/dates';
 import { Icon } from './Icon';
 import { FormValue, leaveHandler, useControlled, useFieldRef, type FieldProps } from './form';
-import { styleOf } from './util';
+import { cx, styleOf } from './util';
 
 export interface PeriodPickerProps extends FieldProps {
   /** 受控：期間代碼 */
@@ -39,7 +39,7 @@ export const PeriodPicker = forwardRef<HTMLElement, PeriodPickerProps>(function 
   };
   return (
     <div className={className} style={styleOf(style)} onBlur={leaveHandler(onBlur)}>
-      <div ref={ps} className="ps" role="radiogroup" aria-label="期間" aria-disabled={disabled || undefined} onKeyDown={onKeyDown}>
+      <div ref={ps} className={cx('ps', disabled && 'dis')} role="radiogroup" aria-label="期間" aria-disabled={disabled || undefined} onKeyDown={onKeyDown}>
         <i ref={pill} />
         {PERIODS.map((p, i) => (
           <span key={p.key} role="radio" aria-checked={i === cur} tabIndex={i === cur && !disabled ? 0 : -1} className={i === cur ? 'on' : undefined} onClick={() => select(p.key)}>

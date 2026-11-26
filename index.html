@@ -1,4 +1,5 @@
 <title>元件展示牆</title>
+<script>if (location.hash.length > 1 && !/[?&]preview=/.test(location.search)) document.documentElement.classList.add('boot-dt');</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/l/font?kit=co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_iE9GnbciL93RJXSJcQ&amp;skey=a863d1376a24bd7a&amp;v=v21">
@@ -147,15 +148,40 @@ h1 { margin: 0; font-size: calc(28px * var(--fs-k) * var(--rk, 1)); line-height:
 .ctl svg { width: 14px; height: 14px; fill: currentColor; }
 
 /* 分類標籤：膠囊按鈕，選中淡主色（同篩選標籤） */
-.wf { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: -2px; }
-.wf button { height: 40px; padding: 0 16px 0 18px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--tile); color: var(--muted); font: inherit; font-size: calc(15px * var(--fs-k)); font-weight: 500; cursor: pointer; transition: background calc(.2s * var(--dur)), border-color calc(.2s * var(--dur)), color calc(.2s * var(--dur)), transform calc(.2s * var(--dur)) var(--spring); }
+.wf { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: -2px; }
+.wf-c { display: flex; flex-wrap: wrap; gap: 10px; min-width: 0; }
+.wf-c button { flex: none; }
+/* 篩選框：分類列右側；打字即時篩選卡片 */
+.wq { margin-left: auto; width: 240px; height: 40px; display: flex; align-items: center; gap: 8px; padding: 0 6px 0 14px; border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--tile); color: var(--weak); transition: border-color calc(.2s * var(--dur)); }
+.wq:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
+.wq:focus-within { border-color: var(--primary); outline: 3px solid var(--focus); outline-offset: 1px; }
+.wq > svg, .wq-x svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.wq input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; color: var(--ink); font: inherit; font-size: 15px; outline: none; }
+.wq input::placeholder { color: var(--label); }
+.wq input::-webkit-search-cancel-button { display: none; }
+.wq-x { flex: none; width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 50%; background: none; color: var(--weak); cursor: pointer; }
+.wq-x:hover { background: var(--hover); color: var(--ink); }
+.wq-x:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.wq-x[hidden] { display: none; }
+.wq-none { margin: 8px 0 0; padding: 48px 16px; border: 1px dashed var(--line); border-radius: var(--r-lg); text-align: center; color: var(--weak); }
+.wq-none b { color: var(--ink); }
+.wq-none button { margin-left: 6px; border: 0; background: none; color: var(--primary); font: inherit; font-weight: 600; cursor: pointer; }
+.shell.on-detail > .wq-none { display: none; }
+/* 平板：篩選框換到分類下一列、撐滿；手機：篩選框放第一列，分類改單列橫向捲動（右緣淡出提示） */
+@media (max-width: 900px) { .wq { flex: 1 1 100%; width: auto; margin-left: 0; } }
+@media (max-width: 540px) {
+  .wq { order: -1; }
+  .wf-c { flex-wrap: nowrap; width: 100%; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
+  .wf-c::-webkit-scrollbar { display: none; }
+}
+.wf-c button { height: 40px; padding: 0 16px 0 18px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--tile); color: var(--muted); font: inherit; font-size: calc(15px * var(--fs-k)); font-weight: 500; cursor: pointer; transition: background calc(.2s * var(--dur)), border-color calc(.2s * var(--dur)), color calc(.2s * var(--dur)), transform calc(.2s * var(--dur)) var(--spring); }
 /* 數量做成小膠囊，和上方設定按鈕（32px、純文字）明顯區分 */
-.wf button small { min-width: 22px; height: 20px; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-pill); background: var(--soft); font-size: 12px; font-weight: 600; color: var(--weak); font-variant-numeric: tabular-nums; }
-.wf button:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); color: var(--ink); }
-.wf button:active { transform: scale(.96); }
-.wf button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
-.wf button[aria-pressed="true"] { background: var(--tint); border-color: color-mix(in srgb, var(--primary) 40%, transparent); color: var(--selected-fg); font-weight: 600; }
-.wf button[aria-pressed="true"] small { background: var(--primary); color: var(--on-primary); }
+.wf-c button small { min-width: 22px; height: 20px; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-pill); background: var(--soft); font-size: 12px; font-weight: 600; color: var(--weak); font-variant-numeric: tabular-nums; }
+.wf-c button:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); color: var(--ink); }
+.wf-c button:active { transform: scale(.96); }
+.wf-c button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.wf-c button[aria-pressed="true"] { background: var(--tint); border-color: color-mix(in srgb, var(--primary) 40%, transparent); color: var(--selected-fg); font-weight: 600; }
+.wf-c button[aria-pressed="true"] small { background: var(--primary); color: var(--on-primary); }
 .shell.on-detail > .wf { display: none; }
 .wall { position: relative; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-auto-rows: var(--row); grid-auto-flow: dense; gap: var(--gap); }
 .cell {
@@ -582,8 +608,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 @media (max-width: 540px) {
   .tabs, .ps { overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain; }
   .tabs::-webkit-scrollbar, .ps::-webkit-scrollbar { display: none; }
-  :is(.tabs, .ps, .dt).ovf { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
-  :is(.tabs, .ps, .dt).ovf.end { -webkit-mask-image: none; mask-image: none; }   /* 捲到最右就不用淡出 */
+  :is(.tabs, .ps, .dt, .wf-c).ovf { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
+  :is(.tabs, .ps, .dt, .wf-c).ovf.end { -webkit-mask-image: none; mask-image: none; }   /* 捲到最右就不用淡出 */
 }
 @media (max-width: 360px) {   /* 小手機：半寬卡片太窄（按住確認的按鈕放不下），一律撐滿；圓餅圖圖例收窄 */
   .cell.half { grid-column: span 2; }
@@ -621,7 +647,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .drg-ph.show { opacity: .7; }
 .drg-r.landed { animation: drg-land calc(1.6s * var(--dur)) ease-out; }
 @keyframes drg-land { 0%, 25% { background: var(--tint); } }
-.drg-s { flex: none; padding: 0; border: 0; background: none; border-radius: var(--r-pill); cursor: pointer; }
+.drg-s { position: relative; flex: none; padding: 0; border: 0; background: none; border-radius: var(--r-pill); cursor: pointer; }
+.drg-s::after { content: ""; position: absolute; inset: -2px 0; }   /* 點擊範圍補到 24px 高，外觀不變 */
 .drg-s:disabled { cursor: default; opacity: .5; }
 .drg .tg { width: 32px; height: 20px; display: block; }
 .drg .tg i { width: 16px; height: 16px; }
@@ -809,7 +836,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .shell { transition: margin-right calc(420ms * var(--dur)) var(--ease); }
 /* 面板開著時元件牆讓位：調設定永遠看得到即時變化 */
 /* 面板開著時：元件牆自己捲動，捲軸在內容區右側（面板左邊），不和面板疊在一起 */
-@media (min-width: 761px) { html:has(> body.cz-open) { overflow: hidden; } body.cz-open { position: fixed; inset: 0 380px 0 0; overflow-y: auto; overscroll-behavior: contain; } }
+@media (min-width: 761px) { html:has(> body.cz-open) { overflow: hidden; } body.cz-open { position: fixed; inset: 0 420px 0 0; overflow-y: auto; overscroll-behavior: contain; } }
 @media (min-width: 761px) { body.cz-open .top { top: -28px; } }   /* 面板開著時捲動容器換成 body：固定的標題列抵掉 body 的上內距（28px），貼齊頂端 */
 @media (max-width: 760px) { body.cz-open, body.doc-open { padding-bottom: 62vh; } }
 
@@ -820,7 +847,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 /* 滑過：外框轉淡主色，提示「點了會進詳細頁」；鍵盤聚焦 ⓘ 時同樣亮起 */
 #wall > .cell:hover, #wall > .cell:has(.cell-doc:focus-visible) { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
 /* ⓘ 緊跟在標題後面（右上角留給程式名稱與圖例）；平常隱藏，滑過卡片或鍵盤聚焦才出現 */
-.cell-doc { width: 20px; height: 20px; margin: -2px auto -2px -4px; flex: none; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--label); cursor: pointer; opacity: 0; scale: .7; transition: opacity calc(.2s * var(--dur)) var(--ease), scale calc(.35s * var(--dur)) var(--spring), color calc(.2s * var(--dur)), background calc(.2s * var(--dur)); }
+.cell-doc { width: 24px; height: 24px; margin: -4px auto -4px -6px;   /* 點擊範圍 24px（WCAG 2.5.8），圖示仍 15px、位置不變 */
+  flex: none; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--label); cursor: pointer; opacity: 0; scale: .7; transition: opacity calc(.2s * var(--dur)) var(--ease), scale calc(.35s * var(--dur)) var(--spring), color calc(.2s * var(--dur)), background calc(.2s * var(--dur)); }
 .cell-doc svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .cell:hover .cell-doc, .cell-doc:focus-visible { opacity: 1; scale: 1; }
 .cell-doc:hover { color: var(--primary); background: var(--tint); }
@@ -830,6 +858,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 @keyframes cell-ping { 0%, 40% { box-shadow: 0 0 0 4px var(--focus), var(--shadow-lift); } }
 
 .shell.on-detail > .wall { display: none; }
+.boot-dt .shell > :is(.wf, .wall, .wq-none), .boot-dt #toggle-play { visibility: hidden; }   /* 直接開詳細頁網址：路由切好前不畫元件牆 */
 /* 詳細頁有自己的播放／暫停（會連動整體），頂部列的整體播放鈕先隱藏，避免兩顆打架 */
 .shell.on-detail #toggle-play { display: none; }
 /* 進場動畫只播第一次：牆從詳細頁回來時 display 由 none 變回 grid，瀏覽器會把 rise 重播，排後面的卡片空白最久 2 秒多（2026-11-16 修正）。ping 是返回時的提示，要留著 */
@@ -856,13 +885,15 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 /* 相關元件：同類或「禁止使用」裡建議改用的元件 */
 .dt-rel h3 { margin: 0 0 10px; font-size: 13px; line-height: 20px; font-weight: 600; color: var(--label); }
 .dt-rel-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-.dt-rel-g button { min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--tile); box-shadow: var(--raise); text-align: left; cursor: pointer; transition: border-color calc(.2s * var(--dur)), transform calc(.2s * var(--dur)) var(--spring); }
+.dt-rel-g button { min-width: 0; display: grid; grid-template-columns: 36px minmax(0, 1fr); align-items: center; gap: 0 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--tile); box-shadow: var(--raise); text-align: left; cursor: pointer; transition: border-color calc(.2s * var(--dur)), transform calc(.2s * var(--dur)) var(--spring); }
 .dt-rel-g button:hover { border-color: color-mix(in srgb, var(--primary) 55%, var(--card-edge)); }
 .dt-rel-g button:active { transform: scale(.98); }
 .dt-rel-g button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
-.dt-rel-g b { font-size: 14px; font-weight: 600; color: var(--ink); }
-.dt-rel-g em { font-style: normal; font-size: 12px; color: var(--weak); }
-.dt-rel-g span { font-size: 13px; line-height: 20px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* 圖示：淡主色方塊，佔兩列（名稱、英文名稱疊在右邊） */
+.dt-rel-g i { grid-row: span 2; width: 36px; height: 36px; display: grid; place-items: center; border-radius: var(--r-md); background: color-mix(in srgb, var(--primary) 12%, transparent); color: var(--primary); }
+.dt-rel-g i svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.dt-rel-g b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; line-height: 20px; font-weight: 600; color: var(--ink); }
+.dt-rel-g em { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-style: normal; font-size: 12px; line-height: 16px; color: var(--weak); }
 .dt-share.done { color: var(--ok-fg); border-color: color-mix(in srgb, var(--ok-fg) 40%, transparent); background: var(--ok-bg); }
 .dt-back svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .cdp button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
@@ -941,6 +972,16 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sp .ff-i.ta { height: 76px; align-items: flex-start; padding-top: 9px; }
 .sp .ff.dis .ff-i { background: var(--soft); border-color: var(--line-subtle); box-shadow: none; color: var(--label); }
 .sp .ff.dis .ff-l { color: var(--label); }
+/* 下拉、多選、日期、時間、標籤搜尋、分段切換、期間停用：同欄位停用——淡灰底、淡邊框、無陰影、文字與圖示改次要色；不能操作（不出滑過樣式） */
+.sp :is(.dd, .ms, .dp).dis > :is(.dd-t, .ms-t, .dp-f), .sp .tp.dis .tp-f, .sp .tsr.dis .search { background: var(--soft); border-color: var(--line-subtle); box-shadow: none; color: var(--label); pointer-events: none; }
+.sp :is(.dd, .ms, .dp).dis > :is(.dd-t, .ms-t, .dp-f) :is(span, svg, input), .sp .tp.dis .tp-f svg, .sp .tsr.dis .search :is(svg, input) { color: var(--label); opacity: 1; }   /* input：框架版的下拉文字在原生輸入框裡 */
+.sp .ms.dis .ms-n { background: var(--line-subtle); color: var(--label); }
+.sp .tp.dis .tp-col { pointer-events: none; }
+.sp .tp.dis .tp-col u { color: var(--label); opacity: .45; }
+.sp .tp.dis .tp-col .v { background: var(--soft); border-color: var(--line-subtle); box-shadow: none; color: var(--label); }
+.sp :is(.seg, .ps).dis { box-shadow: none; pointer-events: none; }
+.sp .seg.dis i, .sp .ps.dis > i { background: var(--line-subtle); box-shadow: none; }
+.sp :is(.seg, .ps).dis span { color: var(--label); }
 .sp .ff-x:empty { display: none; }
 /* 第一批規格樣本：浮層改成靜態攤開，寬度跟格子走 */
 .sp-pv > :is(.dd, .ms, .mn) { width: 100%; height: auto; align-self: start; }
@@ -1243,18 +1284,32 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .ck-i kbd { padding: 0 6px; border: 1px solid var(--line); border-radius: 5px; color: var(--weak); font: 11px/18px ui-monospace, Consolas, monospace; }
 .ck-l { overflow-y: auto; padding: 6px; overscroll-behavior: contain; }
 .ck-g { padding: 8px 10px 4px; font-size: 12px; font-weight: 600; color: var(--label); }
-.ck-r { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 4px 10px; border-radius: var(--r-sm); cursor: pointer; }
+.ck-r { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 4px 10px; border-radius: var(--r-sm); cursor: pointer; }
 .ck-r.on { background: var(--tint); }
-.ck-r b { font-weight: 600; }
-.ck-r small { display: block; font-size: 12px; line-height: 18px; color: var(--weak); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ck-r > div { flex: 1; min-width: 0; }
+.ck-r b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+/* 元件圖示（同詳細頁相關元件）：淡主色方塊 */
+.ck-ic { flex: none; width: 28px; height: 28px; display: grid; place-items: center; border-radius: var(--r-sm); background: color-mix(in srgb, var(--primary) 12%, transparent); color: var(--primary); }
+.ck-ic svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ck-r.on .ck-ic { background: color-mix(in srgb, var(--primary) 20%, transparent); }
 .ck-r code { flex: none; font: 12px/18px ui-monospace, Consolas, monospace; color: var(--weak); }
 .ck-r.on code { color: var(--primary); }
 .ck-r mark { background: none; color: var(--primary); font-weight: 700; }
 .ck-e { padding: 28px 16px; text-align: center; color: var(--weak); }
 .ck-f { flex: none; display: flex; gap: 14px; padding: 8px 16px; border-top: 1px solid var(--line-subtle); font-size: 12px; color: var(--weak); }
+.ck-x { display: none; flex: none; height: 32px; padding: 0 4px; border: 0; background: none; color: var(--primary); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+/* 手機：底部全高抽屜（高度跟著可見區，鍵盤彈出時不被蓋住）；觸控列高 48；沒有實體鍵盤就不顯示快捷鍵說明，改用「取消」 */
+@media (max-width: 540px) {
+  .cmdk { left: 0; right: 0; top: calc(var(--vvt, 0px) + 12px); width: auto; height: calc(var(--vvh, 100dvh) - 12px); max-height: none; translate: none; border-bottom: 0; border-radius: var(--r-lg) var(--r-lg) 0 0; transform: translateY(100%); }
+  .cmdk.open { transform: none; }
+  .ck-i { height: 56px; }
+  .ck-i kbd { display: none; }
+  .ck-x { display: block; }
+  .ck-r { min-height: 48px; }
+  .ck-l { padding-bottom: calc(6px + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 540px), (pointer: coarse) { .ck-f { display: none; } }
 .ck-f kbd { padding: 0 4px; border: 1px solid var(--line); border-radius: 4px; font: 11px/16px ui-monospace, Consolas, monospace; }
-.cz { position: fixed; z-index: 30; top: 0; right: 0; bottom: 0; width: 380px; max-width: 100%; display: flex; flex-direction: column; background: var(--surface); border-left: 1px solid var(--line); box-shadow: var(--shadow-pop); transform: translateX(105%); transition: transform calc(520ms * var(--dur)) var(--spring-soft); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-right: env(safe-area-inset-right, 0px); }
+.cz { position: fixed; z-index: 30; top: 0; right: 0; bottom: 0; width: 420px; max-width: 100%; display: flex; flex-direction: column; background: var(--surface); border-left: 1px solid var(--line); box-shadow: var(--shadow-pop); transform: translateX(105%); transition: transform calc(520ms * var(--dur)) var(--spring-soft); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); padding-right: env(safe-area-inset-right, 0px); }
 .cz.open { transform: none; }
 @media (max-width: 760px) {
   .cz { top: auto; left: 0; width: auto; height: 60vh; border-left: 0; border-top: 1px solid var(--line); border-radius: var(--r-2xl) var(--r-2xl) 0 0; transform: translateY(105%); padding-left: env(safe-area-inset-left, 0px); }
@@ -1321,8 +1376,27 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 :root[data-theme="dark"] :is(.cz-seg button[aria-pressed="true"], .cz-pane button[aria-selected="true"], .cz-style[aria-pressed="true"], .cz-opt[aria-pressed="true"]) { background: var(--hover); color: var(--ink); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); }
 :root[data-theme="dark"] .cz-seg button[aria-pressed="true"] { font-weight: 600; }
 .cz-range { display: flex; align-items: center; gap: 10px; }
-.cz-range input { flex: 1; accent-color: var(--primary); }
-.cz-range output { min-width: 40px; text-align: right; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+/* 滑桿：軌道 6px、已選範圍主色填滿；圓鈕 20px，拖動時放大並顯示數值氣泡；兩端寫意義；右邊可直接輸入數值或用 − ＋ 微調 */
+.cz-end { flex: none; font-size: 12px; color: var(--weak); white-space: nowrap; }
+.cz-trk { position: relative; flex: 1; min-width: 80px; height: 28px; display: flex; align-items: center; }
+.cz-trk input[type="range"] { -webkit-appearance: none; appearance: none; flex: 1; height: 6px; margin: 0; border-radius: 3px; background: linear-gradient(90deg, var(--primary) 0 var(--p, 50%), var(--ev-line-2, var(--line-strong)) var(--p, 50%)); cursor: pointer; }
+.cz-trk input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgb(0 0 0 / .3), 0 0 0 1px rgb(0 0 0 / .06); transition: transform calc(.15s * var(--dur)); }
+.cz-trk input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: 0; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgb(0 0 0 / .3), 0 0 0 1px rgb(0 0 0 / .06); transition: transform calc(.15s * var(--dur)); }
+.cz-trk input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.15); }
+.cz-trk input[type="range"]:active::-moz-range-thumb { transform: scale(1.15); }
+.cz-trk input[type="range"]:focus-visible { outline: 3px solid var(--focus); outline-offset: 6px; }
+.cz-trk input[type="range"]:disabled { opacity: .45; cursor: default; }
+.cz-bub { position: absolute; bottom: calc(100% + 2px); left: calc(10px + (100% - 20px) * var(--pf, .5)); padding: 2px 7px; border-radius: 7px; background: var(--ink); color: var(--surface); font-size: 11.5px; font-weight: 600; line-height: 18px; font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none; opacity: 0; transform: translate(-50%, 4px); transition: opacity calc(.15s * var(--dur)), transform calc(.15s * var(--dur)); }
+.cz-trk:has(input:active) .cz-bub { opacity: 1; transform: translate(-50%, 0); }
+.cz-num { flex: none; display: flex; align-items: center; height: 30px; border-radius: 9px; background: var(--ev-cell, var(--surface)); box-shadow: inset 0 0 0 1px var(--ev-line, var(--line)); }
+.cz-num:focus-within { box-shadow: inset 0 0 0 1px var(--primary), 0 0 0 3px var(--focus); }
+.cz-nb { width: 26px; height: 100%; padding: 0; border: 0; border-radius: 9px; background: none; color: var(--ink); font: inherit; font-size: 15px; cursor: pointer; }
+.cz-nb:hover:not(:disabled) { background: var(--ev-cell, var(--hover)); }
+.cz-nb:active:not(:disabled) { scale: .9; }
+.cz-nb:disabled { opacity: .35; cursor: default; }
+.cz-numi { width: 34px; padding: 0; border: 0; background: none; color: var(--ink); font: inherit; font-size: 12.5px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; outline: none; }
+.cz-unit { padding-left: 1px; font-size: 12px; color: var(--weak); }
 .cz-sw { appearance: none; -webkit-appearance: none; position: relative; width: 40px; height: 24px; flex: none; margin: 0; border-radius: 12px; background: var(--line-strong); box-shadow: var(--inset); cursor: pointer; transition: background calc(300ms * var(--dur)) var(--ease); }
 .cz-sw::before { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--knob); box-shadow: 0 1px 3px rgb(0 0 0 / .3); transition: transform calc(500ms * var(--dur)) var(--spring); }
 .cz-sw:checked { background: var(--primary); box-shadow: 0 4px 10px -3px var(--glow); }
@@ -1393,10 +1467,6 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .cz-fsel, .cz-fin { width: 100%; height: 36px; padding: 0 10px; border: 0; border-radius: var(--r-md); background: var(--surface); box-shadow: var(--inset); color: var(--ink); font: inherit; font-size: 13px; font-weight: 600; }
 .cz-fin { font-weight: 400; }
 .cz-fprev { padding: 10px 12px; border-radius: var(--r-md); background: var(--surface); box-shadow: var(--raise); font-size: 18px; line-height: 26px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cz-pane { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin: 0 12px 12px; padding: 3px; border-radius: var(--r-md); background: var(--soft); box-shadow: var(--inset); }
-.cz-pane button { height: 30px; border: 0; border-radius: max(2px, calc(var(--r-md) - 3px)); background: transparent; color: var(--weak); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background calc(200ms * var(--dur)) var(--ease), color calc(200ms * var(--dur)) var(--ease), scale calc(300ms * var(--dur)) var(--spring); }
-.cz-pane button:active { scale: .96; }
-.cz-pane button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--raise); }
 .cz-body { gap: 16px !important; padding-bottom: 24px !important; }
 .cz-blk { gap: 16px; padding: 16px 14px 18px; }
 .cz-quick { gap: 0 !important; }
@@ -1461,13 +1531,13 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .cz-th.r { width: 30px; height: 20px; margin: 1px 0 0 6px; border-width: 2px 0 0 2px; border-color: var(--primary); border-radius: 0; background: none; }
 .cz-th.mo { border: 0; background: none; }
 .cz-th.mo svg { width: 26px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
-.cz-q .cz-sw-row { gap: 6px; flex-wrap: nowrap; }
-.cz-q .cz-swatch { width: 26px; height: 26px; }
-.cz-q .cz-pick { position: relative; width: 26px; height: 26px; padding: 0; justify-content: center; border-radius: 50%; font-size: 0; }
-.cz-q .cz-pick input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-.cz-q .cz-pick::after { content: "+"; font-size: 16px; line-height: 1; font-weight: 600; color: var(--weak); }
-.cz-q .cz-pick.on { background: var(--c); }
-.cz-q .cz-pick.on::after { content: none; }
+:is(.cz-q, .cz-set) .cz-sw-row { gap: 6px; flex-wrap: nowrap; }
+:is(.cz-q, .cz-set) .cz-swatch { width: 26px; height: 26px; }
+:is(.cz-q, .cz-set) .cz-pick { position: relative; width: 26px; height: 26px; padding: 0; justify-content: center; border-radius: 50%; font-size: 0; }
+:is(.cz-q, .cz-set) .cz-pick input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+:is(.cz-q, .cz-set) .cz-pick::after { content: "+"; font-size: 16px; line-height: 1; font-weight: 600; color: var(--weak); }
+:is(.cz-q, .cz-set) .cz-pick.on { background: var(--c); }
+:is(.cz-q, .cz-set) .cz-pick.on::after { content: none; }
 .cz-pick.on { border-style: solid; border-color: var(--c); box-shadow: 0 0 0 2px var(--soft), 0 0 0 3px var(--c); }
 .cz-warn { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 6px 6px 10px; border-radius: var(--r-md); background: var(--warn-bg); color: var(--warn-fg); font-size: 12px; font-weight: 600; }
 .cz-warn button { flex: none; height: 26px; padding: 0 10px; border: 0; border-radius: var(--r-sm); background: var(--surface); color: var(--ink); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; box-shadow: var(--raise); }
@@ -1817,10 +1887,10 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="y2k"] :is(.seg span.on, .ps span.on), :root[data-ui="y2k"]:not([data-tabs="underline"]) :is(.dtab.on, .dtab.on svg) { color: var(--on-primary); }   /* 主色金屬上的字用主色配對的文字色 */
 :root[data-ui="y2k"]:not([data-tabs="underline"]) .dtab.on b { background: rgb(255 255 255 / .25); color: var(--on-primary); box-shadow: none; }
 /* 分類標籤、工具列：亮面＋鉻邊 */
-:root[data-ui="y2k"] :is(.wf button, .top-a .ctl) { border: 1px solid transparent; background: var(--y2k-gloss-s) padding-box, var(--y2k-btn) padding-box, var(--y2k-rim) border-box; box-shadow: inset 0 1px 0 var(--y2k-in1), 0 2px 6px -3px rgb(var(--sh-rgb, 60 90 150) / .3); }
-:root[data-ui="y2k"] .wf button[aria-pressed="true"] { background: var(--y2k-spec) padding-box, var(--y2k-pearl) padding-box, var(--y2k-metal) 0 0 / 100% 130% padding-box, var(--y2k-metal-rim) border-box; color: var(--on-primary); }
-:root[data-ui="y2k"] .wf button[aria-pressed="true"] small { background: rgb(255 255 255 / .25); color: var(--on-primary); }
-:root[data-ui="y2k"] :is(.wf button, .top-a .ctl):hover { filter: brightness(1.05); }
+:root[data-ui="y2k"] :is(.wf-c button, .top-a .ctl) { border: 1px solid transparent; background: var(--y2k-gloss-s) padding-box, var(--y2k-btn) padding-box, var(--y2k-rim) border-box; box-shadow: inset 0 1px 0 var(--y2k-in1), 0 2px 6px -3px rgb(var(--sh-rgb, 60 90 150) / .3); }
+:root[data-ui="y2k"] .wf-c button[aria-pressed="true"] { background: var(--y2k-spec) padding-box, var(--y2k-pearl) padding-box, var(--y2k-metal) 0 0 / 100% 130% padding-box, var(--y2k-metal-rim) border-box; color: var(--on-primary); }
+:root[data-ui="y2k"] .wf-c button[aria-pressed="true"] small { background: rgb(255 255 255 / .25); color: var(--on-primary); }
+:root[data-ui="y2k"] :is(.wf-c button, .top-a .ctl):hover { filter: brightness(1.05); }
 
 
 /* ==== 頁籤樣式（data-tabs）：列表頁籤與詳情頁籤一起換 ==== */
@@ -1877,6 +1947,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 @property --wr { syntax: '<length>'; inherits: false; initial-value: 0px; }
 @property --wf { syntax: '<length>'; inherits: false; initial-value: 160px; }
 .vt-wand::view-transition-old(root), .vt-wand::view-transition-new(root), ::view-transition-group(wand), ::view-transition-old(wand), ::view-transition-new(wand) { animation: none; mix-blend-mode: normal; }
+.vt-dim::view-transition-old(root), .vt-dim::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 .vt-wand::view-transition-old(root) { z-index: 2; }
 /* 徑向遮罩是墨流遮罩無法使用時的備援。 */
 .vt-wand::view-transition-old(root) { mask-image: radial-gradient(circle, transparent calc(var(--wr) - var(--wf)), #000 var(--wr)); }
@@ -1888,6 +1959,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .vt-wand-quick::view-transition-old(root) { mask-image: none; }
 .vt-wand::view-transition-group(root) { animation: none; }
 .wand-ink { position: absolute; z-index: 2; left: 50%; top: 50%; width: 384px; height: 384px; opacity: 0; }
+.wand-haze { position: absolute; z-index: 2; inset: 0; filter: url(#wand-haze-f); }
+.wand-haze > svg { position: absolute; }
+.wand-glow { position: absolute; z-index: 2; left: 50%; top: 50%; width: 464px; height: 464px; opacity: 0; }   /* 384 + 四邊各 40（GLOW_PAD），縮放倍率同墨水 */
+.wand-gl { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; pointer-events: none; }   /* WebGL 墨水邊緣＋光暈（取代上面兩張圖與熱浪濾鏡） */
 .vt-wand * { transition: none !important; }
 ::view-transition-group(wand) { z-index: 3; }
 .wand-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; view-transition-name: wand; }
@@ -1895,6 +1970,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .wand svg { display: block; overflow: visible; }
 .wand .wand-cv { display: block; width: 100%; height: 100%; }
 .wand .wand-tip { top: 50%; margin-top: -14px; }
+/* 杖身光流：遮罩＝魔杖圖（JS 設定），光帶從握柄流向杖尖；前緣白熱、後拖暖橘→粉→藍 */
+.wand-flow { position: absolute; inset: 0; overflow: hidden; mask-size: 100% 100%; -webkit-mask-size: 100% 100%; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; mix-blend-mode: screen; }
+.wand-flow i { position: absolute; top: 0; bottom: 0; left: 0; width: 35%; background: linear-gradient(90deg, transparent, #fff 8%, #ffb347 28%, #ff4f8b 58%, #3d8bff 84%, transparent); opacity: 0; }
+/* 杖尖火花（煙火）：全螢幕畫布，JS 逐格畫彎曲光尾 */
+.wand-sparks { position: absolute; z-index: 4; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .wand-tip { position: absolute; left: -14px; top: -5px; width: 28px; height: 28px; border-radius: 50%; }
 .lumos .wand-tip { background: radial-gradient(circle, #fff 0 22%, rgb(220 235 255 / .9) 38%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 24px 8px rgb(210 230 255 / .7); }
 .nox .wand-tip { background: radial-gradient(circle, #fff 0 18%, rgb(200 220 255 / .7) 40%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 14px 4px rgb(200 220 255 / .45); }
@@ -1935,7 +2015,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   --ev-glow: color-mix(in srgb, var(--primary) 42%, transparent);
   --ev-sel: color-mix(in srgb, var(--primary) 14%, transparent);
   --ev-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
-  top: 24px; right: 24px; bottom: 24px; width: 380px; max-width: calc(100% - 48px);
+  top: 24px; right: 24px; bottom: 24px; width: 420px; max-width: calc(100% - 48px);
   border: 1px solid var(--ev-line-2); border-radius: 22px; overflow: hidden;
   background: var(--ev-glass); -webkit-backdrop-filter: blur(28px) saturate(170%); backdrop-filter: blur(28px) saturate(170%);
   box-shadow: 0 28px 70px -28px rgb(15 30 60 / .35), 0 2px 6px rgb(15 30 60 / .06), inset 0 1px 0 rgb(255 255 255 / .55);
@@ -1957,7 +2037,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   .cz { top: auto; left: 24px; right: 24px; bottom: 24px; width: auto; max-width: none; height: calc(60vh - 24px); border: 1px solid var(--ev-line-2); border-radius: 22px; transform: translateY(calc(100% + 40px)); }
 }
 @media (min-width: 761px) {
-  body.cz-open { inset: 0 404px 0 0; margin: 0; scrollbar-width: none; }   /* 讓出面板寬＋右邊界；元件區照常捲動但不顯示捲動軸 */
+  body.cz-open { inset: 0 444px 0 0; margin: 0; scrollbar-width: none; }   /* 讓出面板寬＋右邊界；元件區照常捲動但不顯示捲動軸 */
   body.cz-open::-webkit-scrollbar { display: none; }
 }
 
@@ -1971,10 +2051,6 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz .cz-cur { padding: 12px 14px 10px; }
 .cz .cz-cur select, .cz :is(.cz-fsel, .cz-fin) { border-radius: 12px; background: var(--ev-cell); box-shadow: inset 0 0 0 1px var(--ev-line); }
 
-/* 層級頁籤：細框軌道，選中＝亮字＋細框 */
-.cz.cz .cz-pane { margin: 0 14px 4px; background: transparent; box-shadow: inset 0 0 0 1px var(--ev-line); border-radius: 12px; }
-.cz.cz .cz-pane button { position: relative; border-radius: 9px; color: var(--ev-dim); letter-spacing: .08em; }
-.cz.cz .cz-pane button[aria-selected="true"] { background: var(--ev-cell); color: var(--ink); box-shadow: inset 0 0 0 1px var(--ev-line-2); }
 
 /* 內容：細線分區，不用灰底區塊 */
 .cz .cz-body { background: transparent; padding: 14px 14px 24px; scrollbar-width: none; }   /* 照常捲動，不顯示捲動軸 */
@@ -1987,6 +2063,69 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz.cz :is(.cz-ql, .cz-blk > h3) { display: flex; align-items: center; gap: 8px; padding: 0; font-size: 12.5px; line-height: 18px; font-weight: 600; letter-spacing: .04em; color: var(--ink); }
 .cz .cz-rl { font-size: 12.5px; }
 .cz .cz-dot { box-shadow: 0 0 6px var(--ev-glow); }
+
+/* ---- 外觀設定（2026-11-25 改版）：分類頁籤＋設定列 ---- */
+/* 分類：7 類，放不下時橫向捲動；改過的項目數顯示在名稱旁 */
+.cz-tabs { flex: none; display: flex; gap: 2px; margin: 0 14px 4px; padding: 3px; overflow-x: auto; scrollbar-width: none; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--ev-line, var(--line)); }
+.cz-tabs::-webkit-scrollbar { display: none; }
+.cz-tabs button { flex: 1 0 auto; height: 30px; padding: 0 5px; display: inline-flex; align-items: center; justify-content: center; gap: 2px; border: 0; border-radius: 9px; background: transparent; color: var(--ev-dim, var(--weak)); font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; transition: color calc(.15s * var(--dur)), background calc(.15s * var(--dur)); }
+.cz-tabs button:hover { color: var(--ink); }
+.cz-tabs button:active { scale: .96; }
+.cz-tabs button[aria-selected="true"] { background: var(--ev-cell, var(--soft)); color: var(--ink); box-shadow: inset 0 0 0 1px var(--ev-line-2, var(--line)); }
+.cz-tabs button:focus-visible { outline: 3px solid var(--focus); outline-offset: -1px; }
+.cz-tabs small { min-width: 14px; height: 14px; padding: 0 3px; border-radius: 7px; background: var(--primary); color: var(--on-primary); font-size: 10px; line-height: 14px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+.cz-tabs small[hidden] { display: none; }
+/* 設定列：名稱在左、控制在右（寬的控制項放名稱下方）；選到的列淡底並展開一句說明 */
+.cz.cz .cz-sets { gap: 6px; padding: 0; border: 0; background: transparent; }   /* 每個項目自成一塊，用底色分隔（不用水平線） */
+.cz-set { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px 12px; min-height: 48px; padding: 8px 10px; border-radius: 12px; transition: background calc(.15s * var(--dur)); }
+.cz-set { background: var(--ev-cell, var(--soft)); }
+
+
+.cz-set.block { grid-template-columns: minmax(0, 1fr); }
+.cz-set:hover { background: color-mix(in srgb, var(--ink) 9%, transparent); }   /* 滑過：底色稍深，提示可點 */
+.cz.kbd .cz-set.cur { outline: 2px solid var(--focus); outline-offset: -2px; }   /* 鍵盤操作：主色焦點框；滑鼠點選不加底色（灰底容易看成停用），靠展開的說明表示選到 */
+.cz-set .cz-rl { min-width: 0; }
+.cz-set .cz-lab { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cz-ctl { min-width: 0; display: flex; justify-content: flex-end; }
+.cz-set.block .cz-ctl { display: block; }
+
+.cz-set:not(.block) .cz-seg button { flex: none; min-width: 40px; padding: 0 9px; }
+.cz-set.changed .cz-rl .cz-dot { display: inline-block; }
+.cz-set.changed:is(:hover, .cur, :focus-within) .cz-rl .cz-undo1 { display: inline-flex; }   /* 改過的列：滑過或選到才出現單項還原 */
+
+.cz-stack { display: flex; flex-direction: column; gap: 10px; }
+.cz-inl { display: flex; align-items: center; gap: 10px; }
+.cz-inl .cz-pick { width: 26px; height: 26px; padding: 0; border-radius: 50%; background: var(--c); border: 0; }
+.cz-inl .cz-pick input { opacity: 0; width: 100%; height: 100%; }
+/* 各層級字級：名稱＋字級在一行，粗細在下一行 */
+.cz-lv { display: flex; flex-direction: column; gap: 8px; }
+.cz-lvr { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 8px; padding-top: 8px; border-top: 1px solid var(--ev-line, var(--line-subtle)); }
+.cz-lvr > .cz-seg { grid-column: 1 / -1; }
+.cz-lvn { min-width: 0; display: flex; align-items: baseline; gap: 6px; overflow: hidden; white-space: nowrap; color: var(--ink); line-height: 1.3; }
+.cz-lvn small { font-size: 11px; font-weight: 500; color: var(--weak); }
+.cz-set .cz-list { max-height: 260px; overflow-y: auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* 按鍵提示：只在用鍵盤操作時出現 */
+.cz-keys { flex: none; display: none; flex-wrap: wrap; gap: 4px 14px; padding: 8px 16px; border-top: 1px solid var(--ev-line, var(--line-subtle)); font-size: 11.5px; color: var(--weak); }
+.cz.kbd .cz-keys { display: flex; }
+.cz-keys kbd { margin-right: 2px; padding: 0 4px; border: 1px solid var(--ev-line-2, var(--line)); border-radius: 4px; font: 10.5px/16px ui-monospace, Consolas, monospace; }
+/* 牆上受影響的元件：選到或滑過某列時微微亮起 */
+#wall > .cell.cz-aff { outline: 2px solid color-mix(in srgb, var(--primary) 65%, transparent); outline-offset: 4px; }
+/* 手機：抽屜頂端握把，點一下或往上拉＝拉高（下半部仍看得到元件牆時可再拉回）；觸控目標 ≥ 44px */
+.cz-grab { display: none; }
+@media (max-width: 760px) {
+  .cz-grab { flex: none; display: flex; justify-content: center; align-items: center; height: 22px; padding: 0; border: 0; background: none; cursor: grab; touch-action: none; }
+  .cz-grab i { width: 36px; height: 4px; border-radius: 2px; background: var(--ev-line-2, var(--line-strong)); }
+  .cz { transition: transform calc(520ms * var(--dur)) var(--spring-soft), height calc(320ms * var(--dur)) var(--spring-soft); }
+  .cz.tall { height: calc(92vh - 24px); }
+  .cz .cz-h { padding-top: 4px; }
+  .cz-tabs button, .cz-set .cz-seg button { min-height: 44px; }
+  .cz-num { height: 44px; }
+  .cz-nb { width: 40px; }
+  .cz .cz-ic { width: 40px; height: 40px; }
+  .cz .cz-hb { gap: 0; }
+  .cz .cz-h h2 { white-space: nowrap; }   /* 標題不要被按鈕擠成直排 */
+  .cz-keys { display: none !important; }
+}
 
 /* 選項格：透明格＋細框；選中＝主色細框＋柔光 */
 .cz.cz :is(.cz-style, .cz-opt, .cz-tile, .cz-langs button, .cz-filter button) { background: var(--ev-cell); box-shadow: inset 0 0 0 1px var(--ev-line); border-radius: 12px; }
@@ -2001,13 +2140,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz.cz .cz-swatch[aria-pressed="true"] { box-shadow: 0 0 0 2.5px var(--c), 0 0 16px -2px var(--c); }
 .cz.cz .cz-pick { background: transparent; border-color: var(--ev-line-2); }
 /* 滑桿：細軌道＋刻度、發光圓鈕；數值＝等寬讀數 */
-.cz .cz-range input { -webkit-appearance: none; appearance: none; height: 20px; margin: 0; background: transparent; cursor: pointer; }
-.cz .cz-range input::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: repeating-linear-gradient(90deg, var(--ev-line-2) 0 1px, transparent 1px 10%) 0 0 / 100% 4px no-repeat, linear-gradient(var(--ev-line-2), var(--ev-line-2)) 0 100% / 100% 1.5px no-repeat; }
-.cz .cz-range input::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -3px; border-radius: 50%; background: var(--surface); border: 2px solid var(--ev-acc); box-shadow: 0 0 10px var(--ev-glow); }
-.cz .cz-range input::-moz-range-track { height: 1.5px; background: var(--ev-line-2); }
-.cz .cz-range input::-moz-range-thumb { width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--ev-acc); box-shadow: 0 0 10px var(--ev-glow); }
 .cz :is(.cz-range output, .cz-step output, .cz-ratio, .cz-tile small, .cz-pick code) { font-family: var(--ev-mono); letter-spacing: .02em; }
-.cz .cz-range output { color: var(--ink); }
 .cz .cz-step { background: transparent; box-shadow: inset 0 0 0 1px var(--ev-line); border-radius: 12px; }
 .cz .cz-sw { background: var(--ev-line-2); box-shadow: none; }
 .cz .cz-sw:checked { background: var(--ev-acc); box-shadow: 0 0 14px -2px var(--ev-glow); }
@@ -2041,8 +2174,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
     </div>
   </div>
 
-  <nav class="wf" id="wf" aria-label="元件分類"></nav>
+  <div class="wf" id="wf"><nav class="wf-c" id="wf-c" aria-label="元件分類"></nav><div class="wq" role="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input id="wq" type="search" placeholder="篩選元件" aria-label="篩選元件（名稱、英文、程式名稱）" autocomplete="off" spellcheck="false" enterkeyhint="search"><button class="wq-x" id="wq-x" type="button" aria-label="清除篩選" hidden><svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div></div>
 
+  <p class="wq-none" id="wq-none" role="status" hidden></p>
   <div class="wall" id="wall">
     <section class="cell h2" id="c-dd">
       <header>下拉選單<em>combo</em></header>
@@ -2441,12 +2575,13 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   </div>
 </div>
 <div class="cmdk" id="ck" role="dialog" aria-modal="true" aria-label="搜尋元件" hidden>
-  <div class="ck-i"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input id="ck-q" type="text" role="combobox" aria-expanded="true" aria-controls="ck-l" aria-autocomplete="list" placeholder="搜尋元件：名稱、英文、程式名稱" autocomplete="off" spellcheck="false"><kbd>Esc</kbd></div>
+  <div class="ck-i"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg><input id="ck-q" type="text" role="combobox" aria-expanded="true" aria-controls="ck-l" aria-autocomplete="list" placeholder="搜尋元件：名稱、英文、程式名稱" autocomplete="off" spellcheck="false" enterkeyhint="go"><kbd>Esc</kbd><button class="ck-x" id="ck-x" type="button">取消</button></div>
   <div class="ck-l" id="ck-l" role="listbox" aria-label="元件"></div>
   <div class="ck-f"><span><kbd>↑</kbd> <kbd>↓</kbd> 選擇</span><span><kbd>Enter</kbd> 前往並看說明</span><span><kbd>Esc</kbd> 關閉</span></div>
 </div>
 
 <aside class="cz" id="cz" aria-labelledby="cz-title" inert>
+  <button class="cz-grab" id="cz-grab" type="button" aria-label="拉高面板" aria-expanded="false"><i></i></button>
   <div class="cz-h">
     <div class="cz-tt"><h2 id="cz-title" tabindex="-1">外觀</h2><span class="cz-state" id="cz-state"></span></div>
     <div class="cz-hb">
@@ -2467,8 +2602,9 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   <div class="cz-cur">
     <select id="cz-theme" aria-label="主題"></select>
   </div>
-  <div class="cz-pane" role="tablist" aria-label="設定層級"><button type="button" role="tab" data-pane="basic">基本</button><button type="button" role="tab" data-pane="adv">進階</button><button type="button" role="tab" data-pane="show">顯示</button></div>
+  <div class="cz-tabs" id="cz-tabs" role="tablist" aria-label="設定分類"></div>
   <div class="cz-body" id="cz-panel" role="tabpanel"></div>
+  <div class="cz-keys" aria-hidden="true"><span><kbd>↑</kbd><kbd>↓</kbd> 選擇</span><span><kbd>←</kbd><kbd>→</kbd> 調整</span><span><kbd>Q</kbd><kbd>E</kbd> 分類</span><span><kbd>Esc</kbd> 關閉</span></div>
   <div class="cz-foot">
     <p class="cz-note" id="cz-note" aria-live="polite"></p>
     <textarea class="cz-out" id="cz-out" readonly hidden aria-label="分享內容"></textarea>
@@ -2543,8 +2679,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
   // 頁籤、詳情頁籤、期間選擇：內容比寬度長時加 .ovf（右緣淡出），捲到最右加 .end
   {
     const ovf = (el) => { el.classList.toggle('ovf', el.scrollWidth > el.clientWidth + 1); el.classList.toggle('end', el.scrollLeft + el.clientWidth >= el.scrollWidth - 2); };
-    const scan = () => $$('.tabs, .ps, .dt').forEach(ovf);
-    document.addEventListener('scroll', (e) => { if (e.target instanceof Element && e.target.matches('.tabs, .ps, .dt')) ovf(e.target); }, true);
+    const scan = () => $$('.tabs, .ps, .dt, .wf-c').forEach(ovf);
+    document.addEventListener('scroll', (e) => { if (e.target instanceof Element && e.target.matches('.tabs, .ps, .dt, .wf-c')) ovf(e.target); }, true);
     addEventListener('resize', scan); requestAnimationFrame(scan); setTimeout(scan, 1200);
     // 選中項換了：在可捲動的列裡捲到看得見（置中）
     const follow = new MutationObserver((ms) => { for (const m of ms) { const el = m.target, box = el.parentElement; if (!el.classList.contains('on') || !box || box.scrollWidth <= box.clientWidth + 1) continue; const x = el.offsetLeft - (box.clientWidth - el.offsetWidth) / 2; if (el.offsetLeft < box.scrollLeft || el.offsetLeft + el.offsetWidth > box.scrollLeft + box.clientWidth) box.scrollTo({ left: Math.max(0, x), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); } });
@@ -2680,8 +2816,8 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       }
       setTimeout(() => { layer.remove(); shBusy = false; }, TOTAL + 40);
     }
-    /* 深淺色轉場（魔杖，約 1.45 秒）：杖尖在中央點一下。
-       墨水先朝杖尖回縮，再向外擴散。Lumos 揭開淺色，Nox 揭開深色。
+    /* 深淺色轉場（魔杖，約 1.45 秒）：魔杖在中央後仰蓄力（三色光沿杖身灌注），甩下點擊時噴出火花、畫面輕震。
+       墨水先朝杖尖回縮，再向外擴散（0.85 秒，由慢到快）；墨水邊緣與光暈由 WebGL 逐幀畫（虹彩三色沿邊緣流轉、前緣白熱線），不支援時改用預畫的墨色圖。Lumos 揭開淺色，Nox 揭開深色。
        舊畫面沿柔邊墨流淡出，新畫面留在底層，交界保留一層舊配色殘影。 */
     document.fonts?.load('600 40px "Cormorant Garamond"', 'LumosNox').catch(() => {});
     // 接骨木魔杖（Canvas，轉場開始前畫一次）：杖尖在左（x = 0），杖身由尖漸粗、沿途 8 個節瘤（越靠握把越大），
@@ -2736,6 +2872,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       g.strokeStyle = 'rgba(30,22,15,.35)'; g.lineWidth = Math.max(0.6, Hh * 0.012); g.beginPath(); g.moveTo(0, c - rs[0]); for (let x = 1; x <= N; x += 2) g.lineTo(x, c - rs[x]); for (let x = N; x >= 0; x -= 2) g.lineTo(x, c + rs[x]); g.closePath(); g.stroke();
     }
     let wandArt;
+    const GLOW_PAD = 40;   // 光暈畫布四邊外擴（同 CSS .wand-glow 尺寸 384 + 80）
     function prepareWandArt() {
       if (wandArt) return wandArt;
       const size = 384, center = size / 2, radius = size * .366, band = radius * .076;
@@ -2789,20 +2926,30 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       function pigment(colors) {
         g.clearRect(0, 0, size, size);
         g.filter = 'blur(2.4px)';
-        g.globalAlpha = .21;
+        g.globalAlpha = .34;
         g.fillStyle = colors[0];
         g.fill(wash, 'evenodd');
         g.filter = 'none';
-        g.globalAlpha = .31;
+        g.globalAlpha = .5;
         g.fillStyle = colors[1];
         g.fill(rim, 'evenodd');
-        g.globalAlpha = .41;
+        g.globalAlpha = .58;
         g.fillStyle = colors[2];
         g.fill(veins, 'evenodd');
         return canvas.toDataURL();
       }
-      const lumos = pigment(['#dca25b', '#a86632', '#ffe1af']);
-      const nox = pigment(['#7a77be', '#42437d', '#c5cbff']);
+      // 墨色用 AI 三色（Afterglow）：前緣外側暈開的暖橘、前緣粉、後方紋路藍；淺深兩向共用
+      const lumos = pigment(['#ffb347', '#ff4f8b', '#3d8bff']);
+      const nox = lumos;
+      // 前緣光暈：沿墨水輪廓描三層柔光（外粉大暈、暖橘中暈、白熱細線）。畫在四邊各多 GLOW_PAD 的畫布上，柔光才不會被裁掉
+      const gc = document.createElement('canvas');
+      gc.width = gc.height = size + GLOW_PAD * 2;
+      const gg = gc.getContext('2d');
+      gg.translate(GLOW_PAD, GLOW_PAD);
+      gg.lineJoin = 'round';
+      [[crest, 'blur(10px)', .7, '#ff4f8b', band * 2.2], [outline(() => band * .5), 'blur(5px)', .65, '#ffb347', band * 1.1], [crest, 'blur(1.2px)', .9, '#ffffff', band * .25]]
+        .forEach(([path, filter, alpha, color, width]) => { gg.filter = filter; gg.globalAlpha = alpha; gg.strokeStyle = color; gg.lineWidth = width; gg.stroke(path); });
+      const glow = gc.toDataURL();
       // 預先畫咒語的剝落邊緣。只有筆畫遮罩會取樣這張圖。
       const ashWidth = 256, ashHeight = 144;
       canvas.width = ashWidth;
@@ -2823,8 +2970,154 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       wand.width = 720;
       wand.height = Math.round(wand.width * .07);
       drawElder(wand, wand.width, wand.height);
-      wandArt = { mask, lumos, nox, spellAsh, wand, size, radius };
+      wandArt = { mask, lumos, nox, glow, spellAsh, wand, wandUrl: wand.toDataURL(), size, radius };   // wandUrl：杖身光流的遮罩
       return wandArt;
+    }
+    /* 魔杖墨水的 WebGL 版：依實際螢幕解析度逐幀畫墨水邊緣與光暈（不會像放大的圖一樣糊）。
+       · 輪廓：照抄 prepareWandArt() 的「角度 → 半徑」公式，縮放倍率每幀從墨水元素（當驅動器、不顯示）讀，和 CSS 換色遮罩同一組關鍵影格，一定對齊
+       · 熱浪：先用低頻噪聲偏移像素座標再算距離（取代 SVG 位移濾鏡）
+       · 流動滲開：邊緣疊兩層隨時間流動的噪聲（毛邊、濃淡），後方拉長噪聲做藍色紋路
+       · 虹彩：橘→粉→藍依邊緣角度＋時間循環；前緣白熱細線＋外圈約 40px 柔光
+       畫布與程式只建立一次、之後每次轉場重用；不支援或 context 遺失時回傳 null，改用圖片版 */
+    let wandGl;
+    function getWandGl() {
+      if (wandGl !== undefined) return wandGl;
+      wandGl = null;
+      const cv = document.createElement('canvas');
+      cv.className = 'wand-gl';
+      cv.setAttribute('aria-hidden', 'true');
+      const gl = cv.getContext('webgl', { premultipliedAlpha: true, antialias: false, alpha: true });
+      if (!gl) return null;
+      const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+      const FS = `precision highp float;
+uniform vec2 R,C;uniform float K,A,T,HZ,D;
+const float RAD=140.544,BAND=10.681;
+float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float n2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),h(i+1.),f.x),f.y);}
+float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*n2(p);p=p*2.03+17.;a*=.5;}return s;}
+float shape(float a){
+  float co=sin(3.*a+.9)*.44+sin(5.*a-1.7)*.31+sin(8.*a+.5)*.25;
+  float w=a+.063*sin(7.*a)+.034*sin(13.*a-.8);
+  float fi=sin(14.*w+.9)*.48+sin(23.*w-1.1)*.34+sin(32.*w)*.18;
+  return RAD*(1.+.22*(co+.42*fi));
+}
+vec3 iri(float x){x=fract(x)*3.;vec3 o=vec3(1.,.702,.278),pk=vec3(1.,.31,.545),b=vec3(.239,.545,1.);return x<1.?mix(o,pk,x):x<2.?mix(pk,b,x-1.):mix(b,o,x-2.);}
+void main(){
+  vec2 q=vec2(gl_FragCoord.x,R.y-gl_FragCoord.y);
+  vec2 hz=vec2(n2(q*.018/D+vec2(T*2.1,-T*1.3)),n2(q*.022/D+vec2(-T*1.7,T*2.4)+9.))-.5;
+  q+=hz*HZ*D;
+  vec2 v=q-C;float a=atan(v.y,v.x);
+  float d=length(v)-K*shape(a);
+  float w=max(K*BAND,6.*D);
+  float df=d+(fbm(q*.04/D+vec2(T*.8,-T*.5))-.5)*9.*D+(n2(q*.13/D-T*1.5)-.5)*3.*D;
+  float ph=a/6.2832*2.+T*.35;
+  vec3 tint=iri(ph),warm=iri(ph-.15),cool=iri(ph+.25);
+  float wash=(1.-smoothstep(0.,w*.9,df))*step(0.,df)*.3*(.6+.8*fbm(q*.06/D+T));
+  float rim=smoothstep(-w*.45,-w*.05,df)*(1.-smoothstep(-w*.02,w*.08,df))*.55;
+  float vn=fbm(vec2(a*38.,df/w*2.2-T*1.2));
+  float veins=smoothstep(.55,.75,vn)*smoothstep(-w*1.3,-w*.4,df)*(1.-smoothstep(-w*.3,0.,df))*.6;
+  float line=exp(-abs(df)/(1.6*D));
+  float glow=exp(-max(df,0.)/(40.*D))*smoothstep(-w*.3,0.,df)*.45;
+  vec3 col=warm*wash+tint*rim+cool*veins+tint*glow+vec3(.9)*line;
+  float al=clamp(wash+rim+veins+glow*.6+line*.8,0.,1.);
+  col=1.-exp(-col*1.15);
+  gl_FragColor=vec4(col,al)*A;
+}`;
+      const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error('wandSwap shader', gl.getShaderInfoLog(s)); return s; };
+      const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null;
+      gl.useProgram(pr);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const al = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
+      const U = {}; for (const k of ['R', 'C', 'K', 'A', 'T', 'HZ', 'D']) U[k] = gl.getUniformLocation(pr, k);
+      cv.addEventListener('webglcontextlost', (e) => { e.preventDefault(); wandGl = null; });
+      wandGl = {
+        cv, gl,
+        // 每次轉場開始：依畫面尺寸設定畫布
+        size(W, H, D, center) { cv.width = Math.round(W * D); cv.height = Math.round(H * D); gl.viewport(0, 0, cv.width, cv.height); gl.uniform2f(U.R, cv.width, cv.height); gl.uniform2f(U.C, center[0] * D, center[1] * D); gl.uniform1f(U.D, D); this.D = D; },
+        // k＝墨水目前的縮放倍率（每個貼圖 px 對應幾個 CSS px）；alpha＝墨水透明度；t＝秒；hz＝熱浪位移 px
+        draw(k, alpha, t, hz) { gl.uniform1f(U.K, k * this.D); gl.uniform1f(U.A, alpha); gl.uniform1f(U.T, t); gl.uniform1f(U.HZ, hz); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLES, 0, 3); },
+      };
+      return wandGl;
+    }
+    /* 照片魔杖（同「深淺之神」阿波羅胸像的做法）：真實照片去背 → 依明暗推算凹凸（高度圖 → 法線）→ WebGL 即時打光。
+       · 照片不放進公開 repo：只有頁面裡有 <script type="text/plain" id="wand-photo">（私人 Artifact 版本才注入）時才啟用，否則用程式畫的魔杖
+       · 照片在本機預先旋轉、去白底與地上的影子，裁成橫條 PNG（杖尖在左）再注入；魔杖元素的高度照這張圖的比例
+       · 打光：固定的左上主光保留照片原本的明暗；另有兩個會動的光——蓄力時沿杖身流向杖尖的三色光、杖尖的施法光 */
+    let wandPhoto = null, wandPhotoGl;
+    async function loadWandPhoto() {
+      if (wandPhoto) return wandPhoto;
+      const src = document.getElementById('wand-photo')?.textContent.trim();
+      if (!src) return null;
+      const im = new Image();
+      im.src = src;
+      await im.decode();
+      // 照片已預先處理成去背的橫條 PNG（杖尖在左、高＝長 × 0.092，握柄節瘤與杖尾完整），這裡只讀出透明度與明暗
+      const W = im.naturalWidth, H = im.naturalHeight, N = W * H;
+      const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      const g = cv.getContext('2d', { willReadFrequently: true });
+      g.drawImage(im, 0, 0);
+      const P = g.getImageData(0, 0, W, H).data;
+      const A = new Float32Array(N), Y = new Float32Array(N);
+      for (let i = 0; i < N; i++) { const o = i * 4; A[i] = P[o + 3] / 255; Y[i] = (.299 * P[o] + .587 * P[o + 1] + .114 * P[o + 2]) / 255 * A[i]; }
+      // 高度圖：細／中兩層明暗＋依輪廓推的圓柱感（同阿波羅），再算法線
+      const blur = (src, r) => { const t = new Float32Array(N), o = new Float32Array(N), n = 2 * r + 1;
+        for (let y = 0; y < H; y++) { let sm = 0; for (let x = -r; x <= r; x++) sm += src[y * W + Math.min(W - 1, Math.max(0, x))]; for (let x = 0; x < W; x++) { t[y * W + x] = sm / n; sm += src[y * W + Math.min(W - 1, x + r + 1)] - src[y * W + Math.max(0, x - r)]; } }
+        for (let x = 0; x < W; x++) { let sm = 0; for (let y = -r; y <= r; y++) sm += t[Math.min(H - 1, Math.max(0, y)) * W + x]; for (let y = 0; y < H; y++) { o[y * W + x] = sm / n; sm += t[Math.min(H - 1, y + r + 1) * W + x] - t[Math.max(0, y - r) * W + x]; } } return o; };
+      const y1 = blur(Y, 1), y2 = blur(blur(Y, 3), 3), round = blur(blur(A, 6), 6);
+      const Hh = new Float32Array(N); for (let i = 0; i < N; i++) Hh[i] = y1[i] * 2.2 + y2[i] * 5 + Math.sqrt(round[i]) * 34;
+      const NM = new Uint8Array(N * 4);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { const i = y * W + x, o = i * 4;
+        const hx = Hh[y * W + Math.min(W - 1, x + 1)] - Hh[y * W + Math.max(0, x - 1)], hy = Hh[Math.min(H - 1, y + 1) * W + x] - Hh[Math.max(0, y - 1) * W + x];
+        const nx = -hx * .7, ny = -hy * .7, l = Math.hypot(nx, ny, 1);
+        NM[o] = (nx / l * .5 + .5) * 255; NM[o + 1] = (ny / l * .5 + .5) * 255; NM[o + 2] = (1 / l * .5 + .5) * 255; NM[o + 3] = 255; }
+      wandPhoto = { cv, W, H, normal: NM, url: cv.toDataURL() };
+      return wandPhoto;
+    }
+    // 照片魔杖的打光程式（畫布與程式只建立一次）；不支援時回傳 null，改用照片原圖（不打光）
+    function getWandPhotoGl() {
+      if (wandPhotoGl !== undefined) return wandPhotoGl;
+      const ph = wandPhoto; if (!ph) return null;
+      wandPhotoGl = null;
+      const cv = document.createElement('canvas'); cv.width = ph.W; cv.height = ph.H;
+      const gl = cv.getContext('webgl', { premultipliedAlpha: true, antialias: false, alpha: true });
+      if (!gl) return null;
+      const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+      const FS = `precision mediump float;
+uniform sampler2D uC,uN;uniform vec2 uR;uniform vec3 uFL,uFC,uTC;uniform float uTip;
+void main(){
+  vec2 t=vec2(gl_FragCoord.x/uR.x,1.-gl_FragCoord.y/uR.y);
+  vec4 c=texture2D(uC,t);if(c.a<.004){gl_FragColor=vec4(0.);return;}
+  vec3 n=normalize(texture2D(uN,t).xyz*2.-1.);
+  vec3 p=vec3(t*uR,0.);
+  vec3 lk=normalize(vec3(-.4,-.6,.7));
+  vec3 col=c.rgb*(.8+.3*max(dot(n,lk),0.));
+  vec3 ld=uFL-p;float dl=length(ld);ld/=dl;float at=1./(1.+pow(dl/(uR.y*1.6),2.));
+  col+=uFC*(c.rgb*1.8*max(dot(n,ld),0.)+pow(max(dot(n,normalize(ld+vec3(0.,0.,1.))),0.),22.)*.8)*at;
+  vec3 tl=vec3(0.,uR.y*.5,uR.y*.9)-p;float dt=length(tl);tl/=dt;float ta=1./(1.+pow(dt/(uR.y*3.5),2.));
+  col+=uTC*uTip*(c.rgb*1.5*max(dot(n,tl),0.)+pow(max(dot(n,normalize(tl+vec3(0.,0.,1.))),0.),18.)*.7)*ta;
+  gl_FragColor=vec4(min(col,1.)*c.a,c.a);
+}`;
+      const sh = (type, src) => { const x = gl.createShader(type); gl.shaderSource(x, src); gl.compileShader(x); if (!gl.getShaderParameter(x, gl.COMPILE_STATUS)) console.error('wand photo shader', gl.getShaderInfoLog(x)); return x; };
+      const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null;
+      gl.useProgram(pr);
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const al = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
+      const tex = (unit, set) => { const t = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t);
+        for (const [k, v] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, v); set(); };
+      tex(0, () => gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, ph.cv));
+      tex(1, () => gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, ph.W, ph.H, 0, gl.RGBA, gl.UNSIGNED_BYTE, ph.normal));
+      const U = {}; for (const k of ['uC', 'uN', 'uR', 'uFL', 'uFC', 'uTC', 'uTip']) U[k] = gl.getUniformLocation(pr, k);
+      gl.uniform1i(U.uC, 0); gl.uniform1i(U.uN, 1); gl.uniform2f(U.uR, ph.W, ph.H); gl.viewport(0, 0, ph.W, ph.H);
+      cv.addEventListener('webglcontextlost', (e) => { e.preventDefault(); wandPhotoGl = null; });
+      wandPhotoGl = {
+        cv, gl,
+        // fx：光流在杖身上的位置（0＝杖尖、1＝握柄端）；fi：光流亮度；fc：光流顏色；tip：杖尖光亮度；tc：杖尖光顏色
+        draw(fx, fi, fc, tip, tc) { gl.uniform3f(U.uFL, fx * ph.W, ph.H * .5, ph.H * .8); gl.uniform3f(U.uFC, fc[0] * fi, fc[1] * fi, fc[2] * fi); gl.uniform1f(U.uTip, tip); gl.uniform3f(U.uTC, tc[0], tc[1], tc[2]);
+          gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLES, 0, 3); },
+      };
+      return wandPhotoGl;
     }
 
     function wandSwap(next, apply) {
@@ -2840,7 +3133,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const th = 42;   // 杖身固定朝右下，杖尖落在點擊位置
 
       // 魔杖長度：杖尖沿杖身方向到畫面邊緣的距離 × 1.5，下緣三分之一伸出畫面外
-      const dx = Math.cos(th * Math.PI / 180), dy = Math.sin(th * Math.PI / 180), exit = Math.min((W - tip[0]) / dx, (H - tip[1]) / dy), WL = exit * 1.5, WH = WL * 0.07;
+      const dx = Math.cos(th * Math.PI / 180), dy = Math.sin(th * Math.PI / 180), exit = Math.min((W - tip[0]) / dx, (H - tip[1]) / dy), WL = exit * 1.5, WH = WL * (wandPhoto ? wandPhoto.H / wandPhoto.W : 0.07);   // 照片魔杖照圖片比例
       const RV = Math.hypot(W, H) / 2 + 140;
       const useInkMask = CSS.supports('mask-composite', 'exclude');
       const seedRadius = Math.max(23, Math.min(52, Math.min(W, H) * .072));
@@ -2856,7 +3149,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       const fx = document.createElement('div'); fx.className = 'wand-fx' + (lumos ? ' lumos' : ' nox'); fx.setAttribute('aria-hidden', 'true');
       fx.innerHTML = `
         <div class="wand-halo" style="left:${C[0]}px;top:${C[1]}px"></div>
-        <div class="wand" style="left:${tip[0]}px;top:${(tip[1] - WH / 2).toFixed(1)}px;width:${WL.toFixed(0)}px;height:${WH.toFixed(1)}px;rotate:${th}deg"><canvas class="wand-cv"></canvas><i class="wand-tip"></i></div>
+        <div class="wand" style="left:${tip[0]}px;top:${(tip[1] - WH / 2).toFixed(1)}px;width:${WL.toFixed(0)}px;height:${WH.toFixed(1)}px;rotate:${th}deg"><canvas class="wand-cv"></canvas><span class="wand-flow"><i></i></span><i class="wand-tip"></i></div>
         <svg class="wand-word" width="${W}" height="${H}" style="font-size:${FS.toFixed(1)}px"><defs>
           <mask id="ww-ash-mask" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" mask-type="alpha" ${ashBounds}>
             <image class="ww-ash-sweep" href="${art.spellAsh}" ${ashBounds} preserveAspectRatio="none"/>
@@ -2868,15 +3161,56 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           <linearGradient id="ww-hl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
           <mask id="ww-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect class="ww-sweep" x="${(C[0] - total / 2 - 160).toFixed(0)}" y="0" width="140" height="${H}" fill="url(#ww-hl)"/></mask></defs>
           <ellipse class="ww-glow" cx="${C[0]}" cy="${C[1]}" rx="${(total / 2 + FS * 0.7).toFixed(0)}" ry="${(FS * 0.85).toFixed(0)}" fill="url(#ww-g)"/><g class="ww-main" mask="url(#ww-ash-mask)">${letters('ww-l')}</g>${lumos ? `<g class="ww-shine" mask="url(#ww-mask)">${letters('ww-s')}</g>` : ''}</svg>`;
-      const wc = fx.querySelector('.wand-cv');
-      wc.width = art.wand.width;
-      wc.height = art.wand.height;
-      wc.getContext('2d').drawImage(art.wand, 0, 0);
+      let wc = fx.querySelector('.wand-cv');
+      const photo = wandPhoto;   // 照片魔杖（私人 Artifact 版本才有）
+      let PG = null;
+      if (photo) { try { PG = getWandPhotoGl(); } catch { PG = null; } }
+      if (PG) { PG.cv.className = 'wand-cv'; wc.replaceWith(PG.cv); wc = PG.cv; PG.draw(1, 0, [0, 0, 0], 0, [0, 0, 0]); }
+      else {
+        const src = photo ? photo.cv : art.wand;
+        wc.width = src.width;
+        wc.height = src.height;
+        wc.getContext('2d').drawImage(src, 0, 0);
+      }
+      // 杖身光流只出現在杖身輪廓內：用魔杖圖當遮罩
+      const flow = fx.querySelector('.wand-flow');
+      flow.style.webkitMaskImage = flow.style.maskImage = `url("${photo ? photo.url : art.wandUrl}")`;
+      // 杖尖火花（煙火）：全螢幕畫布，每顆火花受阻力減速、受重力下墜，拖出彎曲的光尾
+      const sparkCv = document.createElement('canvas');
+      sparkCv.className = 'wand-sparks';
+      const DPR = Math.min(1.5, devicePixelRatio || 1);
+      sparkCv.width = Math.round(W * DPR); sparkCv.height = Math.round(H * DPR);
+      fx.append(sparkCv);
       const pigment = new Image();
       pigment.className = 'wand-ink';
       pigment.alt = '';
       pigment.src = lumos ? art.lumos : art.nox;
-      fx.prepend(pigment);
+      const edgeGlow = new Image();
+      edgeGlow.className = 'wand-glow';
+      edgeGlow.alt = '';
+      edgeGlow.src = art.glow;
+      // WebGL 版：畫布畫墨水邊緣與光暈；墨水圖只當驅動器（照跑動畫、不顯示），每幀讀它的縮放與透明度
+      let G = null;
+      try { G = getWandGl(); } catch { G = null; }
+      let haze = null;
+      if (G) {
+        G.size(W, H, DPR, C);
+        pigment.style.visibility = 'hidden';
+        fx.prepend(G.cv, pigment);
+      } else {
+      // 熱浪扭曲（圖片版）：墨水與光暈包在全螢幕的一層裡套位移濾鏡（螢幕座標，波紋大小不隨墨水放大而變粗）
+      haze = document.createElement('div');
+      haze.className = 'wand-haze';
+      // 噪點只產生一次：每格約 30px 的隨機值畫在小畫布上，濾鏡放大成全螢幕時自然變成柔和波紋（不必每幀跑 feTurbulence）
+      const nw = Math.ceil(W / 30) + 4, nh = Math.ceil(H / 30) + 4, nc = document.createElement('canvas');
+      nc.width = nw; nc.height = nh;
+      const nctx = nc.getContext('2d'), nd = nctx.createImageData(nw, nh);
+      for (let i = 0; i < nd.data.length; i += 4) { nd.data[i] = Math.random() * 255; nd.data[i + 1] = Math.random() * 255; nd.data[i + 2] = 128; nd.data[i + 3] = 255; }
+      nctx.putImageData(nd, 0, 0);
+      haze.innerHTML = `<svg width="0" height="0" aria-hidden="true"><filter id="wand-haze-f" filterUnits="userSpaceOnUse" x="-40" y="-40" width="${W + 80}" height="${H + 80}" color-interpolation-filters="sRGB"><feImage href="${nc.toDataURL()}" x="-60" y="-60" width="${W + 120}" height="${H + 120}" preserveAspectRatio="none" result="n0"/><feOffset in="n0" dx="0" dy="0" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="0" xChannelSelector="R" yChannelSelector="G"/></filter></svg>`;
+      haze.append(pigment, edgeGlow);
+      fx.prepend(haze);
+      }
       const de = document.documentElement;
       de.classList.add('vt-wand');
       shBusy = true;
@@ -2911,10 +3245,10 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           });
           return;
         }
-        const DUR = 1450, C0 = 95, HIT = 150, SPREAD = 1030;
+        const DUR = 1450, C0 = 95, HIT = 300, SPREAD = 850;   // 出現 → 蓄力後仰（光流灌注）→ 甩杖點下（HIT）→ 擴散 0.85 秒
         const motion = { pseudoElement: '::view-transition-old(root)', duration: DUR, fill: 'both' };
         const startSpread = HIT / DUR, endSpread = (HIT + SPREAD) / DUR;
-        const spreadEase = 'cubic-bezier(.42, 0, .30, 1)';
+        const spreadEase = 'cubic-bezier(.55, 0, .9, .4)';   // 由慢到快：起步慢慢滲開，越推越快衝出畫面
         const contractSize = textureSpan(seedRadius * .68);
         const seedRelease = (HIT + 85) / DUR;
         const feather = Math.round(Math.max(36, Math.min(84, Math.min(W, H) * .095)));
@@ -2938,7 +3272,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         }
 
         const inkTransform = span => `translate(-50%, -50%) scale(${span / art.size})`;
-        pigment.animate([
+        const inkFrames = [
           { opacity: 0, transform: inkTransform(textureSpan(seedRadius)), easing: 'ease-out' },
           { opacity: 1, offset: 55 / DUR },
           { opacity: 1, transform: inkTransform(contractSize), offset: startSpread, easing: 'ease-out' },
@@ -2946,19 +3280,129 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
           { opacity: 1, offset: (HIT + SPREAD * .65) / DUR },
           { transform: inkTransform(finalSpan), offset: endSpread },
           { opacity: 0, transform: inkTransform(finalSpan), offset: 1 }
-        ], { duration: DUR, fill: 'both' });
+        ];
+        pigment.animate(inkFrames, { duration: DUR, fill: 'both' });
+        // 熱浪強度：擴散期間隨擴散加速增強、尾段收掉（最大 34px）
+        const hazeFrom = performance.now() + HIT, hazeLen = SPREAD + 250;
+        const hazeAt = (now) => { const p = (now - hazeFrom) / hazeLen; return p > 0 && p < 1 ? 34 * Math.sin(Math.PI * Math.min(1, p * 1.15)) ** .8 : 0; };
+        if (G) {
+          // WebGL 版：每幀讀驅動器的縮放（transform 矩陣）與透明度，畫一次
+          const t0 = performance.now();
+          const frame = (now) => {
+            if (!fx.isConnected || G.gl.isContextLost()) { if (fx.isConnected) pigment.style.visibility = ''; return; }   // context 遺失：露出墨水圖
+            const cs = getComputedStyle(pigment);
+            const m = cs.transform && cs.transform !== 'none' ? new DOMMatrixReadOnly(cs.transform) : null;
+            G.draw(m ? Math.hypot(m.a, m.b) : 0, +cs.opacity || 0, (now - t0) / 1000, hazeAt(now));
+            requestAnimationFrame(frame);
+          };
+          requestAnimationFrame(frame);
+        } else {
+        edgeGlow.animate(inkFrames, { duration: DUR, fill: 'both' });   // 光暈跟墨水同一組縮放，永遠貼在前緣
+        // 熱浪：擴散期間邊緣像海市蜃樓一樣不規則扭動——噪點來回漂移，位移量隨擴散加速增強、尾段收掉
+        const drift = haze.querySelector('feOffset'), disp = haze.querySelector('feDisplacementMap');
+        const wobble = (now) => {
+          if (!fx.isConnected) return;
+          const p = (now - hazeFrom) / hazeLen;
+          if (p >= 1) { disp.setAttribute('scale', '0'); return; }
+          if (p > 0) {
+            const t = now / 1000;
+            drift.setAttribute('dx', (14 * Math.sin(t * 6.1)).toFixed(1)); drift.setAttribute('dy', (20 * Math.sin(t * 8.3 + 1.2)).toFixed(1));   // 噪點來回漂移＝波紋扭動
+            disp.setAttribute('scale', hazeAt(now).toFixed(1));
+          }
+          requestAnimationFrame(wobble);
+        };
+        requestAnimationFrame(wobble);
+        }
 
-        // 魔杖直接在中央亮起並點擊，不再由畫外滑入；點擊後迅速淡出
+        // 揮杖：在中央亮起 → 以握柄為軸往後仰蓄力（杖尖退約 90px）→ 加速甩下、稍微超過 → 回彈定位，之後淡出
         const wand = fx.querySelector('.wand');
-        const tap = (distance, scale) => `translateX(${distance}px) scale(${scale})`;
+        const deg = (px) => px / WL * 180 / Math.PI;   // 杖尖位移（px）換成繞握柄的角度
+        const swing = (px, scale = 1) => `translateX(${WL.toFixed(0)}px) rotate(${deg(px).toFixed(3)}deg) translateX(${(-WL).toFixed(0)}px) scale(${scale})`;
+        const CHARGE = HIT - 60;   // 蓄力到最後仰的時間點，之後 60ms 甩下
         wand.animate([
-          { offset: 0, opacity: 0, transform: tap(0, .97) },
-          { offset: (C0 - 70) / DUR, opacity: 0, transform: tap(0, .97) },
-          { offset: C0 / DUR, opacity: 1, transform: tap(0, 1), easing: 'cubic-bezier(.23, 1, .32, 1)' },
-          { offset: HIT / DUR, opacity: 1, transform: tap(-3, .98), easing: 'cubic-bezier(.2, .8, .3, 1)' },
-          { offset: (HIT + 55) / DUR, opacity: 1, transform: tap(0, 1) },
-          { offset: (HIT + 190) / DUR, opacity: 0, transform: tap(0, .99) },
-          { offset: 1, opacity: 0, transform: tap(0, .99) }], { duration: DUR, fill: 'both' });
+          { offset: 0, opacity: 0, transform: swing(0, .97) },
+          { offset: (C0 - 70) / DUR, opacity: 0, transform: swing(0, .97) },
+          { offset: C0 / DUR, opacity: 1, transform: swing(0), easing: 'cubic-bezier(.2, .8, .3, 1)' },
+          { offset: CHARGE / DUR, opacity: 1, transform: swing(-90), easing: 'cubic-bezier(.55, 0, .9, .45)' },
+          { offset: HIT / DUR, opacity: 1, transform: swing(18, .98), easing: 'cubic-bezier(.2, .8, .3, 1)' },
+          { offset: (HIT + 90) / DUR, opacity: 1, transform: swing(0) },
+          { offset: (HIT + 260) / DUR, opacity: 0, transform: swing(0, .99) },
+          { offset: 1, opacity: 0, transform: swing(0, .99) }], { duration: DUR, fill: 'both' });
+        // 照片魔杖打光：蓄力時三色光沿杖身從握柄流向杖尖（照亮凹凸紋理），杖尖施法光照亮杖頭
+        if (PG) {
+          const p0 = performance.now();
+          const mixc = (a, b, k) => a.map((v, i) => v + (b[i] - v) * k);
+          const FLOWC = [[.24, .55, 1], [1, .31, .55], [1, .7, .28], [1, 1, 1]];   // 握柄端藍 → 粉 → 橘 → 到杖尖白熱
+          const lit = (now) => {
+            if (!fx.isConnected || PG.gl.isContextLost()) return;
+            const t = now - p0;
+            const f = Math.max(0, Math.min(1, (t - C0) / (HIT - C0))), e = f * f;   // 越流越快
+            const seg = Math.min(2.999, e * 3), fc = mixc(FLOWC[Math.floor(seg)], FLOWC[Math.floor(seg) + 1], seg % 1);
+            const fi = t < C0 ? 0 : t < HIT ? 1.3 * Math.min(1, f * 4) : Math.max(0, 1.3 * (1 - (t - HIT) / 160));
+            let tip;
+            if (lumos) tip = t < HIT - 30 ? .35 * Math.min(1, t / C0) : t < HIT + 50 ? .35 + 1.9 * (t - HIT + 30) / 80 : Math.max(0, 2.25 * (1 - (t - HIT - 50) / (DUR * .5)));
+            else tip = t < C0 ? t / C0 : t < HIT - 20 ? 1 : Math.max(0, 1 - (t - HIT + 20) / 110);   // Nox：施咒時熄滅
+            PG.draw(1 - 1.15 * e, fi, fc, tip, lumos ? [1, .93, .78] : [.8, .86, 1]);
+            if (t < DUR) requestAnimationFrame(lit);
+          };
+          requestAnimationFrame(lit);
+        }
+        // 杖身光流：蓄力期間一道三色光從握柄沿杖身流向杖尖，越流越快，抵達杖尖時正好甩下
+        fx.querySelector('.wand-flow i').animate([
+          { transform: `translateX(${WL.toFixed(0)}px)`, opacity: 1 },
+          { transform: `translateX(${(-WL * .35).toFixed(0)}px)`, opacity: 1, offset: .9 },
+          { transform: `translateX(${(-WL * .4).toFixed(0)}px)`, opacity: 0 }
+        ], { duration: HIT - C0, delay: C0, easing: 'cubic-bezier(.5, 0, .85, .5)', fill: 'both' });
+        // 杖尖火花（煙火）：甩下瞬間噴出 40 顆，避開杖身方向（42° ±40°）；飛 150–380px，重力讓軌跡往下彎，光尾越後面越細越淡
+        {
+          const COLORS = ['#ffffff', '#ffb347', '#ff4f8b', '#3d8bff'];
+          const sg = sparkCv.getContext('2d');
+          sg.scale(DPR, DPR);
+          sg.lineCap = sg.lineJoin = 'round';
+          const TAU = 300, G = .0011, TRAIL = 14;   // 阻力時間常數（ms）、重力（px/ms²）、光尾保留幾個位置
+          const ps = Array.from({ length: 40 }, (_, i) => {
+            const a = (42 + 40 + (i / 40) * 280 + (Math.random() - .5) * 14) * Math.PI / 180;
+            const v = (.5 + Math.random() * .75) * (i % 3 === 2 ? .7 : 1);   // 每三顆一顆較慢、較短，做出層次
+            return { x: tip[0], y: tip[1], vx: Math.cos(a) * v, vy: Math.sin(a) * v - .12, life: 650 + Math.random() * 450,
+              w: i % 3 === 2 ? 1.2 : 1.6 + Math.random() * 1.2, c: COLORS[i % COLORS.length], tr: [] };
+          });
+          const t0 = performance.now() + HIT - 10;
+          let last = t0;
+          const step = (now) => {
+            if (!fx.isConnected) return;
+            if (now < t0) { requestAnimationFrame(step); return; }
+            const dt = Math.min(40, now - last); last = now;
+            const age = now - t0, k = Math.exp(-dt / TAU);
+            sg.clearRect(0, 0, W, H);
+            sg.globalCompositeOperation = 'lighter';
+            let alive = false;
+            for (const p of ps) {
+              const f = age / p.life;
+              if (f >= 1) continue;
+              alive = true;
+              p.vx *= k; p.vy = p.vy * k + G * dt;
+              p.x += p.vx * dt; p.y += p.vy * dt;
+              p.tr.push([p.x, p.y]); if (p.tr.length > TRAIL) p.tr.shift();
+              const fade = 1 - f * f;   // 前段亮、尾段快速熄
+              // 光尾：整條細線＋靠近火花頭的半段加粗，外面再描一筆寬而淡的光暈（不用 shadowBlur，省效能）
+              const tr = p.tr, n = tr.length, path = (from) => { sg.beginPath(); sg.moveTo(tr[from][0], tr[from][1]); for (let j = from + 1; j < n; j++) sg.lineTo(tr[j][0], tr[j][1]); };
+              sg.strokeStyle = p.c;
+              if (n > 1) {
+                path(0); sg.globalAlpha = fade * .18; sg.lineWidth = p.w * 3.2; sg.stroke();
+                sg.globalAlpha = fade * .45; sg.lineWidth = p.w * .45; sg.stroke();
+                const mid = n >> 1; if (n - mid > 1) { path(mid); sg.globalAlpha = fade * .9; sg.lineWidth = p.w; sg.stroke(); }
+              }
+              sg.globalAlpha = fade; sg.fillStyle = '#fff';   // 火花頭：白熱小點
+              sg.beginPath(); sg.arc(p.x, p.y, p.w * .7, 0, Math.PI * 2); sg.fill();
+            }
+            if (alive) requestAnimationFrame(step); else sg.clearRect(0, 0, W, H);
+          };
+          requestAnimationFrame(step);
+        }
+        // 點下的衝擊：整個畫面（新舊配色與特效層一起）震 8px，約 0.3 秒收掉
+        const shake = [[0, 0], [8, -5], [-8, 4], [5, -3], [-3, 1.5], [1, -.5], [0, 0]].map(([x, y]) => ({ transform: `translate(${x}px, ${y}px)` }));
+        for (const pe of ['::view-transition-group(root)', '::view-transition-group(wand)'])
+          de.animate(shake, { pseudoElement: pe, duration: 300, delay: HIT, easing: 'linear' });
         // 杖尖：Lumos 施咒時亮起；Nox 先亮著、施咒時熄滅
         fx.querySelector('.wand-tip').animate(lumos
           ? [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 0.7, transform: 'scale(.55)', offset: C0 / DUR }, { opacity: 0.7, transform: 'scale(.55)', offset: (HIT - 30) / DUR }, { opacity: 1, transform: 'scale(1.8)', offset: (HIT + 50) / DUR }, { opacity: 1, transform: 'scale(1)', offset: 0.6 }, { opacity: 0, transform: 'scale(.6)' }]
@@ -2972,7 +3416,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
         ], { duration: 500, delay: HIT, fill: 'both', easing: 'cubic-bezier(.23, 1, .32, 1)' });
         // 墨水擴散到中段時顯示咒語。Lumos 向上蒸散，Nox 從上方落下收合。
         const mid = (word.length - 1) / 2;
-        const spellStart = HIT + SPREAD / 2, spellOut = 1230, spellEnd = DUR - 15;
+        const spellStart = HIT + SPREAD / 2, spellOut = DUR - 220, spellEnd = DUR - 15;
         const easeOut = 'cubic-bezier(.23, 1, .32, 1)';
         const clear = { opacity: 1, transform: 'none', filter: 'blur(0px)' };
         const ashShift = (em) => `translateY(${(FS * em).toFixed(1)}px)`;
@@ -3045,10 +3489,29 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
       };
       vt.finished.then(cleanUp, cleanUp);
     }
+    /* 深淺色轉場「亮度」（預設，約 0.45 秒）：像調螢幕亮度
+       · 切到深色：舊畫面整片變暗（亮度 100% → 35%），深色畫面從偏暗浮現到正常亮度
+       · 切到淺色：舊畫面整片提亮（→ 160%），淺色畫面從稍微過曝回到正常亮度
+       · 只動兩張快照的 filter: brightness 與透明度（顯示卡處理），不支援 View Transitions 或減少動態時直接切換 */
+    function dimSwap(next, apply) {
+      if (shBusy) return;
+      if (!document.startViewTransition || document.hidden || document.body.classList.contains('reduce') || matchMedia('(prefers-reduced-motion: reduce)').matches) { apply(); return; }
+      shBusy = true;
+      const de = document.documentElement, dark = next === 'dark', K = parseFloat(getComputedStyle(de).getPropertyValue('--dur')) || 1;
+      de.classList.add('vt-dim');
+      const vt = document.startViewTransition(apply);
+      vt.ready.then(() => {
+        const T = 450 * K, ease = 'cubic-bezier(.45, 0, .55, 1)', o = { duration: T, fill: 'both' };
+        const out = dark ? 'brightness(.35)' : 'brightness(1.6)', from = dark ? 'brightness(.35)' : 'brightness(1.3)';
+        de.animate([{ filter: 'brightness(1)', easing: ease }, { filter: out, offset: 0.55 }, { filter: out }], { ...o, pseudoElement: '::view-transition-old(root)' });
+        de.animate([{ opacity: 0, filter: from }, { opacity: 0, filter: from, offset: 0.33, easing: ease }, { opacity: 1, filter: 'brightness(1)' }], { ...o, pseudoElement: '::view-transition-new(root)' });
+      }).catch(() => {});
+      vt.finished.finally(() => { de.classList.remove('vt-dim'); shBusy = false; });
+    }
     let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途
     if ('requestIdleCallback' in window && document.startViewTransition
         && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      requestIdleCallback(() => { try { prepareWandArt(); } catch { /* 按下切換時可直接換色 */ } });
+      requestIdleCallback(() => { try { prepareWandArt(); getWandGl(); } catch { /* 按下切換時可直接換色 */ } loadWandPhoto().then(() => { try { getWandPhotoGl(); } catch {} }).catch(() => {}); });   // 墨水圖與 WebGL 程式都先準備好，點擊時不卡
     }
     /* 深淺色轉場（黑洞／白洞，兩個方向都約 1.45 秒）：黑洞的外觀不變，畫面像海水漩渦一樣被捲進洞裡（白洞反過來湧出）
        · 做法：View Transitions 拍下舊畫面；被捲走的那一層（黑洞＝舊畫面、白洞＝新畫面）套 SVG 濾鏡 #bh-lens：
@@ -3245,7 +3708,7 @@ void main(){
       vt.finished.finally(() => setTimeout(finish, Math.max(0, (END - HIT - 300) * K)));
       setTimeout(finish, (END + 800) * K);   // 保險
     }
-    tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; ({ hole: holeSwap, slash: slashSwap }[root.dataset.themeFx] || wandSwap)(next, () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); }, tb); });
+    tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; ({ hole: holeSwap, slash: slashSwap, wand: wandSwap }[root.dataset.themeFx] || dimSwap)(next, () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); }, tb); });
     new MutationObserver(paint).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint);
     paint();
@@ -4581,7 +5044,7 @@ void main(){
       color: { primary: '#1f6fff', darkPrimary: '', success: '#12b866', warn: '#f59e0b', danger: '#ef3340', info: '#1846c9', series: ['#1f6fff', '#00a3b8', '#8b5cf6', '#f59e0b'], neutral: 'cool' },
       shape: { card: 20, control: 10, pill: 'full' },
       depth: { shadow: 2, glow: 100, border: 'standard' },
-      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'line', themeFx: 'wand' },
+      motion: { speed: 1, bounce: 'standard', autoplay: true, reduce: false, enter: 'line', themeFx: 'dim' },
       layout: { cols: 4, density: 'standard', hidden: [], order: [] },
     };
     const UI_KEYS = ['standard', 'flat', 'glass', 'neu', 'swiss', 'y2k'];   // 已移除的風格（例：高對比）載入時改回標準
@@ -4802,7 +5265,7 @@ void main(){
     let theme = clone(DEFAULT);
     let lastAuto = null;
     function apply() {
-      document.documentElement.dataset.themeFx = ['hole', 'slash'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'wand';   // 深淺色轉場：右上角按鈕讀這個
+      document.documentElement.dataset.themeFx = ['hole', 'slash', 'wand'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'dim';   // 深淺色轉場：右上角按鈕讀這個
       // 舊版存過的風格（寫實、手繪）已移除：改回標準
       // 舊版的「緊湊」風格改成間距「緊」
       if (theme.style.ui === 'compact') { theme.style.ui = 'standard'; theme.layout.density = 'compact'; }
@@ -4839,13 +5302,15 @@ void main(){
     const catOf = (id) => Object.keys(CAT).find((k) => CAT[k].includes(id)) || '其他';
     const cells = $$('#wall > .cell').map((el) => ({ id: el.id, el, name: (el.querySelector('header')?.firstChild?.textContent || el.id).trim(), cat: catOf(el.id) }));
     const naturalOrder = cells.map((c) => c.id);
-    const orderOf = () => { const o = theme.layout.order.filter((id) => naturalOrder.includes(id)); return [...o, ...naturalOrder.filter((id) => !o.includes(id))]; };
+    const orderOf = () => naturalOrder.slice();   // 照原本分類順序（拖移排序已拿掉）
     let wallCat = '';   // 分類篩選（空＝全部）
-    const inView = (c) => !theme.layout.hidden.includes(c.id) && (!wallCat || c.cat === wallCat);
+    let wallQ = '';     // 篩選字（空＝不篩）
+    const wallHit = (c) => { if (!wallQ) return true; const x = ITEMS.find((i) => i.id === c.id); return !!x && wallQ.split(/\s+/).every((t) => x.hay.includes(t)); };
+    const inView = (c) => !theme.layout.hidden.includes(c.id) && (!wallCat || c.cat === wallCat) && wallHit(c);
     function applyLayout(resizeAfter = 0) {
       const order = orderOf();
       for (const c of cells) { c.el.style.order = String(order.indexOf(c.id)); c.el.hidden = !inView(c); }
-      paintCats?.();
+      paintCats?.(); paintNone?.();
       // 滑動標記、圖表都靠量位置：版面變了就讓它們重量一次
       if (resizeAfter) { clearTimeout(applyLayout._t); applyLayout._t = setTimeout(() => dispatchEvent(new Event('resize')), resizeAfter); }
       else requestAnimationFrame(() => dispatchEvent(new Event('resize')));
@@ -4980,11 +5445,11 @@ void main(){
     // 風格只換外觀（形狀、陰影、光暈）；動畫速度與彈跳感由「動畫」設定決定，換風格不會改
     const STYLES = [
       ['standard', '標準', { shape: DEFAULT.shape, depth: DEFAULT.depth }],
-      ['flat', '扁平', { shape: { card: 12, control: 8, pill: 'soft' }, depth: { shadow: 0, glow: 0, border: 'standard' } }],
-      ['glass', '液態玻璃', { shape: { card: 24, control: 12, pill: 'full' }, depth: { shadow: 1, glow: 80, border: 'subtle' } }],
-      ['neu', 'Neumorphism', { shape: { card: 20, control: 14, pill: 'full' }, depth: { shadow: 2, glow: 0, border: 'standard' } }],
+      ['flat', '扁平', { shape: DEFAULT.shape, depth: { shadow: 0, glow: 0, border: 'standard' } }],
+      ['glass', '液態玻璃', { shape: DEFAULT.shape, depth: { shadow: 1, glow: 80, border: 'subtle' } }],
+      ['neu', 'Neumorphism', { shape: DEFAULT.shape, depth: { shadow: 2, glow: 0, border: 'standard' } }],
       ['swiss', 'Swiss Style', { shape: { card: 0, control: 2, pill: 'soft' }, depth: { shadow: 0, glow: 0, border: 'strong' } }],
-      ['y2k', 'Y2K 鉻金屬', { shape: { card: 28, control: 16, pill: 'full' }, depth: { shadow: 2, glow: 80, border: 'standard' } }],
+      ['y2k', 'Y2K 鉻金屬', { shape: DEFAULT.shape, depth: { shadow: 2, glow: 80, border: 'standard' } }],
     ];
     const stylesEl = () => el('div', { class: 'cz-styles', role: 'group', 'aria-label': '介面風格' }, STYLES.map(([key, name, s]) => el('button', { type: 'button', class: 'cz-style', 'aria-pressed': String(theme.style.ui === key), onclick: () => {
       theme.style.ui = key; theme.shape = clone(s.shape); theme.depth = clone(s.depth); 
@@ -5008,7 +5473,8 @@ void main(){
     /* ---- 快速選項的選中狀態：滑桿拖動時也即時更新 ---- */
     let quick = [], primaryWarn = null;
     function paintMarks() {
-      for (const r of rows) r.classList.toggle('changed', !same(getPath(theme, r.dataset.path), getPath(DEFAULT, r.dataset.path)));
+      for (const r of rows) r.classList.toggle('changed', (r.dataset.paths ?? r.dataset.path ?? '').split(' ').filter(Boolean).some((p) => !same(getPath(theme, p), getPath(DEFAULT, p))));
+      paintCounts?.();
       $$('.cz-tile[data-path]').forEach((t) => t.classList.toggle('changed', !same(getPath(theme, t.dataset.path), getPath(DEFAULT, t.dataset.path))));
       $$('.cz-style').forEach((b, i) => b.setAttribute('aria-pressed', String(theme.style.ui === STYLES[i][0])));
       for (const [b, on] of quick) b.setAttribute('aria-pressed', String(on()));
@@ -5016,12 +5482,27 @@ void main(){
       resetBtn.disabled = same(theme, DEFAULT);
     }
     const seg = (path, opts, label) => el('div', { class: 'cz-seg', role: 'group', 'aria-label': label }, opts.map(([v, t]) => el('button', { type: 'button', 'aria-pressed': String(getPath(theme, path) === v), onclick: (e) => { setPath(theme, path, v); e.currentTarget.parentElement.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === e.currentTarget))); changed(); } }, t)));
-    const range = (path, min, max, step, fmt, label) => {
-      const out = el('output', {}, fmt(getPath(theme, path)));
-      const inp = el('input', { type: 'range', min, max, step, value: getPath(theme, path), 'aria-label': label,
-        oninput: (e) => { setPath(theme, path, +e.target.value); out.textContent = fmt(+e.target.value); changed(false); },
-        onchange: () => record() });
-      return el('div', { class: 'cz-range' }, inp, out);
+    // 滑桿：ends＝兩端的意義（例如 ['快', '慢']）；右邊數值框可直接輸入，− ＋ 一次一格；拖動時圓鈕上方顯示數值
+    const range = (path, min, max, step, fmt, label, ends) => {
+      const unit = fmt(0).replace(/^[-+\d.]+/, '');
+      const snap = (v) => +Math.min(max, Math.max(min, Math.round((v - min) / step) * step + min)).toFixed(2);
+      const bub = el('output', { class: 'cz-bub', 'aria-hidden': 'true' }, fmt(getPath(theme, path)));
+      const inp = el('input', { type: 'range', min, max, step, value: getPath(theme, path), 'aria-label': label, 'aria-valuetext': fmt(getPath(theme, path)),
+        oninput: (e) => set(+e.target.value, false), onchange: () => record() });
+      const num = el('input', { type: 'text', inputmode: 'decimal', class: 'cz-numi', value: String(getPath(theme, path)), 'aria-label': label + '（數值）',
+        onchange: (e) => set(parseFloat(e.target.value), true), onkeydown: (e) => { if (e.key === 'Enter') e.target.blur(); } });
+      const trk = el('div', { class: 'cz-trk' }, inp, bub);
+      const btn = (d, t, a) => el('button', { type: 'button', class: 'cz-nb', 'aria-label': label + a, onclick: () => set(getPath(theme, path) + d * step, true) }, t);
+      const minus = btn(-1, '−', '減少'), plus = btn(1, '＋', '增加');
+      const paint = (v) => { const f = (v - min) / (max - min); trk.style.setProperty('--p', f * 100 + '%'); trk.style.setProperty('--pf', f); minus.disabled = v <= min; plus.disabled = v >= max; };
+      function set(v, final) {
+        v = Number.isFinite(v) ? snap(v) : getPath(theme, path);
+        setPath(theme, path, v); inp.value = v; num.value = String(v); bub.textContent = fmt(v); inp.setAttribute('aria-valuetext', fmt(v)); paint(v);
+        changed(final);
+      }
+      paint(getPath(theme, path));
+      return el('div', { class: 'cz-range' }, ends ? el('span', { class: 'cz-end' }, ends[0]) : null, trk, ends ? el('span', { class: 'cz-end' }, ends[1]) : null,
+        el('div', { class: 'cz-num' }, minus, num, unit ? el('span', { class: 'cz-unit' }, unit) : null, plus));
     };
     const sw = (checked, onChange, label) => el('input', { type: 'checkbox', class: 'cz-sw', role: 'switch', 'aria-label': label, checked: !!checked, onchange: (e) => { onChange(e.target.checked); changed(); renderAll(); } });
     const colorInput = (path, label, onDone) => el('input', { type: 'color', value: getPath(theme, path), 'aria-label': label,
@@ -5035,11 +5516,11 @@ void main(){
       return b;
     }));
     // Swiss Style 沒有圓角：圓角相關的控制項停用，旁邊註明原因
-    const lockShape = (node) => {
+    const lockShape = (node, note = true) => {   // note＝false：只停用、不重複寫原因（同一分類第一列已寫）
       if (theme.style.ui !== 'swiss') return node;
       node.querySelectorAll('button, input').forEach((c) => { c.disabled = true; });
       node.classList.add('cz-locked');
-      return el('div', {}, node, el('p', { class: 'cz-hint' }, 'Swiss Style 固定直角，不能調整圓角。'));
+      return note ? el('div', {}, node, el('p', { class: 'cz-hint' }, 'Swiss Style 固定直角，不能調整圓角。')) : node;
     };
     const thumb = (cls, style = '') => el('i', { class: 'cz-th ' + cls, style, 'aria-hidden': 'true' });
     const qrow = (label, ...kids) => el('div', { class: 'cz-q' }, el('div', { class: 'cz-ql' }, label), ...kids);
@@ -5134,11 +5615,16 @@ void main(){
     const MOTION = [['關', null, 'M5 12h14'], ['少', { speed: 1.25, bounce: 'none' }, 'M4 16c4 0 6-8 16-8'], ['標準', { speed: 1, bounce: 'standard' }, 'M3 17c3 0 4-10 8-10s3 7 6 7 2-3 4-3']];
     const CAT_LABEL = { 輸入: '表單', 導覽: '導覽', 狀態: '狀態', 資料: '資料', 圖表: '圖表' };
     /* ---- 元件牆分類篩選：全部／表單／導覽／狀態／資料／圖表 ---- */
-    const wf = $('#wf');
+    const wf = $('#wf'), wfc = $('#wf-c');
     var paintCats = () => {
-      const vis = cells.filter((c) => !theme.layout.hidden.includes(c.id));
-      wf.innerHTML = [['', '全部', vis.length], ...Object.keys(CAT).map((k) => [k, CAT_LABEL[k] || k, vis.filter((c) => c.cat === k).length])]
-        .filter(([k, , n]) => !k || n).map(([k, t, n]) => `<button type="button" data-cat="${k}" aria-pressed="${wallCat === k}">${t}<small>${n}</small></button>`).join('');
+      const vis = cells.filter((c) => !theme.layout.hidden.includes(c.id) && wallHit(c));
+      wfc.innerHTML = [['', '全部', vis.length], ...Object.keys(CAT).map((k) => [k, CAT_LABEL[k] || k, vis.filter((c) => c.cat === k).length])]
+        .filter(([k, , n]) => !k || n || k === wallCat).map(([k, t, n]) => `<button type="button" data-cat="${k}" aria-pressed="${wallCat === k}">${t}<small>${n}</small></button>`).join('');
+    };
+    var paintNone = () => {
+      const p = $('#wq-none'), none = !!wallQ && !cells.some((c) => !c.el.hidden);
+      p.hidden = !none;
+      if (none) p.innerHTML = `找不到符合「<b>${esc($('#wq').value.trim())}</b>」的元件${wallCat ? '（目前只看「' + esc(CAT_LABEL[wallCat] || wallCat) + '」）' : ''}，試試英文或程式名稱<button type="button" data-wq-clear>清除篩選</button>`;
     };
     // 切換分類：布幕掃描——離開的卡片布幕由下往上蓋回，進來的卡片布幕由上往下滑開，光線是布幕上緣；原地不位移、不縮放。
     // 不等吹完才排版：離開的卡片先改成絕對定位留在原處飄走，版面同時重排，從點擊到新卡片出現約 0.2 秒
@@ -5153,15 +5639,21 @@ void main(){
     const clearPending = () => { if (!pending) return; clearTimeout(pending.t); pending.out.forEach(([c, a]) => { a.cancel(); emergeStop(c.el); }); pending = null; };
     function setCat(k) {
       if (k === wallCat) return;
-      clearPending();   // 連續點擊：上一次還沒收完的直接停掉，以最後一次為準
+      refilter(() => { wallCat = k; const u = new URL(location.href); k ? u.searchParams.set('cat', k) : u.searchParams.delete('cat'); history.replaceState(history.state, '', u); }, true);
+    }
+    function setQuery(q) {
+      q = q.trim().toLowerCase(); if (q === wallQ) return;
+      refilter(() => { wallQ = q; }, false);
+    }
+    // 分類或篩選字改變：畫面內要離開的卡片先離場，再重排、新卡片進場
+    function refilter(change, scrollBack) {
+      clearPending();   // 連續點擊／打字：上一次還沒收完的直接停掉，以最後一次為準
       const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const fits = (c) => !theme.layout.hidden.includes(c.id) && (!k || c.cat === k);
-      const out = still ? [] : inViewport(cells.filter((c) => !c.el.hidden && !fits(c)).map((c) => [c, c.el.getBoundingClientRect()]));
-      wallCat = k;
-      const u = new URL(location.href); k ? u.searchParams.set('cat', k) : u.searchParams.delete('cat'); history.replaceState(history.state, '', u);
+      change();
+      const out = still ? [] : inViewport(cells.filter((c) => !c.el.hidden && !inView(c)).map((c) => [c, c.el.getBoundingClientRect()]));
       paintCats?.();   // 分類按鈕立即切換，不等動畫
       // 捲到很下面才切換時，平滑捲回分類列，避免新卡片排在畫面上方、看起來一片空白
-      if (wf.getBoundingClientRect().top < $('.top').offsetHeight) wf.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
+      if (scrollBack && wf.getBoundingClientRect().top < $('.top').offsetHeight) wf.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
       if (!out.length) return relayout(still);
       hushFor(D(1000));   // 轉場期間暫停卡片內的示範動畫，讓出運算
       // 離場：拼塊＝拆成方塊飛散 0.45 秒；飛入、疊放＝原地淡出 0.22 秒；浮線＝由下往上碎成灰燼吹散 0.6 秒（畫面內離開的卡片同時進行）
@@ -5470,6 +5962,15 @@ void main(){
     }
     const replayEnter = () => { hushFor(D(1000)); playEnter(inViewport(cells.filter((c) => !c.el.hidden).map((c) => [c, c.el.getBoundingClientRect()])), true); };
     wf.addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) setCat(b.dataset.cat); });
+    {
+      const wq = $('#wq'), wqx = $('#wq-x'); let t = 0;
+      const sync = () => { wqx.hidden = !wq.value; };
+      const clear = () => { wq.value = ''; sync(); clearTimeout(t); setQuery(''); };
+      wq.addEventListener('input', () => { sync(); clearTimeout(t); t = setTimeout(() => setQuery(wq.value), 150); });
+      wq.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.stopPropagation(); if (wq.value) clear(); else wq.blur(); } else if (e.key === 'Enter') { clearTimeout(t); setQuery(wq.value); } });
+      wqx.addEventListener('click', () => { clear(); wq.focus(); });
+      $('#wq-none').addEventListener('click', (e) => { if (e.target.closest('[data-wq-clear]')) { clear(); wq.focus(); } });
+    }
     { const q = new URLSearchParams(location.search).get('cat'), k = q && (CAT[q] ? q : Object.keys(CAT).find((x) => CAT_LABEL[x] === q)); if (k) wallCat = k; }   // 網址可用內部名稱或畫面上的名稱（例如 表單）
     applyLayout();
     // 首次進場：畫面內的卡片依閱讀順序重排 --i（錯開總長不超過 0.3 秒）；畫面外的不播
@@ -5478,7 +5979,7 @@ void main(){
       const vis = inViewport(shown), seen = new Set(vis.map(([c]) => c));
       const step = stepOf(vis.length);
       vis.forEach(([c, r], k) => { c.el.style.setProperty('--i', (k * step / 55).toFixed(3)); c.el.style.setProperty('--sd', scanMs(r.height) + 'ms'); });
-      playEnter(vis, true);   // --i：CSS 以 55ms 為單位
+      if (location.hash.length < 2) playEnter(vis, true);   // --i：CSS 以 55ms 為單位；直接開詳細頁網址（#switch）時不播：元件牆看不到，那張卡片還會被搬進展示台，進場會演在詳細頁上
       shown.forEach(([c]) => { if (!seen.has(c)) c.el.classList.add('norise'); });
     }
     const isDarkNow = () => root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
@@ -5510,133 +6011,203 @@ void main(){
       [...sel.querySelectorAll('option')].forEach((o) => { if (GF_W[o.value]) o.style.fontFamily = `'${o.value}'`; });
       return el('div', { class: 'cz-font' }, sel, input, el('div', { class: 'cz-fprev', style: `font-family:${fontStack('custom')}` }, 'Aa 案件管理 1234'));
     }
-    function quickBody() {
-      const c = theme.color, ly = theme.layout;
-      const custom = !PRIMARY_SWATCHES.some(([v]) => v === c.primary);
+    /* ---- 外觀設定資料表 ----
+       一筆＝一列設定：cat 分類、key、label 名稱（白話）、hint 一句說明（選到那一列時展開）、
+       paths 會改到的 theme 路徑（改過標記、單項還原、分類上的改過數量都靠它）、ui() 控制項、
+       block＝控制項較寬、放在名稱下方；pin＝也放進「常用」；aff＝會影響的元件（選到或滑過時在牆上亮起）；lr:false＝←→ 不切換。
+       新增設定＝加一筆 */
+    const CZ_CATS = [['common', '常用'], ['style', '風格'], ['color', '色彩'], ['type', '字型'], ['shape', '形狀'], ['motion', '動態'], ['layout', '版面']];
+    // 層次＝陰影、主色光暈、邊框一起調（原本三個控制項）
+    const depthOf = (v) => ({ shadow: v, glow: [0, 50, 100, 150][v], border: ['subtle', 'subtle', 'standard', 'strong'][v] });
+    // 字級表只調字級與粗細；行高、字距照字級自動算（大字收緊）
+    const autoLh = (sz) => (sz >= 40 ? 1.15 : sz >= 28 ? 1.3 : sz >= 18 ? 1.4 : 1.5);
+    const autoLs = (sz) => (sz >= 40 ? -1.5 : sz >= 28 ? -1 : 0);
+    // 分段選項（按了就套用並重畫）：after＝套用後額外動作
+    const pick = (label, list, on, set, after) => el('div', { class: 'cz-seg', role: 'group', 'aria-label': label }, list.map(([v, n]) => {
+      const b = el('button', { type: 'button', 'aria-pressed': String(on(v)), onclick: () => { set(v); changed(); renderAll(); after?.(); } }, n);
+      quick.push([b, () => on(v)]); return b;
+    }));
+    const sizeStep = (k, n) => {
+      const out = el('output', {}, theme.type.levels[k].size + 'px');
+      const go = (d) => { const lv = theme.type.levels[k], v = Math.min(64, Math.max(8, lv.size + d)); lv.size = v; lv.lh = autoLh(v); lv.ls = autoLs(v); out.textContent = v + 'px'; changed(); };
+      return el('div', { class: 'cz-step', role: 'group', 'aria-label': n + '字級' }, el('button', { type: 'button', 'aria-label': '縮小', onclick: () => go(-1) }, '−'), out, el('button', { type: 'button', 'aria-label': '放大', onclick: () => go(1) }, '＋'));
+    };
+    function primaryEl() {
+      const c = theme.color, custom = !PRIMARY_SWATCHES.some(([v]) => v === c.primary);
       primaryWarn = el('div', { class: 'cz-warn', hidden: ratio(c.primary, '#ffffff') >= 3 }, el('span', {}, '這個顏色當文字可能看不清楚'), el('button', { type: 'button', onclick: fixPrimary }, '自動修正'));
-      const hidden = new Set(ly.hidden);
-      return [el('section', { class: 'cz-blk cz-quick' },
-        qrow('風格', stylesEl()),
-        qrow('字型', opts('字型', [['system', '系統'], ['sans', '黑體'], ['custom', '自訂']].map(([k, name]) => ({ name, thumb: Object.assign(el('i', { class: 'cz-th ft', style: `font-family:${fontStack(k)}`, 'aria-hidden': 'true' }), { textContent: 'Aa字' }), on: () => theme.type.family === k, pick: () => { theme.type.family = k; } }))),
-          theme.type.family === 'custom' ? fontPicker() : null,
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '字級' }, [[0.92, '小'], [1, '標準'], [1.08, '大']].map(([v, n]) => { const btn = el('button', { type: 'button', 'aria-pressed': String(theme.type.scale === v), onclick: () => { theme.type.scale = v; changed(); renderAll(); flash(); } }, '字級 ' + n); quick.push([btn, () => theme.type.scale === v]); return btn; })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '層次' }, RATIOS.map(([n, r]) => { const btn = el('button', { type: 'button', 'aria-pressed': String(sizesMatch(r)), onclick: () => { theme.type.levels = levelsFor(r); changed(); renderAll(); flash(); } }, '層次 ' + n); quick.push([btn, () => sizesMatch(r)]); return btn; }))),
-        qrow('主色', el('div', { class: 'cz-sw-row', role: 'group', 'aria-label': '主色' },
-          PRIMARY_SWATCHES.map(([v, n]) => el('button', { type: 'button', class: 'cz-swatch', style: `--c:${v}`, title: n, 'aria-label': `主色：${n}`, 'aria-pressed': String(c.primary === v), onclick: () => { c.primary = v; changed(); renderAll(); flash(); } })),
-          el('label', { class: 'cz-pick' + (custom ? ' on' : ''), title: '自訂顏色', style: custom ? `--c:${c.primary}` : '' }, colorInput('color.primary', '自訂主色'))), primaryWarn),
-        // 底色色調（2026-11-16 從進階移來）：縮圖並排底色、線條、文字三色 —— 淺底三種很像，靠中、深兩段把色相拉開
-        qrow('底色', opts('底色色調', [['cool', '偏藍'], ['neutral', '中性'], ['warm', '偏暖']].map(([k, name]) => {
+      return el('div', { class: 'cz-stack' }, el('div', { class: 'cz-sw-row', role: 'group', 'aria-label': '主色' },
+        PRIMARY_SWATCHES.map(([v, n]) => el('button', { type: 'button', class: 'cz-swatch', style: `--c:${v}`, title: n, 'aria-label': `主色：${n}`, 'aria-pressed': String(c.primary === v), onclick: () => { c.primary = v; changed(); renderAll(); flash(); } })),
+        el('label', { class: 'cz-pick' + (custom ? ' on' : ''), title: '自訂顏色', style: custom ? `--c:${c.primary}` : '' }, colorInput('color.primary', '自訂主色'))), primaryWarn);
+    }
+    function catsEl() {
+      const ly = theme.layout, hidden = new Set(ly.hidden);
+      return el('div', { class: 'cz-cats', role: 'group', 'aria-label': '依類別顯示' }, Object.keys(CAT).map((k) => {
+        const ids = CAT[k], off = ids.filter((id) => hidden.has(id)).length;
+        const state = off === 0 ? 'true' : off === ids.length ? 'false' : 'mixed';
+        return el('button', { type: 'button', class: 'cz-cat', 'aria-pressed': state, title: state === 'mixed' ? '部分顯示；點一下全部顯示' : '',
+          onclick: () => { const h = new Set(ly.hidden); for (const id of ids) state === 'true' ? h.add(id) : h.delete(id); ly.hidden = [...h]; changed(); renderAll(); } },
+          el('i', { 'aria-hidden': 'true' }), CAT_LABEL[k] || k);
+      }));
+    }
+    // 顯示的元件：類別一次開關＋逐一勾選（照原本分類順序，不再拖移排序）
+    function shownEl() {
+      const ly = theme.layout, hidden = new Set(ly.hidden);
+      return el('div', { class: 'cz-stack' }, catsEl(), el('ul', { class: 'cz-list', 'aria-label': '元件（勾選顯示）' }, naturalOrder.map((id) => {
+        const c2 = cells.find((x) => x.id === id);
+        return el('li', { class: 'cz-item' + (hidden.has(id) ? ' off' : '') }, el('label', {}, el('input', { type: 'checkbox', checked: !hidden.has(id), onchange: (e) => { const h = new Set(ly.hidden); e.target.checked ? h.delete(id) : h.add(id); ly.hidden = [...h]; changed(); renderAll(); } }), el('span', {}, c2.name)));
+      })));
+    }
+    const SETTINGS = [
+      { cat: 'common', key: 'mode', label: '深淺色', paths: [],
+        ui: () => pick('深淺色', [['auto', '跟系統'], ['light', '淺色'], ['dark', '深色']], (v) => (root.dataset.theme || 'auto') === v, (v) => setMode(v)) },
+      { cat: 'style', pin: true, key: 'ui', label: '風格', paths: ['style.ui'], block: true, ui: stylesEl },
+      { cat: 'style', key: 'tabs', label: '頁籤樣式', paths: ['style.tabs'], aff: '#c-tabs, #c-dtab',
+        ui: () => seg('style.tabs', [['auto', '自動'], ['underline', '底線'], ['pill', '膠囊'], ['block', '區塊']], '頁籤樣式') },
+      { cat: 'style', key: 'depth', label: '層次', paths: ['depth.shadow', 'depth.glow', 'depth.border'],
+        ui: () => pick('層次', [[0, '無'], [1, '淡'], [2, '標準'], [3, '強']], (v) => theme.depth.shadow === v, (v) => { theme.depth = depthOf(v); }, flash) },
+      { cat: 'color', pin: true, key: 'primary', label: '主色', paths: ['color.primary'], block: true, ui: primaryEl },
+      { cat: 'color', key: 'neutral', label: '底色色調', paths: ['color.neutral'], block: true,
+        ui: () => opts('底色色調', [['cool', '偏藍'], ['neutral', '中性'], ['warm', '偏暖']].map(([k, name]) => {
           const p = (k === 'cool' ? COOL : NEUTRAL[k]).light;
-          return { name, thumb: thumb('tone', `background:linear-gradient(90deg, ${p.page} 0 34%, ${p['line-strong']} 34% 67%, ${p.muted} 67%);border-color:${p['line-strong']}`), on: () => c.neutral === k, pick: () => { c.neutral = k; } };
-        }))),
-        qrow('圓角', lockShape(opts('圓角', RADIUS.map(([name, s, r]) => ({ name, thumb: thumb('r', `border-top-left-radius:${r}`), on: () => same(theme.shape, s), pick: () => { theme.shape = clone(s); } }))))),
-        qrow('動畫', opts('動畫', MOTION.map(([name, m, d]) => {
+          return { name, thumb: thumb('tone', `background:linear-gradient(90deg, ${p.page} 0 34%, ${p['line-strong']} 34% 67%, ${p.muted} 67%);border-color:${p['line-strong']}`), on: () => theme.color.neutral === k, pick: () => { theme.color.neutral = k; } };
+        })) },
+      { cat: 'color', key: 'darkPrimary', label: '深色模式主色', paths: ['color.darkPrimary'],
+        ui: () => { const c = theme.color; return el('div', { class: 'cz-inl' }, c.darkPrimary ? el('label', { class: 'cz-pick on', title: '深色模式主色', style: `--c:${c.darkPrimary}` }, colorInput('color.darkPrimary', '深色模式主色')) : null, sw(c.darkPrimary, (on) => { c.darkPrimary = on ? tone(c.primary, 0.74, 0.9) : ''; }, '深色模式另選主色')); } },
+      { cat: 'color', key: 'status', label: '狀態顏色', paths: ['color.success', 'color.warn', 'color.danger', 'color.info'], block: true, aff: '#c-bdg, #c-co, #c-toast',
+        ui: () => el('div', { class: 'cz-tiles' }, [['success', '成功'], ['warn', '提醒'], ['danger', '錯誤'], ['info', '資訊']].map(([k, n]) => el('label', { class: 'cz-tile', 'data-path': 'color.' + k, title: '點色塊換色' }, colorInput('color.' + k, n + '顏色'), n))) },
+      { cat: 'color', key: 'series', label: '圖表顏色', paths: ['color.series'], block: true, aff: '#c-bars, #c-pie, #c-line, #c-stk, #c-ht',
+        ui: () => el('div', { class: 'cz-series' }, theme.color.series.map((v, i) => el('input', { type: 'color', value: v, 'aria-label': `圖表第 ${i + 1} 色`, oninput: (e) => { theme.color.series[i] = e.target.value; changed(false); }, onchange: () => record() }))) },
+      { cat: 'type', key: 'family', label: '字型', paths: ['type.family', 'type.custom'], block: true,
+        ui: () => el('div', { class: 'cz-stack' }, opts('字型', [['system', '系統'], ['sans', '黑體'], ['custom', '自訂']].map(([k, name]) => ({ name, thumb: Object.assign(el('i', { class: 'cz-th ft', style: `font-family:${fontStack(k)}`, 'aria-hidden': 'true' }), { textContent: 'Aa字' }), on: () => theme.type.family === k, pick: () => { theme.type.family = k; } }))), theme.type.family === 'custom' ? fontPicker() : null) },
+      { cat: 'type', key: 'scale', label: '字級', paths: ['type.scale'],
+        ui: () => pick('字級', [[0.92, '小'], [1, '標準'], [1.08, '大']], (v) => theme.type.scale === v, (v) => { theme.type.scale = v; }, flash) },
+      { cat: 'type', key: 'ratio', label: '標題與內文差距', paths: [],
+        ui: () => pick('標題與內文差距', RATIOS.map(([n, r]) => [r, n]), (r) => sizesMatch(r), (r) => { theme.type.levels = levelsFor(r); }, flash) },
+      { cat: 'type', key: 'levels', label: '各層級字級', paths: ['type.levels'], block: true, lr: false,
+        ui: () => el('div', { class: 'cz-lv' }, LEVELS.map(([k, n, en]) => { const lv = theme.type.levels[k];
+          return el('div', { class: 'cz-lvr' }, el('span', { class: 'cz-lvn', style: `font-family:${fontStack(theme.type.family)};font-size:${Math.min(18, lv.size)}px;font-weight:${lv.weight}` }, n, el('small', {}, en)), sizeStep(k, n),
+            seg(`type.levels.${k}.weight`, [[400, '一般'], [500, '中等'], [600, '半粗'], [700, '粗']], n + '粗細')); })) },
+      { cat: 'shape', pin: true, key: 'radius', label: '圓角', paths: ['shape'], block: true,
+        ui: () => lockShape(opts('圓角', RADIUS.map(([name, sh, r]) => ({ name, thumb: thumb('r', `border-top-left-radius:${r}`), on: () => same(theme.shape, sh), pick: () => { theme.shape = clone(sh); } })))) },
+      { cat: 'shape', key: 'card', label: '卡片圓角', paths: ['shape.card'], block: true, ui: () => lockShape(range('shape.card', 0, 32, 1, (v) => v + 'px', '卡片圓角', ['直角', '圓']), false) },
+      { cat: 'shape', key: 'control', label: '按鈕與欄位圓角', paths: ['shape.control'], block: true, aff: '#c-btn, #c-ff, #c-dd, #c-search',
+        ui: () => lockShape(range('shape.control', 0, 20, 1, (v) => v + 'px', '按鈕與欄位圓角', ['直角', '圓']), false) },
+      { cat: 'shape', key: 'pill', label: '標籤形狀', paths: ['shape.pill'], aff: '#c-bdg, #c-chips',
+        ui: () => lockShape(seg('shape.pill', [['full', '膠囊'], ['soft', '方塊']], '標籤形狀'), false) },
+      { cat: 'motion', pin: true, key: 'anim', label: '動畫', paths: ['motion.reduce', 'motion.speed', 'motion.bounce'], block: true,
+        ui: () => opts('動畫', MOTION.map(([name, m, d]) => {
           const t = thumb('mo'); t.innerHTML = `<svg viewBox="0 0 24 24"><path d="${d}"/></svg>`;
           return { name, thumb: t,
             on: () => (m ? !theme.motion.reduce && theme.motion.speed === m.speed && theme.motion.bounce === m.bounce : theme.motion.reduce),
             pick: () => { if (m) { theme.motion.reduce = false; theme.motion.speed = m.speed; theme.motion.bounce = m.bounce; } else theme.motion.reduce = true; } };
-        })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '進場效果' }, [['line', '浮線'], ['fly', '飛入'], ['tile', '拼塊'], ['stack', '疊放']].map(([v, n]) => { const on = () => (['fly', 'tile', 'stack'].includes(theme.motion.enter) ? theme.motion.enter : 'line') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.enter = v; changed(); renderAll(); requestAnimationFrame(() => replayEnter()); } }, '進場 ' + n); quick.push([btn, on]); return btn; })),
-          el('div', { class: 'cz-seg', role: 'group', 'aria-label': '深淺色轉場' }, [['wand', '魔杖'], ['slash', '亂刀'], ['hole', '黑洞']].map(([v, n]) => { const on = () => (['hole', 'slash'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'wand') === v; const btn = el('button', { type: 'button', 'aria-pressed': String(on()), onclick: () => { theme.motion.themeFx = v; changed(); renderAll(); } }, '深淺色 ' + n); quick.push([btn, on]); return btn; }))),
-      )];
-    }
-    function catsEl() {
-      const ly = theme.layout, hidden = new Set(ly.hidden);
-      return el('div', { class: 'cz-cats', role: 'group', 'aria-label': '顯示哪些元件' }, Object.keys(CAT).map((k) => {
-          const ids = CAT[k], off = ids.filter((id) => hidden.has(id)).length;
-          const state = off === 0 ? 'true' : off === ids.length ? 'false' : 'mixed';
-          return el('button', { type: 'button', class: 'cz-cat', 'aria-pressed': state, title: state === 'mixed' ? '部分顯示；點一下全部顯示' : '',
-            onclick: () => { const h = new Set(ly.hidden); for (const id of ids) state === 'true' ? h.add(id) : h.delete(id); ly.hidden = [...h]; changed(); renderAll(); } },
-            el('i', { 'aria-hidden': 'true' }), CAT_LABEL[k] || k);
-        }));
-    }
+        })) },
+      { cat: 'motion', key: 'speed', label: '動畫速度', paths: ['motion.speed'], block: true, ui: () => range('motion.speed', 0.5, 2, 0.25, (v) => v + '×', '動畫速度', ['快', '慢']) },
+      { cat: 'motion', key: 'bounce', label: '動畫回彈', paths: ['motion.bounce'],
+        ui: () => seg('motion.bounce', [['none', '無'], ['soft', '柔和'], ['standard', '標準'], ['strong', '強']], '動畫回彈') },
+      { cat: 'motion', key: 'enter', label: '進場效果', paths: ['motion.enter'],
+        ui: () => pick('進場效果', [['line', '浮線'], ['fly', '飛入'], ['tile', '拼塊'], ['stack', '疊放']], (v) => (['fly', 'tile', 'stack'].includes(theme.motion.enter) ? theme.motion.enter : 'line') === v, (v) => { theme.motion.enter = v; }, () => requestAnimationFrame(() => replayEnter())) },
+      { cat: 'motion', key: 'themeFx', label: '深淺色轉場', paths: ['motion.themeFx'],
+        ui: () => pick('深淺色轉場', [['dim', '亮度'], ['wand', '魔杖'], ['slash', '亂刀'], ['hole', '黑洞']], (v) => (['hole', 'slash', 'wand'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'dim') === v, (v) => { theme.motion.themeFx = v; }) },
+      { cat: 'layout', key: 'cols', label: '每列卡片數', paths: ['layout.cols'], ui: () => seg('layout.cols', [[2, '2'], [3, '3'], [4, '4'], [5, '5']], '每列卡片數') },
+      { cat: 'layout', key: 'density', label: '疏密', paths: ['layout.density'], ui: () => seg('layout.density', [['compact', '緊'], ['standard', '標準'], ['relaxed', '鬆']], '疏密') },
+      { cat: 'layout', key: 'shown', label: '顯示的元件', paths: ['layout.hidden'], block: true, lr: false, ui: shownEl },
+    ];
 
-    let pane = 'basic', catFilter = '全部';
-    try { const v = localStorage.getItem('wall-cz-pane') || (localStorage.getItem('wall-cz-more') === '1' ? 'adv' : 'basic'); if (['basic', 'adv', 'show'].includes(v)) pane = v; } catch (e) {}
-    const num = (path, min, max, step, fmt, label) => { const out = el('output', {}, fmt(getPath(theme, path))); const go = (d) => { const v = +Math.min(max, Math.max(min, getPath(theme, path) + d)).toFixed(2); setPath(theme, path, v); out.textContent = fmt(v); changed(); }; return el('div', { class: 'cz-step', role: 'group', 'aria-label': label }, el('button', { type: 'button', 'aria-label': '減少', onclick: () => go(-step) }, '−'), out, el('button', { type: 'button', 'aria-label': '增加', onclick: () => go(step) }, '＋')); };
-    const stepper = (path, min, max, label) => { const out = el('output', {}, getPath(theme, path) + 'px'); const go = (d) => { const v = Math.min(max, Math.max(min, getPath(theme, path) + d)); setPath(theme, path, v); out.textContent = v + 'px'; changed(); }; return el('div', { class: 'cz-step', role: 'group', 'aria-label': label }, el('button', { type: 'button', 'aria-label': '縮小', onclick: () => go(-1) }, '−'), out, el('button', { type: 'button', 'aria-label': '放大', onclick: () => go(1) }, '＋')); };
-    function moreBody(kind) {
-      const c = theme.color, ly = theme.layout, order = orderOf(), hidden = new Set(ly.hidden);
-      const shown = order.filter((id) => catFilter === '全部' || catOf(id) === catFilter);
-      const move = (id, dir) => { const o = orderOf(); const i = o.indexOf(id), j = i + dir; if (j < 0 || j >= o.length) return; [o[i], o[j]] = [o[j], o[i]]; ly.order = o; changed(); renderAll(); };
-      let dragId = null;
-      const adv = [
-        blk('風格細節',
-          row('頁籤', 'style.tabs', seg('style.tabs', [['auto', '自動'], ['underline', '底線'], ['pill', '膠囊'], ['block', '區塊']], '頁籤樣式')),
-          row('立體感', 'depth.shadow', seg('depth.shadow', [[0, '無'], [1, '淡'], [2, '標準'], [3, '強']], '立體感')),
-          row('發光', 'depth.glow', range('depth.glow', 0, 150, 10, (v) => v + '%', '發光強度')),
-          row('邊框', 'depth.border', seg('depth.border', [['subtle', '淡'], ['standard', '標準'], ['strong', '明顯']], '邊框'))),
-        blk('顏色細節',
-          row('深色模式另選主色', 'color.darkPrimary', sw(c.darkPrimary, (on) => { c.darkPrimary = on ? tone(c.primary, 0.74, 0.9) : ''; }, '深色模式另選主色'), null, true),
-          c.darkPrimary ? el('label', { class: 'cz-pick', style: 'align-self:flex-start' }, colorInput('color.darkPrimary', '深色模式主色'), '深色主色') : null,
-          row('狀態顏色', 'color.success', el('div', { class: 'cz-tiles' }, [['success', '成功'], ['warn', '提醒'], ['danger', '錯誤'], ['info', '資訊']].map(([k, n]) =>
-            el('label', { class: 'cz-tile', 'data-path': 'color.' + k, title: '點色塊換色' }, colorInput('color.' + k, n + '顏色'), n)))),
-          row('圖表顏色', 'color.series', el('div', { class: 'cz-series' }, c.series.map((v, i) => el('input', { type: 'color', value: v, 'aria-label': `圖表第 ${i + 1} 色`, oninput: (e) => { c.series[i] = e.target.value; changed(false); }, onchange: () => record() }))))),
-        blk('字型細節',
-          el('p', { class: 'cz-hint' }, '七個層級對齊 Material 3；字級以 100% 字級時為準。'),
-          ...LEVELS.map(([k, n, en]) => {
-            const lv = theme.type.levels[k], p = `type.levels.${k}`;
-            const prev = el('div', { class: 'cz-tprev', style: `font-family:${fontStack(theme.type.family)};font-size:${Math.min(22, lv.size)}px;font-weight:${lv.weight};letter-spacing:${lv.ls / 100}em` }, `${n} ${en}`);
-            return row(`${n}　${en}`, p, el('div', { class: 'cz-type' }, prev,
-              el('div', { class: 'cz-tgrid' },
-                el('span', {}, '字級'), num(p + '.size', 8, 64, 1, (v) => v + 'px', n + '字級'),
-                el('span', {}, '行高'), num(p + '.lh', 1, 2, 0.05, (v) => v.toFixed(2), n + '行高'),
-                el('span', {}, '字距'), num(p + '.ls', -5, 10, 0.5, (v) => (v > 0 ? '+' : '') + v + '%', n + '字距')),
-              seg(p + '.weight', [[400, '一般'], [500, '中等'], [600, '半粗'], [700, '粗']], n + '粗細')));
-          })),
-        blk('圓角細節',
-          lockShape(el('div', { class: 'cz-lockable' },
-            row('卡片', 'shape.card', range('shape.card', 0, 32, 1, (v) => v + 'px', '卡片圓角')),
-            row('按鈕與欄位', 'shape.control', range('shape.control', 0, 20, 1, (v) => v + 'px', '按鈕與欄位圓角')),
-            row('標籤', 'shape.pill', seg('shape.pill', [['full', '膠囊'], ['soft', '方塊']], '標籤形狀'))))),
-        blk('動畫細節',
-          row('速度', 'motion.speed', range('motion.speed', 0.5, 2, 0.25, (v) => v + '×', '動畫速度')),
-          row('彈跳感', 'motion.bounce', seg('motion.bounce', [['none', '無'], ['soft', '柔和'], ['standard', '標準'], ['strong', '強']], '彈跳感')),
-          row('自動示範', 'motion.autoplay', sw(theme.motion.autoplay, (v) => (theme.motion.autoplay = v), '自動示範'), null, true)),
-      ];
-      const show = [
-        blk('版面',
-          row('每列幾格', 'layout.cols', seg('layout.cols', [[2, '2'], [3, '3'], [4, '4'], [5, '5']], '每列幾格')),
-          row('間距', 'layout.density', seg('layout.density', [['compact', '緊'], ['standard', '標準'], ['relaxed', '鬆']], '間距')),
-          el('p', { class: 'cz-hint' }, '同時調整卡片距離與元件內的間距。')),
-        blk('元件',
-          row('類別', 'layout.hidden', catsEl()),
-          el('div', { class: 'cz-filter', role: 'group', 'aria-label': '依類別篩選' }, ['全部', ...Object.keys(CAT)].map((k) => el('button', { type: 'button', 'aria-pressed': String(k === catFilter), onclick: () => { catFilter = k; renderAll(); } }, CAT_LABEL[k] || k))),
-          el('div', { class: 'cz-links' }, el('button', { type: 'button', onclick: () => { ly.order = []; ly.hidden = []; changed(); renderAll(); } }, '恢復原本排列')),
-          el('ul', { class: 'cz-list', 'aria-label': '元件（勾選顯示，拖曳或 ↑↓ 調順序）' }, shown.map((id) => {
-            const c2 = cells.find((x) => x.id === id);
-            const li = el('li', { class: 'cz-item' + (hidden.has(id) ? ' off' : ''), draggable: 'true',
-              ondragstart: (e) => { dragId = id; li.classList.add('drag'); e.dataTransfer.effectAllowed = 'move'; },
-              ondragend: () => li.classList.remove('drag'),
-              ondragover: (e) => { e.preventDefault(); li.classList.add('over'); },
-              ondragleave: () => li.classList.remove('over'),
-              ondrop: (e) => { e.preventDefault(); li.classList.remove('over'); if (!dragId || dragId === id) return; const o = orderOf().filter((x) => x !== dragId); o.splice(o.indexOf(id), 0, dragId); ly.order = o; changed(); renderAll(); } },
-              el('span', { class: 'grip', 'aria-hidden': 'true', title: '拖曳調順序' }, '⋮⋮'),
-              el('label', {}, el('input', { type: 'checkbox', checked: !hidden.has(id), onchange: (e) => { const h = new Set(ly.hidden); e.target.checked ? h.delete(id) : h.add(id); ly.hidden = [...h]; changed(); renderAll(); if (e.target.checked) { c2.el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); c2.el.classList.remove('cz-flash'); void c2.el.offsetWidth; c2.el.classList.add('cz-flash'); } } }), el('span', {}, c2.name), el('em', {}, CAT_LABEL[c2.cat] || c2.cat)),
-              el('button', { type: 'button', class: 'mv', 'aria-label': `${c2.name} 往前`, title: '往前', onclick: () => move(id, -1) }, '↑'),
-              el('button', { type: 'button', class: 'mv', 'aria-label': `${c2.name} 往後`, title: '往後', onclick: () => move(id, 1) }, '↓'));
-            return li;
-          }))),
-      ];
-      return kind === 'show' ? show : adv;
+    /* ---- 外觀面板：分類、列、改過標記 ---- */
+    const czTabs = $('#cz-tabs');
+    let czCat = 'common', czCur = '', czReveal = false;
+    try { const v = localStorage.getItem('wall-cz-cat'); if (CZ_CATS.some(([k]) => k === v)) czCat = v; czCur = localStorage.getItem('wall-cz-row') || ''; } catch (e) {}
+    const inCat = (k) => SETTINGS.filter((x) => (k === 'common' ? x.pin || x.cat === 'common' : x.cat === k));
+    const isChanged = (x) => x.paths.some((p) => !same(getPath(theme, p), getPath(DEFAULT, p)));
+    var paintCounts = () => $$('button', czTabs).forEach((b) => { const n = inCat(b.dataset.cat).filter(isChanged).length, sm = $('small', b); sm.hidden = !n; sm.textContent = n; sm.setAttribute('aria-label', `改過 ${n} 項`); });
+    function paintTabs() {
+      czTabs.replaceChildren(...CZ_CATS.map(([k, n]) => el('button', { type: 'button', role: 'tab', id: 'cz-t-' + k, 'data-cat': k, 'aria-selected': String(k === czCat), 'aria-controls': 'cz-panel', tabindex: k === czCat ? '0' : '-1', onclick: () => setCzCat(k) }, n, el('small', { hidden: true }))));
+      panel.setAttribute('aria-labelledby', 'cz-t-' + czCat);
+      $('[aria-selected="true"]', czTabs)?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     }
-
+    function setCzCat(k, focusTab) {
+      if (k === czCat) return; czCat = k; try { localStorage.setItem('wall-cz-cat', k); } catch (e) {}
+      panel.scrollTop = 0; renderAll(); aff(null);
+      if (focusTab) $('[aria-selected="true"]', czTabs)?.focus();
+    }
+    function settingRow(x) {
+      const reset = el('button', { type: 'button', class: 'cz-undo1', title: '改回預設', 'aria-label': `「${x.label}」改回預設`, onclick: () => { x.paths.forEach((p) => setPath(theme, p, clone(getPath(DEFAULT, p)))); changed(); renderAll(); } });
+      reset.innerHTML = RESET_ICON;
+      const r = el('div', { class: 'cz-set' + (x.block ? ' block' : ''), 'data-key': x.key, 'data-paths': x.paths.join(' ') },
+        el('div', { class: 'cz-rl' }, el('span', { class: 'cz-dot', 'aria-hidden': 'true' }), el('span', { class: 'cz-lab' }, x.label), reset),
+        el('div', { class: 'cz-ctl' }, x.ui()));
+      if (x.aff) r.dataset.aff = x.aff;
+      if (x.lr === false) r.dataset.nolr = '';
+      rows.push(r); return r;
+    }
     const panel = $('#cz-panel');
     function renderAll() {
       rows.length = 0; quick = [];
       const top = panel.scrollTop;
-      panel.replaceChildren(...(pane === 'basic' ? quickBody() : moreBody(pane)));
-      $$('.cz-pane button').forEach((b) => { const on = b.dataset.pane === pane; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
+      paintTabs();
+      panel.replaceChildren(el('section', { class: 'cz-blk cz-sets' }, inCat(czCat).map(settingRow)));
       loadFont(WEBFONT.sans[LANG] || WEBFONT.sans.zh); loadFont(theme.type.custom);
-      panel.scrollTop = top;
+      const cur = czCur ? panel.querySelector(`.cz-set[data-key="${czCur}"]`) : null;
+      cur?.classList.add('cur');
+      if (czReveal) { czReveal = false; panel.scrollTop = 0; cur?.scrollIntoView({ block: 'nearest' }); } else panel.scrollTop = top;
       paintMarks(); renderLib(); paintHist();
     }
-    // 頁面右上的淺色／深色鈕切換時，模式選項跟著更新
-    new MutationObserver(() => { if (cz.classList.contains('open')) paintMarks(); }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
-    $$('.cz-pane button').forEach((b) => {
-      b.addEventListener('click', () => { if (b.dataset.pane === pane) return; pane = b.dataset.pane; try { localStorage.setItem('wall-cz-pane', pane); } catch (e) {} panel.scrollTop = 0; renderAll(); });
-      b.addEventListener('keydown', (e) => { if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return; e.preventDefault(); const all = $$('.cz-pane button'), i = all.indexOf(b), o = all[(i + (e.key === 'ArrowRight' ? 1 : all.length - 1)) % all.length]; o.click(); o.focus(); });
+    // 頁面右上的淺色／深色鈕切換時，選項跟著更新
+    new MutationObserver(() => { if ($('#cz').classList.contains('open')) { paintMarks(); if (czCat === 'common') renderAll(); } }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    // 牆上受影響的元件亮起
+    const aff = (sel) => { $$('#wall > .cell.cz-aff').forEach((c) => c.classList.remove('cz-aff')); if (sel) $$(sel).forEach((c) => { if (c.matches('#wall > .cell')) c.classList.add('cz-aff'); }); };
+    const setCur = (r) => {
+      $$('.cz-set.cur', panel).forEach((x) => { if (x !== r) x.classList.remove('cur'); });
+      if (!r) return; r.classList.add('cur'); czCur = r.dataset.key; try { localStorage.setItem('wall-cz-row', czCur); } catch (e) {}
+      aff(r.dataset.aff);
+    };
+    const focusRow = (r, idx) => {
+      if (!r) return;
+      const os = $$('[aria-pressed]:not(:disabled)', r);
+      const t = idx != null && os[idx] ? os[idx] : os.find((b) => b.getAttribute('aria-pressed') === 'true') || r.querySelector('button:not(.cz-undo1):not(:disabled), input:not(:disabled), select');
+      (t || r).focus({ preventScroll: true }); r.scrollIntoView({ block: 'nearest' }); setCur(r);
+    };
+    panel.addEventListener('focusin', (e) => { const r = e.target.closest('.cz-set'); if (r) setCur(r); });
+    panel.addEventListener('pointerdown', (e) => { const r = e.target.closest('.cz-set'); if (r) setCur(r); });
+    panel.addEventListener('pointerover', (e) => { const r = e.target.closest('.cz-set'); aff(r ? r.dataset.aff : $('.cz-set.cur', panel)?.dataset.aff); });
+    panel.addEventListener('pointerleave', () => aff($('.cz-set.cur', panel)?.dataset.aff));
+    // 鍵盤：↑↓ 換列、←→ 改選項（滑桿照原生）、Q／E 換分類；用鍵盤時顯示按鍵提示
+    $('#cz').addEventListener('keydown', (e) => {
+      const t = e.target, czEl = $('#cz');
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key) || /^[qe]$/i.test(e.key)) czEl.classList.add('kbd');
+      if (e.ctrlKey || e.metaKey || e.altKey || t.matches('input[type="text"], input[type="color"], select, textarea')) return;
+      if (/^[qe]$/i.test(e.key)) { e.preventDefault(); const i = CZ_CATS.findIndex(([k]) => k === czCat); setCzCat(CZ_CATS[(i + (e.key.toLowerCase() === 'e' ? 1 : CZ_CATS.length - 1)) % CZ_CATS.length][0], true); return; }
+      if (czTabs.contains(t) && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); const i = CZ_CATS.findIndex(([k]) => k === czCat); setCzCat(CZ_CATS[(i + (e.key === 'ArrowRight' ? 1 : CZ_CATS.length - 1)) % CZ_CATS.length][0], true); return; }
+      if (czTabs.contains(t) && e.key === 'ArrowDown') { e.preventDefault(); focusRow($('.cz-set', panel)); return; }
+      if (!panel.contains(t)) return;
+      const list = $$('.cz-set', panel), r = t.closest('.cz-set');
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault(); const i = r ? list.indexOf(r) : -1, j = i + (e.key === 'ArrowDown' ? 1 : -1);
+        if (j < 0) { $('[aria-selected="true"]', czTabs)?.focus(); return; }
+        focusRow(list[Math.min(list.length - 1, j)]);
+      } else if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && r && !('nolr' in r.dataset) && !t.matches('input[type="range"]')) {
+        const os = $$('[aria-pressed]:not(:disabled)', r); if (!os.length) return;
+        e.preventDefault();
+        const i = os.findIndex((b) => b.getAttribute('aria-pressed') === 'true'), j = Math.max(0, Math.min(os.length - 1, (i < 0 ? 0 : i) + (e.key === 'ArrowRight' ? 1 : -1)));
+        if (j === i) return;
+        const key = r.dataset.key; os[j].click();
+        focusRow(panel.querySelector(`.cz-set[data-key="${key}"]`), j);
+      }
     });
+    $('#cz').addEventListener('pointerdown', () => $('#cz').classList.remove('kbd'));
+    // 手機：握把點一下或往上拉＝拉高，往下拉＝收回（已經是一般高度時往下拉＝關閉）
+    {
+      const g = $('#cz-grab'); let y0 = null, moved = false;
+      const tall = (on) => { $('#cz').classList.toggle('tall', on); g.setAttribute('aria-expanded', String(on)); g.setAttribute('aria-label', on ? '收回面板' : '拉高面板'); };
+      g.addEventListener('pointerdown', (e) => { y0 = e.clientY; moved = false; g.setPointerCapture(e.pointerId); });
+      g.addEventListener('pointermove', (e) => { if (y0 != null && Math.abs(e.clientY - y0) > 8) moved = true; });
+      g.addEventListener('pointerup', (e) => {
+        if (y0 == null) return; const dy = e.clientY - y0; y0 = null;
+        if (!moved) return;
+        if (dy < -40) tall(true); else if (dy > 40) { if ($('#cz').classList.contains('tall')) tall(false); else $('#cz-close').click(); }
+      });
+      g.addEventListener('click', () => { if (!moved) tall(!$('#cz').classList.contains('tall')); });
+    }
     const renderPanes = renderAll;
     /* ---- 匯出：從目前畫面讀出淺色、深色兩組實際值 ---- */
     const TOK = {
@@ -6602,6 +7173,7 @@ ${stamp()}
       // 切換捲動容器（視窗 ↔ 內容區）時保留捲動位置
       const wide = matchMedia('(min-width: 761px)').matches, y = on ? scrollY : document.body.scrollTop;
       cz.classList.toggle('open', on); cz.inert = !on; document.body.classList.toggle('cz-open', on);
+      if (on) czReveal = true; else { aff(null); cz.classList.remove('kbd', 'tall'); $('#cz-grab').setAttribute('aria-expanded', 'false'); }
       if (wide) { if (on) document.body.scrollTop = y; else scrollTo(0, y); }
       opener.setAttribute('aria-expanded', String(on));
       if (on) { renderAll(); setTimeout(() => $('#cz-title').focus({ preventScroll: true }), 60); } else { closeMenus(); opener.focus({ preventScroll: true }); }
@@ -6907,6 +7479,7 @@ ${stamp()}
           ['Typing', DD({ q: '巡檢', items: [['機房巡檢', 'hl']] })],
           ['No results', DD({ q: '空調', none: true })],
           ['Error', DD({ ph: '請選擇所屬專案', bad: true })],
+          ['Disabled', DD({ v: '變電站季度保養' }).replace('<div class="dd">', '<div class="dd dis">')],
         ],
       },
       'c-ms': {
@@ -6927,6 +7500,7 @@ ${stamp()}
           ['Selected (N)', MS({ t: '設計部、研發部', n: 2 })],
           ['Open', MS({ t: '設計部、研發部', n: 2, open: true, list: [['設計部', 1], ['研發部', 1], ['客服部', 0]], foot: '已選 2 個' })],
           ['Searchable', MS({ t: '全部部門', n: 0, open: true, q: '研', list: [['研發部', 0]], foot: '未選＝全部部門' })],
+          ['Disabled', MS({ t: '設計部、研發部', n: 2 }).replace('<div class="ms">', '<div class="ms dis">')],
         ],
       },
       'c-ck': {
@@ -7024,6 +7598,7 @@ ${stamp()}
           ['Hover', `<div style="width:100%">${SEG(['日', '週', '月'], 0, '', { 2: 'hv' })}</div>`],
           ['Pressed', `<div style="width:100%">${SEG(['日', '週', '月'], 0, '', { 2: 'hv is-press' })}</div>`],
           ['Focus', `<div style="width:100%">${SEG(['日', '週', '月'], 0, '', { 0: 'is-focus' })}</div>`],
+          ['Disabled', `<div style="width:100%">${SEG(['日', '週', '月'], 1, 'dis')}</div>`],
         ],
       },
       'c-mn': {
@@ -7341,6 +7916,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
           ['Open', DP({ open: true })],
           ['Day hover', DP({ open: true, mark: { 26: 'hv' } })],
           ['Preset hover', DP({ open: true, preHv: 3 })],
+          ['Disabled', DP().replace('<div class="dp">', '<div class="dp dis">')],
         ],
       },
       'c-tp': {
@@ -7350,6 +7926,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
         s: [
           ['Default', TP()],
           ['Hover', TP(true)],
+          ['Disabled', TP().replace('<div class="tp">', '<div class="tp dis">')],
         ],
       },
       'c-ps': {
@@ -7361,6 +7938,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
           ['本月', PS(0, '2026-11-01 ～ 2026-11-13・共 13 天')],
           ['近 30 天', PS(1, '2026-10-15 ～ 2026-11-13・共 30 天')],
           ['自訂', PS(3, '2026-11-03 ～ 2026-11-12・共 10 天')],
+          ['Disabled', PS(1, '2026-10-15 ～ 2026-11-13・共 30 天').replace('<div class="ps">', '<div class="ps dis">')],
         ],
       },
       'c-search': {
@@ -7377,6 +7955,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
           ['Focus', TSR('', null, 'focus')],
           ['Suggestions', TSR('系統', [['系統維護', '8 篇'], ['系統升級', '3 篇']], 'focus')],
           ['No results', TSR('空調', null, 'focus')],
+          ['Disabled', TSR('系統維護').replace('<div class="tsr">', '<div class="tsr dis">')],
         ],
       },
       'c-hold': {
@@ -7628,7 +8207,50 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
       same.sort((a, b) => Math.abs(CAT[catOf(id)].indexOf(a) - at) - Math.abs(CAT[catOf(id)].indexOf(b) - at)).forEach(add);
       return out;
     };
-    const relHtml = (id) => { const r = relOf(id); return r.length ? `<section class="dt-rel" aria-label="相關元件"><h3>相關元件</h3><div class="dt-rel-g">${r.map((k) => `<button type="button" data-go="${k}"><b>${esc(TITLE[k])}</b><em>${esc(SLUG[k])}</em><span>${esc(DOC[k].d)}</span></button>`).join('')}</div></section>` : ''; };
+    // 相關元件卡片的圖示：每個元件一個（24×24、線寬 2）
+    const REL_ICON = {
+      'c-dd': '<rect x="3" y="7" width="18" height="10" rx="3"/><path d="M14 11l2 2 2-2"/>',
+      'c-search': '<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>',
+      'c-btn': '<rect x="3" y="8" width="18" height="8" rx="4"/><path d="M9 12h6"/>',
+      'c-seg': '<rect x="3" y="7" width="18" height="10" rx="3"/><path d="M9 7v10M15 7v10"/>',
+      'c-tg': '<rect x="3" y="7" width="18" height="10" rx="5"/><circle cx="16" cy="12" r="2.5"/>',
+      'c-hold': '<circle cx="12" cy="12" r="8" opacity=".35"/><path d="M12 4a8 8 0 0 1 8 8"/><path d="M9 12l2 2 4-4"/>',
+      'c-drag': '<path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" stroke-width="3"/>',
+      'c-ff': '<path d="M4 5.5h7"/><rect x="3" y="10" width="18" height="9" rx="2"/><path d="M7 14.5h5"/>',
+      'c-ms': '<rect x="3" y="8" width="8" height="8" rx="2.5"/><rect x="13" y="8" width="8" height="8" rx="2.5"/><path d="M6 12h2M16 12h2"/>',
+      'c-mn': '<path d="M12 5.5h.01M12 12h.01M12 18.5h.01" stroke-width="3"/>',
+      'c-tabs': '<path d="M3 18h18M6 18V8h6v10M14.5 13h4.5"/>',
+      'c-dtab': '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v5"/>',
+      'c-side': '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M5.5 8h1M5.5 11h1"/>',
+      'c-co': '<rect x="3" y="6" width="18" height="12" rx="3"/><path d="M8 9.5v3M8 15h.01M12 12h5"/>',
+      'c-nt': '<circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M6 8v8M11 6h9M11 18h9"/>',
+      'c-tb': '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 10v10"/>',
+      'c-bdg': '<rect x="3" y="8" width="18" height="8" rx="4"/><path d="M7.5 12h.01M11 12h6"/>',
+      'c-star': '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/>',
+      'c-stat': '<rect x="3" y="5" width="7.5" height="14" rx="2"/><rect x="13.5" y="5" width="7.5" height="14" rx="2"/><path d="M6.5 15v-3M17 15V9"/>',
+      'c-sb': '<rect x="3" y="9" width="18" height="6" rx="3"/><path d="M10 9v6M15 9v6"/>',
+      'c-fl': '<circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 12h3M14 12h3"/>',
+      'c-ck': '<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 12l3 3 5-6"/>',
+      'c-rad': '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+      'c-bars': '<path d="M4 20h16M7 16v-4M12 16V6M17 16V9"/>',
+      'c-pie': '<path d="M12 4a8 8 0 1 0 8 8h-8z"/><path d="M15 3.6A8 8 0 0 1 20.4 9H15z"/>',
+      'c-line': '<path d="M4 20h16"/><path d="M4 15l5-5 4 3 7-7"/>',
+      'c-stk': '<path d="M4 20h16"/><rect x="6" y="10" width="4" height="7"/><rect x="14" y="6" width="4" height="11"/><path d="M6 13.5h4M14 11h4"/>',
+      'c-ht': '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9.3h16M4 14.6h16M9.3 4v16M14.6 4v16"/>',
+      'c-pg': '<path d="M7 9l-3 3 3 3M17 9l3 3-3 3M10 12h.01M14 12h.01"/>',
+      'c-up': '<path d="M12 15V4M7 9l5-5 5 5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>',
+      'c-chips': '<path d="M4 6h16l-6 7v5l-4 2v-7z"/>',
+      'c-tp': '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+      'c-dp': '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>',
+      'c-ps': '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4M8 15h8"/>',
+      'c-av': '<circle cx="9" cy="9" r="3.5"/><path d="M3 19c0-3 2.7-5 6-5s6 2 6 5"/><path d="M16 5.5a3.5 3.5 0 0 1 0 7M18 14.5c1.8.6 3 2.2 3 4.5"/>',
+      'c-toast': '<path d="M5 5h14a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-7l-4 4v-4H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/>',
+      'c-dl': '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M13 15h5"/>',
+      'c-es': '<path d="M4 13l2.5-7h11L20 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M4 13h5l1 2h4l1-2h5"/>',
+      'c-ip': '<circle cx="12" cy="12" r="8"/><path d="M12 11v5M12 8h.01"/>',
+      'c-sk': '<rect x="3" y="5" width="6" height="6" rx="3"/><path d="M12 7h9M12 10h6M3 15h18M3 19h12"/>',
+    };
+    const relHtml = (id) => { const r = relOf(id); return r.length ? `<section class="dt-rel" aria-label="相關元件"><h3>相關元件</h3><div class="dt-rel-g">${r.map((k) => `<button type="button" data-go="${k}"><i aria-hidden="true"><svg viewBox="0 0 24 24">${REL_ICON[k] || ''}</svg></i><b>${esc(TITLE[k])}</b><em>${esc(SLUG[k])}</em></button>`).join('')}</div></section>` : ''; };
     // 複製給 AI：這個元件的規格（說明、使用時機、不要用、狀態、無障礙、HTML 結構、變體、參數）＋實作指令，一次貼給 AI
     const aiCopyText = (id) => `# 實作元件：${TITLE[id]}（${SLUG[id]}）
 
@@ -7738,7 +8360,19 @@ ${aiComponents(id)}`;
     // 預覽頁回報自己的高度；主題、語言、深淺色改了就再同步一次
     addEventListener('message', (e) => { const m = e.data, f = dt && $('.dt-frame', dt); if (m?.type === 'wall-pv-h' && f && e.source === f.contentWindow) f.style.height = Math.max(200, m.h) + 'px'; });   // 框高＝預覽內容高度（不設上限，不出捲軸）
     new MutationObserver(() => { const f = dt && $('.dt-frame', dt); if (f) syncFrame(f); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-ui', 'style', 'lang', 'class', 'data-tabs', 'data-density'] });
+    // 詳細頁進場：各區塊由上到下淡入上移（標題區 → 展示台 → 頁籤與指南／規格 → 相關元件 → 上下一個）
+    // 每次進詳細頁都播（從元件牆點入、相關元件、上下一個、直接開網址）；動畫速度照外觀設定，減少動態時不播
+    function dtEnter() {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches || theme.motion.reduce) return;
+      const steps = [['.dt-hero'], ['.dt-stage'], ['.dt-tabs', '.dt-panel:not([hidden])'], ['.dt-rel'], ['.dt-pn']];
+      steps.forEach((sels, k) => sels.forEach((sel) => { const el = $(sel, dt); if (!el) return;
+        el.animate([{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }],
+          { duration: D(400), delay: D(k * 60), easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' });
+      }));
+    }
+    const noteRecent = (id) => { try { const a = JSON.parse(localStorage.getItem('wall-recent') || '[]').filter((x) => x !== id); a.unshift(id); localStorage.setItem('wall-recent', JSON.stringify(a.slice(0, 6))); } catch (e) {} };
     function showDetail(id, tab = 'basic') {
+      noteRecent(id);
       putBack();
       const d = DOC[id], cat = CAT_LABEL[catOf(id)] || catOf(id), cell = $('#' + id);
       const ids = seq(), i = ids.indexOf(id), prev = i > 0 ? ids[i - 1] : null, next = i >= 0 && i < ids.length - 1 ? ids[i + 1] : null;
@@ -7769,7 +8403,7 @@ ${aiComponents(id)}`;
         $('.dt-stage', dt).append(cell);
       }
       dtId = id; wall.classList.add('ready'); setTab(tab); paintPlay(); setDev(devW);
-      shell.classList.add('on-detail'); dt.hidden = false;
+      shell.classList.add('on-detail'); dt.hidden = false; dtEnter();
       document.title = `${TITLE[id]}・${BASE_TITLE}`;
       scroller().scrollTop = 0;
       requestAnimationFrame(() => { dispatchEvent(new Event('resize')); moveTabBar(); setDev(devW); });   // 詳細頁顯示後才量得到展示台寬度
@@ -7793,8 +8427,9 @@ ${aiComponents(id)}`;
     const route = () => {
       const [pth] = decodeURIComponent(location.hash.slice(1)).split('?'), [slug, sub] = pth.split('/'), id = BY_SLUG[slug];
       const tab = sub === 'specs' || sub === 'variants' ? 'variants' : 'basic';
-      if (!id) return showWall();
+      if (!id) { document.documentElement.classList.remove('boot-dt'); return showWall(); }
       if (id === dtId) setTab(tab); else showDetail(id, tab);
+      document.documentElement.classList.remove('boot-dt');
     };
     function goDetail(id) {
       if (!DOC[id]) return;
@@ -7878,7 +8513,13 @@ ${aiComponents(id)}`;
     const mark = (t, q) => { if (!q) return esc(t); const i = t.toLowerCase().indexOf(q); return i < 0 ? esc(t) : esc(t.slice(0, i)) + '<mark>' + esc(t.slice(i, i + q.length)) + '</mark>' + esc(t.slice(i + q.length)); };
     function ckRender() {
       const q = ckQ.value.trim().toLowerCase(), toks = q.split(/\s+/).filter(Boolean);
-      if (!toks.length) ckHits = ORDER.flatMap((c) => ITEMS.filter((x) => x.cat === c));
+      let groups = [];
+      if (!toks.length) {
+        let rec = []; try { rec = JSON.parse(localStorage.getItem('wall-recent') || '[]'); } catch (e) {}
+        rec = rec.map((id) => ITEMS.find((x) => x.id === id)).filter(Boolean).slice(0, 4);
+        ckHits = [...rec, ...ORDER.flatMap((c) => ITEMS.filter((x) => x.cat === c))];
+        groups = ckHits.map((x, i) => (i < rec.length ? '最近看過' : x.cat));
+      }
       else ckHits = ITEMS.filter((x) => toks.every((t) => x.hay.includes(t))).map((x) => {
         const tl = x.t.toLowerCase(), cl = x.code.toLowerCase();
         const sc = tl.startsWith(q) ? 0 : tl.includes(q) ? 1 : cl.includes(q) ? 2 : x.hay.split(' ').some((w) => w.startsWith(toks[0])) ? 3 : 4;
@@ -7888,17 +8529,17 @@ ${aiComponents(id)}`;
       if (!ckHits.length) { ckL.innerHTML = `<div class="ck-e">找不到「${esc(ckQ.value.trim())}」，試試英文或程式名稱</div>`; ckQ.removeAttribute('aria-activedescendant'); return; }
       let html = '', lastCat = null;
       ckHits.forEach((x, i) => {
-        if (!toks.length && x.cat !== lastCat) { html += `<div class="ck-g" role="presentation">${esc(x.cat)}</div>`; lastCat = x.cat; }
-        html += `<div class="ck-r${i === ckAt ? ' on' : ''}" role="option" id="ck-o-${x.id}" data-i="${i}" aria-selected="${i === ckAt}"><div><b>${mark(x.t, q)}</b><small>${esc(x.d)}</small></div><code>${mark(x.code, q)}</code></div>`;
+        if (groups[i] && groups[i] !== lastCat) { html += `<div class="ck-g" role="presentation">${esc(groups[i])}</div>`; lastCat = groups[i]; }
+        html += `<div class="ck-r${i === ckAt ? ' on' : ''}" role="option" id="ck-o-${i}" data-i="${i}" aria-selected="${i === ckAt}"><i class="ck-ic" aria-hidden="true"><svg viewBox="0 0 24 24">${REL_ICON[x.id] || ''}</svg></i><b>${mark(x.t, q)}</b><code>${mark(x.code, q)}</code></div>`;
       });
       ckL.innerHTML = html;
-      ckQ.setAttribute('aria-activedescendant', 'ck-o-' + ckHits[ckAt].id);
+      ckQ.setAttribute('aria-activedescendant', 'ck-o-' + ckAt);
     }
     const ckMove = (i) => {
       if (!ckHits.length) return; ckAt = (i + ckHits.length) % ckHits.length;
       $$('.ck-r', ckL).forEach((r) => { const on = +r.dataset.i === ckAt; r.classList.toggle('on', on); r.setAttribute('aria-selected', on); });
       const r = $(`.ck-r[data-i="${ckAt}"]`, ckL); r?.scrollIntoView({ block: 'nearest' });
-      ckQ.setAttribute('aria-activedescendant', 'ck-o-' + ckHits[ckAt].id);
+      ckQ.setAttribute('aria-activedescendant', 'ck-o-' + ckAt);
     };
     function openCk() {
       if (!ck.hidden) return;
@@ -7928,6 +8569,8 @@ ${aiComponents(id)}`;
     ckL.addEventListener('mousemove', (e) => { const r = e.target.closest('.ck-r'); if (r && +r.dataset.i !== ckAt) ckMove(+r.dataset.i); });
     ckL.addEventListener('click', (e) => { const r = e.target.closest('.ck-r'); if (r) ckGo(+r.dataset.i); });
     ckBd.addEventListener('click', () => closeCk());
+    $('#ck-x').addEventListener('click', () => closeCk());
+    if (window.visualViewport) { const vv = visualViewport, fitVV = () => { ck.style.setProperty('--vvh', vv.height + 'px'); ck.style.setProperty('--vvt', vv.offsetTop + 'px'); }; vv.addEventListener('resize', fitVV); vv.addEventListener('scroll', fitVV); fitVV(); }
     $('#open-search').addEventListener('click', openCk);
     document.addEventListener('keydown', (e) => {
       const typing = e.target.closest?.('input, textarea, select, [contenteditable="true"]');

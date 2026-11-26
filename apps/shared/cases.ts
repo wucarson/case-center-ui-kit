@@ -108,6 +108,7 @@ export const CASES: Record<string, Case[]> = {
     { id: 's1', props: { value: 0, options: ['日', '週', '月'] }, wrap: 'width:100%', interact: { type: 'hover', target: 2 } },
     { id: 's2', props: { value: 0, options: ['日', '週', '月'] }, wrap: 'width:100%', interact: { type: 'press', target: 2 } },
     { id: 's3', props: { value: 0, options: ['日', '週', '月'] }, wrap: 'width:100%', interact: { type: 'focus', target: 0 } },
+    { id: 's4', props: { value: 1, options: ['日', '週', '月'], disabled: true }, wrap: 'width:100%' },
   ],
   'form-field': [
     { id: 'v0', props: { label: '工單名稱', required: true, empty: true, placeholder: '例如：機房巡檢', help: '顯示在工單列表與通知', maxLength: 50, showCount: true, value: '' } },
@@ -133,6 +134,7 @@ export const CASES: Record<string, Case[]> = {
     { id: 's3', props: { label: '所屬專案', items: ['變電站季度保養', '機房巡檢', '設備汰換'], defaultOpen: true, defaultQuery: '巡檢', inlineMenu: true } },
     { id: 's4', props: { label: '所屬專案', items: ['變電站季度保養', '機房巡檢', '設備汰換'], defaultOpen: true, defaultQuery: '空調', inlineMenu: true } },
     { id: 's5', props: { label: '所屬專案', placeholder: '請選擇所屬專案', invalid: true, items: ['變電站季度保養', '機房巡檢', '設備汰換'] } },
+    { id: 's6', props: { label: '所屬專案', placeholder: '請選擇所屬專案', items: ['變電站季度保養', '機房巡檢', '設備汰換'], value: '變電站季度保養', disabled: true } },
   ],
   'multi-select': [
     { id: 'v0', props: { noun: '部門', options: ['設計部', '研發部', '客服部'], value: ['設計部', '研發部'] } },
@@ -143,6 +145,7 @@ export const CASES: Record<string, Case[]> = {
     { id: 's2', props: { noun: '部門', options: ['設計部', '研發部', '客服部'], value: ['設計部', '研發部'] } },
     { id: 's3', props: { noun: '部門', options: ['設計部', '研發部', '客服部'], value: ['設計部', '研發部'], defaultOpen: true, inlineMenu: true } },
     { id: 's4', props: { noun: '部門', options: ['設計部', '研發部', '客服部'], value: [], defaultOpen: true, defaultQuery: '研', inlineMenu: true } },
+    { id: 's5', props: { noun: '部門', options: ['設計部', '研發部', '客服部'], value: ['設計部', '研發部'], disabled: true } },
   ],
   menu: [
     { id: 'v0', props: { inline: true, items: [{ icon: 'copy', label: '複製' }, { icon: 'link', label: '設定相依' }] } },
@@ -182,17 +185,20 @@ export const CASES: Record<string, Case[]> = {
     { id: 's2', props: { label: '結束日期', value: '2026-11-20', help: '結束日期・預設為一週後', today: '2026-11-13', min: '2026-11-13', defaultOpen: true } },
     { id: 's3', props: { label: '結束日期', value: '2026-11-20', help: '結束日期・預設為一週後', today: '2026-11-13', min: '2026-11-13', defaultOpen: true }, interact: { type: 'hover', selector: '.dp-g span:nth-of-type(26)' } },
     { id: 's4', props: { label: '結束日期', value: '2026-11-20', help: '結束日期・預設為一週後', today: '2026-11-13', min: '2026-11-13', defaultOpen: true }, interact: { type: 'hover', selector: '.dp-pre span:nth-child(4)' } },
+    { id: 's5', props: { label: '結束日期', value: '2026-11-20', help: '結束日期・預設為一週後', today: '2026-11-13', min: '2026-11-13', disabled: true } },
   ],
   'time-picker': [
     { id: 'v0', props: { label: '開始時間', value: '09:30' } },
     { id: 's0', props: { label: '開始時間', value: '09:30' } },
     { id: 's1', props: { label: '開始時間', value: '09:30' }, interact: { type: 'hover', selector: '.tp-col u' } },
+    { id: 's2', props: { label: '開始時間', value: '09:30', disabled: true } },
   ],
   'period-picker': [
     { id: 'v0', props: { value: 'month', today: '2026-11-13', style: 'width:100%' } },
     { id: 's0', props: { value: 'month', today: '2026-11-13', style: 'width:100%' } },
     { id: 's1', props: { value: '30d', today: '2026-11-13', style: 'width:100%' } },
     { id: 's2', props: { value: 'custom', today: '2026-11-13', custom: ['2026-11-03', '2026-11-12'], style: 'width:100%' } },
+    { id: 's3', props: { value: '30d', today: '2026-11-13', style: 'width:100%', disabled: true } },
   ],
   pagination: [
     { id: 'v0', props: { total: 56, page: 1, pageSize: 20, style: 'width:100%' } },
@@ -294,6 +300,7 @@ export const CASES: Record<string, Case[]> = {
     { id: 's2', props: { label: '搜尋公告', tags: TAGS, value: '' }, interact: { type: 'focus', selector: 'input' } },
     { id: 's3', props: { label: '搜尋公告', tags: TAGS, value: '系統' }, interact: { type: 'focus', selector: 'input' } },
     { id: 's4', props: { label: '搜尋公告', tags: TAGS, value: '空調' }, interact: { type: 'focus', selector: 'input' } },
+    { id: 's5', props: { label: '搜尋公告', tags: TAGS, value: '系統維護', disabled: true } },
   ],
   'hold-to-confirm': [
     { id: 'v0', props: { label: '結案' } },

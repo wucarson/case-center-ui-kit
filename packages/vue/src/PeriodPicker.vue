@@ -39,5 +39,5 @@ const onKey = (e: KeyboardEvent) => {
 </script>
 
 <template>
-  <div :style="style" @focusout="onOut"><div ref="ps" class="ps" role="radiogroup" aria-label="期間" :aria-disabled="disabled || undefined" @keydown="onKey"><i ref="pill" /><span v-for="(p, i) in PERIODS" :key="p.key" role="radio" :aria-checked="i === cur" :tabindex="i === cur && !disabled ? 0 : -1" :class="i === cur ? 'on' : undefined" @click="select(p.key)">{{ p.label }}<Icon v-if="p.key === 'custom'" name="chevronDown" /></span></div><div class="ps-r">{{ range }}</div></div>
+  <div :style="style" @focusout="onOut"><div ref="ps" class="ps" :class="{ dis: disabled }" role="radiogroup" aria-label="期間" :aria-disabled="disabled || undefined" @keydown="onKey"><i ref="pill" /><span v-for="(p, i) in PERIODS" :key="p.key" role="radio" :aria-checked="i === cur" :tabindex="i === cur && !disabled ? 0 : -1" :class="i === cur ? 'on' : undefined" @click="select(p.key)">{{ p.label }}<Icon v-if="p.key === 'custom'" name="chevronDown" /></span></div><div class="ps-r">{{ range }}</div></div>
 </template>

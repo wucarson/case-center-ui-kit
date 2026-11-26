@@ -1,0 +1,3 @@
+# 複製到使用 Facet 的專案根目錄，改名為 .npmrc（token 放環境變數 GITHUB_TOKEN，不要寫進這個檔案）
+@wucarson:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}

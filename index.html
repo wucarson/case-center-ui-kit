@@ -1149,8 +1149,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sp-seg button[aria-checked="true"] { color: var(--ink); font-weight: 600; }
 .sp-seg button:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; border-radius: var(--r-sm); }
 /* 深色模式：分段切換的滑塊要比底軌亮一階（原本用卡片底色，比底軌還暗、看不出選中） */
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) :is(.seg, .sp-seg) > i { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); } }
-:root[data-theme="dark"] :is(.seg, .sp-seg) > i { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) :is(.seg, .sp-seg):not(.dis) > i { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); } }
+:root[data-theme="dark"] :is(.seg, .sp-seg):not(.dis) > i { background: var(--hover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .1), 0 1px 3px rgb(0 0 0 / .45); }
 /* 欄位滑過（下拉、搜尋、表單欄位、多選、日期）：框線加深一階，同 4301 的 --cc-control-border-hover（line-strong）。
    規格樣本用 .hv；暫停後直接操作時是真的 :hover；展開、聚焦、錯誤、唯讀、停用時不套 */
 :is(.dd-t, .search, .ms-t, .dp-f).hv, .ff.hv .ff-i { border-color: var(--line-strong); }

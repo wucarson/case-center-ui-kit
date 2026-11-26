@@ -972,6 +972,16 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .sp .ff-i.ta { height: 76px; align-items: flex-start; padding-top: 9px; }
 .sp .ff.dis .ff-i { background: var(--soft); border-color: var(--line-subtle); box-shadow: none; color: var(--label); }
 .sp .ff.dis .ff-l { color: var(--label); }
+/* 下拉、多選、日期、時間、標籤搜尋、分段切換、期間停用：同欄位停用——淡灰底、淡邊框、無陰影、文字與圖示改次要色；不能操作（不出滑過樣式） */
+.sp :is(.dd, .ms, .dp).dis > :is(.dd-t, .ms-t, .dp-f), .sp .tp.dis .tp-f, .sp .tsr.dis .search { background: var(--soft); border-color: var(--line-subtle); box-shadow: none; color: var(--label); pointer-events: none; }
+.sp :is(.dd, .ms, .dp).dis > :is(.dd-t, .ms-t, .dp-f) :is(span, svg), .sp .tp.dis .tp-f svg, .sp .tsr.dis .search :is(svg, input) { color: var(--label); }
+.sp .ms.dis .ms-n { background: var(--line-subtle); color: var(--label); }
+.sp .tp.dis .tp-col { pointer-events: none; }
+.sp .tp.dis .tp-col u { color: var(--label); opacity: .45; }
+.sp .tp.dis .tp-col .v { background: var(--soft); border-color: var(--line-subtle); box-shadow: none; color: var(--label); }
+.sp :is(.seg, .ps).dis { box-shadow: none; pointer-events: none; }
+.sp .seg.dis i, .sp .ps.dis > i { background: var(--line-subtle); box-shadow: none; }
+.sp :is(.seg, .ps).dis span { color: var(--label); }
 .sp .ff-x:empty { display: none; }
 /* 第一批規格樣本：浮層改成靜態攤開，寬度跟格子走 */
 .sp-pv > :is(.dd, .ms, .mn) { width: 100%; height: auto; align-self: start; }
@@ -7364,6 +7374,7 @@ ${stamp()}
           ['Typing', DD({ q: '巡檢', items: [['機房巡檢', 'hl']] })],
           ['No results', DD({ q: '空調', none: true })],
           ['Error', DD({ ph: '請選擇所屬專案', bad: true })],
+          ['Disabled', DD({ v: '變電站季度保養' }).replace('<div class="dd">', '<div class="dd dis">')],
         ],
       },
       'c-ms': {
@@ -7384,6 +7395,7 @@ ${stamp()}
           ['Selected (N)', MS({ t: '設計部、研發部', n: 2 })],
           ['Open', MS({ t: '設計部、研發部', n: 2, open: true, list: [['設計部', 1], ['研發部', 1], ['客服部', 0]], foot: '已選 2 個' })],
           ['Searchable', MS({ t: '全部部門', n: 0, open: true, q: '研', list: [['研發部', 0]], foot: '未選＝全部部門' })],
+          ['Disabled', MS({ t: '設計部、研發部', n: 2 }).replace('<div class="ms">', '<div class="ms dis">')],
         ],
       },
       'c-ck': {
@@ -7481,6 +7493,7 @@ ${stamp()}
           ['Hover', `<div style="width:100%">${SEG(['日', '週', '月'], 0, '', { 2: 'hv' })}</div>`],
           ['Pressed', `<div style="width:100%">${SEG(['日', '週', '月'], 0, '', { 2: 'hv is-press' })}</div>`],
           ['Focus', `<div style="width:100%">${SEG(['日', '週', '月'], 0, '', { 0: 'is-focus' })}</div>`],
+          ['Disabled', `<div style="width:100%">${SEG(['日', '週', '月'], 1, 'dis')}</div>`],
         ],
       },
       'c-mn': {
@@ -7798,6 +7811,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
           ['Open', DP({ open: true })],
           ['Day hover', DP({ open: true, mark: { 26: 'hv' } })],
           ['Preset hover', DP({ open: true, preHv: 3 })],
+          ['Disabled', DP().replace('<div class="dp">', '<div class="dp dis">')],
         ],
       },
       'c-tp': {
@@ -7807,6 +7821,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
         s: [
           ['Default', TP()],
           ['Hover', TP(true)],
+          ['Disabled', TP().replace('<div class="tp">', '<div class="tp dis">')],
         ],
       },
       'c-ps': {
@@ -7818,6 +7833,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
           ['本月', PS(0, '2026-11-01 ～ 2026-11-13・共 13 天')],
           ['近 30 天', PS(1, '2026-10-15 ～ 2026-11-13・共 30 天')],
           ['自訂', PS(3, '2026-11-03 ～ 2026-11-12・共 10 天')],
+          ['Disabled', PS(1, '2026-10-15 ～ 2026-11-13・共 30 天').replace('<div class="ps">', '<div class="ps dis">')],
         ],
       },
       'c-search': {
@@ -7834,6 +7850,7 @@ this.toast.show('已移除成員', m.name, () => this.restore(m));`],
           ['Focus', TSR('', null, 'focus')],
           ['Suggestions', TSR('系統', [['系統維護', '8 篇'], ['系統升級', '3 篇']], 'focus')],
           ['No results', TSR('空調', null, 'focus')],
+          ['Disabled', TSR('系統維護').replace('<div class="tsr">', '<div class="tsr dis">')],
         ],
       },
       'c-hold': {

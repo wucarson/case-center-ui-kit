@@ -1577,10 +1577,11 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .cz { font-family: 'SF Pro Text', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
 
 /* 液態玻璃：半透明卡片＋背景模糊，背後一層柔和色光 */
+/* --glass-blur＝外觀面板「玻璃模糊」；--glass-a＝卡片底色濃度（模糊低於 10px 時自動加濃，維持文字對比） */
 :root[data-ui="glass"] {
-  --card: color-mix(in srgb, var(--surface) 50%, transparent);
-  --tile: color-mix(in srgb, var(--surface) 62%, transparent);
-  --field: color-mix(in srgb, var(--surface) 70%, transparent);
+  --card: color-mix(in srgb, var(--surface) var(--glass-a, 50%), transparent);
+  --tile: color-mix(in srgb, var(--surface) calc(var(--glass-a, 50%) + 12%), transparent);
+  --field: color-mix(in srgb, var(--surface) calc(var(--glass-a, 50%) + 20%), transparent);
   --card-edge: color-mix(in srgb, var(--hi) 75%, transparent);
 }
 :root[data-ui="glass"] body::before, :root[data-ui="glass"] body::after {
@@ -1612,7 +1613,7 @@ body.reduce::before, body.reduce::after { animation: none !important; }
 :root[data-ui="glass"] .silk.on.shown { opacity: 1; }
 :root[data-ui="glass"].silk-on body::before, :root[data-ui="glass"].silk-on body::after { display: none; }
 :root[data-ui="glass"] .cell {
-  -webkit-backdrop-filter: blur(22px) saturate(170%); backdrop-filter: blur(22px) saturate(170%);
+  -webkit-backdrop-filter: blur(var(--glass-blur, 22px)) saturate(170%); backdrop-filter: blur(var(--glass-blur, 22px)) saturate(170%);
   box-shadow: inset 0 1px 0 var(--hi), inset 0 -1px 0 color-mix(in srgb, var(--hi) 35%, transparent), var(--shadow);
 }
 :root[data-ui="glass"] .cell:hover { box-shadow: inset 0 1px 0 var(--hi), inset 0 -1px 0 color-mix(in srgb, var(--hi) 35%, transparent), var(--shadow-lift); }
@@ -5129,7 +5130,7 @@ void main(){
     const clone = (o) => JSON.parse(JSON.stringify(o));
     const DEFAULT = {
       v: 1,
-      style: { ui: 'standard', tabs: 'auto' },
+      style: { ui: 'standard', tabs: 'auto', blur: 22 },   // blur＝液態玻璃的背景模糊（px）
       type: { family: 'system', custom: 'Noto Serif TC', scale: 1, levels: { display: { size: 28, weight: 600, lh: 1.3, ls: -1 }, headline: { size: 14, weight: 600, lh: 1.4, ls: 0 }, title: { size: 12, weight: 600, lh: 1.5, ls: 0 }, body: { size: 14, weight: 400, lh: 1.57, ls: 0 }, label: { size: 12, weight: 600, lh: 1.5, ls: 0 }, caption: { size: 12, weight: 400, lh: 1.5, ls: 0 }, numeric: { size: 28, weight: 600, lh: 1.3, ls: 0 } } },
       color: { primary: '#1f6fff', darkPrimary: '', success: '#12b866', warn: '#f59e0b', danger: '#ef3340', info: '#1846c9', series: ['#1f6fff', '#00a3b8', '#8b5cf6', '#f59e0b'], neutral: 'cool' },
       shape: { card: 20, control: 10, pill: 'full' },
@@ -5354,6 +5355,7 @@ void main(){
 
     let theme = clone(DEFAULT);
     let lastAuto = null;
+    const glassAlpha = () => 50 + Math.max(0, 10 - theme.style.blur) * 3;   // 模糊 10px 以下：每少 1px 底色加濃 3%（0px 時 80%）
     function apply() {
       document.documentElement.dataset.themeFx = ['hole', 'slash', 'wand'].includes(theme.motion.themeFx) ? theme.motion.themeFx : 'dim';   // 深淺色轉場：右上角按鈕讀這個
       // 舊版存過的風格（寫實、手繪）已移除：改回標準
@@ -5362,6 +5364,10 @@ void main(){
       if (!UI_KEYS.includes(theme.style.ui)) theme.style.ui = 'standard';
       if (!['compact', 'standard', 'relaxed'].includes(theme.layout.density)) theme.layout.density = 'standard';
       if (!['auto', 'underline', 'pill', 'block'].includes(theme.style.tabs)) theme.style.tabs = 'auto';
+      if (!Number.isFinite(theme.style.blur)) theme.style.blur = 22;   // 舊主題沒有這項
+      theme.style.blur = Math.min(40, Math.max(0, theme.style.blur));
+      root.style.setProperty('--glass-blur', theme.style.blur + 'px');
+      root.style.setProperty('--glass-a', glassAlpha() + '%');
       const v = vars(theme);
       styleEl.textContent = `:root { ${block(v.root)} ${block(v.light)} }\n` +
         (Object.keys(v.dark).length ? `@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { ${block(v.dark)} } }\n:root[data-theme="dark"] { ${block(v.dark)} }` : '');
@@ -6227,6 +6233,8 @@ void main(){
     const SETTINGS = [
       { cat: 'style', key: 'mode', label: '深淺色', paths: [], block: true, ui: modeEl },
       { cat: 'style', key: 'ui', label: '風格', paths: ['style.ui'], block: true, ui: stylesEl },
+      { cat: 'style', sub: 'ui', when: () => theme.style.ui === 'glass', key: 'blur', label: '玻璃模糊', paths: ['style.blur'], block: true, aff: '#wall > .cell',
+        ui: () => range('style.blur', 0, 40, 2, (v) => v + 'px', '玻璃模糊', ['清透', '霧面']) },
       { cat: 'style', key: 'radius', label: '圓角', paths: ['shape'], block: true,
         ui: () => lockShape(opts('圓角', RADIUS.map(([name, sh, r]) => ({ name, thumb: thumb('r', `border-top-left-radius:${r}`), on: () => same(theme.shape, sh), pick: () => { theme.shape = clone(sh); } })))) },
       { cat: 'style', sub: 'radius', key: 'card', label: '卡片圓角', paths: ['shape.card'], block: true, ui: () => lockShape(range('shape.card', 0, 32, 1, (v) => v + 'px', '卡片圓角', ['直角', '圓']), false) },
@@ -6284,8 +6292,8 @@ void main(){
     let czCat = 'style', czCur = '', czReveal = false;
     const czOpen = new Set();   // 展開「細調」的主項
     try { const v = localStorage.getItem('wall-cz-cat'); if (CZ_CATS.some(([k]) => k === v)) czCat = v; czCur = localStorage.getItem('wall-cz-row') || ''; JSON.parse(localStorage.getItem('wall-cz-open') || '[]').forEach((k) => czOpen.add(k)); } catch (e) {}
-    const inCat = (k) => SETTINGS.filter((x) => x.cat === k);
-    const subsOf = (k) => SETTINGS.filter((x) => x.sub === k);
+    const inCat = (k) => SETTINGS.filter((x) => x.cat === k && (!x.when || x.when()));
+    const subsOf = (k) => SETTINGS.filter((x) => x.sub === k && (!x.when || x.when()));   // when：條件成立才出現（例：玻璃模糊只在液態玻璃）
     const isChanged = (x) => x.paths.some((p) => !same(getPath(theme, p), getPath(DEFAULT, p)));
     var paintCounts = () => {
       $$('button', czTabs).forEach((b) => { const n = inCat(b.dataset.cat).filter(isChanged).length, sm = $('small', b); sm.hidden = !n; sm.textContent = n; b.setAttribute('aria-label', n ? `${b.dataset.tip}，改過 ${n} 項` : b.dataset.tip); });
@@ -6477,7 +6485,7 @@ void main(){
     const uiSpec = (surface, ink, hi, line, lineStrong, page = surface) => ({
       standard: null,
       flat: { background: surface, border: `1px solid ${line}`, 'box-shadow': 'none' },
-      glass: { background: `color-mix(in srgb, ${surface} 50%, transparent)`, border: `1px solid color-mix(in srgb, ${hi} 75%, transparent)`, 'backdrop-filter': 'blur(22px) saturate(170%)', 'box-shadow-extra': `inset 0 1px 0 ${hi}` },
+      glass: { background: `color-mix(in srgb, ${surface} ${glassAlpha()}%, transparent)`, border: `1px solid color-mix(in srgb, ${hi} 75%, transparent)`, 'backdrop-filter': `blur(${theme.style.blur}px) saturate(170%)`, 'box-shadow-extra': `inset 0 1px 0 ${hi}` },
       neu: { background: page, border: '0', 'box-shadow': `-3px -3px 6px color-mix(in srgb, color-mix(in srgb, ${page} 12%, #ffffff) 96%, transparent), 3px 3px 6px color-mix(in srgb, color-mix(in srgb, ${page} 60%, #7d8ca8) 72%, transparent)` },
       swiss: { border: `1px solid ${lineStrong}`, 'border-top': `3px solid ${ink}`, 'border-radius': '0', 'box-shadow': 'none' },
       y2k: { border: '1px solid transparent', background: `linear-gradient(180deg, rgb(255 255 255 / .75), rgb(255 255 255 / 0) 28%) padding-box, linear-gradient(180deg, ${surface} 0%, color-mix(in srgb, ${surface} 72%, ${page}) 100%) padding-box, linear-gradient(180deg, #ffffff, color-mix(in srgb, ${lineStrong} 55%, #ffffff) 45%, ${lineStrong}) border-box`, 'box-shadow': 'inset 0 1px 0 rgb(255 255 255 / .95), inset 0 0 0 1px rgb(255 255 255 / .4), 0 10px 28px -10px rgb(60 90 150 / .4)' },

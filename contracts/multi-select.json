@@ -7,6 +7,7 @@
   "description": "從清單勾選多個；沒選＝全部。按鈕列出已選名稱和數量。",
   "use": "篩選條件（部門、客戶），可複選。",
   "instead": [{ "when": "只能選一個", "use": "combo" }],
+  "form": { "value": "string[]", "prop": "value", "empty": [] },
   "parts": [
     { "name": "root", "selector": ".ms", "element": "div", "classes": { "ms": "多選", "open": "清單打開中", "pin": "清單跟在按鈕下方、不浮起" } },
     {

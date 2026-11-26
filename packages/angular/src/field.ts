@@ -1,4 +1,5 @@
-import { Component, Directive, ElementRef, InjectionToken, computed, contentChild, inject, input, signal } from '@angular/core';
+import { Component, Directive, ElementRef, InjectionToken, computed, contentChild, effect, inject, input, signal } from '@angular/core';
+import { NgControl, Validators } from '@angular/forms';
 import { NgTemplateOutlet } from '@angular/common';
 import { SR_ONLY_STYLE, fieldClass, fieldInputClass, fieldMark, leftField } from '@wucarson/facet-core/field';
 
@@ -13,12 +14,15 @@ export const FIELD_BOX = new InjectionToken<unknown>('FIELD_BOX');
  *   </div>
  * 下拉、多選直接放進來（它們自己就是輸入框區）：
  *   <div ccFormField label="所屬專案" required><div ccCombo [items]="projects" label="所屬專案"></div></div>
+ * 裡面的控制項接了表單（formControlName／ngModel）時，自動帶入：
+ *   停用（control.disable()）、錯誤樣式（驗證不通過且碰過）、必填星號（有 Validators.required）。
+ *   錯誤訊息文字仍由 error 給：<div ccFormField label="名稱" [error]="f.controls.name.invalid && f.controls.name.touched ? '請輸入名稱' : ''">
  */
 @Component({
   selector: '[ccFormField]',
   imports: [NgTemplateOutlet],
   host: { '[class]': 'cls()', '(focusin)': 'focus.set(true)', '(focusout)': 'onOut($event)' },
-  template: `<ng-template #content><ng-content /></ng-template><label class="ff-l" [attr.for]="htmlFor() ?? null">{{ label() }}@if (mark() === 'req') {<span class="req" aria-hidden="true">*</span>} @else if (mark() === 'opt') {<span class="opt">（選填）</span>}@if (required()) {<span class="sr-only" [style]="srOnly">必填</span>}@if (empty()) {<span class="ff-e">{{ emptyLabel() }}</span>}</label>@if (box()) {<ng-container *ngTemplateOutlet="content" />} @else {<div [class]="boxCls()"><ng-container *ngTemplateOutlet="content" /></div>}@if (!error()) {<div class="ff-h"><span>{{ help() }}</span>@if (counter()) {<span class="cnt" aria-live="polite">{{ counter() }}</span>}</div>}<div class="ff-x" [attr.role]="error() ? 'alert' : null">{{ error() }}</div>`,
+  template: `<ng-template #content><ng-content /></ng-template><label class="ff-l" [attr.for]="htmlFor() ?? null">{{ label() }}@if (mark() === 'req') {<span class="req" aria-hidden="true">*</span>} @else if (mark() === 'opt') {<span class="opt">（選填）</span>}@if (isRequired()) {<span class="sr-only" [style]="srOnly">必填</span>}@if (empty()) {<span class="ff-e">{{ emptyLabel() }}</span>}</label>@if (box()) {<ng-container *ngTemplateOutlet="content" />} @else {<div [class]="boxCls()"><ng-container *ngTemplateOutlet="content" /></div>}@if (!error()) {<div class="ff-h"><span>{{ help() }}</span>@if (counter()) {<span class="cnt" aria-live="polite">{{ counter() }}</span>}</div>}<div class="ff-x" [attr.role]="error() ? 'alert' : null">{{ error() }}</div>`,
 })
 export class FormField {
   readonly label = input.required<string>();
@@ -46,9 +50,29 @@ export class FormField {
   protected readonly srOnly = SR_ONLY_STYLE;
   protected readonly box = contentChild(FIELD_BOX);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  protected readonly cls = computed(() => fieldClass({ readOnly: this.readOnly(), disabled: this.disabled(), error: this.error(), focus: this.focus() }));
+  /** 裡面接了表單的控制項：狀態轉成 signal */
+  private readonly control = contentChild(NgControl, { descendants: true });
+  private readonly ctlDisabled = signal(false);
+  private readonly ctlInvalid = signal(false);
+  private readonly ctlRequired = signal(false);
+  /** 停用、錯誤、必填：自己給的或表單的，任一成立 */
+  readonly isDisabled = computed(() => this.disabled() || this.ctlDisabled());
+  readonly hasError = computed(() => !!this.error() || this.ctlInvalid());
+  readonly isRequired = computed(() => this.required() || this.ctlRequired());
+  protected readonly cls = computed(() => fieldClass({ readOnly: this.readOnly(), disabled: this.isDisabled(), error: this.hasError(), focus: this.focus() }));
+
+  constructor() {
+    effect((onCleanup) => {
+      const c = this.control()?.control;
+      if (!c) return;
+      const update = () => { this.ctlDisabled.set(c.disabled); this.ctlInvalid.set(c.invalid && c.touched); this.ctlRequired.set(c.hasValidator(Validators.required)); };
+      update();
+      const sub = c.events.subscribe(update);
+      onCleanup(() => sub.unsubscribe());
+    });
+  }
   protected readonly boxCls = computed(() => fieldInputClass(this.multiline()));
-  protected readonly mark = computed(() => fieldMark({ readOnly: this.readOnly(), required: this.required(), optional: this.optional() }));
+  protected readonly mark = computed(() => fieldMark({ readOnly: this.readOnly(), required: this.isRequired(), optional: this.optional() }));
   protected onOut(e: FocusEvent) { if (leftField(this.host.nativeElement, e.relatedTarget)) this.focus.set(false); }
 }
 
@@ -57,11 +81,12 @@ export class FormField {
   selector: 'input[ccFieldControl], textarea[ccFieldControl]',
   host: {
     '[attr.readonly]': 'field?.readOnly() ? "" : null',
-    '[attr.disabled]': 'field?.disabled() ? "" : null',
-    '[attr.aria-invalid]': 'field?.error() ? "true" : null',
-    '[attr.aria-required]': 'field?.required() ? "true" : null',
+    '[disabled]': '!!field?.isDisabled() || !!ngControl?.disabled',
+    '[attr.aria-invalid]': 'field?.hasError() ? "true" : null',
+    '[attr.aria-required]': 'field?.isRequired() ? "true" : null',
   },
 })
 export class FieldControl {
   protected readonly field = inject(FormField, { optional: true });
+  protected readonly ngControl = inject(NgControl, { self: true, optional: true });
 }

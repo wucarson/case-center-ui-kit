@@ -1,4 +1,4 @@
-# 每個 PR 與 main 的推送：建置、安裝測試、契約檢查、逐像素比對。任何一項失敗就不能合併。
+# 每個 PR 與 main 的推送：建置、安裝測試、契約檢查、表單整合、逐像素比對。任何一項失敗就不能合併。
 name: CI
 
 on:
@@ -57,6 +57,11 @@ jobs:
       - run: npm run build -w apps/${{ matrix.fw }}-demo
       - name: 契約檢查
         run: node check-contracts.mjs ${{ matrix.fw }}
+        working-directory: tools
+      - name: 表單整合
+        # 依序完成：Angular → Vue → React；完成的框架加進來
+        if: matrix.fw == 'angular'
+        run: node form-check.mjs ${{ matrix.fw }}
         working-directory: tools
       - name: 逐像素比對
         run: node compare.mjs ${{ matrix.fw }}

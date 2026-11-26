@@ -6,6 +6,7 @@
   "logic": "core/field.ts",
   "description": "標籤＋輸入框＋說明／錯誤；輸入框聚焦時整框換主色並加光圈。錯誤訊息位置先留好，出現時欄位不跳動。",
   "use": "表單裡的文字輸入；下拉、多選放進來時也用同一個外框。",
+  "form": { "value": "string", "prop": "value", "empty": "" },
   "parts": [
     { "name": "root", "selector": ".ff", "element": "div", "classes": { "ff": "欄位", "ro": "唯讀（系統帶入）", "bad": "有錯誤", "dis": "停用", "focus": "輸入框聚焦中" } },
     { "name": "label", "selector": ".ff > .ff-l", "element": "label", "classes": { "ff-l": "標籤" } },

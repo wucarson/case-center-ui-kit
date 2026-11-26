@@ -1,5 +1,6 @@
-import { Component, computed, input, model, output, signal } from '@angular/core';
+import { Component, computed, inject, input, model, output, signal } from '@angular/core';
 import { searchBoxClass, suggestionClass, suggestionId, suggestionListLabel, tagMatches, tagSearchKey, type TagSuggestion } from '@wucarson/facet-core/search';
+import { FormBridge } from './form';
 import { Icon } from './icon';
 
 export type { TagSuggestion };
@@ -9,12 +10,14 @@ let seq = 0;
 /**
  * 搜尋與標籤建議：邊打字邊列出相符的標籤；↑↓ 移動、Enter 選取、Esc 收起。
  *   <div ccTagSearch [tags]="tags" [(value)]="q" label="搜尋公告" (pick)="go($event)"></div>
+ * 表單：值是輸入的文字。表單停用時輸入框停用（展示牆尚無停用樣式）。
  */
 @Component({
   selector: '[ccTagSearch]',
   imports: [Icon],
+  hostDirectives: [FormBridge],
   host: { class: 'tsr' },
-  template: `<div [class]="boxCls()"><svg ccIcon="search"></svg><input [id]="inputId" class="ff-real" role="combobox" [attr.aria-label]="label()" [attr.aria-expanded]="open()" [attr.aria-controls]="listId" aria-autocomplete="list" [attr.aria-activedescendant]="open() ? optId(cursor()) : null" autocomplete="off" [attr.placeholder]="placeholder()" [value]="value()" (input)="set($any($event.target).value)" (focus)="focus.set(true)" (blur)="focus.set(false)" (keydown)="onKey($event)" /></div>@if (open()) {<div [id]="listId" class="results show" role="listbox" [attr.aria-label]="listLabel()">@for (t of shown(); track t.label; let i = $index) {<div [id]="optId(i)" [class]="optCls(i)" role="option" [attr.aria-selected]="i === cursor()" (mousedown)="$event.preventDefault(); choose(t)" (mousemove)="cursor.set(i)"><span>{{ t.label }}</span>@if (t.count) {<em>{{ t.count }}</em>}</div>}</div>}`,
+  template: `<div [class]="boxCls()"><svg ccIcon="search"></svg><input [id]="inputId" class="ff-real" role="combobox" [attr.aria-label]="label()" [attr.aria-expanded]="open()" [attr.aria-controls]="listId" aria-autocomplete="list" [attr.aria-activedescendant]="open() ? optId(cursor()) : null" autocomplete="off" [attr.placeholder]="placeholder()" [value]="value()" [disabled]="form.disabled()" (input)="set($any($event.target).value)" (focus)="focus.set(true)" (blur)="focus.set(false)" (keydown)="onKey($event)" /></div>@if (open()) {<div [id]="listId" class="results show" role="listbox" [attr.aria-label]="listLabel()">@for (t of shown(); track t.label; let i = $index) {<div [id]="optId(i)" [class]="optCls(i)" role="option" [attr.aria-selected]="i === cursor()" (mousedown)="$event.preventDefault(); choose(t)" (mousemove)="cursor.set(i)"><span>{{ t.label }}</span>@if (t.count) {<em>{{ t.count }}</em>}</div>}</div>}`,
 })
 export class TagSearch {
   /** 可建議的標籤 */
@@ -28,6 +31,7 @@ export class TagSearch {
   readonly pick = output<TagSuggestion>();
 
   protected readonly inputId = `cc-ts-${++seq}`;
+  protected readonly form = inject<FormBridge<string>>(FormBridge).attach(this.value, '');
   protected readonly listId = this.inputId + '-list';
   protected readonly focus = signal(false);
   private readonly closed = signal(false);

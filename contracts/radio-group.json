@@ -10,6 +10,7 @@
     { "when": "選項超過 5 個", "use": "combo" },
     { "when": "切換檢視或篩選，選項很短", "use": "segmented" }
   ],
+  "form": { "value": "string", "prop": "value" },
   "parts": [
     { "name": "group", "selector": "[role=\"radiogroup\"]", "element": "div", "classes": { "rads": "選項清單" }, "attrs": { "aria-label": {} } },
     {

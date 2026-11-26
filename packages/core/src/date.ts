@@ -11,7 +11,7 @@ export const viewOf = (iso: string): MonthView => { const d = fromISO(iso); retu
 /** 換月：n＝-1 上個月、1 下個月 */
 export const shiftView = ([y, m]: MonthView, n: number): MonthView => { const d = new Date(y, m + n, 1); return [d.getFullYear(), d.getMonth()]; };
 export const monthTitle = ([y, m]: MonthView) => `${y} 年 ${m + 1} 月`;
-export const dateFieldLabel = (label: string, value: string) => `${label}：${fmtDay(value)}`;
+export const dateFieldLabel = (label: string, value: string) => (value ? `${label}：${fmtDay(value)}` : label);
 /** 最早可選之前的日期不能選 */
 export const canPickDay = (d: string, min?: string) => !(min && d < min);
 export const dayClass = (d: string, value: string, today: string, min?: string) =>

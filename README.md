@@ -66,6 +66,25 @@ import { Button, DataTable } from '@wucarson/facet-angular';
 @Component({ imports: [Button, DataTable], template: `<button ccButton variant="outline">取消</button>` })
 ```
 
+### 表單
+
+會產生值的元件（文字欄位、下拉、多選、日期、期間、時間、勾選、單選、開關、分段切換、標籤搜尋）直接接框架的表單。值的型別寫在各元件的契約（`contracts/*.json` 的 `form`）：開／關用 `checked`，其餘用 `value`。
+
+```html
+<!-- Angular：formControlName、formControl、ngModel 都可以 -->
+<form [formGroup]="form">
+  <div ccFormField label="工單名稱"><input ccFieldControl formControlName="title" /></div>
+  <div ccFormField label="工作類型"><div ccCombo formControlName="kind" [items]="kinds" label="工作類型"></div></div>
+  <div ccSwitch formControlName="remind" label="到期前提醒"></div>
+</form>
+```
+
+- `disable()`：元件不能操作；欄位外框、勾選、單選、開關顯示停用樣式
+- 驗證不通過且碰過（touched）：欄位外框、下拉自動顯示錯誤樣式；錯誤文字用欄位的 `error` 給
+- 欄位外框裡的控制項有 `Validators.required` 時，自動加必填星號
+- 勾選必填用 `Validators.requiredTrue`
+- 原本的 `[(value)]`、`[(checked)]` 寫法照常可用
+
 ### 開發
 
 ```sh
@@ -75,6 +94,7 @@ npm run build:apps         # 建置三個展示頁（比對工具截圖用）
 npm run pack:check         # 安裝測試：打包後裝進全新專案，檢查載入與 React／Vue／Angular 型別
 cd tools && node export.mjs          # 展示牆改了之後：匯出樣式、token、比對樣本到套件
 cd tools && node compare.mjs react   # 逐像素比對（react｜vue｜angular）
+cd tools && node form-check.mjs angular   # 表單整合：綁定、改值、寫入、停用、碰過、重設、送出
 ```
 
 ## 檔案

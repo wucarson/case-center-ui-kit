@@ -3,7 +3,8 @@
  */
 import { cx } from './dom';
 
-export interface FieldState { readOnly?: boolean; disabled?: boolean; error?: string; focus?: boolean }
+/** error：錯誤訊息，或 true＝只顯示錯誤樣式（表單驗證不通過、訊息另給） */
+export interface FieldState { readOnly?: boolean; disabled?: boolean; error?: string | boolean; focus?: boolean }
 /** 唯讀、停用、有錯誤時不畫聚焦框 */
 export const fieldClass = (s: FieldState) => cx('ff', s.readOnly && 'ro', !!s.error && 'bad', s.disabled && 'dis', s.focus && !s.readOnly && !s.disabled && !s.error && 'focus');
 export const fieldInputClass = (multiline?: boolean) => cx('ff-i', multiline && 'ta');

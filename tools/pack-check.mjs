@@ -31,7 +31,7 @@ ok(files.angular.some((f) => f.startsWith('fesm2022/')), 'angular 是 Angular �
 const tarballs = fs.readdirSync(tgz).map((f) => `"${path.join(tgz, f)}"`).join(' ');
 fs.writeFileSync(path.join(app, 'package.json'), JSON.stringify({ name: 'consumer', private: true, type: 'module' }));
 const ng = JSON.parse(fs.readFileSync(path.join(root, 'packages/angular/package.json'), 'utf8')).devDependencies;
-sh(`npm install --no-audit --no-fund --prefer-offline ${tarballs} react@18 react-dom@18 @types/react@18 vue@3 @angular/core@${ng['@angular/core']} @angular/common@${ng['@angular/common']} @angular/platform-browser@${ng['@angular/platform-browser']} rxjs@7 typescript@~6.0.2`, app);
+sh(`npm install --no-audit --no-fund --prefer-offline ${tarballs} react@18 react-dom@18 @types/react@18 vue@3 @angular/core@${ng['@angular/core']} @angular/common@${ng['@angular/common']} @angular/platform-browser@${ng['@angular/platform-browser']} @angular/forms@${ng['@angular/forms']} rxjs@7 typescript@~6.0.2`, app);
 console.log('✓ 全新專案安裝完成');
 
 // 3. 執行期載入（Node 直接 import，驗證 exports 對得上）

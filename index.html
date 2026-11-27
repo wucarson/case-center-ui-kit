@@ -596,14 +596,14 @@ button.wx-site:hover { background: var(--hover); }
 .wx { grid-template-columns: minmax(0, 1fr) 200px; column-gap: 16px; }   /* 車窗欄固定寬：車窗放在地點＋現在天氣右側 */
 .wx:not(:has(> .wx-win)) { grid-template-columns: minmax(0, 1fr); }
 .wx > .wx-top { grid-column: 1; grid-row: 1; } .wx > .wx-now { grid-column: 1; grid-row: 2; }
-.wx > .wx-tabs { grid-column: 1; grid-row: 3; justify-self: start; align-self: start; z-index: 1; margin: 8px 0 0 10px; background: color-mix(in srgb, var(--ink) 7%, transparent); }   /* 當日／當週：圖表面板左上角，當作圖表的標題列 */
+.wx > .wx-tabs { grid-column: 1 / -1; grid-row: 3; justify-self: end; align-self: start; z-index: 1; margin: 8px 10px 0 0; background: color-mix(in srgb, var(--ink) 7%, transparent); }   /* 當日／當週：圖表面板右上角 */
 .wx > .wx-tabs ~ .wx-pane { padding-top: 48px; }
 .wx > .wx-pane { grid-column: 1 / -1; grid-row: 3; }   /* 圖表單獨一整列 */
 .wx > .wx-win { grid-column: 2; grid-row: 1 / span 2; align-self: stretch; width: 100%; height: auto; aspect-ratio: auto; }   /* 跨地點＋現在天氣兩列，上下緣貼齊 */
-.wx-win { --bz: var(--card); --hl: rgb(255 255 255 / .5);   /* 外框＝卡片底色，只靠明暗做出內凹 */ position: relative; width: 216px; aspect-ratio: 21 / 23;   /* 接近方形（參考新幹線車窗） */ border-radius: 58px / 56px; background: radial-gradient(ellipse 78% 74% at 50% 54%, color-mix(in srgb, #000 22%, var(--bz)) 52%, color-mix(in srgb, #000 8%, var(--bz)) 68%, transparent 92%), linear-gradient(180deg, color-mix(in srgb, #000 14%, var(--bz)) 0%, var(--bz) 45%, color-mix(in srgb, #fff 45%, var(--bz)) 100%); box-shadow: inset 0 14px 22px -6px rgb(0 0 0 / .26), inset 0 -10px 16px -4px var(--hl), inset 0 0 0 1px var(--line-strong), inset 0 1.5px 0 1px var(--hl), 0 1px 0 var(--hl); }   /* 外框線：外緣一圈＋內側亮線 */   /* 內凹弧面：由外往中間連續變深，上半背光、下半受光，沒有分段的斜面 */
+.wx-win { --bz: var(--card); --hl: rgb(255 255 255 / .5);   /* 外框＝卡片底色，只靠明暗做出內凹 */ position: relative; width: 216px; aspect-ratio: 21 / 23;   /* 接近方形（參考新幹線車窗） */ --wxr: calc(var(--r-2xl) * 2.2); border-radius: var(--wxr);   /* 圓角跟著外觀設定 */ background: radial-gradient(ellipse 78% 74% at 50% 54%, color-mix(in srgb, #000 22%, var(--bz)) 52%, color-mix(in srgb, #000 8%, var(--bz)) 68%, transparent 92%), linear-gradient(180deg, color-mix(in srgb, #000 14%, var(--bz)) 0%, var(--bz) 45%, color-mix(in srgb, #fff 45%, var(--bz)) 100%); box-shadow: inset 0 14px 22px -6px rgb(0 0 0 / .26), inset 0 -10px 16px -4px var(--hl), inset 0 0 0 1px var(--line-strong), inset 0 1.5px 0 1px var(--hl), 0 1px 0 var(--hl); }   /* 外框線：外緣一圈＋內側亮線 */   /* 內凹弧面：由外往中間連續變深，上半背光、下半受光，沒有分段的斜面 */
 :root[data-theme="dark"] .wx-win { --hl: rgb(255 255 255 / .14); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .wx-win { --hl: rgb(255 255 255 / .14); } }
-.wx-glass { position: absolute; inset: 15px 14px 14px; border-radius: 44px / 42px; overflow: hidden; box-shadow: 0 0 0 1px var(--line-strong), 0 0 0 2.5px var(--hl);   /* 玻璃外圍框線：深線＋一圈亮邊 */ background: linear-gradient(180deg, #7fb2ec, #cfe3f6 62%, #8fa88c 63%, #6f8a6e); }
+.wx-glass { position: absolute; inset: 15px 14px 14px; border-radius: max(2px, calc(var(--wxr) - 14px)); overflow: hidden; box-shadow: 0 0 0 1px var(--line-strong), 0 0 0 2.5px var(--hl);   /* 玻璃外圍框線：深線＋一圈亮邊 */ background: linear-gradient(180deg, #7fb2ec, #cfe3f6 62%, #8fa88c 63%, #6f8a6e); }
 .wx-glass canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .wx-glass::after { content: ""; position: absolute; inset: 0; z-index: 3; border-radius: inherit; pointer-events: none; box-shadow: 0 0 0 1px rgb(0 0 0 / .18), inset 0 0 0 2.5px rgb(38 36 34 / .78), inset 0 10px 16px rgb(0 0 0 / .45), inset 0 -2px 5px rgb(0 0 0 / .18); }   /* 最深處：密封條＋上緣深陰影 */
 /* 百褶窗簾：從收納槽拉下（transform），底邊一個拉把 */
@@ -4792,7 +4792,7 @@ void main(){
      · 多雲：雲量多、太陽偶爾從雲縫透出　· 颱風：雲層螺旋旋轉、強風斜雨、被風捲過的樹葉、水珠被吹斜
      示範沒暫停、卡片在畫面內才畫；減少動態時停在靜止畫面 */
   const WXWIN_FS = `precision highp float;
-uniform vec2 R;uniform float T,MODE,A,DK,G,DPR,PI,VL,VA;uniform sampler2D P0,P1,V;uniform vec2 PL,IA;
+uniform vec2 R;uniform float T,MODE,A,DK,G,DPR,PI,VL,VA,RR;uniform sampler2D P0,P1,V;uniform vec2 PL,IA;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float h1(float x){return fract(sin(x*127.1)*43758.5453);}
 float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+1.),f.x),f.y);}
@@ -4827,7 +4827,7 @@ vec3 scene(vec2 p){
     uv.x+=(sin(uv.y*64.+T*9.)*.007+sin(uv.y*23.-T*5.)*.005+vn(vec2(uv.x*20.,uv.y*40.-T*3.))*.006)*k+sin(uv.x*30.+T*11.)*.004*hz;
     uv.y+=(sin(uv.x*38.+T*6.)*.004+vn(vec2(uv.x*14.+T,uv.y*30.-T*4.))*.006)*k;}
   if(VL>.5){   /* 真實行車影片：所有天氣共用同一個場景，只靠調色與前景效果區分；不晃動，只有影片本身的水平移動 */
-    float zm=1.;vec2 vt=vec2(.5-(uv.x-asp*.5)/(VA*zm),.5+(uv.y-.5)/zm);
+    float zm=max(1.,asp/VA);vec2 vt=vec2(.5-(uv.x-asp*.5)/(VA*zm),.56+(uv.y-.5)/zm);   /* cover：窗比影片寬時改以寬度填滿，取地平線一帶 */
     return scene2(grade(texture2D(V,clamp(vt,vec2(.002),vec2(.998))).rgb,vt.y),uv,asp);
   }
   float ia=PI<.5?IA.x:IA.y,zh=1.65;   /* 窗內只取照片上半～中段：天空、地平線、近處田野都看得到 */
@@ -4866,7 +4866,7 @@ vec3 scene2(vec3 col,vec2 uv,float asp){
 void main(){
   vec2 p=vec2(gl_FragCoord.x,R.y-gl_FragCoord.y)/DPR,S=R/DPR;
   vec3 col=scene(p);
-  float rr=min(S.x,S.y)*.26,dw=sdRR(p-S*.5,S*.5,rr);   /* 窗形：圓角方形（同 CSS） */
+  float rr=min(RR,min(S.x,S.y)*.5),dw=sdRR(p-S*.5,S*.5,rr);   /* 窗形：圓角方形（同 CSS） */
   if(wet()>.5){   /* 車窗水珠：被風往後（往左）吹成斜向水痕，水珠折射窗外景象 */
     vec2 off=vec2(0.);float m=0.;vec2 g=floor(p/10.);
     for(int j=-1;j<=1;j++)for(int i=-1;i<=1;i++){vec2 cc=g+vec2(float(i),float(j));float r1=h(cc),r2=h(cc+7.3),r3=h(cc+3.1);
@@ -4904,7 +4904,7 @@ void main(){
     gl.useProgram(pr);
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     const ap = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(ap); gl.vertexAttribPointer(ap, 2, gl.FLOAT, false, 0, 0);
-    const U = {}; for (const k of ['R', 'T', 'MODE', 'A', 'DK', 'G', 'DPR', 'PI', 'P0', 'P1', 'PL', 'IA', 'V', 'VL', 'VA']) U[k] = gl.getUniformLocation(pr, k);
+    const U = {}; for (const k of ['R', 'T', 'MODE', 'A', 'DK', 'G', 'DPR', 'PI', 'P0', 'P1', 'PL', 'IA', 'V', 'VL', 'VA', 'RR']) U[k] = gl.getUniformLocation(pr, k);
     // 風景照：兩張各一個貼圖單元；載入前用天空漸層代替
     const PL = [0, 0], IA = [1.5, 1.5];
     gl.uniform1i(U.P0, 0); gl.uniform1i(U.P1, 1);
@@ -4937,7 +4937,9 @@ void main(){
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, vid); VL = 1; dirty = true;
     };
     let DPR = 1, vis = false, t = 7, last = 0, mode = 'sun', next = 'sun', a = 0, g = 0, raf = 0, dirty = true;
-    const size = () => { DPR = Math.max(2, Math.min(3, devicePixelRatio || 1));   // 窗很小：至少 2 倍解析度，景象才細緻
+    let RRpx = 30;   // 玻璃圓角（CSS px），跟著外觀設定
+    const rad = () => { const g = cv.closest('.wx-glass'); if (g) RRpx = parseFloat(getComputedStyle(g).borderTopLeftRadius) || 0; dirty = true; };
+    const size = () => { rad(); DPR = Math.max(2, Math.min(3, devicePixelRatio || 1));   // 窗很小：至少 2 倍解析度，景象才細緻
       const w = cv.clientWidth, hh = cv.clientHeight; if (!w || !hh) return; cv.width = Math.round(w * DPR); cv.height = Math.round(hh * DPR); dirty = true; };
     new ResizeObserver(size).observe(cv);
     new IntersectionObserver(([e]) => { vis = e.isIntersecting; if (vis && !raf) raf = requestAnimationFrame(tick); }, { rootMargin: '60px' }).observe(cv);
@@ -4955,13 +4957,13 @@ void main(){
       if (dirty || a < 1) {
         const de = document.documentElement, dk = de.dataset.theme ? de.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
         gl.viewport(0, 0, cv.width, cv.height);
-        gl.uniform2f(U.R, cv.width, cv.height); gl.uniform1f(U.T, t); gl.uniform1f(U.MODE, WX_FX[mode]); gl.uniform1f(U.A, a); gl.uniform1f(U.DK, dk ? 1 : 0); gl.uniform1f(U.G, g); gl.uniform1f(U.DPR, DPR); gl.uniform1f(U.PI, WX_PHOTO[mode]); gl.uniform2f(U.PL, PL[0], PL[1]); gl.uniform2f(U.IA, IA[0], IA[1]); gl.uniform1f(U.VL, VL); gl.uniform1f(U.VA, VA);
+        gl.uniform2f(U.R, cv.width, cv.height); gl.uniform1f(U.T, t); gl.uniform1f(U.MODE, WX_FX[mode]); gl.uniform1f(U.A, a); gl.uniform1f(U.DK, dk ? 1 : 0); gl.uniform1f(U.G, g); gl.uniform1f(U.DPR, DPR); gl.uniform1f(U.PI, WX_PHOTO[mode]); gl.uniform2f(U.PL, PL[0], PL[1]); gl.uniform2f(U.IA, IA[0], IA[1]); gl.uniform1f(U.VL, VL); gl.uniform1f(U.VA, VA); gl.uniform1f(U.RR, RRpx);
         gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLES, 0, 3);
         dirty = run;
       }
       raf = requestAnimationFrame(tick);
     }
-    new MutationObserver(() => { dirty = true; }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    new MutationObserver(rad).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'style', 'data-ui'] });   // 主題、圓角設定改變時重算
     return { cv, set(fx, instant) { next = fx; if (instant) { mode = fx; a = 1; g = 0; } dirty = true; }, frame(tt, fx, gg = 1) { t = tt; mode = next = fx; a = 1; g = gg; dirty = true; } };   // frame：逐格檢查用
   }
 

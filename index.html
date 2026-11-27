@@ -593,7 +593,7 @@ button.wx-site:hover { background: var(--hover); }
 .wx-site small { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--muted); font-size: inherit; font-weight: 400; }
 /* 高鐵車窗（參考新幹線）：接近方形的大圓角窗；米灰塑膠外框（上亮下暗的漸層＋邊緣高光）、窗內一圈深色密封條與內凹陰影、上緣窗簾底桿與拉把；
    玻璃一道斜向反光；切換地點時百褶窗簾從上緣拉下、換好景色再拉上（.shut） */
-.wx { grid-template-columns: minmax(0, 1fr) 200px; column-gap: 16px; }   /* 車窗欄固定寬：車窗放在地點＋現在天氣右側 */
+.wx { grid-template-columns: minmax(0, 1fr) 250px; column-gap: 16px; }   /* 車窗欄固定寬：車窗放在地點＋現在天氣右側 */
 .wx:not(:has(> .wx-win)) { grid-template-columns: minmax(0, 1fr); }
 .wx > .wx-top { grid-column: 1; grid-row: 1; } .wx > .wx-now { grid-column: 1; grid-row: 2; }
 .wx > .wx-tabs { grid-column: 1 / -1; grid-row: 3; justify-self: end; align-self: start; z-index: 1; margin: 8px 10px 0 0; background: color-mix(in srgb, var(--ink) 7%, transparent); }   /* 當日／當週：圖表面板右上角 */

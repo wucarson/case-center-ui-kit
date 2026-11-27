@@ -505,6 +505,22 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 #c-wx .body { container-type: inline-size; }
 .wx { flex: 1; min-height: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 10px; }
 .wx-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+/* 地點下拉選單 */
+.wx-pick { position: relative; min-width: 0; }
+.wx-site[aria-expanded="true"] svg:last-child { rotate: 180deg; }
+.wx-site svg:last-child { transition: rotate calc(.2s * var(--dur)) var(--ease); }
+.wx-menu { position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; min-width: 240px; padding: 4px; border-radius: var(--r-lg); background: var(--card); box-shadow: 0 0 0 1px var(--line), var(--shadow-lift); display: grid; gap: 1px; transform-origin: top left; animation: wx-menu calc(.18s * var(--dur)) var(--ease); }
+.wx-menu[hidden] { display: none; }
+@keyframes wx-menu { from { opacity: 0; scale: .96; } }
+.wx-menu button { display: grid; grid-template-columns: 18px auto minmax(0, 1fr); align-items: center; gap: 8px; padding: 6px 10px; border: 0; border-radius: var(--r-md); background: none; color: var(--ink); font: inherit; font-size: calc(13px * var(--fs-k) * var(--rk, 1)); text-align: left; cursor: pointer; }
+.wx-menu button .wxi { width: 18px; height: 18px; }
+.wx-menu button small { color: var(--muted); font-size: calc(12px * var(--fs-k) * var(--rk, 1)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wx-menu button:hover, .wx-menu button:focus-visible { background: var(--hover); outline: none; }
+.wx-menu button[aria-selected="true"] { background: color-mix(in srgb, var(--primary) 10%, transparent); color: var(--primary); font-weight: 600; }
+/* 嚴重天氣：只在豪雨、高溫、低溫、颱風時出現的小標籤 */
+.wx-tag { align-self: flex-start; margin-left: auto; padding: 2px 9px; border-radius: var(--r-pill); font-size: calc(12px * var(--fs-k) * var(--rk, 1)); font-weight: 600; white-space: nowrap; }
+.wx-tag[data-lv="warn"] { background: var(--warn-bg); color: var(--warn-fg); }
+.wx-tag[data-lv="danger"] { background: var(--danger-bg); color: var(--danger-fg); }
 /* 當日／當週切換 */
 .wx-tabs { display: inline-flex; padding: 2px; border-radius: var(--r-pill); background: var(--soft); flex: none; }
 .wx-tabs button { padding: 3px 12px; border: 0; border-radius: var(--r-pill); background: none; color: var(--muted); font: inherit; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); cursor: pointer; transition: background calc(.2s * var(--dur)), color calc(.2s * var(--dur)); }
@@ -516,16 +532,16 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .wx-now > span { align-self: flex-start; margin: 2px 4px 0 -6px; color: var(--muted); font-size: calc(14px * var(--fs-k) * var(--rk, 1)); }
 .wx-ns { display: grid; gap: 1px; min-width: 0; }
 .wx-ns b { color: var(--ink); font-size: calc(14px * var(--fs-k) * var(--rk, 1)); font-weight: 600; white-space: nowrap; }
-.wx-ns span, .wx-ns small { color: var(--muted); font-size: calc(11px * var(--fs-k) * var(--rk, 1)); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.wx-ns span, .wx-ns small { color: var(--muted); font-size: calc(12px * var(--fs-k) * var(--rk, 1)); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .wx-pane { min-height: 0; display: grid; }
 /* 當日：逐時格子（時間、圖示、溫度、降雨率），橫向捲動；現在那格淡底 */
-.wx-hrs { min-height: 0; align-self: center; display: grid; grid-auto-flow: column; grid-auto-columns: 50px; gap: 4px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; outline-offset: 2px; padding-bottom: 2px; }
+.wx-hrs { min-height: 0; align-self: center; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
 .wx-h { display: grid; justify-items: center; align-items: center; gap: 7px; padding: 10px 0; border-radius: var(--r-md); font-size: calc(12px * var(--fs-k) * var(--rk, 1)); font-variant-numeric: tabular-nums; }
 .wx-h.now { background: var(--soft); }
 .wx-h > span { color: var(--muted); white-space: nowrap; }
 .wx-h.now > span { color: var(--ink); font-weight: 600; }
 .wx-h > b { color: var(--ink); font-weight: 600; font-size: calc(14px * var(--fs-k) * var(--rk, 1)); }
-.wx-h > small { display: inline-flex; align-items: center; gap: 2px; color: var(--weak); font-size: calc(11px * var(--fs-k) * var(--rk, 1)); }
+.wx-h > small { display: inline-flex; align-items: center; gap: 2px; color: var(--muted); font-size: calc(12px * var(--fs-k) * var(--rk, 1)); }
 .wx-h > small::before { content: ""; width: 5px; height: 7px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: color-mix(in srgb, var(--c1) 55%, transparent); }
 .wx-h > small.hi { color: var(--c1); font-weight: 600; }
 /* 當週：降雨機率面積（主角）＋溫度折線；每天早／午／晚 3 個時段；最高溫標籤；下方星期與圖示 */
@@ -534,20 +550,22 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .wx-lg { display: flex; gap: 10px; }
 .wx-lg span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .wx-lg .a { width: 10px; height: 8px; border-radius: 2px; background: color-mix(in srgb, var(--c1) 35%, transparent); box-shadow: inset 0 1.5px 0 var(--c1); }
-.wx-lg .l { width: 12px; height: 2px; border-radius: 1px; background: var(--wx-tc); }
+.wx-lg .t { width: 10px; height: 8px; border-radius: 2px; background: color-mix(in srgb, var(--wx-tc) 28%, transparent); box-shadow: inset 0 1.5px 0 var(--wx-tc); }
 .wx-wc, .wx-lg { --wx-tc: color-mix(in srgb, var(--warn) 75%, var(--danger)); }
 .wx-plot { position: relative; min-height: 70px; }
 .wx-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .wx-plot .dz { fill: var(--soft); }
 .wx-plot .ra { fill: color-mix(in srgb, var(--c1) 26%, transparent); }
 .wx-plot .rl { fill: none; stroke: color-mix(in srgb, var(--c1) 75%, transparent); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.wx-plot .tb { fill: color-mix(in srgb, var(--wx-tc) 22%, transparent); }
 .wx-plot .tl { fill: none; stroke: var(--wx-tc); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.wx-pk.lo { translate: -50% 0; margin-top: 3px; color: var(--muted); font-weight: 500; }
 .wx-pk { position: absolute; translate: -50% -100%; margin-top: -3px; color: var(--ink); font-size: calc(10px * var(--fs-k) * var(--rk, 1)); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none; }
-.wx-hit { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(21, 1fr); }
+.wx-hit { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(7, 1fr); }
 .wx-hit i { border-radius: 3px; }
 .wx-hit i:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); }
 .wx-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
-.wx-days span { display: flex; align-items: center; justify-content: center; gap: 3px; color: var(--muted); font-size: calc(11px * var(--fs-k) * var(--rk, 1)); white-space: nowrap; }
+.wx-days span { display: flex; align-items: center; justify-content: center; gap: 3px; color: var(--muted); font-size: calc(12px * var(--fs-k) * var(--rk, 1)); white-space: nowrap; }
 .wx-days span:first-child { color: var(--ink); font-weight: 600; }
 .wx-days .wxi { width: 15px; height: 15px; }
 .wx-site { justify-self: start; display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px 3px 8px; border: 0; border-radius: var(--r-pill); background: var(--soft); color: var(--ink); font: inherit; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); font-weight: 500; }
@@ -577,7 +595,7 @@ button.wx-site:hover { background: var(--hover); }
 .wxi { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .wxi[data-k="sun"] { color: var(--warn); } .wxi[data-k="pc"] { color: color-mix(in srgb, var(--warn) 55%, var(--muted)); } .wxi[data-k="cloud"] { color: var(--muted); } .wxi[data-k="rain"] { color: var(--c1); } .wxi[data-k="storm"], .wxi[data-k="typhoon"] { color: var(--c3); } .wxi[data-k="snow"] { color: var(--c2); }
 /* 換地點：錯開淡入 */
-.wx-fade > *, .wx-wc.wx-fade .wx-plot { animation: wx-in calc(.45s * var(--dur)) var(--ease) both; animation-delay: calc(var(--i, 0) * 40ms * var(--dur)); }
+.wx-fade > *, .wx-wc.wx-fade .wx-plot { animation: wx-in calc(.45s * var(--dur)) var(--ease) both; animation-delay: calc(var(--wi, 0) * 40ms * var(--dur)); }   /* --wi：不借用卡片進場用的 --i */
 @keyframes wx-in { from { opacity: 0; translate: 0 6px; } }
 @container (max-width: 460px) { .wx-lg { display: none; } }
 @media (max-width: 540px) { #c-wx { grid-row: span 3; } }
@@ -4681,50 +4699,51 @@ void main(){
       days: [['今天', 'sun', 31, 22, 1, 10], ['週五', 'pc', 30, 22, 1, 20], ['週六', 'cloud', 29, 21, 1, 30], ['週日', 'rain', 26, 20, 0, 70], ['週一', 'pc', 28, 21, 1, 20], ['週二', 'sun', 30, 22, 1, 10], ['週三', 'sun', 31, 23, 1, 10]] },
     { site: '辦公室 E', area: '台北市信義區', k: 'cloud', st: '多雲', t: 25, hi: 27, lo: 21, feel: 26, pop: 20, wind: 3, fx: 'cloud',
       days: [['今天', 'cloud', 27, 21, 1, 20], ['週五', 'pc', 28, 22, 1, 20], ['週六', 'rain', 25, 21, 0, 70], ['週日', 'cloud', 26, 21, 1, 30], ['週一', 'sun', 29, 22, 1, 10], ['週二', 'pc', 28, 22, 1, 20], ['週三', 'cloud', 27, 21, 1, 30]] },
-    { site: '機房 B', area: '新北市板橋區', k: 'rain', st: '多雲轉豪雨', t: 24, hi: 26, lo: 21, feel: 26, pop: 80, wind: 4, fx: 'rain',
+    { site: '機房 B', area: '新北市板橋區', k: 'rain', st: '多雲轉豪雨', t: 24, hi: 26, lo: 21, feel: 26, pop: 80, wind: 4, fx: 'rain', alert: ['warn', '豪雨特報'],
       days: [['今天', 'rain', 26, 21, 0, 80], ['週五', 'rain', 25, 20, 0, 70], ['週六', 'cloud', 26, 21, 1, 40], ['週日', 'pc', 28, 22, 1, 20], ['週一', 'sun', 30, 23, 1, 10], ['週二', 'sun', 30, 23, 1, 10], ['週三', 'pc', 29, 22, 1, 20]] },
-    { site: '基地台 C', area: '高雄市楠梓區', k: 'sun', st: '晴，炎熱', t: 36, hi: 37, lo: 28, feel: 41, pop: 0, wind: 1, fx: 'heat',
+    { site: '基地台 C', area: '高雄市楠梓區', k: 'sun', st: '晴，炎熱', t: 36, hi: 37, lo: 28, feel: 41, pop: 0, wind: 1, fx: 'heat', alert: ['warn', '高溫警示'],
       days: [['今天', 'sun', 37, 28, 0, 0], ['週五', 'sun', 36, 28, 0, 0], ['週六', 'pc', 34, 27, 1, 10], ['週日', 'storm', 32, 26, 0, 60], ['週一', 'pc', 33, 27, 1, 20], ['週二', 'sun', 35, 27, 0, 0], ['週三', 'pc', 34, 27, 1, 10]] },
-    { site: '中繼站 D', area: '南投縣仁愛鄉（合歡山）', k: 'snow', st: '低溫，零星飄雪', t: 4, hi: 9, lo: 1, feel: 0, pop: 20, wind: 5, fx: 'frost',
+    { site: '中繼站 D', area: '南投縣仁愛鄉（合歡山）', k: 'snow', st: '低溫，零星飄雪', t: 4, hi: 9, lo: 1, feel: 0, pop: 20, wind: 5, fx: 'frost', alert: ['warn', '低溫特報'],
       days: [['今天', 'snow', 9, 1, 1, 20], ['週五', 'snow', 6, -1, 0, 60], ['週六', 'cloud', 8, 0, 1, 20], ['週日', 'sun', 11, 2, 1, 0], ['週一', 'pc', 10, 2, 1, 10], ['週二', 'cloud', 8, 1, 1, 30], ['週三', 'snow', 5, -2, 0, 70]] },
-    { site: '港區站 F', area: '基隆市中正區', k: 'typhoon', st: '颱風，強風豪雨', t: 23, hi: 25, lo: 22, feel: 22, pop: 100, wind: 12, fx: 'typhoon',
+    { site: '港區站 F', area: '基隆市中正區', k: 'typhoon', st: '颱風，強風豪雨', t: 23, hi: 25, lo: 22, feel: 22, pop: 100, wind: 12, fx: 'typhoon', alert: ['danger', '颱風警報'],
       days: [['今天', 'typhoon', 25, 22, 0, 100], ['週五', 'typhoon', 25, 22, 0, 100], ['週六', 'rain', 27, 23, 0, 80], ['週日', 'cloud', 28, 23, 1, 30], ['週一', 'sun', 30, 24, 1, 10], ['週二', 'sun', 31, 24, 1, 0], ['週三', 'pc', 30, 24, 1, 20]] },
   ];
   const wxSite = (L, btn) => btn
-    ? `<button type="button" class="wx-site" aria-label="切換外勤地點，目前是 ${L.site}">${WX_PIN}<span>${L.site}</span><small>${L.area}</small>${WX_DOWN}</button>`
+    ? `<div class="wx-pick"><button type="button" class="wx-site" aria-haspopup="listbox" aria-expanded="false" aria-label="外勤地點：${L.site}，${L.area}">${WX_PIN}<span>${L.site}</span><small>${L.area}</small>${WX_DOWN}</button>
+        <div class="wx-menu" role="listbox" aria-label="外勤地點" hidden>${WX_LOCS.map((x, i) => `<button type="button" role="option" data-i="${i}" aria-selected="${x === L}">${wxIcon(x.k)}<span>${x.site}</span><small>${x.area}</small></button>`).join('')}</div></div>`
     : `<span class="wx-site">${WX_PIN}<span>${L.site}</span><small>${L.area}</small></span>`;
   const WX_LABEL = { sun: '晴', pc: '晴時多雲', cloud: '多雲', rain: '雨', storm: '雷陣雨', snow: '降雪', typhoon: '颱風' };
   const WX_WIN = '<div class="wx-win" aria-hidden="true"><div class="wx-glass"><i class="wx-shade"><b></b></i><i class="wx-refl"></i></div><i class="wx-hood"></i></div>';
   // 當日 8–20 時的降雨機率（依天氣）；溫度用當天高低溫做出 13 時左右最高的曲線
   const WX_POP = { sun: [0, 0, 5, 10, 10, 10, 5, 5, 0, 0, 0, 0, 0], cloud: [10, 10, 20, 20, 30, 30, 20, 20, 20, 10, 10, 10, 10], rain: [20, 30, 30, 40, 50, 60, 80, 90, 90, 80, 70, 40, 30],
     heat: [0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0], frost: [20, 20, 10, 10, 10, 10, 10, 10, 10, 20, 20, 20, 20], typhoon: [90, 90, 100, 100, 100, 100, 100, 100, 100, 100, 90, 90, 80] };
-  const WX_NOW = 2;   // 示範的「現在」＝10 時
+  const WX_NOW = 1;   // 示範的「現在」＝10 時（每 2 小時一格的第 2 格）
   const wxHours = (L) => WX_POP[L.fx].map((p, i) => {
     const t = Math.round(L.lo + (L.hi - L.lo) * Math.max(0, Math.sin(Math.PI * (i + 3) / 14)));
     const k = L.fx === 'typhoon' ? 'typhoon' : p >= 60 ? 'rain' : p >= 30 ? 'cloud' : L.fx === 'frost' ? (i < 2 ? 'snow' : 'cloud') : L.k === 'sun' ? 'sun' : 'pc';
     return [8 + i, k, t, p];
-  });
+  }).filter((_, i) => i % 2 === 0);
   // 當週：每天早／午／晚 [溫度, 降雨 %]
   const wxPeriods = (L) => L.days.flatMap(([, , hi, lo, , p]) => [[Math.round(lo + (hi - lo) * .35), Math.round(p * .8)], [hi, p], [Math.round(lo + (hi - lo) * .4), Math.min(100, Math.round(p * 1.1))]]);
   const wxNow = (L) => `<div class="wx-now" role="group" aria-label="${L.site}現在 ${L.st}，${L.t} 度，最高 ${L.hi} 度、最低 ${L.lo} 度，體感 ${L.feel} 度，風速 ${L.wind} 級">${wxIcon(L.k)}<b class="num" aria-hidden="true">${L.t}</b><span aria-hidden="true">°C</span>
-      <div class="wx-ns" aria-hidden="true"><b>${L.st}</b><span>高 ${L.hi}° · 低 ${L.lo}°</span><small>體感 ${L.feel}° · 風 ${L.wind} 級</small></div></div>`;
-  const wxDay = (L) => `<div class="wx-hrs" tabindex="0" role="list" aria-label="當日逐時天氣">${wxHours(L).map(([h, k, t, p], i) =>
-    `<div class="wx-h${i === WX_NOW ? ' now' : ''}" role="listitem" style="--i:${i}" aria-label="${i === WX_NOW ? '現在' : h + ' 時'}，${WX_LABEL[k]}，${t} 度，降雨機率 ${p}%"><span>${i === WX_NOW ? '現在' : h + '時'}</span>${wxIcon(k)}<b>${t}°</b><small class="${p >= 60 ? 'hi' : ''}">${p}%</small></div>`).join('')}</div>`;
-  // 當週面積圖（viewBox 210×60；每個時段 10 單位）：隔天淡底、降雨面積＋外框線、溫度折線；每天最高溫標籤；滑過每個時段顯示細節
+      <div class="wx-ns" aria-hidden="true"><b>${L.st}</b><span>高 ${L.hi}° · 低 ${L.lo}°</span><small>體感 ${L.feel}° · 風 ${L.wind} 級</small></div>${L.alert ? `<span class="wx-tag" data-lv="${L.alert[0]}" role="status">${L.alert[1]}</span>` : ''}</div>`;
+  const wxDay = (L) => `<div class="wx-hrs" role="list" aria-label="當日天氣（每 2 小時）">${wxHours(L).map(([h, k, t, p], i) =>
+    `<div class="wx-h${i === WX_NOW ? ' now' : ''}" role="listitem" style="--wi:${i}" aria-label="${i === WX_NOW ? '現在' : h + ' 時'}，${WX_LABEL[k]}，${t} 度，降雨機率 ${p}%"><span>${i === WX_NOW ? '現在' : h + '時'}</span>${wxIcon(k)}<b>${t}°</b><small class="${p >= 60 ? 'hi' : ''}">${p}%</small></div>`).join('')}</div>`;
+  // 當週面積圖（viewBox 70×60；每天 10 單位）：隔天淡底、降雨面積＋外框線（主角）、高低溫範圍帶；每天標最高溫；滑過顯示當天細節
   const wxWeek = (L) => {
-    const P = wxPeriods(L), T = P.map((x) => x[0]), lo = Math.min(...T), hi = Math.max(...T);
+    const D7 = L.days, lo = Math.min(...D7.map((d) => d[3])), hi = Math.max(...D7.map((d) => d[2]));
     const ty = (t) => 6 + (1 - (t - lo) / Math.max(1, hi - lo)) * 26, ry = (p) => 60 - p * .5, X = (i) => i * 10 + 5;
-    const rl = P.map(([, p], i) => `${i ? 'L' : 'M'}${X(i)} ${ry(p)}`).join(' ');
-    const tl = P.map(([t], i) => `${i ? 'L' : 'M'}${X(i)} ${ty(t).toFixed(1)}`).join(' ');
-    const zones = L.days.map((_, d) => (d % 2 ? `<rect class="dz" x="${d * 30}" y="0" width="30" height="60"/>` : '')).join('');
-    const NM = ['早', '午', '晚'];
-    return `<div class="wx-wc"><div class="wx-wc-h"><span>一週（早／午／晚）</span><span class="wx-lg" aria-hidden="true"><span><i class="a"></i>降雨</span><span><i class="l"></i>溫度</span></span></div>
-      <div class="wx-plot" role="img" aria-label="一週天氣：${L.days.map(([d, k, h, l, , p]) => `${d} ${WX_LABEL[k]}，${l} 到 ${h} 度，降雨 ${p}%`).join('；')}">
-        <svg viewBox="0 0 210 60" preserveAspectRatio="none" aria-hidden="true">${zones}<path class="ra" d="${rl} L205 60 L5 60 Z"/><path class="rl" d="${rl}"/><path class="tl" d="${tl}"/></svg>
-        ${L.days.map(([, , h], d) => `<span class="wx-pk" style="left:${((d * 3 + 1.5) / 21 * 100).toFixed(2)}%;top:${(ty(h) / 60 * 100).toFixed(1)}%">${h}°</span>`).join('')}
-        <div class="wx-hit">${P.map(([t, p], i) => `<i title="${L.days[Math.floor(i / 3)][0]} ${NM[i % 3]}・${t}°・降雨 ${p}%"></i>`).join('')}</div>
+    const rl = D7.map((d, i) => `${i ? 'L' : 'M'}${X(i)} ${ry(d[5])}`).join(' ');
+    const top = D7.map((d, i) => `${i ? 'L' : 'M'}${X(i)} ${ty(d[2]).toFixed(1)}`).join(' ');
+    const bot = D7.map((d, i) => `L${X(6 - i)} ${ty(D7[6 - i][3]).toFixed(1)}`).join(' ');
+    const zones = D7.map((_, d) => (d % 2 ? `<rect class="dz" x="${d * 10}" y="0" width="10" height="60"/>` : '')).join('');
+    return `<div class="wx-wc"><div class="wx-wc-h"><span>一週</span><span class="wx-lg" aria-hidden="true"><span><i class="a"></i>降雨</span><span><i class="t"></i>高低溫</span></span></div>
+      <div class="wx-plot" role="img" aria-label="一週天氣：${D7.map(([d, k, h, l, , p]) => `${d} ${WX_LABEL[k]}，${l} 到 ${h} 度，降雨 ${p}%`).join('；')}">
+        <svg viewBox="0 0 70 60" preserveAspectRatio="none" aria-hidden="true">${zones}<path class="ra" d="${rl} L65 60 L5 60 Z"/><path class="rl" d="${rl}"/><path class="tb" d="${top} ${bot} Z"/><path class="tl" d="${top}"/></svg>
+        ${D7.map(([, , h, l], d) => `<span class="wx-pk" style="left:${((d + .5) / 7 * 100).toFixed(2)}%;top:${(ty(h) / 60 * 100).toFixed(1)}%">${h}°</span><span class="wx-pk lo" style="left:${((d + .5) / 7 * 100).toFixed(2)}%;top:${(ty(l) / 60 * 100).toFixed(1)}%">${l}°</span>`).join('')}
+        <div class="wx-hit">${D7.map(([d, k, h, l, , p]) => `<i title="${d}・${WX_LABEL[k]}・${l}–${h}°・降雨 ${p}%"></i>`).join('')}</div>
       </div>
-      <div class="wx-days" aria-hidden="true">${L.days.map(([d, k]) => `<span>${d}${wxIcon(k)}</span>`).join('')}</div></div>`;
+      <div class="wx-days" aria-hidden="true">${D7.map(([d, k]) => `<span>${d}${wxIcon(k)}</span>`).join('')}</div></div>`;
   };
   const wxTabs = (view) => `<div class="wx-tabs" role="tablist" aria-label="時段">${[['day', '當日'], ['week', '當週']].map(([v, n]) => `<button type="button" role="tab" data-v="${v}" aria-selected="${v === view}">${n}</button>`).join('')}</div>`;
   // 整個元件：地點＋當日／當週切換、現在天氣、當日逐時或當週圖表、車窗；win＝false 時不放車窗；btn＝地點可點（展示牆卡片）
@@ -4936,8 +4955,21 @@ void main(){
       await wait(160); winEl.classList.remove('shut'); busy = false;
     };
     win?.set(render(0, false).fx, true);
-    loop(3200, async () => { await go((cur + 1) % WX_LOCS.length); await sleep(6000); });
-    live('c-wx', (signal) => body.addEventListener('click', (e) => { if (e.target.closest('.wx-site')) go((cur + 1) % WX_LOCS.length); }, { signal }));
+    const menuOpen = () => !!$('.wx-menu:not([hidden])', body);
+    loop(3200, async () => { if (!menuOpen()) await go((cur + 1) % WX_LOCS.length); await sleep(6000); });
+    // 地點下拉選單：隨時可用（不必暫停示範）
+    const setMenu = (open) => { const m = $('.wx-menu', body), b = $('.wx-site', body); if (!m) return; m.hidden = !open; b.setAttribute('aria-expanded', String(open)); if (open) ($('[aria-selected="true"]', m) || m.firstElementChild).focus(); };
+    body.addEventListener('click', (e) => {
+      if (e.target.closest('.wx-site')) { setMenu(!menuOpen()); return; }
+      const o = e.target.closest('.wx-menu [role="option"]'); if (o) { setMenu(false); if (+o.dataset.i !== cur) go(+o.dataset.i); }
+    });
+    body.addEventListener('keydown', (e) => {
+      if (!menuOpen()) return;
+      const opts = $$('.wx-menu [role="option"]', body), k = opts.indexOf(document.activeElement);
+      if (e.key === 'Escape') { e.stopPropagation(); setMenu(false); $('.wx-site', body).focus(); }
+      else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); opts[(k + (e.key === 'ArrowDown' ? 1 : -1) + opts.length) % opts.length].focus(); }
+    });
+    document.addEventListener('pointerdown', (e) => { if (menuOpen() && !e.target.closest('#c-wx .wx-pick')) setMenu(false); });
     // 當日／當週：只換下方內容（淡入），不拉窗簾
     body.addEventListener('click', (e) => {
       const b = e.target.closest('.wx-tabs button'); if (!b || b.dataset.v === view) return;

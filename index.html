@@ -1390,8 +1390,25 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .cz-sw::before { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--knob); box-shadow: 0 1px 3px rgb(0 0 0 / .3); transition: transform calc(500ms * var(--dur)) var(--spring); }
 .cz-sw:checked { background: var(--primary); box-shadow: 0 4px 10px -3px var(--glow); }
 .cz-sw:checked::before { transform: translateX(16px); }
-.cz-series { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-.cz-series input { width: 100%; height: 28px; padding: 0; border: 0; border-radius: var(--r-sm); background: none; cursor: pointer; box-shadow: var(--raise); }
+/* 圖表顏色：圓形色票（下方色碼）＋新增鈕；最多 8 色，前 4 色是示範圖表在用的（不能刪）；下方一條配色預覽 */
+.cz-series { display: grid; gap: 10px; }
+.cz-sws { display: flex; flex-wrap: wrap; gap: 8px 6px; }
+.cz-scol { position: relative; display: grid; justify-items: center; gap: 4px; width: 42px; }
+.cz-scol input { width: 30px; height: 30px; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; box-shadow: 0 0 0 1px rgb(0 0 0 / .08), var(--raise); }
+.cz-scol input::-webkit-color-swatch-wrapper { padding: 0; }
+.cz-scol input::-webkit-color-swatch { border: 0; border-radius: 50%; }
+.cz-scol input::-moz-color-swatch { border: 0; border-radius: 50%; }
+.cz-scol .cz-hex { font: 500 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); letter-spacing: .02em; }
+.cz-sw-x { position: absolute; top: -4px; right: 2px; width: 16px; height: 16px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: var(--surface); color: var(--muted); font-size: 11px; line-height: 1; box-shadow: 0 0 0 1px var(--line), 0 1px 2px rgb(0 0 0 / .12); cursor: pointer; opacity: 0; transition: opacity calc(.15s * var(--dur)); }
+.cz-scol:hover .cz-sw-x, .cz-scol:focus-within .cz-sw-x { opacity: 1; }
+@media (hover: none) { .cz-sw-x { opacity: 1; } }
+.cz-sw-x:hover { color: var(--ink); }
+.cz-sw-add { width: 30px; height: 30px; display: grid; place-items: center; margin: 0 6px; padding: 0; border: 1.5px dashed var(--line-strong); border-radius: 50%; background: none; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; }
+.cz-sw-add:hover { color: var(--primary); border-color: var(--primary); }
+.cz-series-ft { display: flex; align-items: center; gap: 10px; }
+.cz-series-bar { flex: 1; display: flex; height: 10px; border-radius: 999px; overflow: hidden; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .06); }
+.cz-series-bar i { flex: 1; }
+.cz-series-n { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .cz-styles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .cz-style { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 2px 6px; border: 0; border-radius: var(--r-md); background: var(--surface); color: var(--ink); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; box-shadow: var(--raise); transition: background calc(200ms * var(--dur)) var(--ease), scale calc(300ms * var(--dur)) var(--spring); }
 .cz-style:active { scale: .95; }
@@ -2146,7 +2163,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .cz .cz-step { background: transparent; box-shadow: inset 0 0 0 1px var(--ev-line); border-radius: 12px; }
 .cz .cz-sw { background: var(--ev-line-2); box-shadow: none; }
 .cz .cz-sw:checked { background: var(--ev-acc); box-shadow: 0 0 14px -2px var(--ev-glow); }
-.cz :is(.cz-list, .cz-tprev, .cz-fprev, .cz-series input) { background: var(--ev-cell); box-shadow: inset 0 0 0 1px var(--ev-line); }
+.cz :is(.cz-list, .cz-tprev, .cz-fprev) { background: var(--ev-cell); box-shadow: inset 0 0 0 1px var(--ev-line); }
 
 /* 底部：細線分隔、按鈕同材質；主要鈕發光 */
 .cz .cz-foot { background: transparent; border-top: 1px solid var(--ev-line); padding: 12px 14px 14px; }
@@ -3998,7 +4015,7 @@ void main(){
       de.classList.add('vt-hole', dark ? 'vt-hole-in' : 'vt-hole-out');
       lens(0);
       const vt = document.startViewTransition(() => { apply(); if (!done) document.body.append(fx); });   // 連點時這段已被跳過並收尾：不再加特效層
-      let raf = 0, done = false;
+      let raf = 0, done = false, animStart = 0;
       const finish = () => {
         if (done) return; done = true; cancelAnimationFrame(raf); fx.remove(); svg.remove(); de.classList.remove('vt-hole', 'vt-hole-in', 'vt-hole-out'); delete window.__holeFrame;
         if (gl) { gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); }   // 共用畫布：清空，下次轉場重用
@@ -4014,11 +4031,11 @@ void main(){
         // 衝擊震動：只平移、不旋轉，0.3 秒衰減（黑洞在收完時、白洞在爆開時）；也讓轉場撐到震完
         const shake = Array.from({ length: 13 }, (_, i) => { const amp = 8 * Math.pow(1 - i / 12, 2); return { transform: `translate(${(Math.sin(i * 2.3) * amp).toFixed(1)}px, ${(Math.cos(i * 1.7) * amp).toFixed(1)}px)` }; });
         de.animate(shake, { pseudoElement: '::view-transition-group(root)', duration: 300 * K, delay: HIT * K, easing: 'linear' });
-        const t0 = performance.now();
+        const t0 = animStart = performance.now();
         const tick = (now) => { const t = (now - t0) / K; if (t >= END) return; frame(t); raf = requestAnimationFrame(tick); };
         raf = requestAnimationFrame(tick);
       }).catch(() => {});
-      vt.finished.finally(() => setTimeout(finish, Math.max(0, (END - HIT - 300) * K)));
+      vt.finished.finally(() => setTimeout(finish, animStart ? Math.max(0, END * K - (performance.now() - animStart)) : 0));   // 特效層畫到 END 就收尾（之前白洞會多等約 1 秒，期間再按會被當成連點、不播轉深色）
       setTimeout(finish, (END + 800) * K);   // 保險
     }
     let want = null, queue = Promise.resolve(), queued = false;   // want：最後要求的深淺色（轉場還沒換色時再按，也以它為準）
@@ -5399,6 +5416,7 @@ void main(){
     };
     const merge = (base, over) => {
       const out = clone(base);
+      if (Array.isArray(over?.color?.series)) over = { ...over, color: { ...over.color, series: over.color.series.slice(0, 8).concat(base.color?.series?.slice(over.color.series.length, 4) || []) } };   // 圖表顏色 4–8 色
       if (!over || typeof over !== 'object') return out;
       for (const k of Object.keys(out)) {
         if (over[k] === undefined) continue;
@@ -6392,6 +6410,33 @@ void main(){
     const autoLh = (sz) => (sz >= 40 ? 1.15 : sz >= 28 ? 1.3 : sz >= 18 ? 1.4 : 1.5);
     const autoLs = (sz) => (sz >= 40 ? -1.5 : sz >= 28 ? -1 : 0);
     // 分段選項（按了就套用並重畫）：after＝套用後額外動作
+    /* 圖表顏色：4–8 色。新增時自動挑一個跟現有顏色色相最分開的顏色（明度、彩度取現有的平均）；前 4 色示範圖表在用，不能刪 */
+    const SERIES_MIN = 4, SERIES_MAX = 8;
+    const distinctColor = (list) => {
+      const lch = list.map(oklch), Lm = lch.reduce((a, c) => a + c[0], 0) / lch.length, Cm = lch.reduce((a, c) => a + c[1], 0) / lch.length;
+      let best = 0, bestD = -1;
+      for (let k = 0; k < 72; k++) {
+        const h = k / 72 * Math.PI * 2;
+        const d = Math.min(...lch.map((c) => { const x = Math.abs(h - c[2]) % (Math.PI * 2); return Math.min(x, Math.PI * 2 - x); }));
+        if (d > bestD) { bestD = d; best = h; }
+      }
+      return fromOklch(Math.min(.75, Math.max(.55, Lm)), Math.max(.1, Cm), best);
+    };
+    const seriesEl = () => {
+      const S = theme.color.series;
+      const bar = el('div', { class: 'cz-series-bar', 'aria-hidden': 'true' }, S.map((v) => el('i', { style: `background:${v}` })));
+      const sws = S.map((v, i) => {
+        const hex = el('span', { class: 'cz-hex' }, v.toUpperCase());
+        return el('label', { class: 'cz-scol', title: `第 ${i + 1} 色` },
+          el('input', { type: 'color', value: v, 'aria-label': `圖表第 ${i + 1} 色`, oninput: (e) => { S[i] = e.target.value; hex.textContent = S[i].toUpperCase(); bar.children[i].style.background = S[i]; changed(false); }, onchange: () => record() }),
+          hex,
+          i >= SERIES_MIN ? el('button', { type: 'button', class: 'cz-sw-x', 'aria-label': `移除第 ${i + 1} 色`, onclick: (e) => { e.preventDefault(); S.splice(i, 1); changed(); renderAll(); } }, '×') : null);
+      });
+      const add = S.length < SERIES_MAX ? el('button', { type: 'button', class: 'cz-sw-add', 'aria-label': '新增圖表顏色', title: '新增顏色（自動挑一個跟現有顏色分得開的色）', onclick: () => { S.push(distinctColor(S)); changed(); renderAll(); } }, '+') : null;
+      return el('div', { class: 'cz-series' },
+        el('div', { class: 'cz-sws' }, sws, add),
+        el('div', { class: 'cz-series-ft' }, bar, el('span', { class: 'cz-series-n' }, `${S.length}／${SERIES_MAX}`)));
+    };
     const pick = (label, list, on, set, after) => el('div', { class: 'cz-seg', role: 'group', 'aria-label': label }, list.map(([v, n]) => {
       const b = el('button', { type: 'button', 'aria-pressed': String(on(v)), onclick: () => { set(v); changed(); renderAll(); after?.(); } }, n);
       quick.push([b, () => on(v)]); return b;
@@ -6527,7 +6572,7 @@ void main(){
       { cat: 'color', key: 'status', label: '狀態顏色', paths: ['color.success', 'color.warn', 'color.danger', 'color.info'], block: true, aff: '#c-bdg, #c-co, #c-toast',
         ui: () => el('div', { class: 'cz-tiles' }, [['success', '成功'], ['warn', '提醒'], ['danger', '錯誤'], ['info', '資訊']].map(([k, n]) => el('label', { class: 'cz-tile', 'data-path': 'color.' + k, title: '點色塊換色' }, colorInput('color.' + k, n + '顏色'), n))) },
       { cat: 'color', key: 'series', label: '圖表顏色', paths: ['color.series'], block: true, aff: '#c-bars, #c-pie, #c-line, #c-stk, #c-ht',
-        ui: () => el('div', { class: 'cz-series' }, theme.color.series.map((v, i) => el('input', { type: 'color', value: v, 'aria-label': `圖表第 ${i + 1} 色`, oninput: (e) => { theme.color.series[i] = e.target.value; changed(false); }, onchange: () => record() }))) },
+        ui: () => seriesEl() },
       { cat: 'type', key: 'family', label: '字型', paths: ['type.family', 'type.custom'], block: true,
         ui: () => el('div', { class: 'cz-stack' }, opts('字型', [['system', '系統'], ['sans', '黑體'], ['custom', '自訂']].map(([k, name]) => ({ name, thumb: Object.assign(el('i', { class: 'cz-th ft', style: `font-family:${fontStack(k)}`, 'aria-hidden': 'true' }), { textContent: 'Aa字' }), on: () => theme.type.family === k, pick: () => { theme.type.family = k; } }))), theme.type.family === 'custom' ? fontPicker() : null) },
       { cat: 'type', key: 'scale', label: '字級', paths: ['type.scale'],
@@ -6738,6 +6783,7 @@ void main(){
     /* ---- 匯出：從目前畫面讀出淺色、深色兩組實際值 ---- */
     const TOK = {
       color: ['page', 'surface', 'soft', 'hover', 'ink', 'muted', 'weak', 'label', 'line', 'line-strong', 'line-subtle', 'primary', 'primary-dark', 'on-primary', 'selected-fg', 'focus', 'glow', 'success', 'ok-bg', 'ok-fg', 'warn', 'warn-bg', 'warn-fg', 'danger', 'danger-bg', 'danger-fg', 'info-bg', 'info-fg', 'c1', 'c2', 'c3', 'c4'],
+      get series() { return theme.color.series.map((_, i) => 'c' + (i + 1)); },   // 圖表顏色（4–8 色）
       radius: ['r-xs', 'r-sm', 'r-md', 'r-lg', 'r-2xl', 'r-pill'],
       shadow: ['inset', 'raise', 'shadow', 'shadow-pop'],
     };
@@ -6746,7 +6792,7 @@ void main(){
       for (const mode of ['light', 'dark']) {
         root.setAttribute('data-theme', mode);
         const cs = getComputedStyle(root); out[mode] = {};
-        for (const k of [...TOK.color, ...TOK.shadow]) out[mode][k] = cs.getPropertyValue('--' + k).trim();
+        for (const k of [...TOK.color, ...TOK.series.slice(4), ...TOK.shadow]) out[mode][k] = cs.getPropertyValue('--' + k).trim();
         if (mode === 'light') { out.radius = {}; for (const k of TOK.radius) out.radius[k] = cs.getPropertyValue('--' + k).trim(); out.spring = cs.getPropertyValue('--spring').trim(); out.springSoft = cs.getPropertyValue('--spring-soft').trim(); out.ease = cs.getPropertyValue('--ease').trim(); out.dur = +cs.getPropertyValue('--dur') || 0; }
       }
       prev ? root.setAttribute('data-theme', prev) : root.removeAttribute('data-theme');
@@ -6892,7 +6938,7 @@ ${Object.entries(SPACE).map(([k, v]) => `    ${k}: ${tsStr(v)},`).join('\n')}
   },
   chart: {
     /** 分類色：只分辨「是哪一個」，不帶好壞 */
-    series: { light: ${tsStr(['c1', 'c2', 'c3', 'c4'].map((k) => sn.light[k]))}, dark: ${tsStr(['c1', 'c2', 'c3', 'c4'].map((k) => sn.dark[k]))} },
+    series: { light: ${tsStr(TOK.series.map((k) => sn.light[k]))}, dark: ${tsStr(TOK.series.map((k) => sn.dark[k]))} },
   },
   shape: {
     /** 介面風格：${UI_NAME[theme.style.ui]}；頁籤樣式：${theme.style.tabs} */

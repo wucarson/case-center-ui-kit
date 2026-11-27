@@ -588,9 +588,11 @@ button.wx-site:hover { background: var(--hover); }
 .wx-hood { position: absolute; left: 24px; right: 24px; top: 8px; height: 9px; border-radius: 5px; background: linear-gradient(180deg, color-mix(in srgb, #000 22%, var(--bz)), color-mix(in srgb, #000 8%, var(--bz))); box-shadow: inset 0 1px 2px rgb(0 0 0 / .35), 0 1px 0 rgb(255 255 255 / .5); }
 .wx-hood::after { content: ""; position: absolute; left: 50%; top: 2px; width: 30px; height: 5px; margin-left: -15px; border-radius: 3px; background: rgb(30 28 26 / .55); }
 /* 百褶窗簾：從收納槽拉下（transform），底邊一個拉把 */
-.wx-shade { position: absolute; inset: 0; z-index: 2; transform: translateY(-101%); background: repeating-linear-gradient(180deg, #efeae1 0 8px, #ddd6ca 8px 9px, #f6f2ea 9px 10px); box-shadow: 0 4px 8px rgb(0 0 0 / .28); transition: transform calc(.42s * var(--dur)) cubic-bezier(.55, 0, .35, 1); }
+.wx-shade { position: absolute; inset: 0; z-index: 2; transform: translateY(calc(-100% + 14px));   /* 收起時底桿與拉把留在窗內上緣 */ background: repeating-linear-gradient(180deg, #efeae1 0 8px, #ddd6ca 8px 9px, #f6f2ea 9px 10px); box-shadow: 0 4px 8px rgb(0 0 0 / .28); transition: transform calc(.42s * var(--dur)) cubic-bezier(.55, 0, .35, 1); }
 :root[data-theme="dark"] .wx-shade { background: repeating-linear-gradient(180deg, #8d877d 0 8px, #7a746a 8px 9px, #959086 9px 10px); }
-.wx-shade b { position: absolute; left: 50%; bottom: 6px; width: 26px; height: 7px; margin-left: -13px; border-radius: 4px; background: linear-gradient(180deg, #b9b2a6, #8f887c); box-shadow: 0 1px 1px rgb(0 0 0 / .3); }
+.wx-shade::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: linear-gradient(180deg, #e4ded3, #cfc8bb); box-shadow: inset 0 1px 0 rgb(255 255 255 / .7), 0 2px 4px rgb(0 0 0 / .25); }   /* 窗簾底桿 */
+:root[data-theme="dark"] .wx-shade::after { background: linear-gradient(180deg, #8f897f, #77716a); }
+.wx-shade b { position: absolute; z-index: 1; left: 50%; bottom: 3px; width: 34px; height: 8px; margin-left: -17px; border-radius: 4px; background: linear-gradient(180deg, #a59e92, #7d7669); box-shadow: inset 0 1px 1px rgb(0 0 0 / .35), 0 1px 0 rgb(255 255 255 / .5); }   /* 拉把：底桿中央的凹槽 */
 .wx-win.shut .wx-shade { transform: none; }
 @container (max-width: 460px) { .wx { grid-template-columns: minmax(0, 1fr); } .wx > .wx-win { grid-column: 1; grid-row: auto; justify-self: stretch; width: auto; height: 150px; } }
 .wxi { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }

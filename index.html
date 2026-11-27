@@ -4818,7 +4818,7 @@ vec3 scene(vec2 p){
     uv.x+=(sin(uv.y*64.+T*9.)*.007+sin(uv.y*23.-T*5.)*.005+vn(vec2(uv.x*20.,uv.y*40.-T*3.))*.006)*k+sin(uv.x*30.+T*11.)*.004*hz;
     uv.y+=(sin(uv.x*38.+T*6.)*.004+vn(vec2(uv.x*14.+T,uv.y*30.-T*4.))*.006)*k;}
   if(VL>.5){   /* 真實行車影片：所有天氣共用同一個場景，只靠調色與前景效果區分；不晃動，只有影片本身的水平移動 */
-    float zm=1.;vec2 vt=vec2(.5+(uv.x-asp*.5)/(VA*zm),.5+(uv.y-.5)/zm);
+    float zm=1.;vec2 vt=vec2(.5-(uv.x-asp*.5)/(VA*zm),.5+(uv.y-.5)/zm);
     return scene2(grade(texture2D(V,clamp(vt,vec2(.002),vec2(.998))).rgb,vt.y),uv,asp);
   }
   float ia=PI<.5?IA.x:IA.y,zh=1.65;   /* 窗內只取照片上半～中段：天空、地平線、近處田野都看得到 */

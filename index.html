@@ -3028,7 +3028,7 @@ body.reduce #wall > .cell::after { animation: none !important; }
       }
       setTimeout(() => { layer.remove(); shBusy = false; }, TOTAL + 40);
     }
-    /* 深淺色轉場（魔杖，約 1.65 秒）：魔杖從右下滑向中央（三色光沿杖身灌注），杖尖碰到畫面時點出一個閃爍的小火點（引燃），燒開時噴出星塵碎片；魔杖一直留在畫面上，收尾才淡出。
+    /* 深淺色轉場（魔杖，約 1.8 秒）：杖尖在空中畫一道往內收的螺旋符號（三色發光軌跡，三色光沿杖身灌注），畫完軌跡亮一下，從中央燒開並噴出星塵碎片；魔杖一直留在畫面上，收尾才淡出。
        從杖尖燒穿舊畫面，洞向外不規則燒開（0.85 秒，由慢到快）：洞緣外側焦黑、洞緣一圈三色餘燼與白熱細線、少量火星與灰燼往上飄（WebGL＋2D 畫布逐幀畫）；不支援 WebGL 時改用預畫的墨色圖。Lumos 揭開淺色，Nox 揭開深色。
        舊畫面沿柔邊墨流淡出，新畫面留在底層，交界保留一層舊配色殘影。 */
     document.fonts?.load('600 40px "Cormorant Garamond"', 'LumosNox').catch(() => {});
@@ -3396,7 +3396,7 @@ void main(){
 
       const listeners = new AbortController();
       const skip = () => vt.skipTransition();
-      const watchdog = setTimeout(skip, Math.max(0, 2150 - (performance.now() - startedAt)));
+      const watchdog = setTimeout(skip, Math.max(0, 2350 - (performance.now() - startedAt)));
       window.addEventListener('resize', () => {
         if (innerWidth !== W || innerHeight !== H) skip();
       }, { signal: listeners.signal });
@@ -3411,7 +3411,7 @@ void main(){
           });
           return;
         }
-        const DUR = 1650, C0 = 95, HIT = 520, SPREAD = 850, IGN = HIT - 220;   // 出現、滑向中央（光流灌注）→ 杖尖碰到畫面引燃（IGN，火點閃爍 0.22 秒）→ 燒開（HIT）→ 擴散 0.85 秒
+        const DUR = 1800, C0 = 95, D0 = 140, D1 = 600, HIT = 660, SPREAD = 850, IGN = HIT - 60;   // 出現 → 杖尖畫螺旋符號（D0–D1，光流灌注）→ 符號亮一下（IGN）→ 從中央燒開（HIT）→ 擴散 0.85 秒
         const motion = { pseudoElement: '::view-transition-old(root)', duration: DUR, fill: 'both' };
         const startSpread = HIT / DUR, endSpread = (HIT + SPREAD) / DUR;
         const spreadEase = 'cubic-bezier(.55, 0, .9, .4)';   // 由慢到快：起步慢慢滲開，越推越快衝出畫面
@@ -3521,30 +3521,61 @@ void main(){
         requestAnimationFrame(wobble);
         }
 
-        // 魔杖：沿杖身方向從右下慢慢滑向中央（淡入），杖尖碰到畫面時停住引燃；停在畫面上直到收尾淡出
+        // 畫符：杖尖在空中畫一道往內收的螺旋（1.25 圈，終點在畫面中央），留下三色發光軌跡；畫完軌跡亮一下，從中央燒開。
+        // 魔杖用 translate（畫面座標，先於 rotate 套用）移動，杖身角度不變；軌跡依魔杖動畫的 currentTime 畫，暫停、跳轉都會對齊
         const wand = fx.querySelector('.wand');
-        const GD = Math.min(220, WL * .2);   // 滑行距離
-        const glide = (px) => `translateX(${px.toFixed(1)}px)`;   // 魔杖本身已旋轉，translateX＝沿杖身方向
-        wand.animate([
-          { offset: 0, opacity: 0, transform: glide(GD) },
-          { offset: (C0 - 70) / DUR, opacity: 0, transform: glide(GD), easing: 'cubic-bezier(.25, .7, .3, 1)' },
-          { offset: (C0 + 90) / DUR, opacity: 1 },
-          { offset: IGN / DUR, opacity: 1, transform: glide(0) },
-          { offset: (DUR - 320) / DUR, opacity: 1, transform: glide(0), easing: 'ease-in' },   // 魔杖留到最後，收尾才淡出
-          { offset: 1, opacity: 0, transform: glide(0) }], { duration: DUR, fill: 'both' });
-        // 引燃火點：杖尖碰到畫面時亮起一個小火點，像火柴點紙一樣忽明忽暗閃幾下、越燒越大，燒開時散去
+        const SR = Math.min(W, H) * .17, SA = -Math.PI * .35, ST = Math.PI * 2.5;   // 螺旋起始半徑、起始角（右上）、總轉角
+        const sig = (u) => { const r = SR * Math.pow(1 - u, .85), an = SA - ST * u; return [Math.cos(an) * r, Math.sin(an) * r]; };   // 逆時針往內收
+        const ease = (x) => (x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
+        const NS = 24, kf = [{ offset: 0, opacity: 0, translate: `${sig(0)[0].toFixed(1)}px ${sig(0)[1].toFixed(1)}px` },
+          { offset: (C0 - 60) / DUR, opacity: 0 }, { offset: D0 / DUR, opacity: 1 }];
+        for (let i = 1; i <= NS; i++) { const [x, y] = sig(ease(i / NS)); kf.push({ offset: (D0 + (D1 - D0) * i / NS) / DUR, opacity: 1, translate: `${x.toFixed(1)}px ${y.toFixed(1)}px` }); }
+        kf.splice(2, 0, { offset: (C0 - 59) / DUR, translate: `${sig(0)[0].toFixed(1)}px ${sig(0)[1].toFixed(1)}px` });
+        kf.push({ offset: (DUR - 320) / DUR, opacity: 1, translate: '0px 0px', easing: 'ease-in' }, { offset: 1, opacity: 0, translate: '0px 0px' });   // 魔杖留到最後，收尾才淡出
+        kf.sort((p, q) => p.offset - q.offset);
+        const wandAnim = wand.animate(kf, { duration: DUR, fill: 'both' });
+        // 符號軌跡：寬而淡的光暈＋細亮線＋核心，顏色沿軌跡橘→粉→藍；畫完時整條亮一下（加粗加亮），燒開後淡出
+        {
+          const tc = document.createElement('canvas'); tc.className = 'wand-sparks';
+          tc.width = Math.round(W * DPR); tc.height = Math.round(H * DPR); fx.append(tc);
+          const tg = tc.getContext('2d'); tg.scale(DPR, DPR); tg.lineCap = tg.lineJoin = 'round';
+          const IRI = [[255, 179, 71], [255, 79, 139], [61, 139, 255]];
+          const col = (x) => { x = ((x % 1) + 1) % 1 * 3; const i = Math.floor(x), f = x - i, A = IRI[i], B = IRI[(i + 1) % 3]; return A.map((v, j) => Math.round(v + (B[j] - v) * f)).join(','); };
+          const N = 140, pts = Array.from({ length: N + 1 }, (_, i) => sig(i / N)).map(([x, y]) => [tip[0] + x, tip[1] + y]);
+          const draw = () => {
+            if (!fx.isConnected) return;
+            const t = +wandAnim.currentTime || 0;
+            const u = Math.max(0, Math.min(1, ease(Math.max(0, Math.min(1, (t - D0) / (D1 - D0))))));
+            const flash = t < D1 ? 0 : t < HIT ? (t - D1) / (HIT - D1) : Math.max(0, 1 - (t - HIT) / 120);   // 畫完 → 亮起
+            const fade = t < HIT ? 1 : Math.max(0, 1 - (t - HIT) / 320);
+            tg.clearRect(0, 0, W, H);
+            const n = Math.floor(u * N);
+            if (n >= 1 && fade > 0) {
+              tg.globalCompositeOperation = lumos ? 'lighter' : 'source-over';   // 舊畫面是深色（Lumos）用發光疊加；淺色（Nox）用一般疊色才看得見
+              for (const [w, al, core] of [[12, .22, false], [3.2, .85, false], [1.2, 1, true]]) {
+                for (let i = 0; i < n; i++) {
+                  const age = (n - i) / N;   // 越早畫的越淡一點，像彗尾
+                  tg.globalAlpha = fade * al * Math.max(.55, 1 - age * .6) * (1 + flash * .6);
+                  tg.strokeStyle = core ? (lumos ? '#fff' : `rgb(${col(i / N * 1.5 + t / 900)})`) : `rgb(${col(i / N * 1.5 + t / 900)})`;
+                  tg.lineWidth = w * (1 + flash * .7);
+                  tg.beginPath(); tg.moveTo(pts[i][0], pts[i][1]); tg.lineTo(pts[i + 1][0], pts[i + 1][1]); tg.stroke();
+                }
+              }
+              tg.globalAlpha = 1;
+            }
+            if (t < HIT + 400) requestAnimationFrame(draw); else tg.clearRect(0, 0, W, H);
+          };
+          requestAnimationFrame(draw);
+        }
+        // 燒開的瞬間：中央亮起一個光點後散開（不閃爍）
         const ign = document.createElement('i'); ign.className = 'wand-ignite';
         ign.style.left = tip[0] + 'px'; ign.style.top = tip[1] + 'px'; fx.append(ign);
         ign.animate([
-          { opacity: 0, transform: 'translate(-50%, -50%) scale(.2)' },
-          { opacity: 0, transform: 'translate(-50%, -50%) scale(.2)', offset: IGN / DUR },
-          { opacity: .95, transform: 'translate(-50%, -50%) scale(.55)', offset: (IGN + 40) / DUR },
-          { opacity: .35, transform: 'translate(-50%, -50%) scale(.45)', offset: (IGN + 80) / DUR },
-          { opacity: 1, transform: 'translate(-50%, -50%) scale(.8)', offset: (IGN + 125) / DUR },
-          { opacity: .5, transform: 'translate(-50%, -50%) scale(.7)', offset: (IGN + 165) / DUR },
-          { opacity: 1, transform: 'translate(-50%, -50%) scale(1.05)', offset: HIT / DUR },
-          { opacity: 0, transform: 'translate(-50%, -50%) scale(1.7)', offset: (HIT + 160) / DUR },
-          { opacity: 0, transform: 'translate(-50%, -50%) scale(1.7)' }], { duration: DUR, fill: 'both' });
+          { opacity: 0, transform: 'translate(-50%, -50%) scale(.3)' },
+          { opacity: 0, transform: 'translate(-50%, -50%) scale(.3)', offset: IGN / DUR },
+          { opacity: 1, transform: 'translate(-50%, -50%) scale(1)', offset: HIT / DUR },
+          { opacity: 0, transform: 'translate(-50%, -50%) scale(1.8)', offset: (HIT + 180) / DUR },
+          { opacity: 0, transform: 'translate(-50%, -50%) scale(1.8)' }], { duration: DUR, fill: 'both' });
         // 照片魔杖打光：蓄力時三色柔光沿杖身從握柄流向杖尖，杖尖施法光照亮杖頭；光只疊在杖身像素上，結束後就是照片原圖
         if (photo) {
           const PW = wc.width, PH = wc.height;

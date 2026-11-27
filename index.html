@@ -1973,7 +1973,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 /* 杖身光流：遮罩＝魔杖圖（JS 設定），光帶從握柄流向杖尖；前緣白熱、後拖暖橘→粉→藍 */
 .wand-flow { position: absolute; inset: 0; overflow: hidden; mask-size: 100% 100%; -webkit-mask-size: 100% 100%; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; mix-blend-mode: screen; }
 .wand-flow i { position: absolute; top: 0; bottom: 0; left: 0; width: 35%; background: linear-gradient(90deg, transparent, #fff 8%, #ffb347 28%, #ff4f8b 58%, #3d8bff 84%, transparent); opacity: 0; }
-/* 杖尖火花（煙火）：全螢幕畫布，JS 逐格畫彎曲光尾 */
+/* 杖尖星塵碎片、燒穿的火星灰燼：全螢幕畫布，JS 逐格畫 */
 .wand-sparks { position: absolute; z-index: 4; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .wand-tip { position: absolute; left: -14px; top: -5px; width: 28px; height: 28px; border-radius: 50%; }
 .lumos .wand-tip { background: radial-gradient(circle, #fff 0 22%, rgb(220 235 255 / .9) 38%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 24px 8px rgb(210 230 255 / .7); }
@@ -3027,7 +3027,7 @@ body.reduce #wall > .cell::after { animation: none !important; }
       }
       setTimeout(() => { layer.remove(); shBusy = false; }, TOTAL + 40);
     }
-    /* 深淺色轉場（魔杖，約 1.45 秒）：魔杖在中央後仰蓄力（三色光沿杖身灌注），甩下點擊時噴出火花、畫面輕震。
+    /* 深淺色轉場（魔杖，約 1.45 秒）：魔杖在中央後仰蓄力（三色光沿杖身灌注），甩下點擊時噴出星塵碎片（不震動畫面）；魔杖一直留在畫面上，收尾才淡出。
        從杖尖燒穿舊畫面，洞向外不規則燒開（0.85 秒，由慢到快）：洞緣外側焦黑、洞緣一圈三色餘燼與白熱細線、少量火星與灰燼往上飄（WebGL＋2D 畫布逐幀畫）；不支援 WebGL 時改用預畫的墨色圖。Lumos 揭開淺色，Nox 揭開深色。
        舊畫面沿柔邊墨流淡出，新畫面留在底層，交界保留一層舊配色殘影。 */
     document.fonts?.load('600 40px "Cormorant Garamond"', 'LumosNox').catch(() => {});
@@ -3338,7 +3338,7 @@ void main(){
       const flow = fx.querySelector('.wand-flow');
       flow.style.webkitMaskImage = flow.style.maskImage = `url("${photo ? photo.url : art.wandUrl}")`;
       if (photo) flow.style.display = 'none';   // 照片魔杖：不疊 CSS 光流（screen 疊色會蓋掉照片紋理），改由下面的 2D 柔光只打在杖身上
-      // 杖尖火花（煙火）：全螢幕畫布，每顆火花受阻力減速、受重力下墜，拖出彎曲的光尾
+      // 杖尖星塵碎片：全螢幕畫布（燒穿的火星灰燼另用一張）
       const sparkCv = document.createElement('canvas');
       sparkCv.className = 'wand-sparks';
       const DPR = Math.min(1.5, devicePixelRatio || 1);
@@ -3518,7 +3518,7 @@ void main(){
         requestAnimationFrame(wobble);
         }
 
-        // 揮杖：在中央亮起 → 以握柄為軸往後仰蓄力（杖尖退約 90px）→ 加速甩下、稍微超過 → 回彈定位，之後淡出
+        // 揮杖：在中央亮起 → 以握柄為軸往後仰蓄力（杖尖退約 90px）→ 加速甩下、稍微超過 → 回彈定位，停在畫面上直到收尾淡出
         const wand = fx.querySelector('.wand');
         const deg = (px) => px / WL * 180 / Math.PI;   // 杖尖位移（px）換成繞握柄的角度
         const swing = (px, scale = 1) => `translateX(${WL.toFixed(0)}px) rotate(${deg(px).toFixed(3)}deg) translateX(${(-WL).toFixed(0)}px) scale(${scale})`;
@@ -3530,7 +3530,7 @@ void main(){
           { offset: CHARGE / DUR, opacity: 1, transform: swing(-90), easing: 'cubic-bezier(.55, 0, .9, .45)' },
           { offset: HIT / DUR, opacity: 1, transform: swing(18, .98), easing: 'cubic-bezier(.2, .8, .3, 1)' },
           { offset: (HIT + 90) / DUR, opacity: 1, transform: swing(0) },
-          { offset: (HIT + 260) / DUR, opacity: 0, transform: swing(0, .99) },
+          { offset: (DUR - 320) / DUR, opacity: 1, transform: swing(0), easing: 'ease-in' },   // 魔杖留到最後，收尾才淡出
           { offset: 1, opacity: 0, transform: swing(0, .99) }], { duration: DUR, fill: 'both' });
         // 照片魔杖打光：蓄力時三色柔光沿杖身從握柄流向杖尖，杖尖施法光照亮杖頭；光只疊在杖身像素上，結束後就是照片原圖
         if (photo) {
@@ -3568,19 +3568,26 @@ void main(){
           { transform: `translateX(${(-WL * .35).toFixed(0)}px)`, opacity: 1, offset: .9 },
           { transform: `translateX(${(-WL * .4).toFixed(0)}px)`, opacity: 0 }
         ], { duration: HIT - C0, delay: C0, easing: 'cubic-bezier(.5, 0, .85, .5)', fill: 'both' });
-        // 杖尖火花（煙火）：甩下瞬間噴出 40 顆，避開杖身方向（42° ±40°）；飛 150–380px，重力讓軌跡往下彎，光尾越後面越細越淡
+        // 杖尖星塵碎片：甩下瞬間噴出約 90 顆（避開杖身方向 42° ±40°），阻力大、很快減速，之後緩緩上飄、各自閃爍淡出。
+        // 形狀：細小光點（多數）、四芒星閃光、會翻轉的菱形水晶碎片；顏色＝魔杖三色＋白
         {
-          const COLORS = ['#ffffff', '#ffb347', '#ff4f8b', '#3d8bff'];
+          const COLORS = lumos ? ['#e8912a', '#ffb347', '#ff4f8b', '#3d8bff'] : ['#ffffff', '#ffb347', '#ff4f8b', '#3d8bff'];   // 淺底上白色看不見，改深一點的橘
           const sg = sparkCv.getContext('2d');
           sg.scale(DPR, DPR);
-          sg.lineCap = sg.lineJoin = 'round';
-          const TAU = 300, G = .0011, TRAIL = 14;   // 阻力時間常數（ms）、重力（px/ms²）、光尾保留幾個位置
-          const ps = Array.from({ length: 40 }, (_, i) => {
-            const a = (42 + 40 + (i / 40) * 280 + (Math.random() - .5) * 14) * Math.PI / 180;
-            const v = (.5 + Math.random() * .75) * (i % 3 === 2 ? .7 : 1);   // 每三顆一顆較慢、較短，做出層次
-            return { x: tip[0], y: tip[1], vx: Math.cos(a) * v, vy: Math.sin(a) * v - .12, life: 650 + Math.random() * 450,
-              w: i % 3 === 2 ? 1.2 : 1.6 + Math.random() * 1.2, c: COLORS[i % COLORS.length], tr: [] };
+          const TAU = 150, LIFT = .00005;   // 阻力時間常數（ms）、上飄加速度（px/ms²）
+          const ps = Array.from({ length: 90 }, (_, i) => {
+            const a = (42 + 40 + Math.random() * 280) * Math.PI / 180;
+            const v = .25 + Math.pow(Math.random(), 1.6) * .95;   // 多數慢、少數衝得遠
+            const kind = i % 9 === 0 ? 'star' : i % 5 === 0 ? 'shard' : 'dot';
+            return { x: tip[0], y: tip[1], vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 800 + Math.random() * 600, kind,
+              s: kind === 'star' ? 4 + Math.random() * 4 : kind === 'shard' ? 2.5 + Math.random() * 2.5 : .6 + Math.random() * 1.2,
+              c: COLORS[i % COLORS.length], ph: Math.random() * 6.283, tw: 25 + Math.random() * 40, rot: Math.random() * 6.283, spin: (Math.random() - .5) * .012, sway: Math.random() * 6.283 };
           });
+          const star = (x, y, r) => {   // 四芒星：細長十字＋中心亮點
+            sg.beginPath();
+            for (let k = 0; k < 8; k++) { const rr = k % 2 ? r * .16 : r, an = k * Math.PI / 4; sg.lineTo(x + Math.cos(an) * rr, y + Math.sin(an) * rr); }
+            sg.closePath(); sg.fill();
+          };
           const t0 = performance.now() + HIT - 10;
           let last = t0;
           const step = (now) => {
@@ -3589,35 +3596,38 @@ void main(){
             const dt = Math.min(40, now - last); last = now;
             const age = now - t0, k = Math.exp(-dt / TAU);
             sg.clearRect(0, 0, W, H);
-            sg.globalCompositeOperation = 'lighter';
+            sg.globalCompositeOperation = lumos ? 'source-over' : 'lighter';   // 揭開淺色（Lumos）：一般疊色，發光疊加在白底上會看不見
+            const core = (c) => (lumos && c === '#ffffff' ? '#ffb347' : lumos ? c : '#fff');   // 淺底上核心用彩色
             let alive = false;
             for (const p of ps) {
               const f = age / p.life;
               if (f >= 1) continue;
               alive = true;
-              p.vx *= k; p.vy = p.vy * k + G * dt;
-              p.x += p.vx * dt; p.y += p.vy * dt;
-              p.tr.push([p.x, p.y]); if (p.tr.length > TRAIL) p.tr.shift();
-              const fade = 1 - f * f;   // 前段亮、尾段快速熄
-              // 光尾：整條細線＋靠近火花頭的半段加粗，外面再描一筆寬而淡的光暈（不用 shadowBlur，省效能）
-              const tr = p.tr, n = tr.length, path = (from) => { sg.beginPath(); sg.moveTo(tr[from][0], tr[from][1]); for (let j = from + 1; j < n; j++) sg.lineTo(tr[j][0], tr[j][1]); };
-              sg.strokeStyle = p.c;
-              if (n > 1) {
-                path(0); sg.globalAlpha = fade * .18; sg.lineWidth = p.w * 3.2; sg.stroke();
-                sg.globalAlpha = fade * .45; sg.lineWidth = p.w * .45; sg.stroke();
-                const mid = n >> 1; if (n - mid > 1) { path(mid); sg.globalAlpha = fade * .9; sg.lineWidth = p.w; sg.stroke(); }
+              p.vx *= k; p.vy = p.vy * k - LIFT * dt;   // 噴出後很快減速，接著被熱氣帶著往上飄
+              p.x += (p.vx + Math.sin(age / 260 + p.sway) * .012) * dt; p.y += p.vy * dt; p.rot += p.spin * dt;
+              const tw = .55 + .45 * Math.sin(age / p.tw + p.ph);   // 各自閃爍
+              const fade = Math.min(1, age / 60) * (1 - f) * (1 - f) * tw;
+              sg.fillStyle = p.c;
+              if (p.kind === 'dot') {
+                sg.globalAlpha = fade * .3; sg.beginPath(); sg.arc(p.x, p.y, p.s * 3, 0, 6.283); sg.fill();
+                sg.globalAlpha = fade; sg.fillStyle = core(p.c); sg.beginPath(); sg.arc(p.x, p.y, p.s * .7, 0, 6.283); sg.fill();
+              } else if (p.kind === 'star') {
+                sg.globalAlpha = fade * .25; sg.beginPath(); sg.arc(p.x, p.y, p.s * 1.1, 0, 6.283); sg.fill();
+                sg.globalAlpha = fade; star(p.x, p.y, p.s * (.8 + .4 * tw));
+                sg.fillStyle = core(p.c); star(p.x, p.y, p.s * .45);
+              } else {   // 菱形水晶碎片：翻轉時寬度變化，亮面、暗面交替
+                const fl = Math.cos(p.rot * 1.7);
+                sg.save(); sg.translate(p.x, p.y); sg.rotate(p.rot);
+                sg.globalAlpha = fade * (.45 + .55 * Math.abs(fl));
+                sg.beginPath(); sg.moveTo(0, -p.s); sg.lineTo(p.s * .55 * Math.max(.15, Math.abs(fl)), 0); sg.lineTo(0, p.s); sg.lineTo(-p.s * .55 * Math.max(.15, Math.abs(fl)), 0); sg.closePath(); sg.fill();
+                sg.restore();
               }
-              sg.globalAlpha = fade; sg.fillStyle = '#fff';   // 火花頭：白熱小點
-              sg.beginPath(); sg.arc(p.x, p.y, p.w * .7, 0, Math.PI * 2); sg.fill();
             }
+            sg.globalAlpha = 1;
             if (alive) requestAnimationFrame(step); else sg.clearRect(0, 0, W, H);
           };
           requestAnimationFrame(step);
         }
-        // 點下的衝擊：整個畫面（新舊配色與特效層一起）震 8px，約 0.3 秒收掉
-        const shake = [[0, 0], [8, -5], [-8, 4], [5, -3], [-3, 1.5], [1, -.5], [0, 0]].map(([x, y]) => ({ transform: `translate(${x}px, ${y}px)` }));
-        for (const pe of ['::view-transition-group(root)', '::view-transition-group(wand)'])
-          de.animate(shake, { pseudoElement: pe, duration: 300, delay: HIT, easing: 'linear' });
         // 杖尖：Lumos 施咒時亮起；Nox 先亮著、施咒時熄滅
         fx.querySelector('.wand-tip').animate(lumos
           ? [{ opacity: 0, transform: 'scale(.3)' }, { opacity: 0.7, transform: 'scale(.55)', offset: C0 / DUR }, { opacity: 0.7, transform: 'scale(.55)', offset: (HIT - 30) / DUR }, { opacity: 1, transform: 'scale(1.8)', offset: (HIT + 50) / DUR }, { opacity: 1, transform: 'scale(1)', offset: 0.6 }, { opacity: 0, transform: 'scale(.6)' }]

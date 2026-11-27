@@ -3770,7 +3770,7 @@ void main(){
 
       /* ---- 貼圖（畫一次）：m1＝漩渦流場、m2＝徑向（色差、徑向模糊）、arm＝5 瓣柔邊圓（螺旋臂的形狀） ---- */
       const mapURL = (fn) => {
-        const mw = 192, mh = Math.max(64, Math.round(mw * H / W)), cv = document.createElement('canvas'); cv.width = mw; cv.height = mh;
+        const mw = 384, mh = Math.max(128, Math.round(mw * H / W)), cv = document.createElement('canvas'); cv.width = mw; cv.height = mh;
         const g = cv.getContext('2d'), im = g.createImageData(mw, mh), R = Math.hypot(mw, mh) / 2;
         for (let y = 0; y < mh; y++) for (let x = 0; x < mw; x++) {
           const vx = (x - mw / 2) / R, vy = (y - mh / 2) / R, ed = Math.min(1, Math.min(x, mw - 1 - x, y, mh - 1 - y) / (mw * 0.12)), [dx0, dy0] = fn(vx, vy, Math.hypot(vx, vy)), dx = dx0 * ed, dy = dy0 * ed, i = (y * mw + x) * 4;   // ed：離螢幕邊緣越近扭曲越小
@@ -3830,7 +3830,7 @@ void main(){
       let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 
       /* ---- 光塵：固定種子，位置只由 t 決定；沿螺旋前緣，黑洞往中央流、白洞往外噴 ---- */
-      const dust = Array.from({ length: 200 }, () => ({ b: rnd() * (W1 - 350), L: 420 + rnd() * 380, k: 0.2 + rnd() * 0.8, a0: rnd() * 6.28, w: 0.6 + rnd() * 1.2 }));
+      const dust = Array.from({ length: 600 }, () => ({ b: rnd() * (W1 - 350), L: 420 + rnd() * 380, k: 0.2 + rnd() * 0.8, a0: rnd() * 6.28, w: 0.6 + rnd() * 1.2 }));
       const dustAt = (q, t, R) => {   // R：這一格的前緣半徑（拖尾的前一點也用同一個，才不會拉成直線）
         const u = (t - q.b) / q.L; if (u <= 0 || u >= 1) return null;
         const rr = dark ? R * (1 - q.k * 0.45 * u * u) + q.k * 30 * (1 - u) : R * (1 + q.k * 0.25 * u);
@@ -3838,8 +3838,8 @@ void main(){
         return [C[0] + Math.cos(a) * rr, C[1] + Math.sin(a) * rr, Math.pow(Math.sin(Math.PI * u), 0.8)];
       };
 
-      /* ---- WebGL：中央的洞、前緣光環、泡沫流線、衝擊光環、光暈、暗角、顆粒 ---- */
-      let paintGl = () => {};
+      /* ---- WebGL：中央的洞、愛因斯坦環、前緣光環、泡沫流線、衝擊光環、光暈、暗角、顆粒、光塵 ---- */
+      let paintGl = () => {}, paintDust = null;   // paintDust：光塵的 WebGL 版（建立失敗就用 2D 畫布）
       const gl = glc.getContext('webgl', { premultipliedAlpha: true, antialias: false });
       if (gl) {
         const D = DPR.toFixed(2);
@@ -3864,8 +3864,14 @@ void main(){
     float st=(stars(q/(6.*${D}))+stars(q/(10.*${D})+19.)*.7)*space;
     float hring=CR>0.?exp(-pow((r-cr*1.5)/(cr*.06+1.),2.))*fl:0.;
     float hor=CR>0.?smoothstep(cr*1.03,cr*.95,r):0.;
-    a=max(max(space*.92,hor),max(hring,sw));
-    col=vec3(.015,.018,.028)+vec3(1.)*st+vec3(1.,.97,.92)*(hring+sw)*1.4;
+    vec3 ein=vec3(0.);                                                                        /* 愛因斯坦環：背後星光被彎成一圈；紅外藍內的色差 */
+    if(CR>0.){
+      float rr=cr*2.6,w0=cr*.07+1.,wob=.7+.3*sin(ang*2.+T*.004);
+      ein=vec3(exp(-pow((r-rr*1.014)/w0,2.)),exp(-pow((r-rr)/w0,2.)),exp(-pow((r-rr*.986)/w0,2.)))*wob*.95;
+      ein+=vec3(.7,.8,1.)*exp(-pow((r-cr*3.6)/(w0*1.7),2.))*.28*(.6+.4*sin(-ang*3.+T*.003));
+    }
+    a=max(max(space*.92,hor),max(max(hring,sw),max(ein.r,max(ein.g,ein.b))));
+    col=vec3(.015,.018,.028)+vec3(1.)*st+vec3(1.,.97,.92)*(hring+sw)*1.4+ein*1.25;
     col=mix(col,vec3(0.),hor);
   }else{
     float c=CR>0.?smoothstep(cr*1.05,cr*.9,r):0.;
@@ -3890,10 +3896,39 @@ void main(){
           const al = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
           const U = {}; for (const k of ['R', 'RS', 'CR', 'T', 'MODE', 'SHOCK', 'SHOCKA', 'LI', 'SP', 'SPIN']) U[k] = gl.getUniformLocation(pr, k);
           gl.viewport(0, 0, glc.width, glc.height); gl.uniform2f(U.R, glc.width, glc.height); gl.uniform1f(U.MODE, dark ? 0 : 1); gl.uniform1f(U.SPIN, SPIN);
+          const triBuf = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
+          /* 光塵（WebGL）：每顆一段四邊形（從 30ms 前的位置拉到現在），橫向用柔邊：細亮的芯＋寬淡的光，加法疊色 */
+          const DVS = 'attribute vec2 p;attribute vec2 sa;uniform vec2 RR;varying vec2 v;void main(){v=sa;gl_Position=vec4(p.x/RR.x*2.-1.,1.-p.y/RR.y*2.,0.,1.);}';
+          const DFS = `precision mediump float;varying vec2 v;uniform vec3 DC;void main(){float k=exp(-v.x*v.x*9.)+exp(-v.x*v.x*1.6)*.35;float a=v.y*k;gl_FragColor=vec4(DC*a,a*.7);}`;
+          const pd = gl.createProgram(); gl.attachShader(pd, sh(gl.VERTEX_SHADER, DVS)); gl.attachShader(pd, sh(gl.FRAGMENT_SHADER, DFS)); gl.linkProgram(pd);
+          if (gl.getProgramParameter(pd, gl.LINK_STATUS)) {
+            const dBuf = gl.createBuffer(), dP = gl.getAttribLocation(pd, 'p'), dS = gl.getAttribLocation(pd, 'sa'), uRR = gl.getUniformLocation(pd, 'RR'), uDC = gl.getUniformLocation(pd, 'DC');
+            const arr = new Float32Array(dust.length * 6 * 4);
+            paintDust = (t, Rf) => {
+              let n = 0;
+              if (Rf > 0) for (const q of dust) {
+                const a = dustAt(q, t, Rf), z = dustAt(q, t - 30, Rf); if (!a || !z) continue;
+                let dx = a[0] - z[0], dy = a[1] - z[1]; const len = Math.hypot(dx, dy) || 1; dx /= len; dy /= len;
+                const w = q.w * 3 * DPR, nx = -dy * w, ny = dx * w, aa = a[2] * .75;
+                const P = [[z[0] * DPR + nx, z[1] * DPR + ny, -1, aa * .2], [z[0] * DPR - nx, z[1] * DPR - ny, 1, aa * .2], [a[0] * DPR + nx, a[1] * DPR + ny, -1, aa], [a[0] * DPR - nx, a[1] * DPR - ny, 1, aa]];   // 尾端淡、頭亮
+                for (const k of [0, 1, 2, 2, 1, 3]) { arr.set(P[k], n); n += 4; }
+              }
+              if (!n) return;
+              gl.useProgram(pd); gl.bindBuffer(gl.ARRAY_BUFFER, dBuf); gl.bufferData(gl.ARRAY_BUFFER, arr.subarray(0, n), gl.DYNAMIC_DRAW);
+              gl.enableVertexAttribArray(dP); gl.vertexAttribPointer(dP, 2, gl.FLOAT, false, 16, 0);
+              gl.enableVertexAttribArray(dS); gl.vertexAttribPointer(dS, 2, gl.FLOAT, false, 16, 8);
+              gl.uniform2f(uRR, glc.width, glc.height); gl.uniform3f(uDC, ...(dark ? [1, 1, 1] : [1, .97, .9]));
+              gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+              gl.drawArrays(gl.TRIANGLES, 0, n / 4);
+              gl.disable(gl.BLEND); gl.disableVertexAttribArray(dS);
+              gl.useProgram(pr); gl.bindBuffer(gl.ARRAY_BUFFER, triBuf); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
+            };
+          }
           paintGl = (t, rs, cr) => {
             const s = cl((t - HIT) / 300);   // 衝擊光環：黑洞收完／白洞爆開時從中央擴散，0.3 秒到半個畫面
             gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.uniform1f(U.RS, rs * DPR); gl.uniform1f(U.CR, cr * DPR); gl.uniform1f(U.T, t);
             gl.uniform1f(U.LI, lensI(t)); gl.uniform1f(U.SP, speed(t)); gl.uniform1f(U.SHOCK, s * M * 0.55 * DPR); gl.uniform1f(U.SHOCKA, t > HIT && s < 1 ? Math.pow(1 - s, 1.6) : 0); gl.drawArrays(gl.TRIANGLES, 0, 3);
+            paintDust?.(t, rs);
           };
         }
       }
@@ -3905,7 +3940,7 @@ void main(){
         paintGl(t, R, hole(t));
         glc.style.opacity = dc.style.opacity = fade.toFixed(3);
         g2.setTransform(DPR, 0, 0, DPR, 0, 0); g2.clearRect(0, 0, W, H); g2.lineCap = 'round'; g2.strokeStyle = dark ? '#fff' : '#fff7e6';
-        if (R > 0) for (const q of dust) {
+        if (R > 0 && !paintDust) for (const q of dust.slice(0, 200)) {   // 2D 備援：只畫 200 顆
           const a = dustAt(q, t, R), z = dustAt(q, t - 12, R); if (!a || !z) continue;
           g2.globalAlpha = a[2] * 0.85; g2.lineWidth = q.w; g2.beginPath(); g2.moveTo(z[0], z[1]); g2.lineTo(a[0], a[1]); g2.stroke();
         }

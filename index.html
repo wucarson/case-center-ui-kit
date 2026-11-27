@@ -551,15 +551,12 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .wx-h > small::before { content: ""; width: 5px; height: 7px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: color-mix(in srgb, var(--c1) 55%, transparent); }
 .wx-h > small.hi { color: var(--c1); font-weight: 600; }
 /* 當週：降雨機率面積（主角）＋溫度折線；每天早／午／晚 3 個時段；最高溫標籤；下方星期與圖示 */
-.wx-wc { min-height: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; gap: 4px; }
-/* 每天的高／低溫數字：一排在折線圖上方 */
-.wx-tv { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
-.wx-tv span { display: flex; justify-content: center; align-items: baseline; gap: 3px; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); font-variant-numeric: tabular-nums; }
-.wx-tv b { color: var(--ink); font-weight: 600; }
-.wx-tv small { color: var(--muted); font-size: inherit; }
-/* 資料點圓點：高溫實心、低溫空心、降雨藍點；滑過放大並顯示說明 */
+.wx-wc { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 4px; }
+/* 溫度數值：高溫標在圓點正上方，低溫淡色小字標在範圍帶下緣 */
+.wx-pv { position: absolute; translate: -50% -100%; margin-top: -6px; color: var(--ink); font-size: calc(12px * var(--fs-k) * var(--rk, 1)); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none; }
+.wx-pv.lo { translate: -50% 0; margin-top: 3px; color: var(--muted); font-size: calc(11px * var(--fs-k) * var(--rk, 1)); font-weight: 500; }
+/* 資料點圓點：高溫橘點、降雨藍點；滑過放大並顯示說明 */
 .wx-dot { position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--wx-tc); box-shadow: 0 0 0 2px var(--card); cursor: default; transition: scale calc(.15s * var(--dur)); }
-.wx-dot.lo { background: var(--card); box-shadow: inset 0 0 0 2px var(--wx-tc); }
 .wx-dot.rn { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: var(--c1); }
 .wx-dot:hover { scale: 1.6; }
 .wx-wc-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; color: var(--muted); font-size: calc(11px * var(--fs-k) * var(--rk, 1)); }
@@ -573,7 +570,6 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .wx-plot .ra:not([fill]) { fill: color-mix(in srgb, var(--c1) 20%, transparent); }   /* 有 fill="url(#…)" 漸層時以漸層為準 */
 .wx-plot .rl { fill: none; stroke: color-mix(in srgb, var(--c1) 75%, transparent); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 .wx-plot .tb:not([fill]) { fill: color-mix(in srgb, var(--wx-tc) 22%, transparent); }
-.wx-plot .tl.lo { stroke-width: 1.5; stroke-dasharray: 3 2; opacity: .8; }
 .wx-plot .tl { fill: none; stroke: var(--wx-tc); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .wx-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
 .wx-days span { display: flex; align-items: center; justify-content: center; gap: 3px; color: var(--muted); font-size: calc(12px * var(--fs-k) * var(--rk, 1)); white-space: nowrap; }
@@ -4744,19 +4740,17 @@ void main(){
   // 當週面積圖（viewBox 70×60；每天 10 單位）：降雨面積＋外框線（主角）、高低溫範圍帶；每天標最高溫；滑過顯示當天細節
   const wxWeek = (L) => {
     const D7 = L.days, lo = Math.min(...D7.map((d) => d[3])), hi = Math.max(...D7.map((d) => d[2]));
-    const ty = (t) => 5 + (1 - (t - lo) / Math.max(1, hi - lo)) * 24, ry = (p) => 60 - p * .3, X = (i) => i * 10 + 5;
+    const ty = (t) => 11 + (1 - (t - lo) / Math.max(1, hi - lo)) * 17, ry = (p) => 59 - p * .16,   /* 上半溫度（11–28）、下半降雨（43–59），互不重疊 */ X = (i) => i * 10 + 5;
     const rl = D7.map((d, i) => `${i ? 'L' : 'M'}${X(i)} ${ry(d[5]).toFixed(1)}`).join(' ');
     const top = D7.map((d, i) => `${i ? 'L' : 'M'}${X(i)} ${ty(d[2]).toFixed(1)}`).join(' ');
-    const lol = D7.map((d, i) => `${i ? 'L' : 'M'}${X(i)} ${ty(d[3]).toFixed(1)}`).join(' ');
     const bot = D7.map((d, i) => `L${X(6 - i)} ${ty(D7[6 - i][3]).toFixed(1)}`).join(' ');
     const id = 'wxg' + (++wxGid);   // 漸層 id：同頁有多張圖表（卡片＋規格頁）時不重複
     const defs = `<defs><linearGradient id="${id}r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--c1);stop-opacity:.34"/><stop offset="1" style="stop-color:var(--c1);stop-opacity:0"/></linearGradient><linearGradient id="${id}t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--wx-tc);stop-opacity:.3"/><stop offset="1" style="stop-color:var(--wx-tc);stop-opacity:.04"/></linearGradient></defs>`;
     const pos = (d, t) => `left:${((d + .5) / 7 * 100).toFixed(2)}%;top:${(t / 60 * 100).toFixed(1)}%`;
     return `<div class="wx-wc"><div class="wx-wc-h"><span>一週</span><span class="wx-lg" aria-hidden="true"><span><i class="a"></i>降雨</span><span><i class="t"></i>高低溫</span></span></div>
-      <div class="wx-tv" aria-hidden="true">${D7.map(([, , h, l]) => `<span><b>${h}°</b><small>${l}°</small></span>`).join('')}</div>
       <div class="wx-plot" role="img" aria-label="一週天氣：${D7.map(([d, k, h, l, , p]) => `${d} ${WX_LABEL[k]}，${l} 到 ${h} 度，降雨 ${p}%`).join('；')}">
-        <svg viewBox="0 0 70 60" preserveAspectRatio="none" aria-hidden="true">${defs}<path class="ra" fill="url(#${id}r)" d="${rl} L65 60 L5 60 Z"/><path class="rl" d="${rl}"/><path class="tb" fill="url(#${id}t)" d="${top} ${bot} Z"/><path class="tl" d="${top}"/><path class="tl lo" d="${lol}"/></svg>
-        ${D7.map(([d, , h, l, , p], k) => `<i class="wx-dot" style="${pos(k, ty(h))}" title="${d} 最高 ${h}°"></i><i class="wx-dot lo" style="${pos(k, ty(l))}" title="${d} 最低 ${l}°"></i><i class="wx-dot rn" style="${pos(k, ry(p))}" title="${d} 降雨 ${p}%"></i>`).join('')}
+        <svg viewBox="0 0 70 60" preserveAspectRatio="none" aria-hidden="true">${defs}<path class="ra" fill="url(#${id}r)" d="${rl} L65 60 L5 60 Z"/><path class="rl" d="${rl}"/><path class="tb" fill="url(#${id}t)" d="${top} ${bot} Z"/><path class="tl" d="${top}"/></svg>
+        ${D7.map(([d, , h, l, , p], k) => `<b class="wx-pv" style="${pos(k, ty(h))}">${h}°</b><i class="wx-dot" style="${pos(k, ty(h))}" title="${d} 最高 ${h}°，最低 ${l}°"></i><small class="wx-pv lo" style="${pos(k, ty(l))}">${l}°</small><i class="wx-dot rn" style="${pos(k, ry(p))}" title="${d} 降雨 ${p}%"></i>`).join('')}
       </div>
       <div class="wx-days" aria-hidden="true">${D7.map(([d]) => `<span>${d}</span>`).join('')}</div></div>`;
   };

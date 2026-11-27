@@ -556,7 +556,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .wx-bars i.hi { background: linear-gradient(180deg, var(--c1), color-mix(in srgb, var(--c1) 35%, transparent)); }
 .wx-dc .wx-plot { min-height: 0; }
 /* 當週：降雨機率面積（主角）＋溫度折線；每天早／午／晚 3 個時段；最高溫標籤；下方星期與圖示 */
-.wx-wc { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 4px; }
+.wx-wc { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 4px; }
 /* 溫度數值：高溫標在圓點正上方，低溫淡色小字標在範圍帶下緣 */
 .wx-pv { position: absolute; translate: -50% -100%; margin-top: -6px; color: var(--ink); font-size: calc(12px * var(--fs-k) * var(--rk, 1)); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none; }
 .wx-pv.lo { translate: -50% 0; margin-top: 3px; color: var(--muted); font-size: calc(11px * var(--fs-k) * var(--rk, 1)); font-weight: 500; }
@@ -566,6 +566,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .wx-bars.wk i { position: relative; width: 14px; }
 .wx-bars.wk small { position: absolute; bottom: 100%; left: 50%; translate: -50% -2px; font-style: normal; color: var(--muted); font-size: calc(11px * var(--fs-k) * var(--rk, 1)); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .wx-bars.wk i.hi small { color: var(--c1); font-weight: 600; }
+.wx-dot.lo { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: var(--card); box-shadow: inset 0 0 0 1.5px var(--wx-tc); }   /* 低溫：空心 */
 .wx-dot:hover { scale: 1.6; }
 .wx-wc-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; color: var(--muted); font-size: calc(11px * var(--fs-k) * var(--rk, 1)); }
 .wx-lg { display: flex; gap: 10px; }
@@ -582,6 +583,8 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .wx-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
 .wx-days span { display: flex; align-items: center; justify-content: center; gap: 3px; color: var(--muted); font-size: calc(12px * var(--fs-k) * var(--rk, 1)); white-space: nowrap; }
 .wx-days span:first-child { color: var(--ink); font-weight: 600; }
+.wx-days span.ok { justify-self: center; padding: 1px 7px 1px 5px; border-radius: 999px; color: var(--ok-fg); background: var(--ok-bg); }   /* 適合外勤：淡綠底＋小勾 */
+.wx-days span.ok::before { content: "✓"; font-size: .85em; font-weight: 700; }
 .wx-site { justify-self: start; display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px 2px 7px; border: 0; border-radius: var(--r-pill); background: var(--soft); color: var(--ink); font: inherit; font-size: calc(12px * var(--fs-k) * var(--rk, 1)); font-weight: 500; }
 button.wx-site { cursor: pointer; }
 button.wx-site:hover { background: var(--hover); }
@@ -4729,12 +4732,12 @@ void main(){
   // 當日 8–20 時的降雨機率（依天氣）；溫度用當天高低溫做出 13 時左右最高的曲線
   const WX_POP = { sun: [0, 0, 5, 10, 10, 10, 5, 5, 0, 0, 0, 0, 0], cloud: [10, 10, 20, 20, 30, 30, 20, 20, 20, 10, 10, 10, 10], rain: [20, 30, 30, 40, 50, 60, 80, 90, 90, 80, 70, 40, 30],
     heat: [0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0], frost: [20, 20, 10, 10, 10, 10, 10, 10, 10, 20, 20, 20, 20], typhoon: [90, 90, 100, 100, 100, 100, 100, 100, 100, 100, 90, 90, 80] };
-  const WX_NOW = 1;   // 示範的「現在」＝10 時（每 2 小時一格的第 2 格）
-  const wxHours = (L) => WX_POP[L.fx].map((p, i) => {
+  const WX_NOW = 0;   // 當日從「現在」（10 時）開始，已過去的時段不顯示
+  const wxHours = (L) => Array.from({ length: 15 }, (_, i) => WX_POP[L.fx][Math.min(i, WX_POP[L.fx].length - 1)]).map((p, i) => {
     const t = Math.round(L.lo + (L.hi - L.lo) * Math.max(0, Math.sin(Math.PI * (i + 3) / 14)));
     const k = L.fx === 'typhoon' ? 'typhoon' : p >= 60 ? 'rain' : p >= 30 ? 'cloud' : L.fx === 'frost' ? 'cloud' : L.k === 'sun' ? 'sun' : 'pc';
     return [8 + i, k, t, p];
-  }).filter((_, i) => i % 2 === 0);
+  }).filter((_, i) => i >= 2 && i % 2 === 0);
   // 當週：每天早／午／晚 [溫度, 降雨 %]
   const wxPeriods = (L) => L.days.flatMap(([, , hi, lo, , p]) => [[Math.round(lo + (hi - lo) * .35), Math.round(p * .8)], [hi, p], [Math.round(lo + (hi - lo) * .4), Math.min(100, Math.round(p * 1.1))]]);
   const wxNow = (L) => `<div class="wx-now" role="group" aria-label="${L.site}${L.alert ? '，' + L.alert[1] : ''}，現在 ${L.st}，${L.t} 度，最高 ${L.hi} 度、最低 ${L.lo} 度">${wxIcon(L.k)}<b class="num" aria-hidden="true">${L.t}</b><span aria-hidden="true">°C</span>
@@ -4746,7 +4749,7 @@ void main(){
     const id = 'wxd' + (++wxGid);
     const pos = (i, y) => `left:${((i + .5) / 7 * 100).toFixed(2)}%;top:${(y / 60 * 100).toFixed(1)}%`;
     return `<div class="wx-dc" role="list" aria-label="當日天氣（每 2 小時）"><i class="wx-nowcol" style="--n:${WX_NOW}" aria-hidden="true"></i>
-      <div class="wx-dt" aria-hidden="true">${H.map(([h, k], i) => `<span class="${i === WX_NOW ? 'now' : ''}">${i === WX_NOW ? '現在' : h + '時'}${wxIcon(k)}</span>`).join('')}</div>
+      <div class="wx-dt" aria-hidden="true">${H.map(([h, k], i) => `<span class="${i === WX_NOW ? 'now' : ''}">${i === WX_NOW ? '現在' : h + '時'}${i && k === H[i - 1][1] ? wxIcon(k).replace('<svg', '<svg style="visibility:hidden"') : wxIcon(k)}</span>`).join('')}</div>
       <div class="wx-plot">
         <svg viewBox="0 0 70 60" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--wx-tc);stop-opacity:.26"/><stop offset="1" style="stop-color:var(--wx-tc);stop-opacity:0"/></linearGradient></defs><path fill="url(#${id})" d="${line} L65 36 L5 36 Z"/><path class="tl" d="${line}"/></svg>
         ${H.map(([h, k, t, p], i) => `<b class="wx-pv" style="${pos(i, ty(t))}">${t}°</b><i class="wx-dot" style="${pos(i, ty(t))}" title="${i === WX_NOW ? '現在' : h + ' 時'} ${t}°"></i>`).join('')}
@@ -4764,13 +4767,13 @@ void main(){
     const id = 'wxg' + (++wxGid);   // 漸層 id：同頁有多張圖表（卡片＋規格頁）時不重複
     const defs = `<defs><linearGradient id="${id}t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--wx-tc);stop-opacity:.3"/><stop offset="1" style="stop-color:var(--wx-tc);stop-opacity:.04"/></linearGradient></defs>`;
     const pos = (d, t) => `left:${((d + .5) / 7 * 100).toFixed(2)}%;top:${(t / 60 * 100).toFixed(1)}%`;
-    return `<div class="wx-wc"><div class="wx-wc-h"><span>一週</span><span class="wx-lg" aria-hidden="true"><span><i class="a"></i>降雨</span><span><i class="t"></i>高低溫</span></span></div>
-      <div class="wx-plot" role="img" aria-label="一週天氣：${D7.map(([d, k, h, l, , p]) => `${d} ${WX_LABEL[k]}，${l} 到 ${h} 度，降雨 ${p}%`).join('；')}">
+    return `<div class="wx-wc">
+      <div class="wx-plot" role="img" aria-label="一週天氣：${D7.map(([d, k, h, l, ok, p]) => `${d} ${WX_LABEL[k]}，${l} 到 ${h} 度，降雨 ${p}%，${ok ? '適合外勤' : '不建議外勤'}`).join('；')}">
         <svg viewBox="0 0 70 60" preserveAspectRatio="none" aria-hidden="true">${defs}<path class="tb" fill="url(#${id}t)" d="${top} ${bot} Z"/><path class="tl" d="${top}"/></svg>
-        ${D7.map(([d, , h, l, , p], k) => `<b class="wx-pv" style="${pos(k, ty(h))}">${h}°</b><i class="wx-dot" style="${pos(k, ty(h))}" title="${d} 最高 ${h}°，最低 ${l}°"></i><small class="wx-pv lo" style="${pos(k, ty(l))}">${l}°</small>`).join('')}
+        ${D7.map(([d, , h, l, , p], k) => `<b class="wx-pv" style="${pos(k, ty(h))}">${h}°</b><i class="wx-dot" style="${pos(k, ty(h))}" title="${d} 最高 ${h}°，最低 ${l}°"></i><i class="wx-dot lo" style="${pos(k, ty(l))}" title="${d} 最低 ${l}°"></i><small class="wx-pv lo" style="${pos(k, ty(l))}">${l}°</small>`).join('')}
         <div class="wx-bars wk" aria-hidden="true">${D7.map(([, , , , , p]) => `<i class="${p >= 60 ? 'hi' : ''}" style="--p:${p / 100}"><small>${p}%</small></i>`).join('')}</div>
       </div>
-      <div class="wx-days" aria-hidden="true">${D7.map(([d]) => `<span>${d}</span>`).join('')}</div></div>`;
+      <div class="wx-days" aria-hidden="true">${D7.map(([d, , , , ok]) => `<span class="${ok ? 'ok' : ''}" title="${ok ? '適合外勤' : '不建議外勤'}">${d}</span>`).join('')}</div></div>`;
   };
   const wxTabs = (view) => `<div class="wx-tabs" role="tablist" aria-label="時段">${[['day', '當日'], ['week', '當週']].map(([v, n]) => `<button type="button" role="tab" data-v="${v}" aria-selected="${v === view}">${n}</button>`).join('')}</div>`;
   // 整個元件：地點＋當日／當週切換、現在天氣、當日逐時或當週圖表、車窗；win＝false 時不放車窗；btn＝地點可點（展示牆卡片）
@@ -4836,11 +4839,10 @@ vec3 scene2(vec3 col,vec2 uv,float asp){
   if(sun>0.){vec2 sp=vec2(asp*.78,.16);float sd=length(uv-sp);vec3 sc=is(3.)?vec3(1.,.85,.6):vec3(1.,.96,.84);
     col+=sc*(smoothstep(.06,.048,sd)*.85+exp(-sd*9.)*.45+exp(-sd*2.6)*.18)*sun;
     col+=sc*pow(.5+.5*sin(atan(uv.y-sp.y,uv.x-sp.x)*12.+T*.2),12.)*exp(-sd*4.)*.12*sun;}
-  /* 前景天氣：斜雨／颱風雨、飛葉、斜飛的雪、暖色顆粒 */
+  /* 前景天氣：斜雨／颱風雨（雨絲較粗、較亮） */
   if(wet()>.5){float sl=is(5.)?-1.2:-.55,spd=is(5.)?3.4:2.4;vec2 q=vec2(uv.x+uv.y*sl,uv.y);
-    float ln=q.x*85.,id=floor(ln),fx=fract(ln),o=h(vec2(id,1.)),yy=fract(q.y*1.1+T*spd*(.8+o*.6)+o*10.);
-    col=mix(col,vec3(.86,.9,.97),smoothstep(0.,.03,fx)*smoothstep(.14,.07,fx)*smoothstep(.22,0.,yy)*step(.45,h(vec2(id,2.)))*.45);}
-  if(is(5.)){for(int i=0;i<5;i++){float fi=float(i),sx=1.-fract(T*(.5+h(vec2(fi,3.))*.4)+h(vec2(fi,4.)));vec2 lp=vec2(sx*(asp+.4)-.2,.25+.5*h(vec2(fi,5.))+.08*sin(T*3.+fi)),d=uv-lp;float a=T*7.+fi*2.;d=mat2(cos(a),-sin(a),sin(a),cos(a))*d;col=mix(col,vec3(.34,.46,.22),smoothstep(1.,.6,length(d/vec2(.03,.011)))*.85);}}
+    float ln=q.x*70.,id=floor(ln),fx=fract(ln),o=h(vec2(id,1.)),yy=fract(q.y*1.1+T*spd*(.8+o*.6)+o*10.);
+    col=mix(col,vec3(.92,.95,1.),smoothstep(0.,.04,fx)*smoothstep(.24,.12,fx)*smoothstep(.3,0.,yy)*step(.4,h(vec2(id,2.)))*.7);}
   if(is(4.)){   /* 冷天霧氣：兩層噪聲霧緩慢往左飄，地平線附近最濃、上下漸淡 */
     float band=exp(-pow((uv.y-.42)/.22,2.)),fo=0.;
     for(int L=0;L<2;L++){float fl=float(L);fo+=smoothstep(.35,.85,fbm(vec2(uv.x*(1.6+fl)+T*(.025+fl*.02)+fl*5.,uv.y*(4.+fl*2.)-T*.01)))*(.6-fl*.15);}

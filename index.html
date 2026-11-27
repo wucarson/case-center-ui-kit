@@ -574,19 +574,17 @@ button.wx-site { cursor: pointer; }
 button.wx-site:hover { background: var(--hover); }
 .wx-site svg { width: 14px; height: 14px; fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .wx-site small { color: var(--muted); font-size: inherit; font-weight: 400; }
-/* 高鐵車窗（參考新幹線）：接近方形的大圓角窗；米灰塑膠外框（上亮下暗的漸層＋邊緣高光）、窗內一圈深色密封條與內凹陰影、上緣窗簾收納槽與拉把；
+/* 高鐵車窗（參考新幹線）：接近方形的大圓角窗；米灰塑膠外框（上亮下暗的漸層＋邊緣高光）、窗內一圈深色密封條與內凹陰影、上緣窗簾底桿與拉把；
    玻璃一道斜向反光；切換地點時百褶窗簾從上緣拉下、換好景色再拉上（.shut） */
 .wx { grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; }
 .wx > .wx-win { grid-column: 2; grid-row: 1 / span 3; align-self: center; }
 .wx-win { --bz: color-mix(in srgb, #dcd7cf 78%, var(--surface)); position: relative; width: 216px; aspect-ratio: 21 / 23;   /* 接近方形（參考新幹線車窗） */ border-radius: 58px / 56px; background: linear-gradient(165deg, color-mix(in srgb, #fff 55%, var(--bz)) 0%, var(--bz) 38%, color-mix(in srgb, #000 14%, var(--bz)) 100%); box-shadow: inset 0 1.5px 0 rgb(255 255 255 / .75), inset 0 -2px 4px rgb(0 0 0 / .16), 0 1px 2px rgb(0 0 0 / .14), 0 8px 18px -8px rgb(0 0 0 / .3); }
 :root[data-theme="dark"] .wx-win { --bz: #5b5853; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .wx-win { --bz: #5b5853; } }
-.wx-glass { position: absolute; inset: 24px 14px 14px; border-radius: 44px / 42px; overflow: hidden; background: linear-gradient(180deg, #7fb2ec, #cfe3f6 62%, #8fa88c 63%, #6f8a6e); }
+.wx-glass { position: absolute; inset: 15px 14px 14px; border-radius: 44px / 42px; overflow: hidden; background: linear-gradient(180deg, #7fb2ec, #cfe3f6 62%, #8fa88c 63%, #6f8a6e); }
 .wx-glass canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .wx-glass::after { content: ""; position: absolute; inset: 0; z-index: 3; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 3px rgb(38 36 34 / .82), inset 0 6px 10px rgb(0 0 0 / .45), inset 0 -3px 6px rgb(0 0 0 / .25); }
 .wx-refl { position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(118deg, transparent 30%, rgb(255 255 255 / .16) 38%, transparent 46%, transparent 62%, rgb(255 255 255 / .08) 66%, transparent 72%); }
-.wx-hood { position: absolute; left: 24px; right: 24px; top: 8px; height: 9px; border-radius: 5px; background: linear-gradient(180deg, color-mix(in srgb, #000 22%, var(--bz)), color-mix(in srgb, #000 8%, var(--bz))); box-shadow: inset 0 1px 2px rgb(0 0 0 / .35), 0 1px 0 rgb(255 255 255 / .5); }
-.wx-hood::after { content: ""; position: absolute; left: 50%; top: 2px; width: 30px; height: 5px; margin-left: -15px; border-radius: 3px; background: rgb(30 28 26 / .55); }
 /* 百褶窗簾：從收納槽拉下（transform），底邊一個拉把 */
 .wx-shade { position: absolute; inset: 0; z-index: 2; transform: translateY(calc(-100% + 14px));   /* 收起時底桿與拉把留在窗內上緣 */ background: repeating-linear-gradient(180deg, #efeae1 0 8px, #ddd6ca 8px 9px, #f6f2ea 9px 10px); box-shadow: 0 4px 8px rgb(0 0 0 / .28); transition: transform calc(.42s * var(--dur)) cubic-bezier(.55, 0, .35, 1); }
 :root[data-theme="dark"] .wx-shade { background: repeating-linear-gradient(180deg, #8d877d 0 8px, #7a746a 8px 9px, #959086 9px 10px); }
@@ -4717,7 +4715,7 @@ void main(){
         <div class="wx-menu" role="listbox" aria-label="外勤地點" hidden>${WX_LOCS.map((x, i) => `<button type="button" role="option" data-i="${i}" aria-selected="${x === L}">${wxIcon(x.k)}<span>${x.site}</span><small>${x.area}</small></button>`).join('')}</div></div>`
     : `<span class="wx-site">${WX_PIN}<span>${L.site}</span><small>${L.area}</small></span>`;
   const WX_LABEL = { sun: '晴', pc: '晴時多雲', cloud: '多雲', rain: '雨', storm: '雷陣雨', snow: '降雪', typhoon: '颱風' };
-  const WX_WIN = '<div class="wx-win" aria-hidden="true"><div class="wx-glass"><i class="wx-shade"><b></b></i><i class="wx-refl"></i></div><i class="wx-hood"></i></div>';
+  const WX_WIN = '<div class="wx-win" aria-hidden="true"><div class="wx-glass"><i class="wx-shade"><b></b></i><i class="wx-refl"></i></div></div>';
   // 當日 8–20 時的降雨機率（依天氣）；溫度用當天高低溫做出 13 時左右最高的曲線
   const WX_POP = { sun: [0, 0, 5, 10, 10, 10, 5, 5, 0, 0, 0, 0, 0], cloud: [10, 10, 20, 20, 30, 30, 20, 20, 20, 10, 10, 10, 10], rain: [20, 30, 30, 40, 50, 60, 80, 90, 90, 80, 70, 40, 30],
     heat: [0, 0, 0, 0, 0, 0, 0, 0, 10, 10, 0, 0, 0], frost: [20, 20, 10, 10, 10, 10, 10, 10, 10, 20, 20, 20, 20], typhoon: [90, 90, 100, 100, 100, 100, 100, 100, 100, 100, 90, 90, 80] };
@@ -4755,7 +4753,7 @@ void main(){
   // 整個元件：地點＋當日／當週切換、現在天氣、當日逐時或當週圖表、車窗；win＝false 時不放車窗；btn＝地點可點（展示牆卡片）
   const WX = (L, { view = 'day', win = true, btn = false } = {}) => `<div class="wx"><div class="wx-top">${wxSite(L, btn)}${wxTabs(view)}</div>${wxNow(L)}<div class="wx-pane" role="tabpanel">${view === 'week' ? wxWeek(L) : wxDay(L)}</div>${win ? WX_WIN : ''}</div>`;
 
-  /* 天氣窗（WebGL，高鐵車窗）：窗外是真實風景照（台東稻田／合歡山）依天氣調色、慢慢捲動，近景電線桿與天氣效果疊在前景；溫度右側的空白處畫一片窗外景象，不疊在任何文字上；窗外遠山、樹叢田野、電線桿分層往左捲動（視差），整片景色明顯上下晃動、輕微傾斜、偶爾顛一下（颱風加倍）
+  /* 天氣窗（WebGL，高鐵車窗）：窗外是真實風景照（台東稻田／合歡山）依天氣調色、慢慢捲動，天氣效果疊在前景；溫度右側的空白處畫一片窗外景象，不疊在任何文字上；窗外遠山、樹叢田野、電線桿分層往左捲動（視差），整片景色明顯上下晃動、輕微傾斜、偶爾顛一下（颱風加倍）
      · 天空漸層（深色模式偏夜色）＋三層噪聲雲（用上下取樣差做出受光面與陰影、各層速度不同）＋太陽光暈、光芒與鏡頭光斑
      · 雨：背景斜雨絲＋玻璃上的水珠（真的折射窗內景象、帶高光）、大水珠下滑留下較清楚的水痕、玻璃起霧
      · 高溫：強光＋熱浪扭曲窗內景象（越下方越強）＋上升的暖色顆粒　· 低溫：飄雪＋窗框長出樹枝狀霜花與閃光
@@ -4804,13 +4802,6 @@ vec3 scene(vec2 p){
   if(sun>0.){vec2 sp=vec2(asp*.78,.16);float sd=length(uv-sp);vec3 sc=is(3.)?vec3(1.,.85,.6):vec3(1.,.96,.84);
     col+=sc*(smoothstep(.06,.048,sd)*.85+exp(-sd*9.)*.45+exp(-sd*2.6)*.18)*sun;
     col+=sc*pow(.5+.5*sin(atan(uv.y-sp.y,uv.x-sp.x)*12.+T*.2),12.)*exp(-sd*4.)*.12*sun;}
-  /* 近景電線桿＋電線（很快掠過、邊緣模糊）：疊在照片前面，帶出列車的速度 */
-  float pw=asp*.9,px=mod(uv.x+T*1.5,pw)-pw*.5;
-  float pole=smoothstep(4.,.6,abs(px)*S.y)*.9*step(.1,uv.y);
-  float arm=smoothstep(1.2,.3,abs(uv.y-.14)*S.y)*step(abs(px),.05);
-  float sag=.15+.05*pow(px/(pw*.5),2.);
-  float wire=(smoothstep(1.1,.2,abs(uv.y-sag)*S.y)+smoothstep(1.1,.2,abs(uv.y-sag-.045)*S.y))*.8;
-  col=mix(col,vec3(.16,.17,.19),max(max(pole,arm),wire));
   /* 前景天氣：斜雨／颱風雨、飛葉、斜飛的雪、暖色顆粒 */
   if(wet()>.5){float sl=is(5.)?-1.2:-.55,spd=is(5.)?3.4:2.4;vec2 q=vec2(uv.x+uv.y*sl,uv.y);
     float ln=q.x*85.,id=floor(ln),fx=fract(ln),o=h(vec2(id,1.)),yy=fract(q.y*1.1+T*spd*(.8+o*.6)+o*10.);

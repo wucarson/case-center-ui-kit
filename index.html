@@ -1962,14 +1962,17 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .wand .wand-tip { top: 50%; margin-top: -14px; }
 /* 杖身光流：遮罩＝魔杖圖（JS 設定），光帶從握柄流向杖尖；前緣白熱、後拖暖橘→粉→藍 */
 .wand-flow { position: absolute; inset: 0; overflow: hidden; mask-size: 100% 100%; -webkit-mask-size: 100% 100%; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; mix-blend-mode: screen; }
-.wand-flow i { position: absolute; top: 0; bottom: 0; left: 0; width: 35%; background: linear-gradient(90deg, transparent, #fff 8%, #ffb347 28%, #ff4f8b 58%, #3d8bff 84%, transparent); opacity: 0; }
+.wand-flow i { position: absolute; top: 0; bottom: 0; left: 0; width: 35%; background: linear-gradient(90deg, transparent, #fff 8%, #bff4ff 28%, #9b7bff 58%, #ff8fc8 84%, transparent); opacity: 0; }
 /* 杖尖星塵碎片、燒穿的火星灰燼：全螢幕畫布，JS 逐格畫 */
 .wand-sparks { position: absolute; z-index: 4; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .wand-tip { position: absolute; left: -14px; top: -5px; width: 28px; height: 28px; border-radius: 50%; }
 .lumos .wand-tip { background: radial-gradient(circle, #fff 0 22%, rgb(220 235 255 / .9) 38%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 24px 8px rgb(210 230 255 / .7); }
 .nox .wand-tip { background: radial-gradient(circle, #fff 0 18%, rgb(200 220 255 / .7) 40%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 14px 4px rgb(200 220 255 / .45); }
-.wand-ripple { position: absolute; z-index: 4; border-radius: 50%; pointer-events: none; background: conic-gradient(#ffb347, #ff4f8b, #3d8bff, #ffb347); -webkit-mask: radial-gradient(circle, transparent 60%, #000 66%, #000 69%, transparent 75%); mask: radial-gradient(circle, transparent 60%, #000 66%, #000 69%, transparent 75%); filter: drop-shadow(0 0 6px rgb(255 120 160 / .6)); }   /* 魔杖輕點的漣漪光環（魔杖三色） */
-.wand-ignite { position: absolute; z-index: 4; width: 46px; height: 46px; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, #fff 0 14%, #ffd27a 26%, #ffb347 38%, rgb(255 79 139 / .75) 54%, rgb(61 139 255 / .3) 70%, rgb(61 139 255 / 0) 80%); box-shadow: 0 0 22px 6px rgb(255 120 90 / .45); }   /* 魔杖引燃火點：白熱核心→橘→粉→藍（魔杖三色） */
+.wand-ripple { position: absolute; z-index: 4; border-radius: 50%; pointer-events: none; background: conic-gradient(#bff4ff, #9b7bff, #ff8fc8, #ffb27a, #bff4ff); -webkit-mask: radial-gradient(circle, transparent 60%, #000 66%, #000 69%, transparent 75%); mask: radial-gradient(circle, transparent 60%, #000 66%, #000 69%, transparent 75%); filter: drop-shadow(0 0 6px rgb(170 150 255 / .6)); }   /* 魔杖輕點的漣漪光環（彗星色） */
+.wand-ignite { position: absolute; z-index: 4; width: 46px; height: 46px; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, #fff 0 16%, #dff9ff 26%, #9fe6ff 38%, rgb(155 123 255 / .75) 54%, rgb(255 143 200 / .3) 70%, rgb(255 143 200 / 0) 80%); box-shadow: 0 0 26px 8px rgb(150 200 255 / .45); }   /* 彗星落點：白熱核心→青→紫→粉 */
+.wand-flare { position: absolute; z-index: 5; width: 0; height: 0; rotate: -32deg; pointer-events: none; opacity: 0; }   /* 鏡頭光暈：斜向一道光帶＋沿線幾個小光圈 */
+.wand-flare .fl-streak { position: absolute; left: -45vmax; top: -1.5px; width: 90vmax; height: 3px; background: linear-gradient(90deg, transparent, rgb(160 220 255 / .45) 38%, #fff 50%, rgb(255 170 220 / .45) 62%, transparent); filter: blur(1px); }
+.wand-flare .fl-o { position: absolute; left: var(--d); top: 0; width: var(--s); height: var(--s); translate: -50% -50%; border-radius: 50%; background: radial-gradient(circle, rgb(200 235 255 / .05) 30%, var(--c) 64%, transparent 74%); }
 .wand-halo { position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; }
 .lumos .wand-halo { background: radial-gradient(circle, #fff 0, rgb(255 253 245 / .97) 22%, rgb(255 246 222 / .75) 38%, rgb(255 240 210 / .3) 52%, rgb(255 255 255 / 0) 64%); }   /* 過曝的光：中心整片白、邊緣暖白柔退 */
 .nox .wand-halo { background: radial-gradient(circle, #fff 0, rgb(246 249 255 / .92) 18%, rgb(205 220 255 / .62) 34%, rgb(138 164 255 / .28) 50%, rgb(110 140 255 / 0) 64%); }   /* Nox 使用冷銀藍光暈 */
@@ -3007,7 +3010,7 @@ body.reduce #wall > .cell::after { animation: none !important; }
       }
       setTimeout(() => { layer.remove(); shBusy = false; }, TOTAL + 40);
     }
-    /* 深淺色轉場（魔杖，約 1.45 秒）：魔杖在中央微微後收（三色光沿杖身灌注），杖尖往前輕點，點下處泛起兩圈三色光環漣漪，從中央燒開並噴出星塵碎片；魔杖一直留在畫面上，收尾才淡出（不顯示咒語字）。
+    /* 深淺色轉場（魔杖，約 1.45 秒）：魔杖在中央微微後收（光流沿杖身灌注），一顆小彗星從右上劃入、正好在杖尖輕點時落下，泛起兩圈彗星色光環與一道鏡頭光暈，從中央燒開並噴出星塵與星光；配色取自彗星（青白、紫、粉橘），燒穿外緣是深藍紫夜空；魔杖一直留在畫面上，收尾才淡出（不顯示咒語字）。
        從杖尖燒穿舊畫面，洞向外不規則燒開（0.85 秒，由慢到快）：洞緣外側焦黑、洞緣一圈三色餘燼與白熱細線、少量火星與灰燼往上飄（WebGL＋2D 畫布逐幀畫）；不支援 WebGL 時改用預畫的墨色圖。Lumos 揭開淺色，Nox 揭開深色。
        舊畫面沿柔邊墨流淡出，新畫面留在底層，交界保留一層舊配色殘影。 */
     // 接骨木魔杖（Canvas，轉場開始前畫一次）：杖尖在左（x = 0），杖身由尖漸粗、沿途 8 個節瘤（越靠握把越大），
@@ -3176,7 +3179,7 @@ float shape(float a){
   float fi=sin(14.*w+.9)*.48+sin(23.*w-1.1)*.34+sin(32.*w)*.18;
   return RAD*(1.+.22*(co+.42*fi));
 }
-vec3 iri(float x){x=fract(x)*3.;vec3 o=vec3(1.,.702,.278),pk=vec3(1.,.31,.545),b=vec3(.239,.545,1.);return x<1.?mix(o,pk,x):x<2.?mix(pk,b,x-1.):mix(b,o,x-2.);}
+vec3 iri(float x){x=fract(x)*3.;vec3 o=vec3(.58,.9,1.),pk=vec3(.62,.46,1.),b=vec3(1.,.6,.66);   /* 彗星色：青白 → 紫 → 粉橘 */return x<1.?mix(o,pk,x):x<2.?mix(pk,b,x-1.):mix(b,o,x-2.);}
 void main(){
   vec2 q=vec2(gl_FragCoord.x,R.y-gl_FragCoord.y);
   vec2 hz=vec2(n2(q*.018/D+vec2(T*2.1,-T*1.3)),n2(q*.022/D+vec2(-T*1.7,T*2.4)+9.))-.5;
@@ -3200,7 +3203,7 @@ void main(){
   float line=exp(-abs(df)/(1.4*D));
   float glow=exp(-max(df,0.)/(26.*D))*smoothstep(-w*.3,0.,df)*.3;
   float ab=max(charA,scorch);
-  vec3 base=mix(vec3(.36,.22,.12),vec3(.06,.035,.03),smoothstep(.2,.8,charA/max(ab,.001)))*ab;
+  vec3 base=mix(vec3(.22,.2,.4),vec3(.04,.04,.11),smoothstep(.2,.8,charA/max(ab,.001)))*ab;   /* 燒穿外緣是深藍紫的夜空，不是焦黑 */
   vec3 em=tint*ember*1.35+warm*sp*1.6+vec3(1.)*line*.85+tint*glow;
   em=1.-exp(-em*1.2);
   float ea=clamp(ember*.9+sp+line*.8+glow*.5,0.,1.);
@@ -3479,7 +3482,7 @@ void main(){
           const emCv = document.createElement('canvas'); emCv.className = 'wand-sparks';
           emCv.width = Math.round(W * DPR); emCv.height = Math.round(H * DPR); fx.append(emCv);
           const eg = emCv.getContext('2d'); eg.scale(DPR, DPR);
-          const EMC = ['#ffb347', '#ff4f8b', '#3d8bff', '#fff1d6'], embers = [];
+          const EMC = ['#bff4ff', '#9b7bff', '#ff8fc8', '#ffffff'], embers = [];   // 彗星色星點
           const shapeAt = (a) => { const co = Math.sin(3 * a + .9) * .44 + Math.sin(5 * a - 1.7) * .31 + Math.sin(8 * a + .5) * .25, w = a + .063 * Math.sin(7 * a) + .034 * Math.sin(13 * a - .8);
             return art.radius * (1 + .22 * (co + .42 * (Math.sin(14 * w + .9) * .48 + Math.sin(23 * w - 1.1) * .34 + Math.sin(32 * w) * .18))); };   // 同 shader 的輪廓
           let lastT = t0;
@@ -3499,7 +3502,7 @@ void main(){
               p.vy -= .00006 * dt; p.x += (p.vx + Math.sin(now / 160 + p.ph) * .02) * dt; p.y += p.vy * dt;   // 熱氣上升、左右飄
               const fade = (1 - f) * (1 - f);
               if (p.ash) {
-                eg.globalCompositeOperation = 'source-over'; eg.globalAlpha = fade * .55; eg.fillStyle = '#2a2320';
+                eg.globalCompositeOperation = 'source-over'; eg.globalAlpha = fade * .55; eg.fillStyle = '#1c1b3a';
                 eg.save(); eg.translate(p.x, p.y); eg.rotate(p.rot + f * 4); eg.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); eg.restore();
               } else {
                 eg.globalCompositeOperation = 'lighter';
@@ -3563,6 +3566,55 @@ void main(){
             { opacity: 0, transform: 'translate(-50%, -50%) scale(1) rotate(40deg)' }],
             { duration: 420, delay: TAP + delay, fill: 'both', easing: 'cubic-bezier(.2, .7, .3, 1)' });
         });
+        // 彗星劃入：一顆小彗星從右上斜劃進來（越來越快），正好在輕點的瞬間落在杖尖；彗尾分岔（青、粉兩股）、中心白熱；落地後彗尾往落點收掉
+        {
+          const cc = document.createElement('canvas'); cc.className = 'wand-sparks';
+          cc.width = Math.round(W * DPR); cc.height = Math.round(H * DPR); fx.append(cc);
+          const cg = cc.getContext('2d'); cg.scale(DPR, DPR); cg.lineCap = 'round';
+          const CS = 40, CL = Math.hypot(W, H) * .55, CA = -35 * Math.PI / 180, ux = Math.cos(CA), uy = Math.sin(CA);
+          const pos = (tt) => { const k = Math.max(0, Math.min(1, (tt - CS) / (TAP - CS))), e = 1 - Math.pow(k, 1.7); return [tip[0] + ux * CL * e, tip[1] + uy * CL * e]; };
+          const forkAt = (fork, f) => fork * f * f * 16;   // 分岔：越往尾巴分得越開
+          const TAIL = 22, layers = lumos
+            ? [[18, 'rgba(155,123,255,.16)', 0], [9, 'rgba(191,244,255,.45)', 0], [3.2, '#ffffff', 0], [5, 'rgba(255,143,200,.55)', 1], [5, 'rgba(120,220,255,.55)', -1]]
+            : [[18, 'rgba(110,80,230,.14)', 0], [9, 'rgba(70,150,220,.45)', 0], [3.2, '#5b6cff', 0], [5, 'rgba(226,96,158,.6)', 1], [5, 'rgba(63,168,216,.6)', -1]];   // 舊畫面淺色時用較深的色
+          const drawComet = () => {
+            if (!fx.isConnected) return;
+            const t = +wandAnim.currentTime || 0;
+            cg.clearRect(0, 0, W, H);
+            const fade = t < TAP ? Math.min(1, (t - CS) / 40) : Math.max(0, 1 - (t - TAP) / 150);
+            if (t > CS && fade > 0) {
+              const pts = Array.from({ length: TAIL }, (_, j) => pos(Math.max(CS, t - j * 9)));
+              cg.globalCompositeOperation = lumos ? 'lighter' : 'source-over';
+              for (const [w, c, fork] of layers) {
+                cg.strokeStyle = c;
+                for (let j = 0; j < TAIL - 1; j++) {
+                  const f = j / TAIL, o0 = forkAt(fork, f), o1 = forkAt(fork, (j + 1) / TAIL);
+                  cg.globalAlpha = fade * (1 - f); cg.lineWidth = Math.max(.5, w * (1 - f * .85));
+                  cg.beginPath(); cg.moveTo(pts[j][0] - uy * o0, pts[j][1] + ux * o0); cg.lineTo(pts[j + 1][0] - uy * o1, pts[j + 1][1] + ux * o1); cg.stroke();
+                }
+              }
+              const [hx, hy] = pts[0];   // 彗核：白熱光點＋十字光芒
+              cg.globalAlpha = fade;
+              const gr = cg.createRadialGradient(hx, hy, 0, hx, hy, 14); gr.addColorStop(0, '#fff'); gr.addColorStop(.35, lumos ? 'rgba(191,244,255,.8)' : 'rgba(91,108,255,.7)'); gr.addColorStop(1, 'rgba(155,123,255,0)');
+              cg.fillStyle = gr; cg.beginPath(); cg.arc(hx, hy, 14, 0, 6.283); cg.fill();
+              cg.strokeStyle = lumos ? '#fff' : '#7b8cff'; cg.lineWidth = 1.2; cg.globalAlpha = fade * .8;
+              cg.beginPath(); cg.moveTo(hx - 22, hy); cg.lineTo(hx + 22, hy); cg.moveTo(hx, hy - 22); cg.lineTo(hx, hy + 22); cg.stroke();
+              cg.globalAlpha = 1;
+            }
+            if (t < TAP + 200) requestAnimationFrame(drawComet); else cg.clearRect(0, 0, W, H);
+          };
+          requestAnimationFrame(drawComet);
+        }
+        // 鏡頭光暈：燒開時從落點斜向延伸一道淡光帶，沿線幾個小光圈，0.45 秒淡出
+        {
+          const fl = document.createElement('div'); fl.className = 'wand-flare';
+          fl.style.left = tip[0] + 'px'; fl.style.top = tip[1] + 'px';
+          fl.innerHTML = '<i class="fl-streak"></i>' + [[-180, 26, 'rgb(160 220 255 / .35)'], [-95, 14, 'rgb(255 170 220 / .4)'], [120, 40, 'rgb(170 150 255 / .25)'], [230, 18, 'rgb(160 220 255 / .35)']]
+            .map(([d, sz, c]) => `<i class="fl-o" style="--d:${d}px;--s:${sz}px;--c:${c}"></i>`).join('');
+          fx.append(fl);
+          fl.animate([{ opacity: 0 }, { opacity: .9, offset: .15 }, { opacity: 0 }], { duration: 450, delay: TAP, fill: 'both', easing: 'ease-out' });
+          fl.querySelector('.fl-streak').animate([{ transform: 'scaleX(.2)' }, { transform: 'scaleX(1)' }], { duration: 450, delay: TAP, fill: 'both', easing: 'cubic-bezier(.2, .8, .3, 1)' });
+        }
         // 燒開的瞬間：中央亮起一個光點後散開（不閃爍）
         const ign = document.createElement('i'); ign.className = 'wand-ignite';
         ign.style.left = tip[0] + 'px'; ign.style.top = tip[1] + 'px'; fx.append(ign);
@@ -3588,7 +3640,7 @@ void main(){
             wg.globalCompositeOperation = 'source-over';
           };
           const mixc = (a, b, k) => a.map((v, i) => v + (b[i] - v) * k);
-          const FLOWC = [[.24, .55, 1], [1, .31, .55], [1, .7, .28], [1, 1, 1]];   // 握柄端藍 → 粉 → 橘 → 到杖尖白熱
+          const FLOWC = [[.6, .45, 1], [1, .56, .78], [.6, .9, 1], [1, 1, 1]];   // 握柄端紫 → 粉 → 青 → 到杖尖白熱（彗星色）
           const lit = () => {
             if (!fx.isConnected) return;
             const t = +wandAnim.currentTime || 0;   // 跟魔杖動畫同一條時間軸（暫停、跳轉都對齊）
@@ -3612,7 +3664,7 @@ void main(){
         // 杖尖星塵碎片：甩下瞬間噴出約 90 顆（避開杖身方向 42° ±40°），阻力大、很快減速，之後緩緩上飄、各自閃爍淡出。
         // 形狀：細小光點（多數）、四芒星閃光、會翻轉的菱形水晶碎片；顏色＝魔杖三色＋白
         {
-          const COLORS = lumos ? ['#e8912a', '#ffb347', '#ff4f8b', '#3d8bff'] : ['#ffffff', '#ffb347', '#ff4f8b', '#3d8bff'];   // 淺底上白色看不見，改深一點的橘
+          const COLORS = lumos ? ['#3fa8d8', '#7b5cf0', '#e2609e', '#e08a4a'] : ['#ffffff', '#bff4ff', '#9b7bff', '#ff8fc8'];   // 彗星色；淺底上白色看不見，改深一點的青
           const sg = sparkCv.getContext('2d');
           sg.scale(DPR, DPR);
           const TAU = 150, LIFT = .00005;   // 阻力時間常數（ms）、上飄加速度（px/ms²）
@@ -3638,7 +3690,7 @@ void main(){
             const age = now - t0, k = Math.exp(-dt / TAU);
             sg.clearRect(0, 0, W, H);
             sg.globalCompositeOperation = lumos ? 'source-over' : 'lighter';   // 揭開淺色（Lumos）：一般疊色，發光疊加在白底上會看不見
-            const core = (c) => (lumos && c === '#ffffff' ? '#ffb347' : lumos ? c : '#fff');   // 淺底上核心用彩色
+            const core = (c) => (lumos ? c : '#fff');   // 淺底上核心用彩色
             let alive = false;
             for (const p of ps) {
               const f = age / p.life;
@@ -3650,12 +3702,19 @@ void main(){
               const fade = Math.min(1, age / 60) * (1 - f) * (1 - f) * tw;
               sg.fillStyle = p.c;
               if (p.kind === 'dot') {
+                const sp = Math.hypot(p.vx, p.vy);
+                if (sp > .05) {   // 還在飛的光點：拖一條短彗尾
+                  const len = Math.min(26, sp * 60);
+                  sg.globalAlpha = fade * .5; sg.strokeStyle = p.c; sg.lineWidth = p.s * .9; sg.lineCap = 'round';
+                  sg.beginPath(); sg.moveTo(p.x, p.y); sg.lineTo(p.x - p.vx / sp * len, p.y - p.vy / sp * len); sg.stroke();
+                }
                 sg.globalAlpha = fade * .3; sg.beginPath(); sg.arc(p.x, p.y, p.s * 3, 0, 6.283); sg.fill();
                 sg.globalAlpha = fade; sg.fillStyle = core(p.c); sg.beginPath(); sg.arc(p.x, p.y, p.s * .7, 0, 6.283); sg.fill();
               } else if (p.kind === 'star') {
                 sg.globalAlpha = fade * .25; sg.beginPath(); sg.arc(p.x, p.y, p.s * 1.1, 0, 6.283); sg.fill();
                 sg.globalAlpha = fade; star(p.x, p.y, p.s * (.8 + .4 * tw));
-                sg.fillStyle = core(p.c); star(p.x, p.y, p.s * .45);
+                sg.globalAlpha = fade * .45; star(p.x, p.y, p.s * (1.8 + .8 * tw));   // 長而淡的繞射光芒
+                sg.globalAlpha = fade; sg.fillStyle = core(p.c); star(p.x, p.y, p.s * .45);
               } else {   // 菱形水晶碎片：翻轉時寬度變化，亮面、暗面交替
                 const fl = Math.cos(p.rot * 1.7);
                 sg.save(); sg.translate(p.x, p.y); sg.rotate(p.rot);

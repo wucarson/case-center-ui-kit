@@ -3028,7 +3028,7 @@ body.reduce #wall > .cell::after { animation: none !important; }
       setTimeout(() => { layer.remove(); shBusy = false; }, TOTAL + 40);
     }
     /* 深淺色轉場（魔杖，約 1.45 秒）：魔杖在中央後仰蓄力（三色光沿杖身灌注），甩下點擊時噴出火花、畫面輕震。
-       墨水先朝杖尖回縮，再向外擴散（0.85 秒，由慢到快）；墨水邊緣與光暈由 WebGL 逐幀畫（虹彩三色沿邊緣流轉、前緣白熱線），不支援時改用預畫的墨色圖。Lumos 揭開淺色，Nox 揭開深色。
+       從杖尖燒穿舊畫面，洞向外不規則燒開（0.85 秒，由慢到快）：洞緣外側焦黑、洞緣一圈三色餘燼與白熱細線、少量火星與灰燼往上飄（WebGL＋2D 畫布逐幀畫）；不支援 WebGL 時改用預畫的墨色圖。Lumos 揭開淺色，Nox 揭開深色。
        舊畫面沿柔邊墨流淡出，新畫面留在底層，交界保留一層舊配色殘影。 */
     document.fonts?.load('600 40px "Cormorant Garamond"', 'LumosNox').catch(() => {});
     // 接骨木魔杖（Canvas，轉場開始前畫一次）：杖尖在左（x = 0），杖身由尖漸粗、沿途 8 個節瘤（越靠握把越大），
@@ -3184,11 +3184,12 @@ body.reduce #wall > .cell::after { animation: none !important; }
       wandArt = { mask, lumos, nox, glow, spellAsh, wand, wandUrl: wand.toDataURL(), size, radius };   // wandUrl：杖身光流的遮罩
       return wandArt;
     }
-    /* 魔杖墨水的 WebGL 版：依實際螢幕解析度逐幀畫墨水邊緣與光暈（不會像放大的圖一樣糊）。
+    /* 魔杖燒穿的 WebGL 版：依實際螢幕解析度逐幀畫燒穿邊緣（不會像放大的圖一樣糊）。
+       · 燒穿：洞緣外側一圈寬窄不一的焦黑帶與淡烤痕（蓋在舊畫面上），洞緣一圈三色餘燼火線、焦黑帶裡零星閃爍的火點、最前緣白熱細線
        · 輪廓：照抄 prepareWandArt() 的「角度 → 半徑」公式，縮放倍率每幀從墨水元素（當驅動器、不顯示）讀，和 CSS 換色遮罩同一組關鍵影格，一定對齊
        · 熱浪：先用低頻噪聲偏移像素座標再算距離（取代 SVG 位移濾鏡）
-       · 流動滲開：邊緣疊兩層隨時間流動的噪聲（毛邊、濃淡），後方拉長噪聲做藍色紋路
-       · 虹彩：橘→粉→藍依邊緣角度＋時間循環；前緣白熱細線＋外圈約 40px 柔光
+       · 不規則推進：邊緣疊兩層隨時間流動的噪聲，像紙張燃燒有快有慢
+       · 虹彩：餘燼顏色是橘→粉→藍，依邊緣角度＋時間循環
        畫布與程式只建立一次、之後每次轉場重用；不支援或 context 遺失時回傳 null，改用圖片版 */
     let wandGl;
     function getWandGl() {
@@ -3220,19 +3221,27 @@ void main(){
   vec2 v=q-C;float a=atan(v.y,v.x);
   float d=length(v)-K*shape(a);
   float w=max(K*BAND,6.*D);
-  float df=d+(fbm(q*.04/D+vec2(T*.8,-T*.5))-.5)*9.*D+(n2(q*.13/D-T*1.5)-.5)*3.*D;
+  float nb=fbm(q*.03/D+vec2(T*.6,-T*.4));
+  float df=d+(nb-.5)*10.*D+(n2(q*.13/D-T*1.5)-.5)*3.*D;
   float ph=a/6.2832*2.+T*.35;
-  vec3 tint=iri(ph),warm=iri(ph-.15),cool=iri(ph+.25);
-  float wash=(1.-smoothstep(0.,w*.9,df))*step(0.,df)*.3*(.6+.8*fbm(q*.06/D+T));
-  float rim=smoothstep(-w*.45,-w*.05,df)*(1.-smoothstep(-w*.02,w*.08,df))*.55;
-  float vn=fbm(vec2(a*38.,df/w*2.2-T*1.2));
-  float veins=smoothstep(.55,.75,vn)*smoothstep(-w*1.3,-w*.4,df)*(1.-smoothstep(-w*.3,0.,df))*.6;
-  float line=exp(-abs(df)/(1.6*D));
-  float glow=exp(-max(df,0.)/(40.*D))*smoothstep(-w*.3,0.,df)*.45;
-  vec3 col=warm*wash+tint*rim+cool*veins+tint*glow+vec3(.9)*line;
-  float al=clamp(wash+rim+veins+glow*.6+line*.8,0.,1.);
-  col=1.-exp(-col*1.15);
-  gl_FragColor=vec4(col,al)*A;
+  vec3 tint=iri(ph),warm=iri(ph-.15);
+  /* 焦黑帶：洞緣外側（舊畫面上）一圈燒焦的深色，寬度隨噪聲忽寬忽窄（燃燒不均）；再往外一層淡淡的烤痕 */
+  float cw=w*(1.1+2.4*fbm(q*.012/D+vec2(3.1,T*.2)))+8.*D;
+  float x=df/cw;
+  float charA=step(0.,df)*(1.-smoothstep(.45,1.,x))*(.82+.18*nb);
+  float scorch=step(0.,df)*(1.-smoothstep(.8,2.6,x))*.4;
+  /* 餘燼（魔杖三色）：洞緣一圈發亮的火線＋焦黑帶裡零星閃爍的火點；最前緣白熱細線、外圈薄薄的光 */
+  float fl=.72+.28*sin(T*21.+a*37.+nb*14.);
+  float ember=smoothstep(-w*.3,0.,df)*(1.-smoothstep(0.,cw*.4,df))*fl;
+  float sp=smoothstep(.6,.76,fbm(q*.085/D+vec2(-T*.9,T*1.4)))*charA*(1.-x)*(.6+.4*fl);
+  float line=exp(-abs(df)/(1.4*D));
+  float glow=exp(-max(df,0.)/(26.*D))*smoothstep(-w*.3,0.,df)*.3;
+  float ab=max(charA,scorch);
+  vec3 base=mix(vec3(.36,.22,.12),vec3(.06,.035,.03),smoothstep(.2,.8,charA/max(ab,.001)))*ab;
+  vec3 em=tint*ember*1.35+warm*sp*1.6+vec3(1.)*line*.85+tint*glow;
+  em=1.-exp(-em*1.2);
+  float ea=clamp(ember*.9+sp+line*.8+glow*.5,0.,1.);
+  gl_FragColor=vec4(base*(1.-ea)+em,max(ab,ea))*A;
 }`;
       const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error('wandSwap shader', gl.getShaderInfoLog(s)); return s; };
       const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
@@ -3446,11 +3455,48 @@ void main(){
         if (G) {
           // WebGL 版：每幀讀驅動器的縮放（transform 矩陣）與透明度，畫一次
           const t0 = performance.now();
+          // 火星與灰燼（少量）：沿燃燒邊緣產生，往外、往上飄，閃爍後熄滅；火星用魔杖三色、灰燼是深灰碎片
+          const emCv = document.createElement('canvas'); emCv.className = 'wand-sparks';
+          emCv.width = Math.round(W * DPR); emCv.height = Math.round(H * DPR); fx.append(emCv);
+          const eg = emCv.getContext('2d'); eg.scale(DPR, DPR);
+          const EMC = ['#ffb347', '#ff4f8b', '#3d8bff', '#fff1d6'], embers = [];
+          const shapeAt = (a) => { const co = Math.sin(3 * a + .9) * .44 + Math.sin(5 * a - 1.7) * .31 + Math.sin(8 * a + .5) * .25, w = a + .063 * Math.sin(7 * a) + .034 * Math.sin(13 * a - .8);
+            return art.radius * (1 + .22 * (co + .42 * (Math.sin(14 * w + .9) * .48 + Math.sin(23 * w - 1.1) * .34 + Math.sin(32 * w) * .18))); };   // 同 shader 的輪廓
+          let lastT = t0;
+          const sparksAt = (now, k, alpha) => {
+            const dt = Math.min(40, now - lastT); lastT = now;
+            if (alpha > .3 && k > 0) for (let i = 0; i < 2; i++) {   // 每幀最多 2 顆，只生在畫面內的邊緣
+              const a = Math.random() * Math.PI * 2, r = k * shapeAt(a), x = tip[0] + Math.cos(a) * r, y = tip[1] + Math.sin(a) * r;
+              if (x < -20 || y < -20 || x > W + 20 || y > H + 20 || Math.random() < .35) continue;
+              const ash = Math.random() < .3;
+              embers.push({ x, y, vx: Math.cos(a) * (.03 + Math.random() * .06), vy: Math.sin(a) * .04 - .05 - Math.random() * .07, born: now, life: 500 + Math.random() * 500,
+                s: ash ? 2 + Math.random() * 2.5 : .8 + Math.random() * 1.3, ash, c: EMC[(Math.random() * 4) | 0], rot: Math.random() * 6, ph: Math.random() * 6 });
+            }
+            eg.clearRect(0, 0, W, H);
+            for (let i = embers.length - 1; i >= 0; i--) {
+              const p = embers[i], f = (now - p.born) / p.life;
+              if (f >= 1) { embers.splice(i, 1); continue; }
+              p.vy -= .00006 * dt; p.x += (p.vx + Math.sin(now / 160 + p.ph) * .02) * dt; p.y += p.vy * dt;   // 熱氣上升、左右飄
+              const fade = (1 - f) * (1 - f);
+              if (p.ash) {
+                eg.globalCompositeOperation = 'source-over'; eg.globalAlpha = fade * .55; eg.fillStyle = '#2a2320';
+                eg.save(); eg.translate(p.x, p.y); eg.rotate(p.rot + f * 4); eg.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); eg.restore();
+              } else {
+                eg.globalCompositeOperation = 'lighter';
+                const fl = .6 + .4 * Math.sin(now / 45 + p.ph);
+                eg.globalAlpha = fade * .35 * fl; eg.fillStyle = p.c; eg.beginPath(); eg.arc(p.x, p.y, p.s * 3, 0, 6.283); eg.fill();
+                eg.globalAlpha = fade * fl; eg.fillStyle = '#fff'; eg.beginPath(); eg.arc(p.x, p.y, p.s * .6, 0, 6.283); eg.fill();
+              }
+            }
+            eg.globalAlpha = 1;
+          };
           const frame = (now) => {
             if (!fx.isConnected || G.gl.isContextLost()) { if (fx.isConnected) pigment.style.visibility = ''; return; }   // context 遺失：露出墨水圖
             const cs = getComputedStyle(pigment);
             const m = cs.transform && cs.transform !== 'none' ? new DOMMatrixReadOnly(cs.transform) : null;
-            G.draw(m ? Math.hypot(m.a, m.b) : 0, +cs.opacity || 0, (now - t0) / 1000, hazeAt(now));
+            const k = m ? Math.hypot(m.a, m.b) : 0, alpha = +cs.opacity || 0;
+            G.draw(k, alpha, (now - t0) / 1000, hazeAt(now));
+            sparksAt(now, now - t0 > HIT ? k : 0, alpha);
             requestAnimationFrame(frame);
           };
           requestAnimationFrame(frame);

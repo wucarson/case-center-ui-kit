@@ -533,7 +533,7 @@ body.paused :is(.spin, .shim, .caret) { animation-play-state: paused; }
 .wx-tabs button[aria-selected="true"] { background: var(--card); color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgb(0 0 0 / .1); }
 /* 現在天氣 */
 /* 第一層：現在天氣——大圖示、大溫度、天氣說明（最醒目） */
-.wx-now { display: flex; align-items: center; gap: 12px; height: 100px; }   /* 固定高度：當日／當週面板因此一樣高；跟車窗同高 */
+.wx-now { display: flex; align-items: center; gap: 12px; height: 92px; }   /* 固定高度：當日／當週面板因此一樣高 */
 .wx-now > .wxi { width: 46px; height: 46px; stroke-width: 1.5; }
 .wx-now > b { font-size: calc(58px * var(--fs-k) * var(--rk, 1)); line-height: .9; font-weight: 600; letter-spacing: -.04em; color: var(--ink); font-variant-numeric: tabular-nums; }
 .wx-now > span { align-self: center; translate: 0 -.85em; margin: 0 4px 0 -8px; color: var(--muted); font-size: calc(18px * var(--fs-k) * var(--rk, 1)); }
@@ -593,10 +593,11 @@ button.wx-site:hover { background: var(--hover); }
 .wx-site small { min-width: 0; overflow: hidden; text-overflow: ellipsis; color: var(--muted); font-size: inherit; font-weight: 400; }
 /* 高鐵車窗（參考新幹線）：接近方形的大圓角窗；米灰塑膠外框（上亮下暗的漸層＋邊緣高光）、窗內一圈深色密封條與內凹陰影、上緣窗簾底桿與拉把；
    玻璃一道斜向反光；切換地點時百褶窗簾從上緣拉下、換好景色再拉上（.shut） */
-.wx { grid-template-columns: minmax(0, 1fr) 150px; column-gap: 16px; }   /* 車窗欄固定寬：車窗放在地點＋現在天氣右側 */
+.wx { grid-template-columns: minmax(0, 1fr) 200px; column-gap: 16px; }   /* 車窗欄固定寬：車窗放在地點＋現在天氣右側 */
 .wx:not(:has(> .wx-win)) { grid-template-columns: minmax(0, 1fr); }
 .wx > .wx-top { grid-column: 1; grid-row: 1; } .wx > .wx-now { grid-column: 1; grid-row: 2; }
-.wx > .wx-tabs { grid-column: 1; grid-row: 2; justify-self: end; align-self: end; }   /* 當日／當週：現在天氣右下角，緊貼圖表上方 */
+.wx > .wx-tabs { grid-column: 1; grid-row: 3; justify-self: start; align-self: start; z-index: 1; margin: 8px 0 0 10px; background: color-mix(in srgb, var(--ink) 7%, transparent); }   /* 當日／當週：圖表面板左上角，當作圖表的標題列 */
+.wx > .wx-tabs ~ .wx-pane { padding-top: 48px; }
 .wx > .wx-pane { grid-column: 1 / -1; grid-row: 3; }   /* 圖表單獨一整列 */
 .wx > .wx-win { grid-column: 2; grid-row: 1 / span 2; align-self: stretch; width: 100%; height: auto; aspect-ratio: auto; }   /* 跨地點＋現在天氣兩列，上下緣貼齊 */
 .wx-win { --bz: var(--card); --hl: rgb(255 255 255 / .5);   /* 外框＝卡片底色，只靠明暗做出內凹 */ position: relative; width: 216px; aspect-ratio: 21 / 23;   /* 接近方形（參考新幹線車窗） */ border-radius: 58px / 56px; background: radial-gradient(ellipse 78% 74% at 50% 54%, color-mix(in srgb, #000 22%, var(--bz)) 52%, color-mix(in srgb, #000 8%, var(--bz)) 68%, transparent 92%), linear-gradient(180deg, color-mix(in srgb, #000 14%, var(--bz)) 0%, var(--bz) 45%, color-mix(in srgb, #fff 45%, var(--bz)) 100%); box-shadow: inset 0 14px 22px -6px rgb(0 0 0 / .26), inset 0 -10px 16px -4px var(--hl), inset 0 0 0 1px var(--line-strong), inset 0 1.5px 0 1px var(--hl), 0 1px 0 var(--hl); }   /* 外框線：外緣一圈＋內側亮線 */   /* 內凹弧面：由外往中間連續變深，上半背光、下半受光，沒有分段的斜面 */

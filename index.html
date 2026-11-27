@@ -585,9 +585,9 @@ button.wx-site:hover { background: var(--hover); }
    玻璃一道斜向反光；切換地點時百褶窗簾從上緣拉下、換好景色再拉上（.shut） */
 .wx { grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; }
 .wx > .wx-win { grid-column: 2; grid-row: 1 / span 3; align-self: end; }   /* 下緣貼齊時段面板底部 */
-.wx-win { --bz: color-mix(in srgb, #dcd7cf 78%, var(--surface)); position: relative; width: 216px; aspect-ratio: 21 / 23;   /* 接近方形（參考新幹線車窗） */ border-radius: 58px / 56px; background: radial-gradient(ellipse 78% 74% at 50% 54%, color-mix(in srgb, #000 22%, var(--bz)) 52%, color-mix(in srgb, #000 8%, var(--bz)) 68%, transparent 92%), linear-gradient(180deg, color-mix(in srgb, #000 14%, var(--bz)) 0%, var(--bz) 45%, color-mix(in srgb, #fff 45%, var(--bz)) 100%); box-shadow: inset 0 14px 22px -6px rgb(0 0 0 / .26), inset 0 -10px 16px -4px rgb(255 255 255 / .5), inset 0 0 0 1px rgb(0 0 0 / .05), 0 1px 0 rgb(255 255 255 / .8); }   /* 內凹弧面：由外往中間連續變深，上半背光、下半受光，沒有分段的斜面 */
-:root[data-theme="dark"] .wx-win { --bz: #5b5853; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .wx-win { --bz: #5b5853; } }
+.wx-win { --bz: var(--card); --hl: rgb(255 255 255 / .5);   /* 外框＝卡片底色，只靠明暗做出內凹 */ position: relative; width: 216px; aspect-ratio: 21 / 23;   /* 接近方形（參考新幹線車窗） */ border-radius: 58px / 56px; background: radial-gradient(ellipse 78% 74% at 50% 54%, color-mix(in srgb, #000 22%, var(--bz)) 52%, color-mix(in srgb, #000 8%, var(--bz)) 68%, transparent 92%), linear-gradient(180deg, color-mix(in srgb, #000 14%, var(--bz)) 0%, var(--bz) 45%, color-mix(in srgb, #fff 45%, var(--bz)) 100%); box-shadow: inset 0 14px 22px -6px rgb(0 0 0 / .26), inset 0 -10px 16px -4px var(--hl), inset 0 0 0 1px rgb(0 0 0 / .05), 0 1px 0 var(--hl); }   /* 內凹弧面：由外往中間連續變深，上半背光、下半受光，沒有分段的斜面 */
+:root[data-theme="dark"] .wx-win { --hl: rgb(255 255 255 / .08); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .wx-win { --hl: rgb(255 255 255 / .08); } }
 .wx-glass { position: absolute; inset: 15px 14px 14px; border-radius: 44px / 42px; overflow: hidden; background: linear-gradient(180deg, #7fb2ec, #cfe3f6 62%, #8fa88c 63%, #6f8a6e); }
 .wx-glass canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .wx-glass::after { content: ""; position: absolute; inset: 0; z-index: 3; border-radius: inherit; pointer-events: none; box-shadow: 0 0 0 1px rgb(0 0 0 / .18), inset 0 0 0 2.5px rgb(38 36 34 / .78), inset 0 10px 16px rgb(0 0 0 / .45), inset 0 -2px 5px rgb(0 0 0 / .18); }   /* 最深處：密封條＋上緣深陰影 */

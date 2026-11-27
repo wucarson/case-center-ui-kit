@@ -4865,12 +4865,12 @@ void main(){
     if(m>0.){vec3 rc2=scene(p-off*2.4);vec3 n=normalize(vec3(off/3.5,1.));float hl=pow(max(dot(n,normalize(vec3(-.4,-.6,.7))),0.),22.);col=mix(col,rc2*1.04+hl*.7,m);col*=1.-m*smoothstep(.55,1.,length(off)/3.5)*.25;}
   }
   if(is(4.)){   /* 少許結霜：窗角與窗緣 */
-    float e=-dw,n=fbm(p*.045),grow=G*(18.+26.*fbm(p*.012+2.));   /* 窗緣一圈霜，角落最厚 */
-    float reg=max(smoothstep(grow,grow-14.,e-n*16.),smoothstep(G*70.,G*70.-26.,length(min(p,S-p))-n*28.));
+    float e=-dw,n=fbm(p*.045),grow=G*(14.4+20.8*fbm(p*.012+2.));   /* 窗緣一圈霜，角落最厚（範圍再縮 20%） */
+    float reg=max(smoothstep(grow,grow-11.,e-n*13.),smoothstep(G*56.,G*56.-21.,length(min(p,S-p))-n*22.));
     vec2 fp=p+vec2(fbm(p*.08),fbm(p*.08+3.))*10.;   /* 冰晶紋：較大的羽狀枝晶＋細紋 */
     float a1=pow(abs(sin((fp.x+fp.y)*.26+n*9.)),8.),a2=pow(abs(sin((fp.x-fp.y)*.23+n*8.)),8.),a3=pow(abs(sin(fp.y*.32+n*6.)),10.),a4=pow(abs(sin((fp.x+fp.y)*.9+n*4.)),18.)*.6;
     float spk=step(.97,h(floor(p/4.)))*smoothstep(.35,0.,length(fract(p/4.)-.5))*(.5+.5*sin(T*5.+h(floor(p/4.)+2.)*40.));
-    col=mix(col,DK>.5?vec3(.75,.86,.98):vec3(.96,.99,1.),reg*(.58*(.3+.7*max(max(a1,a2),max(a3,a4)))+.22));col+=spk*reg*.6;
+    col=mix(col,DK>.5?vec3(.75,.86,.98):vec3(.96,.99,1.),reg*(.348*(.3+.7*max(max(a1,a2),max(a3,a4)))+.132));col+=spk*reg*.36;   /* 不透明度降 40% */
     col=mix(col,DK>.5?vec3(.5,.56,.64):vec3(.9,.93,.96),smoothstep(-22.,0.,dw)*.3);   /* 玻璃邊緣起霧 */
   }
   if(dw>-9.&&!is(4.)){float k=smoothstep(-9.,0.,dw);vec2 nrm=normalize(p-S*.5);col.r=mix(col.r,scene(p-nrm*k*3.).r,k*.8);col.b=mix(col.b,scene(p+nrm*k*3.).b,k*.8);}   /* 玻璃厚度：窗緣色散 */

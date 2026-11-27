@@ -1986,6 +1986,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .lumos .wand-word .ww-l { stroke: #b07a22; }
 .nox .wand-word .ww-l { stroke: #c7d3f2; }
 .wand-word .ww-glow { opacity: 0; }   /* 字後面的柔光（靜態漸層，只動透明度） */
+.wand-ignite { position: absolute; z-index: 4; width: 46px; height: 46px; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, #fff 0 14%, #ffd27a 26%, #ffb347 38%, rgb(255 79 139 / .75) 54%, rgb(61 139 255 / .3) 70%, rgb(61 139 255 / 0) 80%); box-shadow: 0 0 22px 6px rgb(255 120 90 / .45); }   /* 魔杖引燃火點：白熱核心→橘→粉→藍（魔杖三色） */
 .wand-halo { position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; }
 .lumos .wand-halo { background: radial-gradient(circle, #fff 0, rgb(255 253 245 / .97) 22%, rgb(255 246 222 / .75) 38%, rgb(255 240 210 / .3) 52%, rgb(255 255 255 / 0) 64%); }   /* 過曝的光：中心整片白、邊緣暖白柔退 */
 .nox .wand-halo { background: radial-gradient(circle, #fff 0, rgb(246 249 255 / .92) 18%, rgb(205 220 255 / .62) 34%, rgb(138 164 255 / .28) 50%, rgb(110 140 255 / 0) 64%); }   /* Nox 使用冷銀藍光暈 */
@@ -3027,7 +3028,7 @@ body.reduce #wall > .cell::after { animation: none !important; }
       }
       setTimeout(() => { layer.remove(); shBusy = false; }, TOTAL + 40);
     }
-    /* 深淺色轉場（魔杖，約 1.45 秒）：魔杖在中央後仰蓄力（三色光沿杖身灌注），甩下點擊時噴出星塵碎片（不震動畫面）；魔杖一直留在畫面上，收尾才淡出。
+    /* 深淺色轉場（魔杖，約 1.65 秒）：魔杖從右下滑向中央（三色光沿杖身灌注），杖尖碰到畫面時點出一個閃爍的小火點（引燃），燒開時噴出星塵碎片；魔杖一直留在畫面上，收尾才淡出。
        從杖尖燒穿舊畫面，洞向外不規則燒開（0.85 秒，由慢到快）：洞緣外側焦黑、洞緣一圈三色餘燼與白熱細線、少量火星與灰燼往上飄（WebGL＋2D 畫布逐幀畫）；不支援 WebGL 時改用預畫的墨色圖。Lumos 揭開淺色，Nox 揭開深色。
        舊畫面沿柔邊墨流淡出，新畫面留在底層，交界保留一層舊配色殘影。 */
     document.fonts?.load('600 40px "Cormorant Garamond"', 'LumosNox').catch(() => {});
@@ -3395,7 +3396,7 @@ void main(){
 
       const listeners = new AbortController();
       const skip = () => vt.skipTransition();
-      const watchdog = setTimeout(skip, Math.max(0, 1900 - (performance.now() - startedAt)));
+      const watchdog = setTimeout(skip, Math.max(0, 2150 - (performance.now() - startedAt)));
       window.addEventListener('resize', () => {
         if (innerWidth !== W || innerHeight !== H) skip();
       }, { signal: listeners.signal });
@@ -3410,7 +3411,7 @@ void main(){
           });
           return;
         }
-        const DUR = 1450, C0 = 95, HIT = 300, SPREAD = 850;   // 出現 → 蓄力後仰（光流灌注）→ 甩杖點下（HIT）→ 擴散 0.85 秒
+        const DUR = 1650, C0 = 95, HIT = 520, SPREAD = 850, IGN = HIT - 220;   // 出現、滑向中央（光流灌注）→ 杖尖碰到畫面引燃（IGN，火點閃爍 0.22 秒）→ 燒開（HIT）→ 擴散 0.85 秒
         const motion = { pseudoElement: '::view-transition-old(root)', duration: DUR, fill: 'both' };
         const startSpread = HIT / DUR, endSpread = (HIT + SPREAD) / DUR;
         const spreadEase = 'cubic-bezier(.55, 0, .9, .4)';   // 由慢到快：起步慢慢滲開，越推越快衝出畫面
@@ -3422,7 +3423,8 @@ void main(){
           const mk = (span) => ({ maskSize: `100% 100%, ${span}px ${span}px`, maskPosition: `0px 0px, ${(tip[0] - span / 2).toFixed(1)}px ${(tip[1] - span / 2).toFixed(1)}px` });
           de.animate([
             { ...mk(0), offset: 0 },
-            { ...mk(0), offset: startSpread, easing: 'cubic-bezier(.2, 0, .35, 1)' },
+            { ...mk(0), offset: IGN / DUR, easing: 'ease-in' },
+            { ...mk(contractSize), offset: startSpread, easing: 'cubic-bezier(.2, 0, .35, 1)' },
             { ...mk(contractSize * 1.12), offset: seedRelease, easing: spreadEase },
             { ...mk(finalSpan), offset: endSpread },
             { ...mk(finalSpan), offset: 1 }
@@ -3440,8 +3442,9 @@ void main(){
 
         const inkTransform = span => `translate(-50%, -50%) scale(${span / art.size})`;
         const inkFrames = [
-          { opacity: 0, transform: inkTransform(textureSpan(seedRadius)), easing: 'ease-out' },
-          { opacity: 1, offset: 55 / DUR },
+          { opacity: 0, transform: inkTransform(textureSpan(2)) },
+          { opacity: 0, transform: inkTransform(textureSpan(2)), offset: IGN / DUR, easing: 'ease-in' },   // 引燃：從一個點燒出小洞
+          { opacity: 1, offset: (IGN + 60) / DUR },
           { opacity: 1, transform: inkTransform(contractSize), offset: startSpread, easing: 'ease-out' },
           { transform: inkTransform(contractSize * 1.12), offset: seedRelease, easing: spreadEase },
           { opacity: 1, offset: (HIT + SPREAD * .65) / DUR },
@@ -3518,20 +3521,30 @@ void main(){
         requestAnimationFrame(wobble);
         }
 
-        // 揮杖：在中央亮起 → 以握柄為軸往後仰蓄力（杖尖退約 90px）→ 加速甩下、稍微超過 → 回彈定位，停在畫面上直到收尾淡出
+        // 魔杖：沿杖身方向從右下慢慢滑向中央（淡入），杖尖碰到畫面時停住引燃；停在畫面上直到收尾淡出
         const wand = fx.querySelector('.wand');
-        const deg = (px) => px / WL * 180 / Math.PI;   // 杖尖位移（px）換成繞握柄的角度
-        const swing = (px, scale = 1) => `translateX(${WL.toFixed(0)}px) rotate(${deg(px).toFixed(3)}deg) translateX(${(-WL).toFixed(0)}px) scale(${scale})`;
-        const CHARGE = HIT - 60;   // 蓄力到最後仰的時間點，之後 60ms 甩下
+        const GD = Math.min(220, WL * .2);   // 滑行距離
+        const glide = (px) => `translateX(${px.toFixed(1)}px)`;   // 魔杖本身已旋轉，translateX＝沿杖身方向
         wand.animate([
-          { offset: 0, opacity: 0, transform: swing(0, .97) },
-          { offset: (C0 - 70) / DUR, opacity: 0, transform: swing(0, .97) },
-          { offset: C0 / DUR, opacity: 1, transform: swing(0), easing: 'cubic-bezier(.2, .8, .3, 1)' },
-          { offset: CHARGE / DUR, opacity: 1, transform: swing(-90), easing: 'cubic-bezier(.55, 0, .9, .45)' },
-          { offset: HIT / DUR, opacity: 1, transform: swing(18, .98), easing: 'cubic-bezier(.2, .8, .3, 1)' },
-          { offset: (HIT + 90) / DUR, opacity: 1, transform: swing(0) },
-          { offset: (DUR - 320) / DUR, opacity: 1, transform: swing(0), easing: 'ease-in' },   // 魔杖留到最後，收尾才淡出
-          { offset: 1, opacity: 0, transform: swing(0, .99) }], { duration: DUR, fill: 'both' });
+          { offset: 0, opacity: 0, transform: glide(GD) },
+          { offset: (C0 - 70) / DUR, opacity: 0, transform: glide(GD), easing: 'cubic-bezier(.25, .7, .3, 1)' },
+          { offset: (C0 + 90) / DUR, opacity: 1 },
+          { offset: IGN / DUR, opacity: 1, transform: glide(0) },
+          { offset: (DUR - 320) / DUR, opacity: 1, transform: glide(0), easing: 'ease-in' },   // 魔杖留到最後，收尾才淡出
+          { offset: 1, opacity: 0, transform: glide(0) }], { duration: DUR, fill: 'both' });
+        // 引燃火點：杖尖碰到畫面時亮起一個小火點，像火柴點紙一樣忽明忽暗閃幾下、越燒越大，燒開時散去
+        const ign = document.createElement('i'); ign.className = 'wand-ignite';
+        ign.style.left = tip[0] + 'px'; ign.style.top = tip[1] + 'px'; fx.append(ign);
+        ign.animate([
+          { opacity: 0, transform: 'translate(-50%, -50%) scale(.2)' },
+          { opacity: 0, transform: 'translate(-50%, -50%) scale(.2)', offset: IGN / DUR },
+          { opacity: .95, transform: 'translate(-50%, -50%) scale(.55)', offset: (IGN + 40) / DUR },
+          { opacity: .35, transform: 'translate(-50%, -50%) scale(.45)', offset: (IGN + 80) / DUR },
+          { opacity: 1, transform: 'translate(-50%, -50%) scale(.8)', offset: (IGN + 125) / DUR },
+          { opacity: .5, transform: 'translate(-50%, -50%) scale(.7)', offset: (IGN + 165) / DUR },
+          { opacity: 1, transform: 'translate(-50%, -50%) scale(1.05)', offset: HIT / DUR },
+          { opacity: 0, transform: 'translate(-50%, -50%) scale(1.7)', offset: (HIT + 160) / DUR },
+          { opacity: 0, transform: 'translate(-50%, -50%) scale(1.7)' }], { duration: DUR, fill: 'both' });
         // 照片魔杖打光：蓄力時三色柔光沿杖身從握柄流向杖尖，杖尖施法光照亮杖頭；光只疊在杖身像素上，結束後就是照片原圖
         if (photo) {
           const PW = wc.width, PH = wc.height;

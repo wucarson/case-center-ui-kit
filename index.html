@@ -3008,7 +3008,10 @@ body.reduce #wall > .cell::after { animation: none !important; }
           { opacity: 0, transform: `translate(${(Math.cos(a0) * v).toFixed(0)}px, ${(Math.sin(a0) * v + 40).toFixed(0)}px) rotate(${(Math.random() * 720 - 360).toFixed(0)}deg) scale(.3)` }],
           { duration: 520 + Math.random() * 180, delay: BOOM - 20, easing: 'cubic-bezier(.15, .7, .3, 1)', fill: 'both' });
       }
-      setTimeout(() => { layer.remove(); shBusy = false; }, TOTAL + 40);
+      let ended = false;
+      const end = () => { if (ended) return; ended = true; clearTimeout(endT); layer.remove(); if (shSkip === end) shSkip = null; shBusy = false; };
+      const endT = setTimeout(end, TOTAL + 40);
+      shSkip = end;
     }
     /* 深淺色轉場（魔杖，約 1.45 秒）：魔杖在中央微微後收（光流沿杖身灌注），杖尖往前輕點，點下處泛起兩圈彗星色光環與一道鏡頭光暈，從中央燒開並噴出星塵與星光；配色取自彗星（青白、紫、粉橘），燒穿外緣是深藍紫夜空；魔杖一直留在畫面上，收尾才淡出（不顯示咒語字）。
        從杖尖燒穿舊畫面，洞向外不規則燒開（0.85 秒，由慢到快）：洞緣外側焦黑、洞緣一圈三色餘燼與白熱細線、少量火星與灰燼往上飄（WebGL＋2D 畫布逐幀畫）；不支援 WebGL 時改用預畫的墨色圖。Lumos 揭開淺色，Nox 揭開深色。
@@ -3404,6 +3407,7 @@ void main(){
       try {
         vt = document.startViewTransition(() => {
           apply();
+          if (cleaned) return;   // 連點時這段已被跳過並收尾：不再加特效層
           if (useInkMask) de.style.setProperty('--wand-ink-mask', `url("${art.mask}")`);
           document.body.append(fx);
         });
@@ -3702,7 +3706,10 @@ void main(){
           { opacity: 0, transform: haloScale(1.1) }
         ], { duration: 500, delay: HIT, fill: 'both', easing: 'cubic-bezier(.23, 1, .32, 1)' });
       }).catch(skip);
+      let cleaned = false;
       const cleanUp = () => {
+        if (cleaned) return; cleaned = true;
+        if (shSkip === skipWand) shSkip = null;
         clearTimeout(watchdog);
         listeners.abort();
         fx.remove();
@@ -3711,6 +3718,8 @@ void main(){
         de.style.removeProperty('--wcx'); de.style.removeProperty('--wcy');
         shBusy = false;
       };
+      const skipWand = () => { try { vt.skipTransition(); } catch (e) {} cleanUp(); return vt.updateCallbackDone; };
+      shSkip = skipWand;
       vt.finished.then(cleanUp, cleanUp);
     }
     /* 深淺色轉場「亮度」（預設，約 0.45 秒）：像調螢幕亮度
@@ -3730,12 +3739,18 @@ void main(){
         de.animate([{ filter: 'brightness(1)', easing: ease }, { filter: out, offset: 0.55 }, { filter: out }], { ...o, pseudoElement: '::view-transition-old(root)' });
         de.animate([{ opacity: 0, filter: from }, { opacity: 0, filter: from, offset: 0.33, easing: ease }, { opacity: 1, filter: 'brightness(1)' }], { ...o, pseudoElement: '::view-transition-new(root)' });
       }).catch(() => {});
-      vt.finished.finally(() => { de.classList.remove('vt-dim'); shBusy = false; });
+      let ended = false;
+      const end = () => { if (ended) return; ended = true; de.classList.remove('vt-dim'); if (shSkip === skipDim) shSkip = null; shBusy = false; };
+      const skipDim = () => { try { vt.skipTransition(); } catch (e) {} end(); return vt.updateCallbackDone; };
+      shSkip = skipDim;
+      vt.finished.finally(end);
     }
-    let shBusy = false;   // 動畫進行中再按：忽略，避免前一段被打斷、畫面停在半途
+    let shBusy = false, shSkip = null;   // 動畫進行中：shSkip＝把目前這段直接跳到結尾並收尾（再按切換時用）
     if ('requestIdleCallback' in window && document.startViewTransition
         && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      requestIdleCallback(() => { try { prepareWandArt(); getWandGl(); } catch { /* 按下切換時可直接換色 */ } });   // 墨水圖與 WebGL 程式都先準備好，點擊時不卡
+      requestIdleCallback(() => { try { prepareWandArt(); getWandGl(); } catch { /* 按下切換時可直接換色 */ } });
+      const warmHole = () => requestIdleCallback(() => { try { holeMapsFor(innerWidth, innerHeight, true); holeMapsFor(innerWidth, innerHeight, false); holeGlPrep(Math.min(1.5, devicePixelRatio || 1)); } catch { /* 點擊時再算 */ } });
+      warmHole(); addEventListener('resize', () => { clearTimeout(warmHole.t); warmHole.t = setTimeout(warmHole, 600); });   // 墨水圖與 WebGL 程式都先準備好，點擊時不卡
     }
     /* 深淺色轉場（黑洞／白洞，兩個方向都約 1.45 秒）：黑洞的外觀不變，畫面像海水漩渦一樣被捲進洞裡（白洞反過來湧出）
        · 做法：View Transitions 拍下舊畫面；被捲走的那一層（黑洞＝舊畫面、白洞＝新畫面）套 SVG 濾鏡 #bh-lens：
@@ -3747,28 +3762,12 @@ void main(){
        · 白洞（切到淺色）：中央白色光核；新畫面沿螺旋臂從洞裡湧出、漩渦解開攤平；爆開時衝擊光環＋震動
        · WebGL 疊加：沿螺旋流進洞裡（白洞往外）的白色泡沫流線、光塵、光暈、暗角、膠片顆粒；每一格只由時間 t 決定
        · 不支援 View Transitions 或減少動態時直接切換 */
-    function holeSwap(next, apply) {
-      if (shBusy) return;
-      if (!document.startViewTransition || document.body.classList.contains('reduce') || matchMedia('(prefers-reduced-motion: reduce)').matches) { apply(); return; }
-      shBusy = true;
-      const de = document.documentElement, dark = next === 'dark', W = innerWidth, H = innerHeight, C = [W / 2, H / 2], M = Math.min(W, H), maxD = Math.hypot(W, H) / 2;
-      const K = parseFloat(getComputedStyle(de).getPropertyValue('--dur')) || 1;   // 動畫速度設定（時間軸整條跟著縮放）
-      const io = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2), cl = (x) => Math.max(0, Math.min(1, x));
-      // 時間軸（毫秒，速度 1 倍時）：兩個方向都在 1.45 秒內完成；HIT＝衝擊（黑洞收完、白洞爆開）
-      const FORM = 150, W0 = 80, W1 = 1150, HIT = dark ? W1 : W0, FADE = dark ? W1 : 800, END = 1450, SPIN = dark ? 1 : -1;
-      const LOBE = 0.7, far = maxD / LOBE + 30;   // 螺旋臂最內側在半徑的 70%；一開始最內側就在螢幕角落，馬上看得到縫隙
-      const prog = (t) => cl((t - W0) / (W1 - W0)), ease = (p) => (dark ? Math.pow(p, 1.6) : 1 - Math.pow(1 - p, 1.6));   // 吸入加速、放出減速
-      const armR = (t) => { const e = ease(prog(t)); return dark ? far * (1 - e) : far * e; };   // 螺旋臂外緣的半徑
-      const twist = (t) => { const p = prog(t); return t < W0 ? (dark ? 0 : 1) : dark ? Math.pow(p, 1.1) : Math.pow(1 - p, 1.1); };   // 漩渦累積量：黑洞越捲越緊、白洞漸漸解開
-      // 整層再轉一圈：只在螺旋臂外緣 ≤ 畫面短邊一半時轉（看得到的部分完全在畫面內，不露長方形的邊）
-      const eIn = M * 0.5 / far;
-      const spin = (t) => { const e = ease(prog(t)), k = dark ? cl((e - (1 - eIn)) / eIn) : 1 - cl(e / eIn); return -SPIN * 360 * (dark ? Math.pow(k, 0.8) : k); };
-      const edgeR = (t) => { const r = armR(t) * 0.86; return r > 0 && r < maxD ? r : 0; };   // 給 WebGL：前緣的平均半徑
-      const r0 = M * 0.028, hole = (t) => r0 * (t < FORM ? io(t / FORM) : 1 - io(cl((t - FADE) / 260)));
-      const lensI = (t) => Math.pow(Math.sin(Math.PI * prog(t)), 1.3);   // 光暈、暗角、顆粒的強度
-      const speed = (t) => { const p = prog(t); return t < W0 || t > W1 ? 0 : dark ? Math.pow(p, 1.6) : Math.pow(1 - p, 1.6); };   // 下落速度：黑洞越接近洞越快、白洞剛湧出最快
-
-      /* ---- 貼圖（畫一次）：m1＝漩渦流場、m2＝徑向（色差、徑向模糊）、arm＝5 瓣柔邊圓（螺旋臂的形狀） ---- */
+    /* 黑洞貼圖：依畫面尺寸與方向（黑洞／白洞）計算一次並快取；網頁閒置時先算好目前尺寸的兩個方向，點擊切換時不卡 */
+    const holeMaps = new Map();
+    function holeMapsFor(W, H, dark) {
+      const key = W + 'x' + H + (dark ? 'd' : 'l');
+      if (holeMaps.has(key)) return holeMaps.get(key);
+      const SPIN = dark ? 1 : -1, LOBE = 0.7, cl = (x) => Math.max(0, Math.min(1, x));
       const mapURL = (fn) => {
         const mw = 384, mh = Math.max(128, Math.round(mw * H / W)), cv = document.createElement('canvas'); cv.width = mw; cv.height = mh;
         const g = cv.getContext('2d'), im = g.createImageData(mw, mh), R = Math.hypot(mw, mh) / 2;
@@ -3791,60 +3790,15 @@ void main(){
         }
         g.putImageData(im, 0, 0); return cv.toDataURL();
       })();
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'bh-svg'); svg.setAttribute('aria-hidden', 'true');
-      const img = (href, id) => `<feImage href="${href}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none" result="${id}"/>`;
-      const ch = (inp, k, out) => `<feColorMatrix in="${inp}" type="matrix" values="${[0, 1, 2].map((c) => [0, 1, 2, 3, 4].map((j) => (c === k && j === k ? 1 : 0)).join(' ')).join(' ')} 0 0 0 1 0" result="${out}"/>`;
-      svg.innerHTML = `<filter id="bh-lens" x="0" y="0" width="${W}" height="${H}" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-        ${img(m1, 'm1')}${img(m2, 'm2')}
-        <feImage class="a-img" href="${armURL}" x="${C[0]}" y="${C[1]}" width="1" height="1" preserveAspectRatio="none" result="a0"/>
-        <feDisplacementMap class="d-arm" in="a0" in2="m1" scale="0" xChannelSelector="R" yChannelSelector="G" result="arm"/>
-        <feDisplacementMap class="d-warp" in="SourceGraphic" in2="m1" scale="0" xChannelSelector="R" yChannelSelector="G" result="warp"/>
-        <feDisplacementMap class="d-zoom" in="warp" in2="m2" scale="0" xChannelSelector="R" yChannelSelector="G" result="zoom"/>
-        <feComposite in="warp" in2="zoom" operator="arithmetic" k2=".55" k3=".45" result="rb"/>
-        <feDisplacementMap class="d-ca1" in="rb" in2="m2" scale="0" xChannelSelector="R" yChannelSelector="G" result="cr"/>
-        <feDisplacementMap class="d-ca2" in="rb" in2="m2" scale="0" xChannelSelector="R" yChannelSelector="G" result="cb"/>
-        ${ch('cr', 0, 'r')}${ch('rb', 1, 'g')}${ch('cb', 2, 'b')}
-        <feComposite in="r" in2="g" operator="arithmetic" k2="1" k3="1" result="rg"/>
-        <feComposite in="rg" in2="b" operator="arithmetic" k2="1" k3="1" result="col"/>
-        <feComposite in="col" in2="arm" operator="in" result="cut"/>
-        <feGaussianBlur in="arm" stdDeviation="6" result="armb"/>
-        <feComposite in="armb" in2="arm" operator="arithmetic" k2=".28" k3="-.28" result="rim"/>
-        <feFlood flood-color="${dark ? '#fff1d6' : '#fffaf0'}" result="rc"/>
-        <feComposite in="rc" in2="rim" operator="in" result="rimc"/>
-        <feMerge><feMergeNode in="cut"/><feMergeNode in="rimc"/></feMerge>
-      </filter>`;
-      document.body.append(svg);
-      const q = (c) => svg.querySelector(c), aImg = q('.a-img'), dArm = q('.d-arm'), dWarp = q('.d-warp'), dZoom = q('.d-zoom'), dCa1 = q('.d-ca1'), dCa2 = q('.d-ca2');
-      const lens = (t) => {   // 漩渦（流場累積）、螺旋臂、徑向模糊、色差
-        const tw = (M * 0.6 * twist(t)).toFixed(1), v = speed(t), r = Math.max(0.5, armR(t));
-        dWarp.setAttribute('scale', tw); dArm.setAttribute('scale', tw);
-        dZoom.setAttribute('scale', (M * 0.07 * v).toFixed(1));
-        dCa1.setAttribute('scale', (M * 0.022 * v).toFixed(1)); dCa2.setAttribute('scale', (-M * 0.022 * v).toFixed(1));
-        aImg.setAttribute('x', (C[0] - r).toFixed(1)); aImg.setAttribute('y', (C[1] - r).toFixed(1));
-        aImg.setAttribute('width', (2 * r).toFixed(1)); aImg.setAttribute('height', (2 * r).toFixed(1));
-      };
-      const fx = document.createElement('div'); fx.className = 'bh-fx'; fx.setAttribute('aria-hidden', 'true');
-      fx.innerHTML = '<canvas class="bh-gl"></canvas><canvas class="bh-dust"></canvas>';
-      const DPR = Math.min(1.5, devicePixelRatio || 1), glc = fx.querySelector('.bh-gl'), dc = fx.querySelector('.bh-dust');
-      for (const c of [glc, dc]) { c.width = Math.round(W * DPR); c.height = Math.round(H * DPR); }
-      let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-
-      /* ---- 光塵：固定種子，位置只由 t 決定；沿螺旋前緣，黑洞往中央流、白洞往外噴 ---- */
-      const dust = Array.from({ length: 600 }, () => ({ b: rnd() * (W1 - 350), L: 420 + rnd() * 380, k: 0.2 + rnd() * 0.8, a0: rnd() * 6.28, w: 0.6 + rnd() * 1.2 }));
-      const dustAt = (q, t, R) => {   // R：這一格的前緣半徑（拖尾的前一點也用同一個，才不會拉成直線）
-        const u = (t - q.b) / q.L; if (u <= 0 || u >= 1) return null;
-        const rr = dark ? R * (1 - q.k * 0.45 * u * u) + q.k * 30 * (1 - u) : R * (1 + q.k * 0.25 * u);
-        const a = q.a0 + SPIN * (dark ? 3.2 : 2) * u * u;
-        return [C[0] + Math.cos(a) * rr, C[1] + Math.sin(a) * rr, Math.pow(Math.sin(Math.PI * u), 0.8)];
-      };
-
-      /* ---- WebGL：中央的洞、愛因斯坦環、前緣光環、泡沫流線、衝擊光環、光暈、暗角、顆粒、光塵 ---- */
-      let paintGl = () => {}, paintDust = null;   // paintDust：光塵的 WebGL 版（建立失敗就用 2D 畫布）
-      const gl = glc.getContext('webgl', { premultipliedAlpha: true, antialias: false });
-      if (gl) {
-        const D = DPR.toFixed(2);
-        const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
-        const FS = `precision highp float;
+      const o = { m1, m2, armURL };
+      if (holeMaps.size > 6) holeMaps.clear();   // 視窗尺寸變很多次時不無限累積
+      holeMaps.set(key, o);
+      return o;
+    }
+    /* 黑洞的 WebGL：畫布、context、著色器程式只建立一次，之後每次轉場重用（閒置時先編譯好）；
+       每次新建 context 會讓點擊卡 20–150ms，連續切換還會累積到瀏覽器的 context 上限 */
+    function holeFS(D) {
+      return `precision highp float;
 uniform vec2 R;uniform float RS,CR,T,MODE,SHOCK,SHOCKA,LI,SP,SPIN;
 float h1(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float stars(vec2 q){vec2 g=floor(q),f=fract(q);float h=h1(g);vec2 c=vec2(h1(g+1.3),h1(g+2.7));return smoothstep(.09,0.,length(f-c))*step(.8,h)*(.6+.4*sin(T*.004*(1.+h*5.)+h*40.));}
@@ -3888,21 +3842,115 @@ void main(){
   float ga=abs(n-.5)*.14*LI;o=vec4(o.rgb*(1.-ga)+vec3(step(.5,n))*ga,o.a+ga*(1.-o.a));
   gl_FragColor=o;
 }`;
-        const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error('holeSwap shader', gl.getShaderInfoLog(s)); return s; };
-        const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr);
+    }
+    const HOLE_DVS = 'attribute vec2 p;attribute vec2 sa;uniform vec2 RR;varying vec2 v;void main(){v=sa;gl_Position=vec4(p.x/RR.x*2.-1.,1.-p.y/RR.y*2.,0.,1.);}';
+    const HOLE_DFS = 'precision mediump float;varying vec2 v;uniform vec3 DC;void main(){float k=exp(-v.x*v.x*9.)+exp(-v.x*v.x*1.6)*.35;float a=v.y*k;gl_FragColor=vec4(DC*a,a*.7);}';
+    const holeGL = { cv: null, gl: null };
+    function holeGlPrep(DPR) {
+      if (!holeGL.gl || holeGL.gl.isContextLost()) {
+        const cv = document.createElement('canvas'); cv.className = 'bh-gl';
+        const gl = cv.getContext('webgl', { premultipliedAlpha: true, antialias: false });
+        if (!gl) return null;
+        Object.assign(holeGL, { cv, gl });
+      }
+      const gl = holeGL.gl, D = DPR.toFixed(2);
+      gl.__bh ||= {};
+      const sh = (type, src) => { const o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) console.error('holeSwap shader', gl.getShaderInfoLog(o)); return o; };
+      const prog = (key, vs, fs) => gl.__bh[key] || (gl.__bh[key] = (() => { const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p); return p; })());
+      prog('hole' + D, 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}', holeFS(D));
+      prog('dust', HOLE_DVS, HOLE_DFS);
+      gl.__tri ||= gl.createBuffer(); gl.__dBuf ||= gl.createBuffer();
+      return gl;
+    }
+    function holeSwap(next, apply) {
+      if (shBusy) return;
+      if (!document.startViewTransition || document.body.classList.contains('reduce') || matchMedia('(prefers-reduced-motion: reduce)').matches) { apply(); return; }
+      shBusy = true;
+      const de = document.documentElement, dark = next === 'dark', W = innerWidth, H = innerHeight, C = [W / 2, H / 2], M = Math.min(W, H), maxD = Math.hypot(W, H) / 2;
+      const K = parseFloat(getComputedStyle(de).getPropertyValue('--dur')) || 1;   // 動畫速度設定（時間軸整條跟著縮放）
+      const io = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2), cl = (x) => Math.max(0, Math.min(1, x));
+      // 時間軸（毫秒，速度 1 倍時）：兩個方向都在 1.45 秒內完成；HIT＝衝擊（黑洞收完、白洞爆開）
+      const FORM = 150, W0 = 80, W1 = 1150, HIT = dark ? W1 : W0, FADE = dark ? W1 : 800, END = 1450, SPIN = dark ? 1 : -1;
+      const LOBE = 0.7, far = maxD / LOBE + 30;   // 螺旋臂最內側在半徑的 70%；一開始最內側就在螢幕角落，馬上看得到縫隙
+      const prog = (t) => cl((t - W0) / (W1 - W0)), ease = (p) => (dark ? Math.pow(p, 1.6) : 1 - Math.pow(1 - p, 1.6));   // 吸入加速、放出減速
+      const armR = (t) => { const e = ease(prog(t)); return dark ? far * (1 - e) : far * e; };   // 螺旋臂外緣的半徑
+      const twist = (t) => { const p = prog(t); return t < W0 ? (dark ? 0 : 1) : dark ? Math.pow(p, 1.1) : Math.pow(1 - p, 1.1); };   // 漩渦累積量：黑洞越捲越緊、白洞漸漸解開
+      // 整層再轉一圈：只在螺旋臂外緣 ≤ 畫面短邊一半時轉（看得到的部分完全在畫面內，不露長方形的邊）
+      const eIn = M * 0.5 / far;
+      const spin = (t) => { const e = ease(prog(t)), k = dark ? cl((e - (1 - eIn)) / eIn) : 1 - cl(e / eIn); return -SPIN * 360 * (dark ? Math.pow(k, 0.8) : k); };
+      const edgeR = (t) => { const r = armR(t) * 0.86; return r > 0 && r < maxD ? r : 0; };   // 給 WebGL：前緣的平均半徑
+      const r0 = M * 0.028, hole = (t) => r0 * (t < FORM ? io(t / FORM) : 1 - io(cl((t - FADE) / 260)));
+      const lensI = (t) => Math.pow(Math.sin(Math.PI * prog(t)), 1.3);   // 光暈、暗角、顆粒的強度
+      const speed = (t) => { const p = prog(t); return t < W0 || t > W1 ? 0 : dark ? Math.pow(p, 1.6) : Math.pow(1 - p, 1.6); };   // 下落速度：黑洞越接近洞越快、白洞剛湧出最快
+
+      /* ---- 貼圖（同一尺寸與方向只算一次，存在 holeMaps）：m1＝漩渦流場、m2＝徑向（色差、徑向模糊）、arm＝5 瓣柔邊圓（螺旋臂的形狀） ---- */
+      const { m1, m2, armURL } = holeMapsFor(W, H, dark);
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'bh-svg'); svg.setAttribute('aria-hidden', 'true');
+      const img = (href, id) => `<feImage href="${href}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none" result="${id}"/>`;
+      const ch = (inp, k, out) => `<feColorMatrix in="${inp}" type="matrix" values="${[0, 1, 2].map((c) => [0, 1, 2, 3, 4].map((j) => (c === k && j === k ? 1 : 0)).join(' ')).join(' ')} 0 0 0 1 0" result="${out}"/>`;
+      svg.innerHTML = `<filter id="bh-lens" x="0" y="0" width="${W}" height="${H}" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+        ${img(m1, 'm1')}${img(m2, 'm2')}
+        <feImage class="a-img" href="${armURL}" x="${C[0]}" y="${C[1]}" width="1" height="1" preserveAspectRatio="none" result="a0"/>
+        <feDisplacementMap class="d-arm" in="a0" in2="m1" scale="0" xChannelSelector="R" yChannelSelector="G" result="arm"/>
+        <feDisplacementMap class="d-warp" in="SourceGraphic" in2="m1" scale="0" xChannelSelector="R" yChannelSelector="G" result="warp"/>
+        <feDisplacementMap class="d-zoom" in="warp" in2="m2" scale="0" xChannelSelector="R" yChannelSelector="G" result="zoom"/>
+        <feComposite in="warp" in2="zoom" operator="arithmetic" k2=".55" k3=".45" result="rb"/>
+        <feDisplacementMap class="d-ca1" in="rb" in2="m2" scale="0" xChannelSelector="R" yChannelSelector="G" result="cr"/>
+        <feDisplacementMap class="d-ca2" in="rb" in2="m2" scale="0" xChannelSelector="R" yChannelSelector="G" result="cb"/>
+        ${ch('cr', 0, 'r')}${ch('rb', 1, 'g')}${ch('cb', 2, 'b')}
+        <feComposite in="r" in2="g" operator="arithmetic" k2="1" k3="1" result="rg"/>
+        <feComposite in="rg" in2="b" operator="arithmetic" k2="1" k3="1" result="col"/>
+        <feComposite in="col" in2="arm" operator="in" result="cut"/>
+        <feGaussianBlur in="arm" stdDeviation="6" result="armb"/>
+        <feComposite in="armb" in2="arm" operator="arithmetic" k2=".28" k3="-.28" result="rim"/>
+        <feFlood flood-color="${dark ? '#fff1d6' : '#fffaf0'}" result="rc"/>
+        <feComposite in="rc" in2="rim" operator="in" result="rimc"/>
+        <feMerge><feMergeNode in="cut"/><feMergeNode in="rimc"/></feMerge>
+      </filter>`;
+      document.body.append(svg);
+      const q = (c) => svg.querySelector(c), aImg = q('.a-img'), dArm = q('.d-arm'), dWarp = q('.d-warp'), dZoom = q('.d-zoom'), dCa1 = q('.d-ca1'), dCa2 = q('.d-ca2');
+      const lens = (t) => {   // 漩渦（流場累積）、螺旋臂、徑向模糊、色差
+        const tw = (M * 0.6 * twist(t)).toFixed(1), v = speed(t), r = Math.max(0.5, armR(t));
+        dWarp.setAttribute('scale', tw); dArm.setAttribute('scale', tw);
+        dZoom.setAttribute('scale', (M * 0.07 * v).toFixed(1));
+        dCa1.setAttribute('scale', (M * 0.022 * v).toFixed(1)); dCa2.setAttribute('scale', (-M * 0.022 * v).toFixed(1));
+        aImg.setAttribute('x', (C[0] - r).toFixed(1)); aImg.setAttribute('y', (C[1] - r).toFixed(1));
+        aImg.setAttribute('width', (2 * r).toFixed(1)); aImg.setAttribute('height', (2 * r).toFixed(1));
+      };
+      const fx = document.createElement('div'); fx.className = 'bh-fx'; fx.setAttribute('aria-hidden', 'true');
+      fx.innerHTML = '<canvas class="bh-dust"></canvas>';
+      const DPR = Math.min(1.5, devicePixelRatio || 1), dc = fx.querySelector('.bh-dust');
+      let gl = null; try { gl = holeGlPrep(DPR); } catch (e) { gl = null; }
+      const glc = gl ? holeGL.cv : document.createElement('canvas');   // 共用畫布：每次轉場放進這次的特效層
+      glc.style.opacity = ''; fx.prepend(glc);
+      for (const c of [glc, dc]) { c.width = Math.round(W * DPR); c.height = Math.round(H * DPR); }
+      let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+
+      /* ---- 光塵：固定種子，位置只由 t 決定；沿螺旋前緣，黑洞往中央流、白洞往外噴 ---- */
+      const dust = Array.from({ length: 600 }, () => ({ b: rnd() * (W1 - 350), L: 420 + rnd() * 380, k: 0.2 + rnd() * 0.8, a0: rnd() * 6.28, w: 0.6 + rnd() * 1.2 }));
+      const dustAt = (q, t, R) => {   // R：這一格的前緣半徑（拖尾的前一點也用同一個，才不會拉成直線）
+        const u = (t - q.b) / q.L; if (u <= 0 || u >= 1) return null;
+        const rr = dark ? R * (1 - q.k * 0.45 * u * u) + q.k * 30 * (1 - u) : R * (1 + q.k * 0.25 * u);
+        const a = q.a0 + SPIN * (dark ? 3.2 : 2) * u * u;
+        return [C[0] + Math.cos(a) * rr, C[1] + Math.sin(a) * rr, Math.pow(Math.sin(Math.PI * u), 0.8)];
+      };
+
+      /* ---- WebGL：中央的洞、愛因斯坦環、前緣光環、泡沫流線、衝擊光環、光暈、暗角、顆粒、光塵 ---- */
+      let paintGl = () => {}, paintDust = null;   // paintDust：光塵的 WebGL 版（建立失敗就用 2D 畫布）
+      if (gl) {
+        const D = DPR.toFixed(2);
+        const pr = gl.__bh['hole' + D];   // 已由 holeGlPrep 編譯好
         if (gl.getProgramParameter(pr, gl.LINK_STATUS)) {
           gl.useProgram(pr);
-          gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+          gl.bindBuffer(gl.ARRAY_BUFFER, gl.__tri); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
           const al = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(al); gl.vertexAttribPointer(al, 2, gl.FLOAT, false, 0, 0);
           const U = {}; for (const k of ['R', 'RS', 'CR', 'T', 'MODE', 'SHOCK', 'SHOCKA', 'LI', 'SP', 'SPIN']) U[k] = gl.getUniformLocation(pr, k);
           gl.viewport(0, 0, glc.width, glc.height); gl.uniform2f(U.R, glc.width, glc.height); gl.uniform1f(U.MODE, dark ? 0 : 1); gl.uniform1f(U.SPIN, SPIN);
           const triBuf = gl.getParameter(gl.ARRAY_BUFFER_BINDING);
           /* 光塵（WebGL）：每顆一段四邊形（從 30ms 前的位置拉到現在），橫向用柔邊：細亮的芯＋寬淡的光，加法疊色 */
-          const DVS = 'attribute vec2 p;attribute vec2 sa;uniform vec2 RR;varying vec2 v;void main(){v=sa;gl_Position=vec4(p.x/RR.x*2.-1.,1.-p.y/RR.y*2.,0.,1.);}';
-          const DFS = `precision mediump float;varying vec2 v;uniform vec3 DC;void main(){float k=exp(-v.x*v.x*9.)+exp(-v.x*v.x*1.6)*.35;float a=v.y*k;gl_FragColor=vec4(DC*a,a*.7);}`;
-          const pd = gl.createProgram(); gl.attachShader(pd, sh(gl.VERTEX_SHADER, DVS)); gl.attachShader(pd, sh(gl.FRAGMENT_SHADER, DFS)); gl.linkProgram(pd);
+          const pd = gl.__bh.dust;
           if (gl.getProgramParameter(pd, gl.LINK_STATUS)) {
-            const dBuf = gl.createBuffer(), dP = gl.getAttribLocation(pd, 'p'), dS = gl.getAttribLocation(pd, 'sa'), uRR = gl.getUniformLocation(pd, 'RR'), uDC = gl.getUniformLocation(pd, 'DC');
+            const dBuf = gl.__dBuf, dP = gl.getAttribLocation(pd, 'p'), dS = gl.getAttribLocation(pd, 'sa'), uRR = gl.getUniformLocation(pd, 'RR'), uDC = gl.getUniformLocation(pd, 'DC');
             const arr = new Float32Array(dust.length * 6 * 4);
             paintDust = (t, Rf) => {
               let n = 0;
@@ -3949,9 +3997,15 @@ void main(){
 
       de.classList.add('vt-hole', dark ? 'vt-hole-in' : 'vt-hole-out');
       lens(0);
-      const vt = document.startViewTransition(() => { apply(); document.body.append(fx); });
+      const vt = document.startViewTransition(() => { apply(); if (!done) document.body.append(fx); });   // 連點時這段已被跳過並收尾：不再加特效層
       let raf = 0, done = false;
-      const finish = () => { if (done) return; done = true; cancelAnimationFrame(raf); fx.remove(); svg.remove(); de.classList.remove('vt-hole', 'vt-hole-in', 'vt-hole-out'); delete window.__holeFrame; shBusy = false; };
+      const finish = () => {
+        if (done) return; done = true; cancelAnimationFrame(raf); fx.remove(); svg.remove(); de.classList.remove('vt-hole', 'vt-hole-in', 'vt-hole-out'); delete window.__holeFrame;
+        if (gl) { gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); }   // 共用畫布：清空，下次轉場重用
+        if (shSkip === skipHole) shSkip = null; shBusy = false;
+      };
+      const skipHole = () => { try { vt.skipTransition(); } catch (e) {} finish(); return vt.updateCallbackDone; };
+      shSkip = skipHole;
       vt.ready.then(() => {
         // 被捲走的那一層：整層轉一圈（只在看得到的部分完全落在畫面內時）；形狀、漩渦交給濾鏡（frame 每格更新）
         const page = { pseudoElement: dark ? '::view-transition-old(root)' : '::view-transition-new(root)', duration: (W1 - W0) * K, delay: W0 * K, fill: 'both', easing: 'linear' };
@@ -3967,7 +4021,20 @@ void main(){
       vt.finished.finally(() => setTimeout(finish, Math.max(0, (END - HIT - 300) * K)));
       setTimeout(finish, (END + 800) * K);   // 保險
     }
-    tb.addEventListener('click', () => { const next = isDark() ? 'light' : 'dark'; ({ hole: holeSwap, slash: slashSwap, wand: wandSwap }[root.dataset.themeFx] || dimSwap)(next, () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); }, tb); });
+    let want = null, queue = Promise.resolve(), queued = false;   // want：最後要求的深淺色（轉場還沒換色時再按，也以它為準）
+    tb.addEventListener('click', () => {
+      if (!shBusy && !queued) want = null;
+      const next = (want || (isDark() ? 'dark' : 'light')) === 'dark' ? 'light' : 'dark'; want = next;
+      const apply = () => { root.dataset.theme = next; try { localStorage.setItem('wall-theme', next); } catch (e) {} paint(); };
+      // 轉場進行中再按：前一段直接跳到結尾，等它自己的換色完成後，依點擊順序立刻切換（不播動畫；不吞掉點擊，也不疊兩段轉場）
+      if (shBusy || queued) {
+        const sk = shSkip; shSkip = null; let p; try { p = sk?.(); } catch (e) {}
+        queued = true;
+        const mine = queue = queue.then(() => p).catch(() => {}).then(apply).finally(() => { if (queue === mine) queued = false; });
+        return;
+      }
+      ({ hole: holeSwap, slash: slashSwap, wand: wandSwap }[root.dataset.themeFx] || dimSwap)(next, apply, tb);
+    });
     new MutationObserver(paint).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paint);
     paint();

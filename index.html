@@ -2390,8 +2390,14 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 /* Neumorphism：浮起 → 滑過時外陰影順順收到 1px，像被輕壓到與頁面齊平（不凹、不縮）；按下卡片才凹。陰影數量與順序各狀態一致才能漸變 */
 :root[data-ui="neu"] #wall > .cell { box-shadow: -5px -5px 10px var(--neu-hi), 5px 5px 10px var(--neu-lo), inset 0 0 0 transparent, inset 0 0 0 transparent, 0 0 0 transparent; transition: box-shadow calc(.5s * var(--dur)) var(--ease), scale calc(.5s * var(--dur)) var(--ease); }
 :root[data-ui="neu"] #wall > .cell:hover { box-shadow: -1px -1px 2px var(--neu-hi), 1px 1px 2px var(--neu-lo), inset 0 0 0 transparent, inset 0 0 0 transparent, 0 0 0 transparent; }
-:root[data-ui="swiss"] #wall > .cell, :root[data-ui="swiss"] #wall > .cell:hover { transition: none; }
-:root[data-ui="swiss"] #wall > .cell:hover { border-color: var(--ink); box-shadow: inset 0 6px 0 var(--ink); }
+/* Swiss Style：滑過時頂端 6px 墨線從左往右畫出（像用尺畫線），外框同時轉墨色；離開時墨線往右收掉，進出方向一致。直線快速、不彈跳 */
+:root[data-ui="swiss"] #wall > .cell { position: relative; transition: border-color calc(.25s * var(--dur)) cubic-bezier(.2, 0, 0, 1); }
+:root[data-ui="swiss"] #wall > .cell::after { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: var(--ink); pointer-events: none; transform: scaleX(0); transform-origin: right; transition: transform calc(.25s * var(--dur)) cubic-bezier(.2, 0, 0, 1); }
+:root[data-ui="swiss"] #wall > .cell:hover { border-color: var(--ink); }
+:root[data-ui="swiss"] #wall > .cell:hover::after { transform: scaleX(1); transform-origin: left; }
+/* 減少動態：維持瞬間出現 */
+:root[data-ui="swiss"] body.reduce #wall > .cell, :root[data-ui="swiss"] body.reduce #wall > .cell::after { transition: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-ui="swiss"] #wall > .cell, :root[data-ui="swiss"] #wall > .cell::after { transition: none; } }
 :root[data-ui="y2k"] #wall > .cell { position: relative; }
 /* Y2K：滑過時像閃卡——卡片跟著滑鼠輕微 3D 傾斜（最多約 6°）；箔片細彩虹條紋只在一道斜向光帶內出現、跟著滑鼠移動，滑鼠處有一點銳利白色反光；外框轉全息色
    資訊要清楚：反光畫在內容下面（卡片 isolation、偽元素 z-index -1），文字、圖表不被彩光蓋到；--px／--py 由滑鼠位置換算（0～1）

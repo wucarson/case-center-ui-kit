@@ -1953,7 +1953,7 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 @property --ay { syntax: '<length>'; inherits: false; initial-value: -60px; }
 .vt-aurora::view-transition-old(root), .vt-aurora::view-transition-new(root), ::view-transition-group(aurora), ::view-transition-old(aurora), ::view-transition-new(aurora) { animation: none; mix-blend-mode: normal; }
 .vt-aurora::view-transition-group(root) { animation: none; }
-.vt-aurora::view-transition-old(root) { z-index: 2; -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--ay) - 40px), #000 calc(var(--ay) + 8px)); mask-image: linear-gradient(to bottom, transparent calc(var(--ay) - 40px), #000 calc(var(--ay) + 8px)); }
+.vt-aurora::view-transition-old(root) { z-index: 2; -webkit-mask-image: linear-gradient(to bottom, transparent calc(var(--ay) - 90px), #000 calc(var(--ay) + 40px)); mask-image: linear-gradient(to bottom, transparent calc(var(--ay) - 90px), #000 calc(var(--ay) + 40px)); }
 .aurora-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; view-transition-name: aurora; }
 .aurora-fx canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* 深淺色轉場：魔杖（wandSwap）——墨流遮罩淡出舊配色，讓底下的新配色沿前緣顯現。 */
@@ -2915,7 +2915,7 @@ body.reduce #wall > .cell::after { animation: none !important; }
     /* 深淺色轉場（極光，約 1.3 秒）：一道極光光幕由上往下垂落，掃過的地方換成新配色
        · 換色：View Transitions 拍下舊畫面，舊畫面套一條由上往下推進的柔邊遮罩（--ay），新配色從上方露出
        · 極光（WebGL，畫在換色邊界上、蓋住接縫）：底緣是一條水波般扭動的亮邊，往上漸淡的光幕帶垂直光柱紋理、像布幕一樣飄動；
-         顏色由下往上 粉紅 → 綠 → 青 → 紫；第二層較淡的光幕在後方錯開飄動；光幕上方的新畫面浮出少量閃爍星點，極光過去後淡出
+         顏色由下往上 淡綠 → 綠 → 青 → 紫；前後兩層光幕（後層在上方、偏青紫、較淡），底緣像水面一樣各自大幅起伏（視差）；光幕上方的新畫面浮出少量閃爍星點，極光過去後淡出
        · WebGL 畫布與程式只建立一次（閒置時先編譯）；不支援 WebGL 時只有遮罩換色；減少動態效果時直接切換 */
     const AURORA_FS = `precision highp float;
 uniform vec2 R;uniform float T,Y,A,DPR,ST;
@@ -2923,7 +2923,7 @@ float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n1(float x){float i=floor(x),f=fract(x);f=f*f*(3.-2.*f);return mix(h(vec2(i,0.)),h(vec2(i+1.,0.)),f);}
 float vn(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+1.),f.x),f.y);}
 /* 一層光幕：邊緣線 e、往上的長度 L、光柱密度 k、相位 ph */
-vec4 curtain(vec2 p,float e,float L,float k,float ph){
+vec4 curtain(vec2 p,float e,float L,float k,float ph,float back){
   float d=e-p.y;                                                           /* 邊緣以上為正 */
   if(d<-24.||d>L*1.6)return vec4(0.);
   float x=p.x+sin(p.y*.006+T*.9+ph)*38.+sin(p.y*.017-T*1.3)*12.;          /* 光柱隨高度左右飄（布幕皺摺） */
@@ -2935,16 +2935,19 @@ vec4 curtain(vec2 p,float e,float L,float k,float ph){
   c=mix(c,vec3(1.,.5,.7),smoothstep(.02,.05,u)*(1.-smoothstep(.05,.12,u))*.35);   /* 底部一點粉紅 */        /* 粉紅（底）→ 綠 */
   c=mix(c,vec3(.22,.86,.92),smoothstep(.18,.5,u));                          /* → 青 */
   c=mix(c,vec3(.58,.36,1.),smoothstep(.45,.95,u));                          /* → 紫 */
+  c=mix(c,mix(vec3(.3,.75,1.),vec3(.62,.4,1.),u),back*.65);                 /* 後層：整體偏青紫 */
   float a=clamp(body*ray+rim,0.,1.);
   return vec4(c*a,a);
 }
 void main(){
   vec2 p=vec2(gl_FragCoord.x,R.y-gl_FragCoord.y)/DPR;float W=R.x/DPR,H=R.y/DPR;
-  /* 邊界水波扭動：三組不同頻率的波疊加 */
-  float wave=18.*sin(p.x*.0062+T*1.7)+9.*sin(p.x*.017-T*2.4)+5.*sin(p.x*.043+T*3.3);
+  /* 水面浮動：前後兩層各自一組長浪（振幅大、慢）＋短波，起伏方向與速度不同＝視差；光幕高度也隨位置高低起伏 */
+  float wave=44.*sin(p.x*.0042+T*1.25)+17.*sin(p.x*.0105-T*1.9)+6.*sin(p.x*.031+T*2.9);
   float e=Y+wave;
-  vec4 c1=curtain(p,e,H*.34,.035,0.);
-  vec4 c2=curtain(p,e-H*.07+12.*sin(p.x*.009-T*1.1),H*.26,.05,2.7)*.55;   /* 後方較淡的第二層 */
+  float wave2=38.*sin(p.x*.0036-T*.95+1.7)+15.*sin(p.x*.0125+T*1.55+.6)+5.*sin(p.x*.027-T*2.3);
+  float e2=Y-H*.15+wave2;                                                   /* 後層在前層上方約 15% 畫面高 */
+  vec4 c1=curtain(p,e,H*.32*(.78+.3*sin(p.x*.0029+T*.7)),.035,0.,0.);
+  vec4 c2=curtain(p,e2,H*.3*(.75+.35*sin(p.x*.0024-T*.6+2.)),.045,2.7,1.)*.6;   /* 後層：較淡、偏青紫 */
   vec4 o=c1+c2*(1.-c1.a);
   /* 星點：光幕以上（已換成新配色的區域），隨極光經過浮現後淡出 */
   float above=e-p.y;
@@ -2975,7 +2978,7 @@ void main(){
       if (!document.startViewTransition || document.hidden || document.body.classList.contains('reduce') || matchMedia('(prefers-reduced-motion: reduce)').matches) { apply(); return; }
       shBusy = true;
       const de = document.documentElement, W = innerWidth, H = innerHeight, K = parseFloat(getComputedStyle(de).getPropertyValue('--dur')) || 1;
-      const DUR = 1300, SWEEP = 1100, Y0 = -60, Y1 = H * 1.42;   // 光幕底緣從畫面上方 60px 落到畫面以下（整片光幕都要掃過）
+      const DUR = 1300, SWEEP = 1100, Y0 = -90, Y1 = H * 1.5;   // 光幕底緣從畫面上方 60px 落到畫面以下（整片光幕都要掃過）
       const fx = document.createElement('div'); fx.className = 'aurora-fx'; fx.setAttribute('aria-hidden', 'true');
       let G = null; try { G = auroraGlPrep(); } catch (e) { G = null; }
       const DPR = Math.min(1.5, devicePixelRatio || 1);

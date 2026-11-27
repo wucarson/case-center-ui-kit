@@ -4,17 +4,7 @@
 <script>if (location.hash.length > 1 && !/[?&]preview=/.test(location.search)) document.documentElement.classList.add('boot-dt');</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preload" as="font" type="font/woff2" crossorigin href="https://fonts.gstatic.com/l/font?kit=co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_iE9GnbciL93RJXSJcQ&amp;skey=a863d1376a24bd7a&amp;v=v21">
 <style>
-/* 咒語只需要 Lumos 與 Nox 的字元。 */
-@font-face {
-  font-family: 'Cormorant Garamond';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url('https://fonts.gstatic.com/l/font?kit=co3umX5slCNuHLi8bLeY9MK7whWMhyjypVO7abI26QOD_iE9GnbciL93RJXSJcQ&skey=a863d1376a24bd7a&v=v21') format('woff2');
-  unicode-range: U+004C, U+004E, U+006D, U+006F, U+0073, U+0075, U+0078;
-}
 /* 版面：4 欄 bento（固定列高、dense 補位）。元件清單取自 case-center-ui-redesign/src/app/shared；配色為展示牆的高對比漸層延伸版 */
 :root {
   --page: #edf1f7; --surface: #ffffff; --soft: #eef2f8; --hover: #e1e8f2;
@@ -1978,23 +1968,11 @@ body.reduce *, body.reduce *::before, body.reduce *::after { animation-duration:
 .wand-tip { position: absolute; left: -14px; top: -5px; width: 28px; height: 28px; border-radius: 50%; }
 .lumos .wand-tip { background: radial-gradient(circle, #fff 0 22%, rgb(220 235 255 / .9) 38%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 24px 8px rgb(210 230 255 / .7); }
 .nox .wand-tip { background: radial-gradient(circle, #fff 0 18%, rgb(200 220 255 / .7) 40%, rgb(160 200 255 / 0) 70%); box-shadow: 0 0 14px 4px rgb(200 220 255 / .45); }
-.wand-word { position: absolute; z-index: 4; inset: 0; overflow: visible; }
-.wand-word text { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; fill: url(#ww-fill); fill-opacity: 0; stroke-width: 1.1; stroke-dasharray: 1; stroke-dashoffset: 1; paint-order: stroke; transform-box: fill-box; transform-origin: center; }
-.wand-word .ww-l { stroke-dasharray: 600; stroke-dashoffset: 600; }
-.wand-word .ww-s { fill: #fffbe8; fill-opacity: 1; stroke: none; }
-.wand-word .ww-shine { opacity: 0; mix-blend-mode: screen; }
-.lumos .wand-word .ww-l { stroke: #b07a22; }
-.nox .wand-word .ww-l { stroke: #c7d3f2; }
-.wand-word .ww-glow { opacity: 0; }   /* 字後面的柔光（靜態漸層，只動透明度） */
 .wand-ripple { position: absolute; z-index: 4; border-radius: 50%; pointer-events: none; background: conic-gradient(#ffb347, #ff4f8b, #3d8bff, #ffb347); -webkit-mask: radial-gradient(circle, transparent 60%, #000 66%, #000 69%, transparent 75%); mask: radial-gradient(circle, transparent 60%, #000 66%, #000 69%, transparent 75%); filter: drop-shadow(0 0 6px rgb(255 120 160 / .6)); }   /* 魔杖輕點的漣漪光環（魔杖三色） */
 .wand-ignite { position: absolute; z-index: 4; width: 46px; height: 46px; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, #fff 0 14%, #ffd27a 26%, #ffb347 38%, rgb(255 79 139 / .75) 54%, rgb(61 139 255 / .3) 70%, rgb(61 139 255 / 0) 80%); box-shadow: 0 0 22px 6px rgb(255 120 90 / .45); }   /* 魔杖引燃火點：白熱核心→橘→粉→藍（魔杖三色） */
 .wand-halo { position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; }
 .lumos .wand-halo { background: radial-gradient(circle, #fff 0, rgb(255 253 245 / .97) 22%, rgb(255 246 222 / .75) 38%, rgb(255 240 210 / .3) 52%, rgb(255 255 255 / 0) 64%); }   /* 過曝的光：中心整片白、邊緣暖白柔退 */
 .nox .wand-halo { background: radial-gradient(circle, #fff 0, rgb(246 249 255 / .92) 18%, rgb(205 220 255 / .62) 34%, rgb(138 164 255 / .28) 50%, rgb(110 140 255 / 0) 64%); }   /* Nox 使用冷銀藍光暈 */
-.wand-spell { position: absolute; transform: translate(-50%, -50%); display: flex; gap: .04em; font: 600 clamp(28px, 4.267vw, 60px)/1 'Cormorant Garamond', Georgia, serif; letter-spacing: .08em; white-space: nowrap; }
-.wand-spell span { display: inline-block; }
-.lumos .wand-spell { color: #f6e6b4; text-shadow: 0 0 18px rgb(255 214 120 / .9), 0 0 42px rgb(255 190 80 / .55), 0 2px 3px rgb(60 40 10 / .5); }
-.nox .wand-spell { color: #dfe7f5; text-shadow: 0 0 16px rgb(150 180 255 / .7), 0 0 40px rgb(20 30 70 / .9), 0 2px 3px rgb(0 0 0 / .6); }
 .slash-fx { position: fixed; inset: 0; z-index: 200; pointer-events: none; overflow: hidden; }
 .slash-pc { position: absolute; inset: 0; overflow: hidden; will-change: transform, opacity; }
 .slash-pc * { transition: none !important; animation: none !important; }   /* 複製品不重播進場動畫（否則會停在透明的起點） */
@@ -3029,10 +3007,9 @@ body.reduce #wall > .cell::after { animation: none !important; }
       }
       setTimeout(() => { layer.remove(); shBusy = false; }, TOTAL + 40);
     }
-    /* 深淺色轉場（魔杖，約 1.45 秒）：魔杖在中央微微後收（三色光沿杖身灌注），杖尖往前輕點，點下處泛起兩圈三色光環漣漪，從中央燒開並噴出星塵碎片；魔杖一直留在畫面上，收尾才淡出。
+    /* 深淺色轉場（魔杖，約 1.45 秒）：魔杖在中央微微後收（三色光沿杖身灌注），杖尖往前輕點，點下處泛起兩圈三色光環漣漪，從中央燒開並噴出星塵碎片；魔杖一直留在畫面上，收尾才淡出（不顯示咒語字）。
        從杖尖燒穿舊畫面，洞向外不規則燒開（0.85 秒，由慢到快）：洞緣外側焦黑、洞緣一圈三色餘燼與白熱細線、少量火星與灰燼往上飄（WebGL＋2D 畫布逐幀畫）；不支援 WebGL 時改用預畫的墨色圖。Lumos 揭開淺色，Nox 揭開深色。
        舊畫面沿柔邊墨流淡出，新畫面留在底層，交界保留一層舊配色殘影。 */
-    document.fonts?.load('600 40px "Cormorant Garamond"', 'LumosNox').catch(() => {});
     // 接骨木魔杖（Canvas，轉場開始前畫一次）：杖尖在左（x = 0），杖身由尖漸粗、沿途 8 個節瘤（越靠握把越大），
     // 握把兩圈雕刻環與凹槽、尾端圓頭；每一直條都用圓柱明暗（上緣窄高光、下緣反光），再疊沿杖身流動、繞過節瘤的木紋
     function drawElder(cv, L, Hh) {
@@ -3163,27 +3140,11 @@ body.reduce #wall > .cell::after { animation: none !important; }
       [[crest, 'blur(10px)', .7, '#ff4f8b', band * 2.2], [outline(() => band * .5), 'blur(5px)', .65, '#ffb347', band * 1.1], [crest, 'blur(1.2px)', .9, '#ffffff', band * .25]]
         .forEach(([path, filter, alpha, color, width]) => { gg.filter = filter; gg.globalAlpha = alpha; gg.strokeStyle = color; gg.lineWidth = width; gg.stroke(path); });
       const glow = gc.toDataURL();
-      // 預先畫咒語的剝落邊緣。只有筆畫遮罩會取樣這張圖。
-      const ashWidth = 256, ashHeight = 144;
-      canvas.width = ashWidth;
-      canvas.height = ashHeight;
-      const ashPixels = g.createImageData(ashWidth, ashHeight);
-      for (let x = 0; x < ashWidth; x++) {
-        const edge = .5 + .019 * Math.sin(x * .11) + .013 * Math.sin(x * .31 + 1.4) + .009 * Math.sin(x * .83);
-        for (let y = 0; y < ashHeight; y++) {
-          const cuts = .27 * Math.sin(x * .47 + y * .85) + .18 * Math.sin(x * 1.16 - y * .58);
-          const alpha = Math.max(0, Math.min(1, .5 + (edge - y / ashHeight) / .046 + cuts));
-          const i = (y * ashWidth + x) * 4;
-          ashPixels.data[i + 3] = 255 * alpha;
-        }
-      }
-      g.putImageData(ashPixels, 0, 0);
-      const spellAsh = canvas.toDataURL();
       const wand = document.createElement('canvas');
       wand.width = 720;
       wand.height = Math.round(wand.width * .07);
       drawElder(wand, wand.width, wand.height);
-      wandArt = { mask, lumos, nox, glow, spellAsh, wand, wandUrl: wand.toDataURL(), size, radius };   // wandUrl：杖身光流的遮罩
+      wandArt = { mask, lumos, nox, glow, wand, wandUrl: wand.toDataURL(), size, radius };   // wandUrl：杖身光流的遮罩
       return wandArt;
     }
     /* 魔杖燒穿的 WebGL 版：依實際螢幕解析度逐幀畫燒穿邊緣（不會像放大的圖一樣糊）。
@@ -3282,9 +3243,9 @@ void main(){
       wandPhoto = { cv, W, H, url: cv.toDataURL() };
       return wandPhoto;
     }
-    /* 照片魔杖的 WebGL 材質（畫布與程式只建立一次）；不支援時回傳 null，改用照片原圖。
+    /* 照片魔杖的 WebGL 卡通著色（畫布與程式只建立一次）；不支援時回傳 null，改用照片原圖。
        · 立體：照片的透明度模糊後當高度（邊緣低、中間高＝圓柱截面），再疊上明暗當木紋起伏，算出每個像素的法線
-       · 打光：上方主光（漫射＋陰面）、凹紋加深（AO）、亮漆般的銳利高光與寬柔光澤、邊緣菲涅耳反光
+       · 手繪感：固有色減少色階（木紋簡化）、光影量化成亮／中／暗 3 階色塊、高光是一條硬邊亮線、外緣一圈粗細不一的深色描邊
        · 動態：施法時一道高光沿杖身從握柄流向杖尖，邊緣反光帶光流的顏色；杖尖附近映出施法光
        · 結果畫回 2D 魔杖畫布（不直接用 WebGL 畫布顯示，避免合成進轉場畫面時顏色被壓暗） */
     function wandShade(photo) {
@@ -3300,9 +3261,9 @@ void main(){
       const sg2 = sil.getContext('2d'); sg2.drawImage(photo.cv, 0, 0); sg2.globalCompositeOperation = 'source-in'; sg2.fillStyle = '#fff'; sg2.fillRect(0, 0, W, H);
       hg.filter = `blur(${Math.max(3, H * .07).toFixed(1)}px)`; hg.drawImage(sil, 0, 0);
       const FS = `precision mediump float;
-varying vec2 v;uniform sampler2D P,HM;uniform vec2 S;uniform float K,SW,RI,TI;uniform vec3 RC,TC;
+varying vec2 v;uniform sampler2D P,HM,PB;uniform vec2 S;uniform float K,SW,RI,TI;uniform vec3 RC,TC;
 float lu(vec3 c){return dot(c,vec3(.299,.587,.114));}
-float hh(vec2 q){vec4 c=texture2D(P,q);return sqrt(texture2D(HM,q).r)+(lu(c.rgb)-.35)*.18*c.a;}
+float hh(vec2 q){return sqrt(texture2D(HM,q).r);}   /* 只用剪影的圓弧，不帶木紋起伏（色塊才平順） */
 void main(){
   vec4 c=texture2D(P,v);
   if(c.a<.004){gl_FragColor=vec4(0.);return;}
@@ -3311,16 +3272,25 @@ void main(){
   float dx=hh(v+vec2(px.x,0.))-hh(v-vec2(px.x,0.)),dy=hh(v+vec2(0.,px.y))-hh(v-vec2(0.,px.y));
   vec3 n=normalize(vec3(-dx*K,-dy*K,1.));
   vec3 L=normalize(vec3(-.3,-.7,.65)),V=vec3(0.,0.,1.),Hv=normalize(L+V);
-  float l=lu(al);
-  float dif=.55+.65*max(dot(n,L),0.);
-  float ao=mix(.74,1.,smoothstep(.04,.32,l));
+  /* 固有色：用模糊過的照片（去掉細碎木紋），只對亮度分 4 階（保留色相，咖啡色不會偏掉） */
+  vec4 pb=texture2D(PB,v);
+  vec3 pc=pb.rgb/max(pb.a,.001);
+  float pl=max(lu(pc),.02);
+  vec3 base=pc*(floor(pl*4.+.5)/4.+.06)/pl;
+  float nl=max(dot(n,L),0.);
+  float tone=nl>.6?1.15:nl>.25?.92:.7;                                                  /* 亮／中／暗 3 階 */
   float nh=max(dot(n,Hv),0.);
-  float sp=pow(nh,56.)*.75+pow(nh,8.)*.12;
+  float hl=step(.965,nh);                                                                /* 硬邊亮線 */
   float band=exp(-pow((v.x-SW)*6.,2.));
-  float sw=band*pow(max(dot(n,normalize(vec3(0.,-.55,1.))),0.),14.);
-  float fr=pow(1.-max(n.z,0.),2.2);
-  float tipL=exp(-v.x*S.x/(S.y*2.5))*(.35+.65*max(n.z,0.));
-  vec3 col=al*dif*ao+vec3(1.,.94,.84)*sp+RC*(sw*.9+fr*.7)*RI+vec3(1.,.97,.9)*sw*.4*RI+TC*TI*tipL*.6;
+  float sw=band*step(.55,max(dot(n,normalize(vec3(0.,-.55,1.))),0.));                 /* 光流掃過：一條平塗亮帶 */
+  float rim=step(.5,1.-max(n.z,0.));
+  float tipL=step(.5,exp(-v.x*S.x/(S.y*2.2)));
+  vec3 col=base*tone+vec3(1.,.95,.82)*hl*.8+RC*(sw*.55+rim*.35)*RI+TC*TI*tipL*.35;
+  /* 描邊：靠近剪影邊緣（高度低）的地方塗深色；寬度沿杖身用噪聲忽粗忽細，像毛筆線 */
+  float hgt=texture2D(HM,v).r;
+  float ink=(.3+.1*sin(v.x*S.x*.045)+.06*sin(v.x*S.x*.13+1.7));
+  float edge=1.-smoothstep(ink-.04,ink+.03,hgt);
+  col=mix(col,vec3(.1,.065,.055),edge);
   gl_FragColor=vec4(col*c.a,c.a);
 }`;
       const sh = (type, src) => { const o = gl.createShader(type); gl.shaderSource(o, src); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) console.error('wandShade shader', gl.getShaderInfoLog(o)); return o; };
@@ -3332,9 +3302,11 @@ void main(){
       const tex = (unit, src) => { const t = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t);
         gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
         for (const [k, val] of [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D, k, val); };
-      tex(0, photo.cv); tex(1, hm);
-      const U = {}; for (const k of ['P', 'HM', 'S', 'K', 'SW', 'RI', 'TI', 'RC', 'TC']) U[k] = gl.getUniformLocation(pr, k);
-      gl.uniform1i(U.P, 0); gl.uniform1i(U.HM, 1); gl.uniform2f(U.S, W, H); gl.uniform1f(U.K, Math.max(8, H * .2)); gl.viewport(0, 0, W, H);
+      const pbc = document.createElement('canvas'); pbc.width = W; pbc.height = H;
+      const pbg = pbc.getContext('2d'); pbg.filter = `blur(${Math.max(2, H * .04).toFixed(1)}px)`; pbg.drawImage(photo.cv, 0, 0);   // 模糊的固有色：去掉細碎木紋
+      tex(0, photo.cv); tex(1, hm); tex(2, pbc);
+      const U = {}; for (const k of ['P', 'HM', 'PB', 'S', 'K', 'SW', 'RI', 'TI', 'RC', 'TC']) U[k] = gl.getUniformLocation(pr, k);
+      gl.uniform1i(U.P, 0); gl.uniform1i(U.HM, 1); gl.uniform1i(U.PB, 2); gl.uniform2f(U.S, W, H); gl.uniform1f(U.K, Math.max(8, H * .2)); gl.viewport(0, 0, W, H);
       // sw：高光沿杖身的位置（0＝杖尖、1＝握柄）；ri／rc：光流強度與顏色；ti／tc：杖尖施法光
       photo.shade = (sw, ri, rc, ti, tc) => {
         if (gl.isContextLost()) return null;
@@ -3367,28 +3339,11 @@ void main(){
       const seedRadius = Math.max(23, Math.min(52, Math.min(W, H) * .072));
       const textureSpan = (radius) => radius * art.size / art.radius;
       const finalSpan = textureSpan(RV * 1.26);
-      // 咒語：每個字母一個 SVG 文字（先描邊再填色），用畫布量字寬排位置
-      const word = lumos ? 'Lumos' : 'Nox', FS = Math.min(90, Math.max(42, W * 0.064)) * 2 / 3, GAP = FS * 0.08;
-      const ctx = document.createElement('canvas').getContext('2d'); ctx.font = `600 ${FS.toFixed(1)}px 'Cormorant Garamond', Georgia, serif`;
-      const ws = [...word].map((ch) => ctx.measureText(ch).width), total = ws.reduce((a, b) => a + b, 0) + GAP * (ws.length - 1);
-      let cur = C[0] - total / 2; const xs = ws.map((w) => { const x = cur + w / 2; cur += w + GAP; return x; });
-      const letters = (cls) => [...word].map((ch, i) => `<text class="${cls}" x="${xs[i].toFixed(1)}" y="${C[1]}" text-anchor="middle" dominant-baseline="central">${ch}</text>`).join('');
-      const ashBounds = `x="${C[0] - total / 2 - FS}" y="${C[1] - 2.5 * FS}" width="${total + 2 * FS}" height="${5 * FS}"`;
       const fx = document.createElement('div'); fx.className = 'wand-fx' + (lumos ? ' lumos' : ' nox'); fx.setAttribute('aria-hidden', 'true');
       fx.innerHTML = `
         <div class="wand-halo" style="left:${tip[0]}px;top:${tip[1]}px"></div>
         <div class="wand" style="left:${tip[0]}px;top:${(tip[1] - WH / 2).toFixed(1)}px;width:${WL.toFixed(0)}px;height:${WH.toFixed(1)}px;rotate:${th}deg"><canvas class="wand-cv"></canvas><span class="wand-flow"><i></i></span><i class="wand-tip"></i></div>
-        <svg class="wand-word" width="${W}" height="${H}" style="font-size:${FS.toFixed(1)}px"><defs>
-          <mask id="ww-ash-mask" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" mask-type="alpha" ${ashBounds}>
-            <image class="ww-ash-sweep" href="${art.spellAsh}" ${ashBounds} preserveAspectRatio="none"/>
-          </mask>
-          <linearGradient id="ww-fill" x1="0" y1="${(C[1] - FS * 0.45).toFixed(0)}" x2="0" y2="${(C[1] + FS * 0.45).toFixed(0)}" gradientUnits="userSpaceOnUse">${lumos
-            ? '<stop offset="0" stop-color="#fff6d2"/><stop offset=".45" stop-color="#f3c75e"/><stop offset=".55" stop-color="#d9a13c"/><stop offset="1" stop-color="#8e5f18"/>'
-            : '<stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#cdd5e4"/><stop offset="1" stop-color="#8994aa"/>'}</linearGradient>
-          <radialGradient id="ww-g">${lumos ? '<stop offset="0" stop-color="#ffcf6a" stop-opacity=".36"/><stop offset=".55" stop-color="#ffb84a" stop-opacity=".10"/><stop offset="1" stop-color="#ffb84a" stop-opacity="0"/>' : '<stop offset="0" stop-color="#9db4ff" stop-opacity=".34"/><stop offset=".55" stop-color="#6f8cff" stop-opacity=".09"/><stop offset="1" stop-color="#6f8cff" stop-opacity="0"/>'}</radialGradient>
-          <linearGradient id="ww-hl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
-          <mask id="ww-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect class="ww-sweep" x="${(C[0] - total / 2 - 160).toFixed(0)}" y="0" width="140" height="${H}" fill="url(#ww-hl)"/></mask></defs>
-          <ellipse class="ww-glow" cx="${C[0]}" cy="${C[1]}" rx="${(total / 2 + FS * 0.7).toFixed(0)}" ry="${(FS * 0.85).toFixed(0)}" fill="url(#ww-g)"/><g class="ww-main" mask="url(#ww-ash-mask)">${letters('ww-l')}</g>${lumos ? `<g class="ww-shine" mask="url(#ww-mask)">${letters('ww-s')}</g>` : ''}</svg>`;
+`;
       let wc = fx.querySelector('.wand-cv');
       const photo = wandPhoto;   // 照片魔杖（私人 Artifact 版本才有）
       // 魔杖一律用 2D 畫布畫原圖：照片魔杖就是照片本身的像素（不用 WebGL——WebGL 畫布合成進轉場畫面時顏色會被壓暗）
@@ -3725,70 +3680,6 @@ void main(){
           { opacity: .16, transform: haloScale(.55), offset: .28 },
           { opacity: 0, transform: haloScale(1.1) }
         ], { duration: 500, delay: HIT, fill: 'both', easing: 'cubic-bezier(.23, 1, .32, 1)' });
-        // 墨水擴散到中段時顯示咒語。Lumos 向上蒸散，Nox 從上方落下收合。
-        const mid = (word.length - 1) / 2;
-        const spellStart = HIT + SPREAD / 2, spellOut = DUR - 220, spellEnd = DUR - 15;
-        const easeOut = 'cubic-bezier(.23, 1, .32, 1)';
-        const clear = { opacity: 1, transform: 'none', filter: 'blur(0px)' };
-        const ashShift = (em) => `translateY(${(FS * em).toFixed(1)}px)`;
-        // 遮罩內的細缺口跟著蒸氣方向移動，完全顯字時遮罩是實心的。
-        fx.querySelector('.ww-ash-sweep').animate(lumos
-          ? [{ transform: ashShift(1.45) }, { transform: ashShift(-.45), offset: .52 }, { transform: ashShift(-2.05) }]
-          : [{ transform: ashShift(-1.8) }, { transform: ashShift(-.36), offset: .5 }, { transform: ashShift(1.45) }],
-          { duration: lumos ? spellEnd - spellOut : 176 + (word.length - 1) * 14,
-            delay: lumos ? spellOut : spellStart, fill: 'both', easing: 'cubic-bezier(.35, .15, .45, 1)' });
-        fx.querySelector('.ww-main').animate([{ opacity: 0 }, { opacity: 1 }],
-          { duration: 42, delay: spellStart, fill: 'both' });
-        fx.querySelectorAll('.ww-l').forEach((el, i) => {
-          const side = i - mid, drift = i % 2 === 0 ? -1 : 1;
-          const enter = spellStart + i * (lumos ? 10 : 14);
-          const revealTime = lumos ? 102 : 176;
-          const settle = enter + revealTime;
-          const duration = spellEnd - enter;
-          const at = (time) => (time - enter) / duration;
-
-          if (lumos) {
-            el.animate([
-              { strokeDashoffset: 600, strokeOpacity: 1 },
-              { strokeDashoffset: 0, strokeOpacity: 1, offset: .7 },
-              { strokeDashoffset: 0, strokeOpacity: .3 }
-            ], { duration: 96, delay: enter, easing: 'cubic-bezier(.4, .1, .3, 1)', fill: 'both' });
-            el.animate([{ fillOpacity: 0 }, { fillOpacity: 0, offset: .4 }, { fillOpacity: 1 }],
-              { duration: revealTime, delay: enter, easing: easeOut, fill: 'both' });
-
-            el.animate([
-              { opacity: 1, transform: `translateX(${side * FS * .14}px)`, filter: 'blur(0px)', easing: easeOut },
-              { ...clear, offset: at(settle) },
-              { ...clear, offset: at(spellOut), easing: 'cubic-bezier(.35, .1, .25, 1)' },
-              { offset: at(spellOut + 82), opacity: .56, filter: 'blur(2.8px)',
-                transform: `translate(${3 * drift + side * 3}px, ${-FS * .27}px) skewX(${drift * 7}deg) scale(.91, 1.25)` },
-              { opacity: 0, filter: 'blur(10px)',
-                transform: `translate(${side * 9 + 8 * drift}px, ${-FS * (.85 + .08 * (i % 3))}px) skewX(${drift * 17}deg) scale(.63, 1.72)` }
-            ], { duration, delay: enter, fill: 'both' });
-          } else {
-            const silver = { fillOpacity: 1, strokeDashoffset: 0, strokeOpacity: .24 };
-            el.animate([
-              { ...silver, opacity: 0, filter: 'blur(9px)', easing: 'cubic-bezier(.25, .65, .32, 1)',
-                transform: `translate(${side * 17 + drift * 5}px, ${-FS * .87}px) skewX(${drift * 15}deg) scale(.72, 1.56)` },
-              { ...silver, offset: at(enter + 70), opacity: .64, filter: 'blur(3.4px)', easing: easeOut,
-                transform: `translate(${side * 7}px, ${-FS * .3}px) skewX(${drift * 5}deg) scale(.91, 1.19)` },
-              { ...silver, ...clear, offset: at(settle) },
-              { ...silver, ...clear, offset: at(spellOut + 100), easing: easeOut },
-              { ...silver, opacity: 0, filter: 'blur(0px)', transform: 'none' }
-            ], { duration, delay: enter, fill: 'both' });
-          }
-        });
-        const glowStart = spellStart + 24, glowDuration = spellEnd - glowStart;
-        fx.querySelector('.ww-glow').animate([
-          { opacity: 0 },
-          { opacity: .72, offset: .37 },
-          { opacity: .72, offset: (spellOut - glowStart) / glowDuration },
-          { opacity: 0 }
-        ], { duration: glowDuration, delay: glowStart, fill: 'both' });
-        if (lumos) {
-          fx.querySelector('.ww-sweep').animate([{ transform: 'translateX(0)' }, { transform: `translateX(${(total + 320).toFixed(0)}px)` }], { duration: 120, delay: spellOut - 130, easing: 'cubic-bezier(.4, 0, .3, 1)', fill: 'both' });
-          fx.querySelector('.ww-shine').animate([{ opacity: 0 }, { opacity: .6, offset: .2 }, { opacity: .6, offset: .8 }, { opacity: 0 }], { duration: 120, delay: spellOut - 130, fill: 'both' });
-        }
       }).catch(skip);
       const cleanUp = () => {
         clearTimeout(watchdog);
